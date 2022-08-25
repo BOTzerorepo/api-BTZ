@@ -25,6 +25,9 @@ Route::get('/imprimirVacio','App\Http\Controllers\crearpdfController@vacio');
 Route::get('/imprimirEviarInstrucivo/{cntr}','App\Http\Controllers\crearpdfController@cargaPorMail');  
 
 
+Route::get('/oceansInstruction/{trip}','App\Http\Controllers\oceansInstructions@generateOceansIntruction'); 
+
+
 /* Envio de Emails */
 
 Route::get('/mailPrueba','App\Http\Controllers\emailController@prueba');  
@@ -54,6 +57,8 @@ Route::delete('/truck/{truck}','App\Http\Controllers\TruckController@destroy');
 Route::post('/truck/{truck}','App\Http\Controllers\TruckController@update');
 Route::get('/trucks/{customer}','App\Http\Controllers\TruckController@index');
 Route::get('/truck/{truck}','App\Http\Controllers\TruckController@show');
+Route::get('/truckTransport/{truck}','App\Http\Controllers\TruckController@showTransport');
+
 
 
 
@@ -61,7 +66,12 @@ Route::get('/truck/{truck}','App\Http\Controllers\TruckController@show');
 Route::post('/trailer','App\Http\Controllers\TrailerController@store');
 Route::post('/trailer/{trailer}','App\Http\Controllers\TrailerController@update');
 Route::delete('/trailer/{trailer}','App\Http\Controllers\TrailerController@destroy');
+Route::get('/trailerTransport/{transport_id}','App\Http\Controllers\TrailerController@showTrailer');
 
+
+// DRIVER CONTROLLLER 
+
+Route::get('/drivers/{transport_id}','App\Http\Controllers\DriverController@showDriver');
 
 Route::get('/user/{user}','App\Http\Controllers\UserController@show');
 

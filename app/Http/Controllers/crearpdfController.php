@@ -34,7 +34,6 @@ class crearpdfController extends Controller
 
         $query = "SELECT asign.cntr_number, asign.booking, asign.file_instruction, transporte.contacto_logistica_celular FROM asign INNER JOIN transporte ON transporte.razon_social = asign.transport WHERE asign.cntr_number = '$cntr_number'";
         $result = mysqli_query($conn, $query);
-
         
         if (mysqli_num_rows($result) == 1) {
             $row = mysqli_fetch_array($result);
@@ -297,6 +296,8 @@ class crearpdfController extends Controller
 
                     $mail = Mail::to($mail)->send(new envioInstructivo($data)); 
                     return 'ok';
+                }else{
+                    return 'el instructivo ya estaba generado';
                 }
 
             } else {
@@ -331,6 +332,8 @@ class crearpdfController extends Controller
 
                         $mail = Mail::to($mail)->send(new envioInstructivo($data)); 
                         return 'ok';
+                }else{
+                    return 'no hay carga asignada';
                 }
             } 
         } else {

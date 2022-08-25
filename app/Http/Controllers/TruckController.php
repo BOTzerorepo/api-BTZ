@@ -8,20 +8,7 @@ use App\Models\truck;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
-/**
-    * @OA\Get(
-    *     path="/api/users",
-    *     summary="Mostrar usuarios",
-    *     @OA\Response(
-    *         response=200,
-    *         description="Mostrar todos los usuarios."
-    *     ),
-    *     @OA\Response(
-    *         response="default",
-    *         description="Ha ocurrido un error."
-    *     )
-    * )
-    */
+
 class TruckController extends Controller
 {
     /**
@@ -82,10 +69,21 @@ class TruckController extends Controller
      * @param  \App\Models\truck  $truck
      * @return \Illuminate\Http\Response
      */
-    public function show(truck $truck)
+    public function show($truck)
     {
-        $truck = truck::find($truck);
-        return $truck;
+   
+        $trucks = DB::table('trucks')->where('transport_id','=',$truck)->get(); 
+
+        return $trucks;
+
+    }
+
+    public function showTransport($truck)
+    {
+        /* Hay que recibir el id del Transporte */
+        $trucks = DB::table('trucks')->where('transport_id','=',$truck)->get(); 
+
+        return $trucks;
 
     }
 

@@ -67,6 +67,14 @@ class TrailerController extends Controller
         return $trailer;
     }
 
+    public function showTrailer($transporte)
+    {
+       
+        $trailers = DB::table('trailers')->where('transport_id','=',$transporte)->get(); 
+        return $trailers;
+
+    }
+
     /**
      * Show the form for editing the specified resource.
      *
