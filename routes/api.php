@@ -40,14 +40,14 @@ Route::get('/cargaAsignada/{id}','App\Http\Controllers\emailController@cargaAsig
 //Route::put('/imprimir/{id}','App\Http\Controllers\imprimirPDF@update');//actualizar
 //Route::delete('/imprimir','App\Http\Controllers\imprimirPDF@destroy'); // eliminar
 
-Route::post('/docs/{booking}','App\Http\Controllers\DocumetController@store');
-Route::post('/docsAta/{booking}','App\Http\Controllers\DocumetController@storeAta');
+Route::post('/docs/{booking}','App\Http\Controllers\DocumentController@store');
+Route::post('/docsAta/{booking}','App\Http\Controllers\DocumentController@storeAta');
 
-Route::get('/docsAtaReed/{booking}/{user}','App\Http\Controllers\DocumetController@index');
-Route::get('/docsCntr/{booking}/{user}/{cntr}','App\Http\Controllers\DocumetController@indexCntr');
+Route::get('/docsAtaReed/{booking}/{user}','App\Http\Controllers\DocumentController@index');
+Route::get('/docsCntr/{booking}/{user}/{cntr}','App\Http\Controllers\DocumentController@indexCntr');
 
 
-Route::get('/docsDel','App\Http\Controllers\DocumetController@destroy'); //mostrar todos
+Route::get('/docsDel','App\Http\Controllers\DocumentController@destroy'); //mostrar todos
  //mostrar todos
 
 
@@ -74,5 +74,7 @@ Route::get('/trailerTransport/{transport_id}','App\Http\Controllers\TrailerContr
 Route::get('/drivers/{transport_id}','App\Http\Controllers\DriverController@showDriver');
 
 Route::get('/user/{user}','App\Http\Controllers\UserController@show');
+
+
 
 
