@@ -46,9 +46,7 @@ Route::post('/docsAta/{booking}','App\Http\Controllers\DocumentController@storeA
 Route::get('/docsAtaReed/{booking}/{user}','App\Http\Controllers\DocumentController@index');
 Route::get('/docsCntr/{booking}/{user}/{cntr}','App\Http\Controllers\DocumentController@indexCntr');
 
-
 Route::get('/docsDel','App\Http\Controllers\DocumentController@destroy'); //mostrar todos
- //mostrar todos
 
 
  // TRUCK CONTROLLLER 
@@ -58,9 +56,6 @@ Route::post('/truck/{truck}','App\Http\Controllers\TruckController@update');
 Route::get('/trucks/{customer}','App\Http\Controllers\TruckController@index');
 Route::get('/truck/{truck}','App\Http\Controllers\TruckController@show');
 Route::get('/truckTransport/{truck}','App\Http\Controllers\TruckController@showTransport');
-
-
-
 
 // TRAILER CONTROLLLER 
 Route::post('/trailer','App\Http\Controllers\TrailerController@store');
@@ -72,9 +67,14 @@ Route::get('/trailerTransport/{transport_id}','App\Http\Controllers\TrailerContr
 // DRIVER CONTROLLLER 
 
 Route::get('/drivers/{transport_id}','App\Http\Controllers\DriverController@showDriver');
-
 Route::get('/user/{user}','App\Http\Controllers\UserController@show');
 
+// MAPS
+Route::get('/lugarDeCarga/{patente}','App\Http\Controllers\lugaresDeCarga@coordenadas');
+Route::get('/accionLugarDeCarga/{idTrip}','App\Http\Controllers\lugaresDeCarga@accionLugarDeCarga');
+Route::get('/accionLugarAduana/{idTrip}','App\Http\Controllers\lugaresDeCarga@accionLugarAduana');
+Route::get('/accionLugarDescarga/{idTrip}','App\Http\Controllers\lugaresDeCarga@accionLugarDescarga');
 
+// Servicio Satelital 
 
-
+Route::get('/servicioSatelital','App\Http\Controllers\ServiceSatelital@serviceSatelital');

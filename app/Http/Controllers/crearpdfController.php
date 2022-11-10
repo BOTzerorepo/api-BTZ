@@ -46,125 +46,133 @@ class crearpdfController extends Controller
             $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
             $save_folder = $folder . $file_name;
 
+            if ($file == null) {
+
+                // sino está generado el Instrtructivo lo creamos. 
+    
+                    $query_file = "SELECT DISTINCT asign.id, asign.transport, asign.transport_agent, asign.observation_load, asign.agent_port, carga.custom_place, carga.load_date, carga.booking, carga.shipper, carga.commodity, carga.load_place, carga.unload_place, carga.cut_off_fis, carga.oceans_line, carga.vessel, carga.voyage, carga.final_point, carga.custom_agent, carga.ref_customer, cntr.cntr_number, cntr.cntr_seal, cntr.cntr_type, cntr.net_weight, cntr.retiro_place, cntr.out_usd, cntr.modo_pago_out, cntr.plazo_de_pago_out, customer_load_place.link_maps, customer_load_place.address, customer_load_place.city FROM carga INNER JOIN cntr INNER JOIN asign INNER JOIN customer_load_place ON carga.booking = cntr.booking AND cntr.cntr_number = asign.cntr_number AND customer_load_place.description = carga.load_place WHERE cntr.cntr_number = '$cntr_number'";                
+                    $result_file = mysqli_query($conn, $query_file);
+                    
+                    if (mysqli_num_rows($result_file) == 1) {
+                        $row = mysqli_fetch_array($result_file);
+    
+                        $data = [
+                            'id_asign' => $row['id'],
+                            'booking' => $row['booking'],
+                            'shipper' => $row['shipper'],
+                            'commodity' => $row['commodity'],
+                            'load_place' => $row['load_place'],
+                            'unload_place' => $row['unload_place'],
+                            'cut_off_fis' => $row['cut_off_fis'],
+                            'oceans_line' => $row['oceans_line'],
+                            'vessel' => $row['vessel'],
+                            'voyage' => $row['voyage'],
+                            'final_point' => $row['final_point'],
+                            'custom_agent' => $row['custom_agent'],
+                            'custom_place' => $row['custom_place'],
+                            'ref_customer' => $row['ref_customer'],
+                            'cntr_number' => $row['cntr_number'],
+                            'cntr_seal' => $row['cntr_seal'],
+                            'cntr_type' => $row['cntr_type'],
+                            'net_weight' => $row['net_weight'],
+                            'retiro_place' => $row['retiro_place'],
+                            'transport' => $row['transport'],
+                            'transport_agent' => $row['transport_agent'],
+                            'observation_load' => $row['observation_load'],
+                            'agent_port' => $row['agent_port'],
+                            'out_usd' => $row['out_usd'],
+                            'modo_pago_out' => $row['modo_pago_out'],
+                            'plazo_de_pago_out' => $row['plazo_de_pago_out'],
+                            'load_date' => $row['load_date'],
+                            'link_maps' => $row['link_maps'],
+                            'address' => $row['address'],
+                            'city' => $row['city'],
+    
+                            /* 'titulo' => 'Styde.net',
+                        'hoy' => Carbon::now()->format('d/m/Y'),
+                        'poliza' => $certificado->id,
+                        'tomador' => $certificado->nombre,
+                        'rut' => $certificado->doc_numero,
+                        'domicilio' => $certificado->domicilio,
+                        'localidad' => $certificado->localidad,
+                        'pais' => $certificado->pais,
+                        'fecha_inicio' => $certificado->fecha_emision,
+                        'fecha_fin' =>  $certificado->fecha_final , 
+                        'asegurados' => Array($asegurados) */
+    
+                        ];
+    
+                        // Logica de Creado de Carpera: 
+    
+    
+                        if (!file_exists('instructivos/' . $booking)) {
+    
+                            /* Si no Existe la Carperta Del booking */
+    
+                            mkdir('instructivos/' . $booking, 0777, true);
+    
+                            /* Si existe la Carpeta del Contenedor dentro de la Carpeta del Booking la Asignamos*/
+                            if (file_exists('instructivos/' . $booking . '/' . $cntr_number)) {
+    
+                                $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
+                            } else {
+    
+                                /* Si no existe la Carpeta del Contenedor dentro de la Carpeta del Booking la creamos y  la Asignamos*/
+    
+    
+                                mkdir('instructivos/' . $booking . '/' . $cntr_number, 0777, true);
+                                $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
+                            }
+                        } else {
+    
+                            /* si Ya existe la Carpeta Booking */
+    
+                            if (file_exists('instructivos/' . $booking . '/' . $cntr_number)) {
+                                /* y existe la carpeta de CNTR la asignamos */
+    
+                                $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
+                            } else {
+    
+                                /* y si no existe la carpeta de CNTR la creamos y la asignamos */
+    
+                                mkdir('instructivos/' . $booking . '/' . $cntr_number, 0777, true);
+                                $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
+                            }
+                        }
+    
+                        $file_name = 'instructivo_' . $booking . '_' . $cntr_number . '.pdf';
+    
+                        // Ya sabemos que esta creada (o la creamos) entonces creamos variables para usar durante todo el proceso.
+    
+                        $save_folder = $folder . $file_name;
+    
+    
+                        // Generamos el Archivo PDF
+                        $pdf = FacadePdf::loadView('pdf.instructivoCarga', $data);
+                        
+    
+                        file_put_contents($save_folder, $pdf->output());
+    
+                        $query_upload_file = "UPDATE `asign` SET `file_instruction` = '$file_name' WHERE cntr_number = '$cntr_number'";
+                        $result_upload_file = mysqli_query($conn, $query_upload_file);
+    
+                        return $pdf->download($file_name);
+                    }
+                }else{
+                    
+                    return redirect('https://botzero.tech/ttl/views/view_instructivos.php');
+
+                }
+
 
         } else {
             
             echo 'no hay instrucción para enviar';
+
         }
 
 
-        if ($file == null) {
-            // sino está generado el Instrtructivo lo creamos. 
-
-                $query_file = "SELECT DISTINCT asign.id, asign.transport, asign.transport_agent, asign.observation_load, asign.agent_port, carga.custom_place, carga.load_date, carga.booking, carga.shipper, carga.commodity, carga.load_place, carga.unload_place, carga.cut_off_fis, carga.oceans_line, carga.vessel, carga.voyage, carga.final_point, carga.custom_agent, carga.ref_customer, cntr.cntr_number, cntr.cntr_seal, cntr.cntr_type, cntr.net_weight, cntr.retiro_place, cntr.out_usd, cntr.modo_pago_out, cntr.plazo_de_pago_out, customer_load_place.link_maps, customer_load_place.address, customer_load_place.city FROM carga INNER JOIN cntr INNER JOIN asign INNER JOIN customer_load_place ON carga.booking = cntr.booking AND cntr.cntr_number = asign.cntr_number AND customer_load_place.description = carga.load_place WHERE cntr.cntr_number = '$cntr_number'";                
-                $result_file = mysqli_query($conn, $query_file);
-                
-                if (mysqli_num_rows($result_file) == 1) {
-                    $row = mysqli_fetch_array($result_file);
-
-                    $data = [
-                        'id_asign' => $row['id'],
-                        'booking' => $row['booking'],
-                        'shipper' => $row['shipper'],
-                        'commodity' => $row['commodity'],
-                        'load_place' => $row['load_place'],
-                        'unload_place' => $row['unload_place'],
-                        'cut_off_fis' => $row['cut_off_fis'],
-                        'oceans_line' => $row['oceans_line'],
-                        'vessel' => $row['vessel'],
-                        'voyage' => $row['voyage'],
-                        'final_point' => $row['final_point'],
-                        'custom_agent' => $row['custom_agent'],
-                        'custom_place' => $row['custom_place'],
-                        'ref_customer' => $row['ref_customer'],
-                        'cntr_number' => $row['cntr_number'],
-                        'cntr_seal' => $row['cntr_seal'],
-                        'cntr_type' => $row['cntr_type'],
-                        'net_weight' => $row['net_weight'],
-                        'retiro_place' => $row['retiro_place'],
-                        'transport' => $row['transport'],
-                        'transport_agent' => $row['transport_agent'],
-                        'observation_load' => $row['observation_load'],
-                        'agent_port' => $row['agent_port'],
-                        'out_usd' => $row['out_usd'],
-                        'modo_pago_out' => $row['modo_pago_out'],
-                        'plazo_de_pago_out' => $row['plazo_de_pago_out'],
-                        'load_date' => $row['load_date'],
-                        'link_maps' => $row['link_maps'],
-                        'address' => $row['address'],
-                        'city' => $row['city'],
-
-                        /* 'titulo' => 'Styde.net',
-                    'hoy' => Carbon::now()->format('d/m/Y'),
-                    'poliza' => $certificado->id,
-                    'tomador' => $certificado->nombre,
-                    'rut' => $certificado->doc_numero,
-                    'domicilio' => $certificado->domicilio,
-                    'localidad' => $certificado->localidad,
-                    'pais' => $certificado->pais,
-                    'fecha_inicio' => $certificado->fecha_emision,
-                    'fecha_fin' =>  $certificado->fecha_final , 
-                    'asegurados' => Array($asegurados) */
-
-                    ];
-
-                    // Logica de Creado de Carpera: 
-
-
-                    if (!file_exists('instructivos/' . $booking)) {
-
-                        /* Si no Existe la Carperta Del booking */
-
-                        mkdir('instructivos/' . $booking, 0777, true);
-
-                        /* Si existe la Carpeta del Contenedor dentro de la Carpeta del Booking la Asignamos*/
-                        if (file_exists('instructivos/' . $booking . '/' . $cntr_number)) {
-
-                            $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                        } else {
-
-                            /* Si no existe la Carpeta del Contenedor dentro de la Carpeta del Booking la creamos y  la Asignamos*/
-
-
-                            mkdir('instructivos/' . $booking . '/' . $cntr_number, 0777, true);
-                            $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                        }
-                    } else {
-
-                        /* si Ya existe la Carpeta Booking */
-
-                        if (file_exists('instructivos/' . $booking . '/' . $cntr_number)) {
-                            /* y existe la carpeta de CNTR la asignamos */
-
-                            $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                        } else {
-
-                            /* y si no existe la carpeta de CNTR la creamos y la asignamos */
-
-                            mkdir('instructivos/' . $booking . '/' . $cntr_number, 0777, true);
-                            $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                        }
-                    }
-
-                    $file_name = 'instructivo_' . $booking . '_' . $cntr_number . '.pdf';
-
-                    // Ya sabemos que esta creada (o la creamos) entonces creamos variables para usar durante todo el proceso.
-
-                    $save_folder = $folder . $file_name;
-
-
-                    // Generamos el Archivo PDF
-                    $pdf = FacadePdf::loadView('pdf.instructivoCarga', $data);
-                    
-
-                    file_put_contents($save_folder, $pdf->output());
-
-                    $query_upload_file = "UPDATE `asign` SET `file_instruction` = '$file_name' WHERE cntr_number = '$cntr_number'";
-                    $result_upload_file = mysqli_query($conn, $query_upload_file);
-
-                    return $pdf->download($file_name);
-                }
-            }
+        
         
     }
     public function cargaPorMail( $cntr )
@@ -297,7 +305,9 @@ class crearpdfController extends Controller
                     $mail = Mail::to($mail)->send(new envioInstructivo($data)); 
                     return 'ok';
                 }else{
-                    return 'el instructivo ya estaba generado';
+
+                    return redirect('https://botzero.tech/ttl/views/view_instructivos.php');
+
                 }
 
             } else {
