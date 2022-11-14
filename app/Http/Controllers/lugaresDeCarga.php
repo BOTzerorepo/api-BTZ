@@ -6,6 +6,7 @@ use App\Mail\cargaAduana;
 use App\Mail\cargaCargando;
 use App\Mail\cargaDescarga;
 use App\Mail\ubicacion;
+use App\Models\pruebasModel;
 use App\Models\statu;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -22,6 +23,9 @@ class lugaresDeCarga extends Controller
     public function coordenadas($patente)
     {
 
+        $chek = new pruebasModel();
+        $chek->contenido = 'Entro a la funcion coordenadas de /lugarDeCarga/{patente} con el Parametro:' . $patente;
+        $chek->save();
         $coordenadas = DB::table('carga')
             ->select(
                 'carga.id as idLoad',
@@ -43,7 +47,11 @@ class lugaresDeCarga extends Controller
             ->join('customer_unload_place', 'customer_unload_place.description', '=', 'carga.unload_place')
             ->where('asign.truck', '=', $patente)
             ->get();
-        
+
+        $chek = new pruebasModel();
+        $chek->contenido = 'La api devolvio:' . $coordenadas;
+        $chek->save();
+
         return $coordenadas;
 
         // SELECT * FROM `carga` INNER JOIN `cntr` INNER JOIN `asign` ON carga.booking = cntr.booking AND cntr.cntr_number = asign.cntr_number WHERE asign.truck = 'AE792WJ';
@@ -55,6 +63,11 @@ class lugaresDeCarga extends Controller
      */
     public function accionLugarDeCarga($idTrip)
     {
+
+        $chek = new pruebasModel();
+        $chek->contenido = 'Entro a la funcion accionLugarDeCarga de /accionLugarDeCarga/{idTrip}con el Parametro:' . $idTrip;
+        $chek->save();
+
         $date = Carbon::now('-03:00');
         $qc = DB::table('cntr')->select('cntr_number', 'booking')->where('id_cntr', '=', $idTrip)->get();
         $cntr = $qc[0];
@@ -63,29 +76,52 @@ class lugaresDeCarga extends Controller
         $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
         $description = $qd->status;
 
+        
+
         if ($qd->main_status == 'CARGANDO') {
 
-        // si el status es igual al informado.     
+            $chek = new pruebasModel();
+            $chek->contenido = 'Entro en manin status = CARGANDO';
+            $chek->save();
+
+            // si el status es igual al informado.     
 
             // Buscamos si se aviso o no al cliente. Si no se aviso. Avisamos.
-           
+            
             if ($qd->avisado == 0) {
 
-                DB::table('status')->insert([
+                $chek = new pruebasModel();
+                $chek->contenido = 'Entro en NO AVISADO';
+                $chek->save();
+
+                $insert = DB::table('status')->insert([
                     'status' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts del Lugar de Carga.',
                     'main_status' => 'CARGANDO',
                     'cntr_number' => $cntr->cntr_number,
                     'user_status' => 'AUTOMATICO',
                 ]);
 
+
                 $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
                 $description = $qd->status;
+
+                $chek = new pruebasModel();
+                $chek->contenido = $description;
+                $chek->save();
 
                 $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $cntr->booking)->get();
                 $empresa = $qempresa[0]->empresa;
 
+                $chek = new pruebasModel();
+                $chek->contenido = $empresa;
+                $chek->save();
+
                 $qmail = DB::table('empresas')->where('razon_social', '=', $empresa)->select('mail_logistic')->get();
                 $mail = $qmail[0]->mail_logistic;
+
+                $chek = new pruebasModel();
+                $chek->contenido = $mail;
+                $chek->save();
 
                 $datos = [
                     'cntr' => $cntr->cntr_number,
@@ -96,41 +132,51 @@ class lugaresDeCarga extends Controller
                     'date' => $date
                 ];
 
-                Mail::to($mail)->send(new cargaCargando($datos));
+                $mailEnviado = Mail::to($mail)->send(new cargaCargando($datos));
+
                 $actualizarAvisado = statu::find($qd->id);
+                
                 $avisadoMas = $actualizarAvisado->avisado + 1;
                 $actualizarAvisado->avisado = $avisadoMas;
                 $actualizarAvisado->save();
+                
                 return 'ok, Actulizó Status - Envió mail.'  . $qd->avisado;
-               
+                
             } elseif ($qd->avisado != 0 && $qd->avisado <= 119) { // // Buscamos si se aviso o no al cliente. Si se aviso o no fue hace mucho actualizamos. 
-        
+
+
+                $chek = new pruebasModel();
+                $chek->contenido = 'entro en avisado y menos de 119 veces reportado';
+                $chek->save();
+
                 $actualizarAvisado = statu::find($qd->id);
                 $avisadoMas = $actualizarAvisado->avisado + 1;
                 $actualizarAvisado->avisado = $avisadoMas;
                 $actualizarAvisado->save();
-              /*   return 'ok, No actulizó Status - No envió mail.'  . $qd->avisado; */
-
-
+                /*   return 'ok, No actulizó Status - No envió mail.'  . $qd->avisado; */
             } elseif ($qd->avisado != 0 && $qd->avisado >= 120) {
 
 
+                $chek = new pruebasModel();
+                $chek->contenido = 'entro en avisado y mas de 120 veces reportado';
+                $chek->save();
+
                 DB::table('status')->insert([
                     'status' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts del Lugar de Carga.',
                     'main_status' => 'CARGANDO',
                     'cntr_number' => $cntr->cntr_number,
                     'user_status' => 'AUTOMATICO',
                 ]);
-    
+
                 $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
                 $description = $qd->status;
-    
+
                 $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $cntr->booking)->get();
                 $empresa = $qempresa[0]->empresa;
-    
+
                 $qmail = DB::table('empresas')->where('razon_social', '=', $empresa)->select('mail_logistic')->get();
                 $mail = $qmail[0]->mail_logistic;
-    
+
                 $datos = [
                     'cntr' => $cntr->cntr_number,
                     'description' =>  $description,
@@ -139,16 +185,21 @@ class lugaresDeCarga extends Controller
                     'booking' => $cntr->booking,
                     'date' => $date
                 ];
-    
-                
+
+
                 $actualizarAvisado = statu::find($qd->id);
                 $avisadoMas = $actualizarAvisado->avisado + 1;
                 $actualizarAvisado->avisado = $avisadoMas;
                 $actualizarAvisado->save();
-               /*  return 'ok, Actulizó Status - No envió mail.'  . $qd->avisado; */
-
+                /*  return 'ok, Actulizó Status - No envió mail.'  . $qd->avisado; */
             }
-        }else{
+        } else {
+
+
+            $chek = new pruebasModel();
+            $chek->contenido = 'Entro en manin status != CARGANDO';
+            $chek->save();
+
             DB::table('status')->insert([
                 'status' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts del Lugar de Carga.',
                 'main_status' => 'CARGANDO',
@@ -184,6 +235,12 @@ class lugaresDeCarga extends Controller
     }
     public function accionLugarAduana($idTrip)
     {
+
+
+        $chek = new pruebasModel();
+        $chek->contenido = 'Entro a la funcion accionLugarDeCarga de /accionLugarAduana/{idTrip}con el Parametro:' . $idTrip;
+        $chek->save();
+
         $date = Carbon::now('-03:00');
         $qc = DB::table('cntr')->select('cntr_number', 'booking')->where('id_cntr', '=', $idTrip)->get();
         $cntr = $qc[0];
@@ -194,11 +251,19 @@ class lugaresDeCarga extends Controller
 
         if ($qd->main_status == 'EN ADUANA') {
 
-        // si el status es igual al informado.     
+            $chek = new pruebasModel();
+            $chek->contenido = 'entro en main status == EN aduana';
+            $chek->save();
+
+            // si el status es igual al informado.     
 
             // Buscamos si se aviso o no al cliente. Si no se aviso. Avisamos.
-           
+
             if ($qd->avisado == 0) {
+
+                $chek = new pruebasModel();
+                $chek->contenido = 'entro en no avisado';
+                $chek->save();
 
                 DB::table('status')->insert([
                     'status' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts de la aduana Asignada.',
@@ -225,24 +290,35 @@ class lugaresDeCarga extends Controller
                     'date' => $date
                 ];
 
+                $chek = new pruebasModel();
+                $chek->contenido = 'envia mail con '.$datos;
+                $chek->save();
+
                 Mail::to($mail)->send(new cargaAduana($datos));
                 $actualizarAvisado = statu::find($qd->id);
                 $avisadoMas = $actualizarAvisado->avisado + 1;
                 $actualizarAvisado->avisado = $avisadoMas;
                 $actualizarAvisado->save();
                 return 'ok, Actulizó Status - Envió mail.';
-               
+
             } elseif ($qd->avisado != 0 && $qd->avisado <= 119) { // // Buscamos si se aviso o no al cliente. Si se aviso o no fue hace mucho actualizamos. 
-        
+
+
+                $chek = new pruebasModel();
+                $chek->contenido = 'entro en avisado y menos de 119 veces reportado ';
+                $chek->save();
+
                 $actualizarAvisado = statu::find($qd->id);
                 $avisadoMas = $actualizarAvisado->avisado + 1;
                 $actualizarAvisado->avisado = $avisadoMas;
                 $actualizarAvisado->save();
                 return 'ok, No actulizó Status - No envió mail.';
 
-
             } elseif ($qd->avisado != 0 && $qd->avisado >= 120) {
 
+                $chek = new pruebasModel();
+                $chek->contenido = 'entro en avisado y mas de 119 veces reportado ';
+                $chek->save();
 
                 DB::table('status')->insert([
                     'status' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts de la Aduana asignada.',
@@ -250,16 +326,16 @@ class lugaresDeCarga extends Controller
                     'cntr_number' => $cntr->cntr_number,
                     'user_status' => 'AUTOMATICO',
                 ]);
-    
+
                 $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
                 $description = $qd->status;
-    
+
                 $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $cntr->booking)->get();
                 $empresa = $qempresa[0]->empresa;
-    
+
                 $qmail = DB::table('empresas')->where('razon_social', '=', $empresa)->select('mail_logistic')->get();
                 $mail = $qmail[0]->mail_logistic;
-    
+
                 $datos = [
                     'cntr' => $cntr->cntr_number,
                     'description' =>  $description,
@@ -268,15 +344,21 @@ class lugaresDeCarga extends Controller
                     'booking' => $cntr->booking,
                     'date' => $date
                 ];
-    
+
                 $actualizarAvisado = statu::find($qd->id);
                 $avisadoMas = $actualizarAvisado->avisado + 1;
                 $actualizarAvisado->avisado = $avisadoMas;
                 $actualizarAvisado->save();
                 return 'ok, Actulizó Status - No envió mail.';
-
             }
-        }else{
+        } else {
+
+
+            $chek = new pruebasModel();
+            $chek->contenido = 'Entro en manin status != ADUANA';
+            $chek->save();
+
+
             DB::table('status')->insert([
                 'status' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts de la Aduana asignada.',
                 'main_status' => 'EN ADUANA',
@@ -322,10 +404,10 @@ class lugaresDeCarga extends Controller
 
         if ($qd->main_status == 'STACKING') {
 
-        // si el status es igual al informado.     
+            // si el status es igual al informado.     
 
             // Buscamos si se aviso o no al cliente. Si no se aviso. Avisamos.
-           
+
             if ($qd->avisado == 0) {
 
                 DB::table('status')->insert([
@@ -353,22 +435,19 @@ class lugaresDeCarga extends Controller
                     'date' => $date
                 ];
 
-                Mail::to($mail)->send(new cargaDescarga($datos)); 
+                Mail::to($mail)->send(new cargaDescarga($datos));
                 $actualizarAvisado = statu::find($qd->id);
                 $avisadoMas = $actualizarAvisado->avisado + 1;
                 $actualizarAvisado->avisado = $avisadoMas;
                 $actualizarAvisado->save();
                 return 'ok, Actulizó Status - Envió mail.';
-               
             } elseif ($qd->avisado != 0 && $qd->avisado <= 119) { // // Buscamos si se aviso o no al cliente. Si se aviso o no fue hace mucho actualizamos. 
-        
+
                 $actualizarAvisado = statu::find($qd->id);
                 $avisadoMas = $actualizarAvisado->avisado + 1;
                 $actualizarAvisado->avisado = $avisadoMas;
                 $actualizarAvisado->save();
                 return 'ok, No actulizó Status - No envió mail.';
-
-
             } elseif ($qd->avisado != 0 && $qd->avisado >= 120) {
 
 
@@ -378,16 +457,16 @@ class lugaresDeCarga extends Controller
                     'cntr_number' => $cntr->cntr_number,
                     'user_status' => 'AUTOMATICO',
                 ]);
-    
+
                 $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
                 $description = $qd->status;
-    
+
                 $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $cntr->booking)->get();
                 $empresa = $qempresa[0]->empresa;
-    
+
                 $qmail = DB::table('empresas')->where('razon_social', '=', $empresa)->select('mail_logistic')->get();
                 $mail = $qmail[0]->mail_logistic;
-    
+
                 $datos = [
                     'cntr' => $cntr->cntr_number,
                     'description' =>  $description,
@@ -396,16 +475,15 @@ class lugaresDeCarga extends Controller
                     'booking' => $cntr->booking,
                     'date' => $date
                 ];
-    
+
                 Mail::to($mail)->send(new cargaDescarga($datos));
                 $actualizarAvisado = statu::find($qd->id);
                 $avisadoMas = $actualizarAvisado->avisado + 1;
                 $actualizarAvisado->avisado = $avisadoMas;
                 $actualizarAvisado->save();
                 return 'ok, Actulizó Status - No envió mail.';
-
             }
-        }else{
+        } else {
             DB::table('status')->insert([
                 'status' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts del Lugar de Descarga.',
                 'main_status' => 'STACKING',
