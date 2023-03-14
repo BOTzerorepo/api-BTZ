@@ -245,9 +245,17 @@ class lugaresDeCarga extends Controller
         $qc = DB::table('cntr')->select('cntr_number', 'booking')->where('id_cntr', '=', $idTrip)->get();
         $cntr = $qc[0];
 
+        $chek = new pruebasModel();
+        $chek->contenido = 'Cntr:' . $cntr;
+        $chek->save();
+
         // cual es el ultimo status.
         $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
         $description = $qd->status;
+
+        $chek = new pruebasModel();
+        $chek->contenido = 'Main Status:' . $qd->main_status ;
+        $chek->save();
 
         if ($qd->main_status == 'EN ADUANA') {
 

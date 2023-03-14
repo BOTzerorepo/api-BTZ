@@ -14,14 +14,13 @@ use Illuminate\Support\Facades\DB;
 use LDAP\Result;
 use Mockery\Undefined;
 
-//wget -O /dev/null "https://rail.com.ar/api/servicioSatelital"
+// wget -O /dev/null "https://rail.com.ar/api/servicioSatelital"
 // tiempo */2 * * * *
 
 class ServiceSatelital extends Controller
 {
     public function serviceSatelital()
     {
-
         $todosMisCamiones = DB::table('trucks')
             ->join('asign', 'trucks.domain', '=', 'asign.truck')
             ->join('cntr', 'cntr.cntr_number', '=', 'asign.cntr_number')
@@ -30,20 +29,18 @@ class ServiceSatelital extends Controller
             ->join('customer_load_place', 'customer_load_place.description', '=', 'carga.load_place')
             ->join('customer_unload_place', 'customer_unload_place.description', '=', 'carga.unload_place')
             ->select('cntr.id_cntr as IdTrip', 'carga.id as idCarga', 'trucks.id', 'trucks.id_satelital', 'trucks.domain', 'customer_load_place.description as LugarCarga', 'customer_load_place.lat as CargaLat', 'customer_load_place.lon as CargaLng', 'aduanas.description as LugarAduana', 'aduanas.lat as aduanaLat', 'aduanas.lon as aduanaLon', 'customer_unload_place.description as lugarDescarga', 'customer_unload_place.lat as descargaLat', 'customer_unload_place.lon as descargaLon')
-            /*   ->where('trucks.domain', '=', 'AE792WJ') */
+            ->where('cntr.main_status', '!=', 'TERMINADA')
             ->get();
 
         $chek = new pruebasModel();
-        $chek->contenido = 'Consulto las patentes del Camion';
+        $chek->contenido = '1. Consulto las patentes del Camion';
         $chek->save();
-
 
         foreach ($todosMisCamiones as $camion) {
 
             $chek = new pruebasModel();
-            $chek->contenido = 'Ingreso al Camion ' . $camion->domain;
+            $chek->contenido = '2 Ingreso al Camion ' . $camion->domain;
             $chek->save();
-
 
             $client = new Client();
             $headers = [
@@ -62,28 +59,31 @@ class ServiceSatelital extends Controller
             $res = $client->sendAsync($request)->wait();
             $respuesta = $res->getBody();
             $r = json_decode($respuesta, true);
-            $keys = array($r);
-
+            $keys = array($r);      
             if (array_key_exists('data', $r)) {
 
                 $chek = new pruebasModel();
-                $chek->contenido = 'Ingreso a a la Prueba de DATA' . $camion->domain;
+                $chek->contenido = '2.a. Ingreso a a la Prueba de DATA - ' . $camion->domain;
                 $chek->save();
 
                 $datos = $keys[0]['data'][$camion->domain];
 
                 $posicionLat = $datos['ult_latitud'];
                 $posicionLon = $datos['ult_longitud'];
-
+            
+                $positionDB = new position();
+                $positionDB->dominio = $camion->domain;
+                $positionDB->lat = $posicionLat;
+                $positionDB->lng = $posicionLon;
+                $positionDB->save();
 
                 $chek = new pruebasModel();
-                $chek->contenido = $posicionLat . 'lon: ' . $posicionLon;
+                $chek->contenido = $camion->domain. '2.a. RESPUESTA Se encuentra en Lat: '. $posicionLat . ' - lon: ' . $posicionLon;
                 $chek->save();
-
 
                 $IdTrip = $camion->IdTrip;
                 $chek = new pruebasModel();
-                $chek->contenido = 'IDTrip: ' . $IdTrip;
+                $chek->contenido = '2.b. Camion '. $camion->domain .' tiene el IDTrip: ' . $IdTrip;
                 $chek->save();
 
                 $Radio = 6371e3; // metres
@@ -113,57 +113,57 @@ class ServiceSatelital extends Controller
                 $d3 = $Radio * $c3; // in metres */
 
                 $chek = new pruebasModel();
-                $chek->contenido = 'Metros de Carga ' . $d;
+                $chek->contenido = '2.c. El camino: '. $camion->domain . 'Se encuentra a'. $d .'metros de Carga.';
                 $chek->save();
                 $chek = new pruebasModel();
-                $chek->contenido = 'Metros de Aduana ' . $d2;
+                $chek->contenido = '2.d. El camino: '. $camion->domain . 'Se encuentra a'. $d2 .'metros de Aduana.';
                 $chek->save();
                 $chek = new pruebasModel();
-                $chek->contenido = 'Metros de Descarga ' . $d3;
+                $chek->contenido = '2.e. El camino: '. $camion->domain . 'Se encuentra a'. $d3 .'metros de Descarga.';
                 $chek->save();
 
+             
 
                 if ($d <= 200) { // lugar de Carga
 
                     $chek = new pruebasModel();
-                    $chek->contenido = 'entro a lugar de carga / Camion: ' . $camion->domain;
+                    $chek->contenido = '3.a . Entro a lugar de carga / Camion: ' . $camion->domain;
                     $chek->save();
 
                     $clientCarga = new Client();
                     $requestCarga = new Psr7Request('GET', 'https://rail.com.ar/api/accionLugarDeCarga/' . $IdTrip);
                     $resCarga = $clientCarga->sendAsync($requestCarga)->wait();
-                    return $resCarga;
                 }
 
                 if ($d2 <= 200) { // lugar de aduana
 
 
                     $chek = new pruebasModel();
-                    $chek->contenido = 'entro a lugar de Aduana / Camion: ' . $camion->domain;
+                    $chek->contenido = '3.b. Entro a lugar de Aduana / Camion: ' . $camion->domain;
                     $chek->save();
 
                     $clientAduana = new Client();
                     $requestAduana = new Psr7Request('GET', 'https://rail.com.ar/api/accionLugarAduana/' . $IdTrip);
                     $resAduana = $clientAduana->sendAsync($requestAduana)->wait();
-                    return $resAduana;
                 }
                 if ($d3 <= 200) { // lugar de descarga
 
 
-
                     $chek = new pruebasModel();
-                    $chek->contenido = 'entro a lugar de descarga / Camion: ' . $camion->domain;
+                    $chek->contenido = '3.c .Entro a lugar de descarga / Camion: ' . $camion->domain;
                     $chek->save();
 
                     $clientDescarga = new Client();
                     $requestDescarga = new Psr7Request('GET', 'https://rail.com.ar/api/accionLugarDescarga/' . $IdTrip);
                     $resDescarga = $clientDescarga->sendAsync($requestDescarga)->wait();
-                    return $resDescarga;
 
-                    $chek = new pruebasModel();
-                    $chek->contenido = 'No esta cerca de ningun lado / camion: ' . $camion->domain;
-                    $chek->save();
+                    
                 }
+                    $chek = new pruebasModel();
+                    $chek->contenido = '4. No esta cerca de ningun lado / camion: ' . $camion->domain;
+                    $chek->save();
+
+                    // Agregar punntos Criticos Globales.
             }
         }
     }

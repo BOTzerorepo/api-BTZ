@@ -7,6 +7,7 @@ use App\Mail\cargaAsignada;
 use App\Mail\cargaAsignadaEditada;
 use App\Mail\CargaConProblemas;
 use App\Mail\IngresadoStacking;
+use App\Mail\transporteAsignado;
 use App\Models\empresa;
 use App\Models\logapi;
 use App\Models\statu;
@@ -28,21 +29,83 @@ class emailController extends Controller
     public function cargaAsignada($id){
 
         $date = Carbon::now('-03:00');
-        $asign = DB::table('asign')->where('id', '=', $id)->get();
+        $asign = DB::table('asign')
+        ->select('asign.*','transporte.Direccion','transporte.paut','transporte.CUIT','transporte.permiso','transporte.vto_permiso','choferes.documento', 'trucks.model','trucks.model','trucks.year','trucks.chasis','trucks.poliza','trucks.vto_poliza','trailers.domain as semi_domain')
+        ->join('transporte','asign.transport','=','transporte.razon_social')
+        ->join('choferes','choferes.nombre','=','asign.driver')
+        ->join('trucks','trucks.domain','=','asign.truck')
+        ->join('trailers','trailers.domain','=','asign.truck_semi')
+
+        ->where('asign.id', '=', $id)->get();
+        $dAsign = $asign[0];
+        $to = DB::table('users')->select('email')->where('username', '=', $dAsign->user)->get();
+        $data = [
+            // Datos CRT
+
+            'transport' => $dAsign->transport, 
+            'direccion' => $dAsign->Direccion, 
+            'paut' => $dAsign->paut,
+            'cuit' => $dAsign->CUIT,
+            'permiso_int' => $dAsign->permiso, 
+            'vto_permiso_int' => $dAsign->vto_permiso, 
+            'crt' => $dAsign->crt, 
+
+            // Datos para MIC
+
+            'fletero_razon_social'=> $dAsign->fletero_razon_social,
+            'fletero_domicilio'=> $dAsign->fletero_domicilio,
+            'fletero_cuit'=> $dAsign->fletero_cuit,
+            'fletero_paut'=> $dAsign->fletero_paut,
+            'fletero_permiso'=> $dAsign->fletero_permiso,
+            'fletero_vto_permiso'=> $dAsign->fletero_vto_permiso,
+
+            'driver' => $dAsign->driver,
+            'documento' => $dAsign->documento,
+
+            'truck' => $dAsign->truck,
+            'truck_modelo' => $dAsign->model,
+            'truck_year' => $dAsign->year,
+            'truck_chasis' => $dAsign->chasis,
+            'truck_poliza' => $dAsign->poliza,
+            'truck_vto_poliza' => $dAsign->vto_poliza,
+
+            'truck_semi' => $dAsign->truck_semi,
+
+            'cntr_number' => $dAsign->cntr_number,
+            'booking' => $dAsign->booking,
+            
+            'user' => $dAsign->user,
+            'company' => $dAsign->company
+        ];
+
+
+        $logapi = new logapi();
+        $logapi->user = $dAsign->user;
+        $logapi->detalle = 'AsignaUnidadCarga-User:'.$dAsign->user.'|Transporte:'. $dAsign->transport.'|Chofer:'.$dAsign->driver.'|Tractor:'.$dAsign->truck.'|Semi:'.$dAsign->truck_semi;
+        $logapi->save();
+
+        Mail::to($to)->send(new cargaAsignada($data, $date));
+        return 'ok';
+
+    }
+    public function transporteAsignado($id){
+
+        $date = Carbon::now('-03:00');
+        $asign = DB::table('asign')->select('asign.id','asign.cntr_number','asign.booking','asign.transport','asign.transport_agent','asign.user','asign.company','ata.tax_id','transporte.pais')->join('transporte','asign.transport','=','transporte.razon_social')->join('ata','asign.transport_agent','=','ata.razon_social')->where('asign.id', '=', $id)->get();
         $dAsign = $asign[0];
         
         $to = DB::table('users')->select('email')->where('username', '=', $dAsign->user)->get();
-
+      
         $data = [
-            'driver' => $dAsign->driver,
+           
             'cntr_number' => $dAsign->cntr_number,
             'booking' => $dAsign->booking,
-            'truck' => $dAsign->truck,
-            'truck_semi' => $dAsign->truck_semi,
             'transport' => $dAsign->transport,
             'transport_agent' => $dAsign->transport_agent,
             'user' => $dAsign->user,
-            'company' => $dAsign->company
+            'company' => $dAsign->company,
+            'transport_bandera' => $dAsign->pais,
+            'cuit_ata'=> $dAsign->tax_id
         ];
 
         $logapi = new logapi();
@@ -50,7 +113,7 @@ class emailController extends Controller
         $logapi->detalle = 'AsignaCarga';
         $logapi->save();
 
-        Mail::to('priopelliza@gmail.com')->send(new cargaAsignada($data, $date));
+        Mail::to($to)->send(new transporteAsignado($data, $date));
         return 'ok';
 
     }

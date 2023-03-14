@@ -198,7 +198,7 @@
                                                                         <p
                                                                             style="margin: 0; font-size: 14px; text-align: center;">
                                                                             <span style="font-size:38px;"><strong><span
-                                                                                        style="font-size:38px; color:#020858;">ASIGNACIÓN DE UNIDAD</strong></span>
+                                                                                        style="font-size:38px; color:#020858;">ASIGNACIÓN DE TRANSPORTE</strong></span>
                                                                         </p>
                                                                     </div>
                                                                 </div>
@@ -218,7 +218,7 @@
                                                                         <p
                                                                             style="margin: 0; font-size: 14px; text-align: center;">
                                                                             <span style="font-size:22px;"><strong><span
-                                                                                        style="font-size:22px;">Asignación de unidad para: 
+                                                                                        style="font-size:22px;">Asignación de Transporte para: 
                                                                                         {{ $datos['cntr_number'] }} de la referencia: 
                                                                                         {{ $datos['booking'] }}
                                                                                     </span></strong></span>
@@ -315,39 +315,23 @@
                                                                             <div style="font-family: sans-serif">
                                                                                 <div class="txtTinyMce-wrapper"
                                                                                     style="font-size: 12px; font-family: Lato, Tahoma, Verdana, Segoe, sans-serif; mso-line-height-alt: 14.399999999999999px; color: #052d3d; line-height: 1.2;">
-                                                                                   
+                                                                                    <p style="margin: 0; font-size: 12px; text-align: center;">
+                                                                                        <span style="font-size:34px;">
+                                                                                            <span style="color:#f44336;font-size:34px;">
+                                                                                                <strong>
+                                                                                                    <span style="font-size:34px;">
+                                                                                                        {{ $datos['cntr_number'] }}
+                                                                                                    </span>
+                                                                                                </strong>
+                                                                                            </span>
+                                                                                        </p>
                                                                                         <p style="margin: 0; font-size: 12px; text-align: center;">
                                                                                             <span style="font-size:20px; color: gray; text-align: center;">
-                                                                                            <h5>Datos para CRT</h5>
-                                                                                              <p>Transporte:  {{$datos['transport']}} <br>
-                                                                                                Domicilio: {{$datos['direccion']}}
-                                                                                                <br>RUT|CUIT: {{$datos['cuit']}}
-                                                                                                <br>PAUT: {{$datos['paut']}}
-                                                                                                <br>Permiso Internacional: {{$datos['permiso_int']}}
-                                                                                                <br>Vto Perm. Int.: {{$datos['vto_permiso_int']}}
-                                                                                                <br>CRT:{{$datos['crt']}}
-                                                                                            </p>
-                                                                                            <h5>Datos para MIC</h5>
-                                                                                            <p>
-                                                                                                Transporte: {{$datos['fletero_razon_social']}}
-                                                                                                <br>Domicilio: {{$datos['fletero_domicilio']}}
-                                                                                                <br>CUIT: {{$datos['fletero_cuit']}} 
-                                                                                                <br>PAUT: {{$datos['fletero_paut']}}
-                                                                                                <br>Permiso Internacional: {{$datos['fletero_permiso']}} 
-                                                                                                <br>Vencimiento Permiso Internacional: {{$datos['fletero_vto_permiso']}}
-                                                                                                <br>
-                                                                                                <br>Chofer:{{$datos['driver']}}
-                                                                                                <br>DNI:{{$datos['documento']}}
-                                                                                                <br>
-                                                                                                <br>Tractor:{{$datos['truck']}}
-                                                                                                <br>Modelo: {{$datos['truck_modelo']}}
-                                                                                                <br>Año: {{$datos['truck_year']}}
-                                                                                                <br>Chasis: {{$datos['truck_chasis']}}
-                                                                                                <br>Póliza: {{$datos['truck_poliza']}}
-                                                                                                <br>Vencimiento: {{$datos['truck_vto_poliza']}}
-                                                                                                <br>Semi: {{$datos['truck_semi']}}
-                                                                                                
-                                                                                            </p>
+
+                                                                                              <p>Transporte:  {{$datos['transport']}} 
+                                                                                                <br> Bandera: {{ $datos['transport_bandera']}}
+                                                                                                <br> ATA:  {{$datos['transport_agent']}}
+                                                                                                <br>CUIT ATA: {{ $datos['cuit_ata']}} 
       
                                                                                             </span>
                                                                                         </span>

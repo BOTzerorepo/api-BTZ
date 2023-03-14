@@ -48,6 +48,9 @@ class TruckController extends Controller
 
         $truck = new truck();
         $truck->model = $request['model'];
+        $truck->chasis = $request['chasis'];
+        $truck->poliza = $request['poliza'];
+        $truck->vto_poliza = $request['vto_poliza'];
         $truck->type = $request['type'];
         $truck->domain = $request['domain'];
         $truck->year = $request['year'];
@@ -116,6 +119,9 @@ class TruckController extends Controller
         $truck->model = $request['model'];
         $truck->type = $request['type'];
         $truck->domain = $request['domain'];
+        $truck->chasis = $request['chasis'];
+        $truck->poliza = $request['poliza'];
+        $truck->vto_poliza = $request['vto_poliza'];
         $truck->year = $request['year'];
         $truck->device_truck = $request['device_truck'];
         $truck->satelital_location = $request['satelital_location'];

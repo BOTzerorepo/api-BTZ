@@ -44,6 +44,9 @@ class TrailerController extends Controller
         
         $trailer = new trailer();
         $trailer->type = $request['type'];
+        $trailer->chasis = $request['chasis'];
+        $trailer->poliza = $request['poliza'];
+        $trailer->vto_poliza = $request['vto_poliza'];
         $trailer->domain = $request['domain'];
         $trailer->year = $request['year'];
         $trailer->user_id = $request['user'];
@@ -98,6 +101,9 @@ class TrailerController extends Controller
        
         $trailer->type = $request['type'];
         $trailer->domain = $request['domain'];
+        $trailer->chasis = $request['chasis'];
+        $trailer->poliza = $request['poliza'];
+        $trailer->vto_poliza = $request['vto_poliza'];
         $trailer->year = $request['year'];
         $trailer->user_id = $request['user_id'];
         $trailer->transport_id = $request['transport_id'];
