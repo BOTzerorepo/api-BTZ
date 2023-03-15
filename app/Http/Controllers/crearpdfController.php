@@ -27,9 +27,9 @@ class crearpdfController extends Controller
         // revisar si no está generado el Instructivo.
         $conn = mysqli_connect(
             '31.170.161.22',
-            'u101685278_ttlgroup',
-            'Pachiman9102',
-            'u101685278_ttlgroup'
+            'u101685278_sbttl',
+            'Pachiman9102$',
+            'u101685278_sbttl'
         );
 
         $query = "SELECT asign.cntr_number, asign.booking, asign.file_instruction, transporte.contacto_logistica_celular FROM asign INNER JOIN transporte ON transporte.razon_social = asign.transport WHERE asign.cntr_number = '$cntr_number'";
@@ -182,11 +182,17 @@ class crearpdfController extends Controller
         // revisar si no está generado el Instructivo.
         $conn = mysqli_connect(
             '31.170.161.22',
-            'u101685278_ttlgroup',
+            'u101685278_ ttlgroup',
             'Pachiman9102',
-            'u101685278_ttlgroup'
+            'u101685278_ ttlgroup'
         );
-
+       /*  $conn = mysqli_connect(
+            '31.170.161.22',
+            'u101685278_sbttl',
+            'Pachiman9102$',
+            'u101685278_sbttl'
+        ); */
+       
         $query = DB::table('asign')
         ->select('asign.cntr_number', 'asign.booking', 'asign.file_instruction','transporte.contacto_logistica_celular')
         ->join('transporte', 'transporte.razon_social', '=', 'asign.transport')->where('asign.cntr_number', '=', $cntr_number)->get();
@@ -297,6 +303,7 @@ class crearpdfController extends Controller
                     $query_upload_file = "UPDATE `asign` SET `file_instruction` = '$file_name' WHERE cntr_number = '$cntr_number'";
                     mysqli_query($conn, $query_upload_file);
                     
+                    
                     $qempresa = DB::table('carga')->select('empresa')->where('booking','=',$booking)->get();
                     $empresa = $qempresa[0]->empresa;
                     $qmail = DB::table('empresas')->where('razon_social','=',$empresa)->select('mail_logistic')->get();
@@ -363,9 +370,9 @@ class crearpdfController extends Controller
 
         $conn = mysqli_connect(
             '31.170.161.22',
-            'u101685278_ttlgroup',
-            'Pachiman9102',
-            'u101685278_ttlgroup'
+            'u101685278_sbttl',
+            'Pachiman9102$',
+            'u101685278_sbttl'
         );
 
         $query_file = "SELECT carga.booking, carga.cliente, carga.vessel, carga.voyage, carga.unload_place, carga.final_point, carga.commodity, cntr.retiro_place, carga.oceans_line, cntr.cntr_type FROM carga INNER JOIN cntr ON carga.booking = cntr.booking WHERE cntr.id_cntr = '$id_cntr'";

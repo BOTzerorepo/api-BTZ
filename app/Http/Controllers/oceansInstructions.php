@@ -22,6 +22,12 @@ class oceansInstructions extends Controller
             'Pachiman9102',
             'u101685278_ttlgroup'
         );
+       /*  $conn = mysqli_connect(
+            '31.170.161.22',
+            'u101685278_sbttl',
+            'Pachiman9102$',
+            'u101685278_sbttl'
+        ); */
 
         $query_file = "SELECT DISTINCT asign.id, asign.transport, asign.transport_agent, asign.observation_load, asign.agent_port, carga.custom_place, carga.load_date, carga.booking, carga.shipper, carga.commodity, carga.load_place, carga.unload_place, carga.cut_off_fis, carga.oceans_line, carga.vessel, carga.voyage, carga.final_point, carga.custom_agent, carga.ref_customer, cntr.cntr_number, cntr.cntr_seal, cntr.cntr_type, cntr.net_weight, cntr.retiro_place, cntr.out_usd, cntr.modo_pago_out, cntr.plazo_de_pago_out, customer_load_place.link_maps, customer_load_place.address, customer_load_place.city FROM carga INNER JOIN cntr INNER JOIN asign INNER JOIN customer_load_place ON carga.booking = cntr.booking AND cntr.cntr_number = asign.cntr_number AND customer_load_place.description = carga.load_place WHERE cntr.cntr_number = '$trip'";                
         $result_file = mysqli_query($conn, $query_file);
