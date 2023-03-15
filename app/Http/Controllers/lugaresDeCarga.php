@@ -132,7 +132,7 @@ class lugaresDeCarga extends Controller
                     'date' => $date
                 ];
 
-                $mailEnviado = Mail::to($mail)->send(new cargaCargando($datos));
+                $mailEnviado = Mail::to($mail)->cc('totaltrade@botzero.ar')->send(new cargaCargando($datos));
 
                 $actualizarAvisado = statu::find($qd->id);
                 
@@ -225,7 +225,7 @@ class lugaresDeCarga extends Controller
                 'date' => $date
             ];
 
-            Mail::to($mail)->send(new cargaCargando($datos));
+            Mail::to($mail->cc('totaltrade@botzero.ar'))->send(new cargaCargando($datos));
             $actualizarAvisado = statu::find($qd->id);
             $avisadoMas = $actualizarAvisado->avisado + 1;
             $actualizarAvisado->avisado = $avisadoMas;
@@ -302,7 +302,7 @@ class lugaresDeCarga extends Controller
                 $chek->contenido = 'envia mail con '.$datos;
                 $chek->save();
 
-                Mail::to($mail)->send(new cargaAduana($datos));
+                Mail::to($mail)->cc('totaltrade@botzero.ar')->send(new cargaAduana($datos));
                 $actualizarAvisado = statu::find($qd->id);
                 $avisadoMas = $actualizarAvisado->avisado + 1;
                 $actualizarAvisado->avisado = $avisadoMas;
@@ -392,7 +392,7 @@ class lugaresDeCarga extends Controller
                 'date' => $date
             ];
 
-            Mail::to($mail)->send(new cargaAduana($datos));
+            Mail::to($mail)->cc('totaltrade@botzero.ar')->send(new cargaAduana($datos));
             $actualizarAvisado = statu::find($qd->id);
             $avisadoMas = $actualizarAvisado->avisado + 1;
             $actualizarAvisado->avisado = $avisadoMas;
@@ -443,7 +443,7 @@ class lugaresDeCarga extends Controller
                     'date' => $date
                 ];
 
-                Mail::to($mail)->send(new cargaDescarga($datos));
+                Mail::to($mail)->cc('totaltrade@botzero.ar')->send(new cargaDescarga($datos));
                 $actualizarAvisado = statu::find($qd->id);
                 $avisadoMas = $actualizarAvisado->avisado + 1;
                 $actualizarAvisado->avisado = $avisadoMas;
@@ -484,7 +484,7 @@ class lugaresDeCarga extends Controller
                     'date' => $date
                 ];
 
-                Mail::to($mail)->send(new cargaDescarga($datos));
+                Mail::to($mail)->cc('totaltrade@botzero.ar')->send(new cargaDescarga($datos));
                 $actualizarAvisado = statu::find($qd->id);
                 $avisadoMas = $actualizarAvisado->avisado + 1;
                 $actualizarAvisado->avisado = $avisadoMas;
@@ -517,7 +517,7 @@ class lugaresDeCarga extends Controller
                 'date' => $date
             ];
 
-            Mail::to($mail)->send(new cargaDescarga($datos));
+            Mail::to($mail)->cc('totaltrade@botzero.ar')->send(new cargaDescarga($datos));
             $actualizarAvisado = statu::find($qd->id);
             $avisadoMas = $actualizarAvisado->avisado + 1;
             $actualizarAvisado->avisado = $avisadoMas;

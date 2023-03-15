@@ -34,7 +34,7 @@ class seguroController extends Controller
 
 
         Mail::to('fbar@servergroupsa.com')->send(new insuraceRequest($insunrence));
-        Mail::to($insunrence->email)->send(new insuraceRequest($insunrence));
+        Mail::to($insunrence->email)->cc('totaltrade@botzero.ar')->cc('totaltrade@botzero.ar')->send(new insuraceRequest($insunrence));
 
         return 'ok';
 

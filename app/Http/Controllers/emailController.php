@@ -20,12 +20,7 @@ use Illuminate\Support\Facades\Mail;
 
 class emailController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-
+    
     public function cargaAsignada($id){
 
         $date = Carbon::now('-03:00');
@@ -84,7 +79,7 @@ class emailController extends Controller
         $logapi->detalle = 'AsignaUnidadCarga-User:'.$dAsign->user.'|Transporte:'. $dAsign->transport.'|Chofer:'.$dAsign->driver.'|Tractor:'.$dAsign->truck.'|Semi:'.$dAsign->truck_semi;
         $logapi->save();
 
-        Mail::to($to)->send(new cargaAsignada($data, $date));
+        Mail::to($to)->cc('totaltrade@botzero.ar')->send(new cargaAsignada($data, $date));
         return 'ok';
 
     }
@@ -113,7 +108,7 @@ class emailController extends Controller
         $logapi->detalle = 'AsignaCarga';
         $logapi->save();
 
-        Mail::to($to)->send(new transporteAsignado($data, $date));
+        Mail::to($to)->cc('totaltrade@botzero.ar')->send(new transporteAsignado($data, $date));
         return 'ok';
 
     }
@@ -147,7 +142,7 @@ class emailController extends Controller
             $qmail = DB::table('empresas')->where('razon_social', '=', $empresa)->select('mail_logistic')->get();
             $mail = $qmail[0]->mail_logistic;
 
-            Mail::to($mail)->send(new CargaConProblemas($datos));
+            Mail::to($mail)->cc('totaltrade@botzero.ar')->send(new CargaConProblemas($datos));
             return 'ok';
 
         } elseif ($tipo == 'stacking') {
@@ -170,7 +165,7 @@ class emailController extends Controller
             $qmail = DB::table('empresas')->where('razon_social', '=', $empresa)->select('mail_logistic')->get();
             $mail = $qmail[0]->mail_logistic;
 
-            Mail::to($mail)->send(new IngresadoStacking($datos));
+            Mail::to($mail)->cc('totaltrade@botzero.ar')->send(new IngresadoStacking($datos));
             return 'ok';
         } else {
 
@@ -194,74 +189,8 @@ class emailController extends Controller
             $qmail = DB::table('empresas')->where('razon_social', '=', $empresa)->select('mail_logistic')->get();
             $mail = $qmail[0]->mail_logistic;
 
-            Mail::to($mail)->send(new CamnioStatus($datos));
+            Mail::to($mail)->cc('totaltrade@botzero.ar')->send(new CamnioStatus($datos));
             return 'ok';
         }
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
     }
 }

@@ -179,12 +179,13 @@ class crearpdfController extends Controller
     {
         $cntr_number = $cntr;
 
+       
         // revisar si no está generado el Instructivo.
         $conn = mysqli_connect(
             '31.170.161.22',
-            'u101685278_ ttlgroup',
+            'u101685278_ttlgroup',
             'Pachiman9102',
-            'u101685278_ ttlgroup'
+            'u101685278_ttlgroup'
         );
        /*  $conn = mysqli_connect(
             '31.170.161.22',
@@ -303,14 +304,14 @@ class crearpdfController extends Controller
                     $query_upload_file = "UPDATE `asign` SET `file_instruction` = '$file_name' WHERE cntr_number = '$cntr_number'";
                     mysqli_query($conn, $query_upload_file);
                     
+                    $qAsing = DB::table('asign')->select('transport')->where('cntr_number','=',$cntr_number)->get();
+                    $empresa = $qAsing[0]->transport;
+                    $qmail = DB::table('transporte')->where('razon_social','=',$empresa)->select('contacto_logistica_mail')->get();
+                    $mail = $qmail[0]->contacto_logistica_mail;
+                    $mail = Mail::to($mail)->cc('totaltrade@botzero.ar')->send(new envioInstructivo($data)); 
                     
-                    $qempresa = DB::table('carga')->select('empresa')->where('booking','=',$booking)->get();
-                    $empresa = $qempresa[0]->empresa;
-                    $qmail = DB::table('empresas')->where('razon_social','=',$empresa)->select('mail_logistic')->get();
-                    $mail = $qmail[0]->mail_logistic;
-
-                    $mail = Mail::to($mail)->send(new envioInstructivo($data)); 
                     return 'ok';
+
                 }else{
 
                     return redirect('https://botzero.tech/ttl/views/view_instructivos.php');
@@ -347,7 +348,7 @@ class crearpdfController extends Controller
                         $qmail = DB::table('empresas')->where('razon_social','=',$empresa)->select('mail_logistic')->get();
                         $mail = $qmail[0]->mail_logistic;
 
-                        $mail = Mail::to($mail)->send(new envioInstructivo($data)); 
+                        $mail = Mail::to($mail)->cc('totaltrade@botzero.ar')->send(new envioInstructivo($data)); 
                         return 'ok';
                 }else{
                     return 'no hay carga asignada';

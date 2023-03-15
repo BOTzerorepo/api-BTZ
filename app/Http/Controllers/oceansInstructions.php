@@ -105,7 +105,7 @@ class oceansInstructions extends Controller
         $qmail = DB::table('empresas')->where('razon_social','=',$empresa)->select('mail_logistic')->get();
         $mail = $qmail[0]->mail_logistic;
 
-        $mail = Mail::to($mail)->send(new envioIntructivoOceans($data)); 
+        $mail = Mail::to($mail)->cc('totaltrade@botzero.ar')->send(new envioIntructivoOceans($data)); 
         return 'ok';
     }
 }
