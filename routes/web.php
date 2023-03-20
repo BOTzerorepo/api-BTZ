@@ -19,7 +19,7 @@ Route::get('/', function () {
 
     $varibles = DB::table('variables')->get();
     return $varibles;
-    return view('welcome');
+/*     return view('welcome'); */
 });
 
 Route::get('/seguros', function () {
