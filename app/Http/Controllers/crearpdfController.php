@@ -182,17 +182,18 @@ class crearpdfController extends Controller
        
         // revisar si no está generado el Instructivo.
         $conn = mysqli_connect(
-            '31.170.161.22',
+            /* '31.170.161.22',
             'u101685278_ttlgroup',
             'Pachiman9102',
-            'u101685278_ttlgroup'
-        );
-       /*  $conn = mysqli_connect(
+            'u101685278_ttlgroup' */
+        
+       
             '31.170.161.22',
             'u101685278_sbttl',
             'Pachiman9102$',
             'u101685278_sbttl'
-        ); */
+        
+    );
        
         $query = DB::table('asign')
         ->select('asign.cntr_number', 'asign.booking', 'asign.file_instruction','transporte.contacto_logistica_celular')
