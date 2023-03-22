@@ -25,7 +25,7 @@ class emailController extends Controller
 
         $date = Carbon::now('-03:00');
         $asign = DB::table('asign')
-        ->select('asign.*','transporte.Direccion','transporte.paut','transporte.CUIT','transporte.permiso','transporte.vto_permiso','choferes.documento', 'trucks.model','trucks.model','trucks.year','trucks.chasis','trucks.poliza','trucks.vto_poliza','trailers.domain as semi_domain')
+        ->select('asign.*','transporte.Direccion','transporte.paut','transporte.CUIT','transporte.permiso','transporte.vto_permiso','choferes.documento', 'trucks.model','trucks.model','trucks.year','trucks.chasis','trucks.poliza','trucks.vto_poliza','trailers.domain as semi_domain','trailers.poliza as semi_poliza','trailers.vto_poliza as semi_vto_poliza')
         ->join('transporte','asign.transport','=','transporte.razon_social')
         ->join('choferes','choferes.nombre','=','asign.driver')
         ->join('trucks','trucks.domain','=','asign.truck')
@@ -65,6 +65,8 @@ class emailController extends Controller
             'truck_vto_poliza' => $dAsign->vto_poliza,
 
             'truck_semi' => $dAsign->truck_semi,
+            'truck_semi_poliza' => $dAsign->semi_poliza,
+            'truck_semi_vto_poliza' => $dAsign->semi_vto_poliza,
 
             'cntr_number' => $dAsign->cntr_number,
             'booking' => $dAsign->booking,

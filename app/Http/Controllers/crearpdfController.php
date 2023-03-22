@@ -32,6 +32,7 @@ class crearpdfController extends Controller
             'u101685278_sbttl'
         );
 
+        
         $query = "SELECT asign.cntr_number, asign.booking, asign.file_instruction, transporte.contacto_logistica_celular FROM asign INNER JOIN transporte ON transporte.razon_social = asign.transport WHERE asign.cntr_number = '$cntr_number'";
         $result = mysqli_query($conn, $query);
         
@@ -315,7 +316,7 @@ class crearpdfController extends Controller
 
                 }else{
 
-                    return redirect('https://botzero.tech/ttl/views/view_instructivos.php');
+                    return redirect('https://ttl.botzero.tech/views/view_instructivos.php');
 
                 }
 

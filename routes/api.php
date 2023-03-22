@@ -123,6 +123,8 @@ Route::get('/excelTransports','App\Http\Controllers\excelController@transports')
 // SEGUROS
 
 Route::post('/seguro','App\Http\Controllers\seguroController@store');
+Route::post('/agencias/{id}','App\Http\Controllers\AgenciaController@update');
+
 
 
 // MAPS
