@@ -318,16 +318,19 @@
                                                                                    
                                                                                         <p style="margin: 0; font-size: 12px; text-align: center;">
                                                                                             <span style="font-size:20px; color: gray; text-align: center;">
-                                                                                            <h5>Datos para CRT</h5>
+                                                                                            <h3>Datos para CRT</h3>
+                                                                                            <hr>
                                                                                               <p>Transporte:  {{$datos['transport']}} <br>
                                                                                                 Domicilio: {{$datos['direccion']}}
                                                                                                 <br>RUT|CUIT: {{$datos['cuit']}}
                                                                                                 <br>PAUT: {{$datos['paut']}}
                                                                                                 <br>Permiso Internacional: {{$datos['permiso_int']}}
                                                                                                 <br>Vto Perm. Int.: {{$datos['vto_permiso_int']}}
-                                                                                                <br>CRT:{{$datos['crt']}}
+                                                                                                <br>
+                                                                                                <br> <strong style="font-size: larger; padding: 5px ; background: #aad4f5;"> CRT:{{$datos['crt']}}</strong>
                                                                                             </p>
-                                                                                            <h5>Datos para MIC</h5>
+                                                                                            <h3>Datos para MIC</h3>
+                                                                                            <hr>
                                                                                             <p>
                                                                                                 Transporte: {{$datos['fletero_razon_social']}}
                                                                                                 <br>Domicilio: {{$datos['fletero_domicilio']}}
@@ -346,7 +349,8 @@
                                                                                                 <br>Póliza: {{$datos['truck_poliza']}}
                                                                                                 <br>Vencimiento: {{$datos['truck_vto_poliza']}}
                                                                                                 <br>Semi: {{$datos['truck_semi']}}
-                                                                                                
+                                                                                                <br>Póliza Semi: {{$datos['truck_semi_poliza']}}
+                                                                                                <br>Vto póliza semi: {{$datos['truck_semi_vto_poliza']}}
                                                                                             </p>
       
                                                                                             </span>
