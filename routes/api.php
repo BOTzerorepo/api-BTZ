@@ -137,8 +137,13 @@ Route::get('/accionLugarDescarga/{idTrip}','App\Http\Controllers\lugaresDeCarga@
 
 Route::get('/servicioSatelital','App\Http\Controllers\ServiceSatelital@serviceSatelital');
 
+//JUANI
 
-
-
+//Ata
+Route::get('/atas','App\Http\Controllers\AtaController@index'); //Busca todos los Agente de transporte
+Route::get('/ata/{id}','App\Http\Controllers\AtaController@show'); //Busca un Agente de transporte
+Route::post('/ata','App\Http\Controllers\AtaController@store'); //Crea un nuevo Agente de transporte
+Route::put('/ata/{id}','App\Http\Controllers\AtaController@update'); //Actualiza los datos de un Agente de transporte
+Route::delete('/ata/{id}','App\Http\Controllers\AtaController@destroy'); //Elimina un Agente de transporte
 
 
