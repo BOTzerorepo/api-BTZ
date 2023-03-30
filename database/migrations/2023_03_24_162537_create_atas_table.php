@@ -15,6 +15,14 @@ return new class extends Migration
     {
         Schema::create('atas', function (Blueprint $table) {
             $table->id();
+            $table->string('razon_social', 255);
+            $table->bigInteger('tax_id');
+            $table->string('provincia', 255);
+            $table->string('pais', 255);
+            $table->bigInteger('phone');
+            $table->string('mail', 255);
+            $table->string('user', 255);
+            $table->string('empresa', 255);
             $table->timestamps();
         });
     }
