@@ -559,79 +559,7 @@ CREATE TABLE `notification` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `oauth_access_tokens`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `oauth_access_tokens` (
-  `id` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `user_id` bigint(20) unsigned DEFAULT NULL,
-  `client_id` bigint(20) unsigned NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `scopes` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `revoked` tinyint(1) NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  `expires_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `oauth_access_tokens_user_id_index` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `oauth_auth_codes`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `oauth_auth_codes` (
-  `id` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `user_id` bigint(20) unsigned NOT NULL,
-  `client_id` bigint(20) unsigned NOT NULL,
-  `scopes` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `revoked` tinyint(1) NOT NULL,
-  `expires_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `oauth_auth_codes_user_id_index` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `oauth_clients`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `oauth_clients` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) unsigned DEFAULT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `secret` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `provider` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `redirect` text COLLATE utf8mb4_unicode_ci NOT NULL,
-  `personal_access_client` tinyint(1) NOT NULL,
-  `password_client` tinyint(1) NOT NULL,
-  `revoked` tinyint(1) NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `oauth_clients_user_id_index` (`user_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `oauth_personal_access_clients`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `oauth_personal_access_clients` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `client_id` bigint(20) unsigned NOT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `oauth_refresh_tokens`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `oauth_refresh_tokens` (
-  `id` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `access_token_id` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `revoked` tinyint(1) NOT NULL,
-  `expires_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  KEY `oauth_refresh_tokens_access_token_id_index` (`access_token_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+
 DROP TABLE IF EXISTS `ocean_lines`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -648,24 +576,7 @@ CREATE TABLE `ocean_lines` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
-DROP TABLE IF EXISTS `personal_access_tokens`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `personal_access_tokens` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `tokenable_type` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `tokenable_id` bigint(20) unsigned NOT NULL,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `token` varchar(64) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `abilities` text COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `last_used_at` timestamp NULL DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT NULL,
-  `updated_at` timestamp NULL DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `personal_access_tokens_token_unique` (`token`),
-  KEY `personal_access_tokens_tokenable_type_tokenable_id_index` (`tokenable_type`,`tokenable_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-/*!40101 SET character_set_client = @saved_cs_client */;
+
 DROP TABLE IF EXISTS `plazos_de_pago`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -915,17 +826,6 @@ INSERT INTO `agencias` (`id`, `description`, `razon_social`, `tax_id`, `puerto`,
 (3, 'Otra Agencia', 'Otra Agencia SA', '5467899', 'Santiago, CL', 'Juan Gomez', '65786595876578568', 'mendoza@juan.com', '2022-06-03 20:28:29', 'TCARGO', '', 'hola Juan'),
 (4, 'Rep en LOS ANDES', 'UNITED Agencia', '8300526-2', 'PTLA', 'Jeanette Espinoza', '+56950718792', 'jeanette.united@gmail.com', '2022-07-01 22:15:02', 'TCARGO', '', '');
 
-
-INSERT INTO `ata` (`id`, `razon_social`, `tax_id`, `provincia`, `pais`, `created_at`, `phone`, `mail`, `user`, `empresa`) VALUES
-(1, 'Gustavo Puebla', 30710342580, 'Mendoza', 'Argentina', '2022-05-27 01:53:25', 5492611473402, 'vitae.sodales@Vivamusnisi.net', 'TCARGO', 'TCargoComex'),
-(2, 'Enrique Torres', 30719181970, 'San Juan', 'Argentina', '2020-09-02 19:59:18', 5492611369715, 'dignissim.tempor@Vivamussit.co.uk', 'USER ', 'Total Trade Group'),
-(3, 'Juan Dominguez', 30719262254, 'Mendoza', 'Argentina', '2020-09-02 19:59:18', 5492618969105, 'ipsum.Suspendisse.sagittis@sitametnulla.edu', 'USER ', 'Total Trade Group'),
-(4, 'Marcos Perez', 30716963281, 'San Juan', 'Argentina', '2020-09-02 19:59:18', 5492618973961, 'Vivamus.euismod.urna@odiotristique.co.uk', 'USER ', 'Total Trade Group'),
-(5, 'Juan Jose Lopez', 30712908977, 'Mendoza', 'Argentina', '2020-09-02 19:59:18', 5492612193840, 'convallis.est@Nullam.ca', 'USER ', 'Total Trade Group'),
-(6, 'Marcelo De Paz', 30716300043, 'San Juan', 'Argentina', '2020-09-02 19:59:18', 5492617523271, 'auctor@Phaselluselit.net', 'USER ', 'Total Trade Group'),
-(7, 'Martin Rodriguez', 30719024899, 'Mendoza', 'Argentina', '2020-09-02 19:59:18', 5492610026791, 'euismod.est.arcu@lectuspede.co.uk', 'USER ', 'Total Trade Group'),
-(8, 'Leonardo fernandez', 30713645056, 'San Juan', 'Argentina', '2020-09-02 19:59:18', 5492610165316, 'id@nonenimcommodo.ca', 'USER ', 'Total Trade Group'),
-(9, 'Jorge', 30300030030, 'MEndoza', 'Argentina', '2022-05-27 00:35:54', 5492612128105, 'juan@perez.com', 'TCARGO', 'TCargoComex');
 
 
 INSERT INTO `choferes` (`id`, `nombre`, `foto`, `documento`, `vto_carnet`, `WhatsApp`, `mail`, `user`, `empresa`, `transporte`, `created_at`, `status_chofer`, `place`, `Observaciones`, `customer_id`) VALUES
