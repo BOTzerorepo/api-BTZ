@@ -151,6 +151,7 @@ Route::get('/drivers/{transport_id}','App\Http\Controllers\DriverController@show
 Route::get('/drivers','App\Http\Controllers\DriverController@index'); 
 Route::get('/driver/{id}','App\Http\Controllers\DriverController@show'); 
 Route::post('/driver','App\Http\Controllers\DriverController@store'); 
+Route::post('/driverStatus/{id}','App\Http\Controllers\DriverController@status'); 
 Route::post('/driver/{id}','App\Http\Controllers\DriverController@update'); 
 Route::delete('/driver/{id}','App\Http\Controllers\DriverController@destroy'); 
 
