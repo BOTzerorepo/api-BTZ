@@ -113,6 +113,18 @@ class DriverController extends Controller
         return $driver;
     }
 
+    public function status(Request $request, $id)
+    {
+        $driver = Driver::findOrFail($id);
+        $driver->status_chofer = $request['status_chofer'];
+        $driver->place= $request['place'];
+        $driver->user = $request['user'];
+        $driver->empresa = $request['empresa'];
+        $driver->save();
+
+        return $driver;
+    }
+
     /**
      * Remove the specified resource from storage.
      *
