@@ -13,9 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('cntrtypes', function (Blueprint $table) {
-            $table->id();
-            $table->timestamps();
+        Schema::table('variables', function (Blueprint $table) {
+            
+            $table->string('configCompany')->nullable();
+
         });
     }
 
@@ -26,6 +27,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('cntrtypes');
+        Schema::table('variables', function (Blueprint $table) {
+            //
+        });
     }
 };

@@ -23,6 +23,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::get('/imprimirCarga','App\Http\Controllers\crearpdfController@carga'); 
 Route::get('/imprimirVacio','App\Http\Controllers\crearpdfController@vacio');  
 Route::get('/imprimirEviarInstrucivo/{cntr}','App\Http\Controllers\crearpdfController@cargaPorMail');  
+Route::get('/mailCargaNueva/{idCarga}/{user}','App\Http\Controllers\emailController@avisoNuevaCarga'); // pachimanok 
+Route::get('/mailPrueba','App\Http\Controllers\emailController@apruebaEmail'); // pachimanok 
+
+
 
 
 /* Envio de Emails */
@@ -137,8 +141,13 @@ Route::get('/accionLugarDescarga/{idTrip}','App\Http\Controllers\lugaresDeCarga@
 
 Route::get('/servicioSatelital','App\Http\Controllers\ServiceSatelital@serviceSatelital');
 
+//JUANI
 
-
-
+//Ata
+Route::get('/atas','App\Http\Controllers\AtaController@index'); //Busca todos los Agente de transporte
+Route::get('/ata/{id}','App\Http\Controllers\AtaController@show'); //Busca un Agente de transporte
+Route::post('/ata','App\Http\Controllers\AtaController@store'); //Crea un nuevo Agente de transporte
+Route::post('/ata/{id}','App\Http\Controllers\AtaController@update'); //Actualiza los datos de un Agente de transporte
+Route::delete('/ata/{id}','App\Http\Controllers\AtaController@destroy'); //Elimina un Agente de transporte
 
 
