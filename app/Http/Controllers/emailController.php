@@ -8,6 +8,7 @@ use App\Mail\cargaAsignada;
 use App\Mail\cargaAsignadaEditada;
 use App\Mail\CargaConProblemas;
 use App\Mail\IngresadoStacking;
+use App\Mail\pruebaMail;
 use App\Mail\transporteAsignado;
 use App\Models\empresa;
 use App\Models\particularSoftConfiguration;
@@ -198,13 +199,15 @@ class emailController extends Controller
             return 'ok';
         }
     }
+
     public function avisoNuevaCarga($idCarga, $user){
+
+       
 
         // Buscar Configuraciones. 
         // buscar id Usuario
 
         $user = DB::table('users')->join('particular_soft_configurations','users.configCompany','=','particular_soft_configurations.name')->where('users.username','=',$user)->get();
-        
         
         $toMailsEnviar = $user[0]->to_mail_trafico_Team;
         $ccMailsEnviar = $user[0]->cc_mail_trafico_Team;
@@ -244,7 +247,14 @@ class emailController extends Controller
 
 
         ];
-      /*   return view('mails.avisoNewCarga')->with('datos',$datos); */
-       Mail::to($toMailsEnviar)->cc($ccMailsEnviar)->send(new avisoNewCarga($datos)); 
+        /*   return view('mails.avisoNewCarga')->with('datos',$datos); */
+        $mail = Mail::to(['priopelliza@gmail.com', 'pablorio@botzero.tech'])->cc($ccMailsEnviar)->send(new avisoNewCarga($datos)); 
+        return 'ok';
+        /* Por ahora hay que setear a mano!
+        Para futuros hay que ver la formad enviar de acuerdo a un seteo dentro de la configuracion. 
+        Tiene que enviar todo en la misma cadena. 
+        */
+       
+
     }
 }
