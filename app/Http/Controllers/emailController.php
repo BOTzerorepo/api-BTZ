@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\avisoNewCarga;
 use App\Mail\CamnioStatus;
 use App\Mail\cargaAsignada;
 use App\Mail\cargaAsignadaEditada;
 use App\Mail\CargaConProblemas;
 use App\Mail\IngresadoStacking;
+use App\Mail\pruebaMail;
 use App\Mail\transporteAsignado;
 use App\Models\empresa;
+use App\Models\particularSoftConfiguration;
+
 use App\Models\logapi;
 use App\Models\statu;
 use Carbon\Carbon;
@@ -194,5 +198,63 @@ class emailController extends Controller
             Mail::to($mail)->cc('totaltrade@botzero.ar')->send(new CamnioStatus($datos));
             return 'ok';
         }
+    }
+
+    public function avisoNuevaCarga($idCarga, $user){
+
+       
+
+        // Buscar Configuraciones. 
+        // buscar id Usuario
+
+        $user = DB::table('users')->join('particular_soft_configurations','users.configCompany','=','particular_soft_configurations.name')->where('users.username','=',$user)->get();
+        
+        $toMailsEnviar = $user[0]->to_mail_trafico_Team;
+        $ccMailsEnviar = $user[0]->cc_mail_trafico_Team;
+
+        $qcarga = DB::table('carga')
+        ->select('carga.booking','carga.trader','carga.user','carga.ref_customer','carga.shipper','carga.load_date','carga.load_place','carga.custom_place',
+        'carga.custom_agent','carga.oceans_line','carga.vessel','carga.voyage','carga.cut_off_fis','carga.unload_place','carga.final_point','carga.commodity','carga.observation_customer',
+        'cntr.retiro_place','cntr.cntr_type')
+        ->join('cntr','carga.booking','=','cntr.booking')->where('carga.id','=',$idCarga)->get();
+        $cantidad = $qcarga->count();
+        $carga = $qcarga[0];
+        $date = Carbon::now('-03:00');
+
+        $datos = [
+
+            'operacion'=>$carga->ref_customer ,
+            'trader'=>$carga->trader ,
+            'booking'=>$carga->booking,
+            'loadDate'=>$carga->load_date ,
+            'depositoRetiro'=>$carga->retiro_place ,
+            'shipper'=>$carga->shipper ,
+            'loadPlace'=>$carga->load_place ,
+            'customPlace'=>$carga->custom_place ,
+            'customAgent'=>$carga->custom_agent ,
+            'armador'=>$carga->oceans_line ,
+            'vessel'=>$carga->vessel ,
+            'voyage'=>$carga->voyage ,
+            'cutOffFisico'=>$carga->cut_off_fis,
+            'loadPort'=>$carga->unload_place ,
+            'finalPoint'=>$carga->final_point ,
+            'commodity'=>$carga->commodity ,
+            'obeservaciones'=>$carga->observation_customer,
+            'cantidad'=>$cantidad,
+            'cntr_type'=>$carga->cntr_type,
+            'user'=>$user[0]->username,
+            'date'=>$date
+
+
+        ];
+        /*   return view('mails.avisoNewCarga')->with('datos',$datos); */
+        $mail = Mail::to(['priopelliza@gmail.com', 'pablorio@botzero.tech'])->cc($ccMailsEnviar)->send(new avisoNewCarga($datos)); 
+        return 'ok';
+        /* Por ahora hay que setear a mano!
+        Para futuros hay que ver la formad enviar de acuerdo a un seteo dentro de la configuracion. 
+        Tiene que enviar todo en la misma cadena. 
+        */
+       
+
     }
 }
