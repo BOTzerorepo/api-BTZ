@@ -24,6 +24,8 @@ Route::get('/imprimirCarga','App\Http\Controllers\crearpdfController@carga');
 Route::get('/imprimirVacio','App\Http\Controllers\crearpdfController@vacio');  
 Route::get('/imprimirEviarInstrucivo/{cntr}','App\Http\Controllers\crearpdfController@cargaPorMail');  
 Route::get('/mailCargaNueva/{idCarga}/{user}','App\Http\Controllers\emailController@avisoNuevaCarga'); // pachimanok 
+Route::get('/mailPrueba','App\Http\Controllers\emailController@apruebaEmail'); // pachimanok 
+
 
 
 
