@@ -25,7 +25,7 @@ class avisoNewCarga extends Mailable
     
     public function build()
     {
-        return $this->view('mails.avisoNewcarga');
+        return $this->view('mails.avisoNewCarga');
     }
 
    
