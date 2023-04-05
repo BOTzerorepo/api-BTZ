@@ -13,14 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('itinerarios', function (Blueprint $table) {
-            
+        Schema::create('particular_soft_configurations', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('customer');
-            $table->string('company');
-            $table->boolean('activo')->default(0)->change();
-            $table->string('idCntr');
+            $table->string('logo')->default('avatar.png');
+            $table->string('imgLogin')->default('avatarLog.png');
+            $table->string('to_mail_trafico_Team')->default('pablorio@botzero.tech');
+            $table->string('cc_mail_trafico_Team')->default('pablorio@botzero.tech');
             $table->timestamps();
         });
     }
@@ -32,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('itinerarios');
+        Schema::dropIfExists('particular_soft_configurations');
     }
 };
