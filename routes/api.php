@@ -159,3 +159,10 @@ Route::post('/driverStatus/{id}','App\Http\Controllers\DriverController@status')
 Route::post('/driver/{id}','App\Http\Controllers\DriverController@update'); 
 Route::delete('/driver/{id}','App\Http\Controllers\DriverController@destroy'); 
 
+//Transporte
+Route::get('/transporteCustomer/{id}','App\Http\Controllers\TransportController@indexTransporteCustomer'); //Busca todos los transportes del customerId
+Route::get('/transportes','App\Http\Controllers\TransportController@index'); 
+Route::get('/transporte/{id}','App\Http\Controllers\TransportController@show'); 
+Route::post('/transporte','App\Http\Controllers\TransportController@store'); 
+Route::post('/transporte/{id}','App\Http\Controllers\TransportController@update'); 
+Route::delete('/transporte/{id}','App\Http\Controllers\TransportController@destroy'); 
