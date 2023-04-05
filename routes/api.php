@@ -76,9 +76,7 @@ Route::get('/trailerTransport/{transport_id}','App\Http\Controllers\TrailerContr
 // ASIGNACIONES
 Route::get('/truckAsign/{id}','App\Http\Controllers\TruckController@trailerAsign'); // Show for Transport
 
-// DRIVER CONTROLLLER trailerAsign
 
-Route::get('/drivers/{transport_id}','App\Http\Controllers\DriverController@showDriver'); // Show for Transport
 
 Route::get('/user/{user}','App\Http\Controllers\UserController@show');
 
@@ -150,4 +148,14 @@ Route::post('/ata','App\Http\Controllers\AtaController@store'); //Crea un nuevo 
 Route::post('/ata/{id}','App\Http\Controllers\AtaController@update'); //Actualiza los datos de un Agente de transporte
 Route::delete('/ata/{id}','App\Http\Controllers\AtaController@destroy'); //Elimina un Agente de transporte
 
+
+// DRIVER CONTROLLLER trailerAsign
+
+Route::get('/drivers/{transport_id}','App\Http\Controllers\DriverController@showDriver'); 
+Route::get('/drivers','App\Http\Controllers\DriverController@index'); 
+Route::get('/driver/{id}','App\Http\Controllers\DriverController@show'); 
+Route::post('/driver','App\Http\Controllers\DriverController@store'); 
+Route::post('/driverStatus/{id}','App\Http\Controllers\DriverController@status'); 
+Route::post('/driver/{id}','App\Http\Controllers\DriverController@update'); 
+Route::delete('/driver/{id}','App\Http\Controllers\DriverController@destroy'); 
 
