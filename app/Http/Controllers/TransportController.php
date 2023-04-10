@@ -50,6 +50,9 @@ class TransportController extends Controller
         $transporte->Direccion = $request['direccion'];
         $transporte->pais = $request['pais'];
         $transporte->Provincia = $request['provincia'];
+        $transporte->paut = $request['paut'];
+        $transporte->permiso = $request['permiso'];
+        $transporte->vto_permiso = $request['vto_permiso'];
         $transporte->contacto_logistica_nombre = $request['contacto_logistica_nombre'];
         $transporte->contacto_logistica_celular = $request['contacto_logistica_celular'];
         $transporte->contacto_logistica_mail = $request['contacto_logistica_mail'];
@@ -97,13 +100,16 @@ class TransportController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $transporte = Transporte::findOrFail($id);
+        $transporte = Transport::findOrFail($id);
 
         $transporte->razon_social = $request['razon_social'];
         $transporte->CUIT = $request['CUIT'];
         $transporte->Direccion = $request['direccion'];
         $transporte->pais = $request['pais'];
         $transporte->Provincia = $request['provincia'];
+        $transporte->paut = $request['paut'];
+        $transporte->permiso = $request['permiso'];
+        $transporte->vto_permiso = $request['vto_permiso'];
         $transporte->contacto_logistica_nombre = $request['contacto_logistica_nombre'];
         $transporte->contacto_logistica_celular = $request['contacto_logistica_celular'];
         $transporte->contacto_logistica_mail = $request['contacto_logistica_mail'];
@@ -124,11 +130,11 @@ class TransportController extends Controller
      * @param  \App\Models\Transport  $transport
      * @return \Illuminate\Http\Response
      */
-    public function destroy( $id)
+    public function destroy($id)
     {
         Transport::destroy($id);
 
-        $existe = Transporte::find($id);
+        $existe = Transport::find($id);
         if($existe){
             return 'No se elimino el Transporte';
         }else{
