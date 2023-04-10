@@ -166,3 +166,10 @@ Route::get('/transporte/{id}','App\Http\Controllers\TransportController@show');
 Route::post('/transporte','App\Http\Controllers\TransportController@store'); 
 Route::post('/transporte/{id}','App\Http\Controllers\TransportController@update'); 
 Route::delete('/transporte/{id}','App\Http\Controllers\TransportController@destroy'); 
+
+//Agencia
+Route::get('/agencias','App\Http\Controllers\AgencyController@index'); //Busca todas las agencias
+Route::get('/agencia/{id}','App\Http\Controllers\AgencyController@show'); //Busca una sola agencia
+Route::post('/agencia','App\Http\Controllers\AgencyController@store'); //Crea una nueva Agencia
+Route::post('/agencia/{id}','App\Http\Controllers\AgencyController@update'); //Actualiza los datos de una Agencia
+Route::delete('/agencia/{id}','App\Http\Controllers\AgencyController@destroy'); //Elimina una Agencia
