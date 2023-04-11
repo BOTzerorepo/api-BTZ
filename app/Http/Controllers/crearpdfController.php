@@ -26,7 +26,9 @@ class crearpdfController extends Controller
         /* $cntr_number = $_GET['cntr_number']; */
 
         // revisar si no está generado el Instructivo.
-       
+        $variables = DB::table('variables')->select('api')->get();
+        $base = $variables[0]->api;
+
         $respuesta = DB::table('asign')
         ->join('transporte','transporte.razon_social','=','asign.transport')
         ->where('asign.cntr_number', '=', $cntr_number)
@@ -51,45 +53,150 @@ class crearpdfController extends Controller
                     ->join('cntr','carga.booking', '=', 'cntr.booking')
                     ->join('asign','cntr.cntr_number', '=', 'asign.cntr_number')
                     ->join('customer_load_place','customer_load_place.description', '=', 'carga.load_place')
+                    ->join('razon_social','asign.sub_empresa', '=', 'razon_social.title')
+                    ->join('agencias','asign.agent_port', '=', 'agencias.description')
+                    ->join('custom_agent','carga.custom_agent', '=', 'custom_agent.razon_social')
+
+
                     ->where('cntr.cntr_number', '=', $cntr_number)
                     ->distinct()
-                    ->get(['asign.id', 'asign.transport', 'asign.transport_agent', 'asign.observation_load', 'asign.agent_port', 'carga.custom_place', 'carga.load_date', 'carga.booking', 'carga.shipper', 'carga.commodity', 'carga.load_place', 'carga.unload_place', 'carga.cut_off_fis', 'carga.oceans_line', 'carga.vessel', 'carga.voyage', 'carga.final_point', 'carga.custom_agent', 'carga.ref_customer', 'cntr.cntr_number', 'cntr.cntr_seal', 'cntr.cntr_type', 'cntr.net_weight', 'cntr.retiro_place', 'cntr.out_usd', 'cntr.modo_pago_out', 'cntr.plazo_de_pago_out', 'customer_load_place.link_maps', 'customer_load_place.address', 'customer_load_place.city']);
+                    ->get(['asign.id','razon_social.img','razon_social.cuit','razon_social.title', 'asign.transport', 'asign.transport_agent', 'asign.observation_load', 'asign.agent_port', 'carga.custom_place','carga.type', 'carga.ref_customer', 'carga.load_date', 'carga.booking', 'carga.shipper', 'carga.commodity', 'carga.load_place', 'carga.unload_place', 'carga.cut_off_fis', 'carga.oceans_line', 'carga.vessel', 'carga.voyage', 'carga.final_point','carga.observation_customer', 'carga.custom_agent', 'carga.ref_customer', 'cntr.cntr_number', 'cntr.cntr_seal', 'cntr.cntr_type', 'cntr.net_weight', 'cntr.retiro_place', 'cntr.out_usd', 'cntr.modo_pago_out', 'cntr.plazo_de_pago_out', 'customer_load_place.link_maps', 'customer_load_place.address', 'customer_load_place.city','agencias.observation_gral','custom_agent.mail','custom_agent.phone']);
                     $row = $respuesta_file[0];
+                    
                   
                     if ($respuesta_file->count() == 1) {
-                       
-                        $data = [
-                            'id_asign' => $row->id,
-                            'booking' => $row->booking,
-                            'shipper' => $row->shipper,
-                            'commodity' => $row->commodity,
-                            'load_place' => $row->load_place,
-                            'unload_place' => $row->unload_place,
-                            'cut_off_fis' => $row->cut_off_fis,
-                            'oceans_line' => $row->oceans_line,
-                            'vessel' => $row->vessel,
-                            'voyage' => $row->voyage,
-                            'final_point' => $row->final_point,
-                            'custom_agent' => $row->custom_agent,
-                            'custom_place' => $row->custom_place,
-                            'ref_customer' => $row->ref_customer,
-                            'cntr_number' => $row->cntr_number,
-                            'cntr_seal' => $row->cntr_seal,
-                            'cntr_type' => $row->cntr_type,
-                            'net_weight' => $row->net_weight,
-                            'retiro_place' => $row->retiro_place,
-                            'transport' => $row->transport,
-                            'transport_agent' => $row->transport_agent,
-                            'observation_load' => $row->observation_load,
-                            'agent_port' => $row->agent_port,
-                            'out_usd' => $row->out_usd,
-                            'modo_pago_out' => $row->modo_pago_out,
-                            'plazo_de_pago_out' => $row->plazo_de_pago_out,
-                            'load_date' => $row->load_date,
-                            'link_maps' => $row->link_maps,
-                            'address' => $row->address,
-                            'city' => $row->city,
-                        ];
+
+                        if($row->type == 'Puesta FOB'){
+
+                            $data = [
+                                'id_asign' => $row->id,
+                                'img' => $base.'/public/image/empresas/'.$row->img,
+                                'cuit' => $row->cuit,
+                                'title' => $row->title,
+                                'booking' => $row->booking,
+                                'shipper' => $row->shipper,
+                                'commodity' => $row->commodity,
+                                'load_place' => $row->load_place,
+                                'unload_place' => $row->unload_place,
+                                'cut_off_fis' => $row->cut_off_fis,
+                                'oceans_line' => $row->oceans_line,
+                                'vessel' => $row->vessel,
+                                'voyage' => $row->voyage,
+                                'final_point' => $row->final_point,
+                                'custom_agent' => $row->custom_agent,
+                                'custom_agent_mail' => $row->mail,
+                                'custom_agent_phone' => $row->phone,
+                                'custom_place' => $row->custom_place,
+                                'ref_customer' => $row->ref_customer,
+                                'cntr_number' => $row->cntr_number,
+                                'cntr_seal' => $row->cntr_seal,
+                                'cntr_type' => $row->cntr_type,
+                                'net_weight' => $row->net_weight,
+                                'retiro_place' => $row->retiro_place,
+                                'transport' => $row->transport,
+                                'transport_agent' => $row->transport_agent,
+                                'observation_load' => $row->observation_load,
+                                'agent_port' => $row->agent_port,
+                                'out_usd' => $row->out_usd,
+                                'modo_pago_out' => $row->modo_pago_out,
+                                'plazo_de_pago_out' => $row->plazo_de_pago_out,
+                                'load_date' => $row->load_date,
+                                'link_maps' => $row->link_maps,
+                                'address' => $row->address,
+                                'city' => $row->city,
+                                'observaciones_agencia' => $row->observation_gral,
+                                'observation_customer' => $row->observation_customer,
+                            
+                            ];
+                            
+                            if (!file_exists('instructivos/' . $booking)) {
+    
+                                /* Si no Existe la Carperta Del booking */
+        
+                                mkdir('instructivos/' . $booking, 0777, true);
+        
+                                /* Si existe la Carpeta del Contenedor dentro de la Carpeta del Booking la Asignamos*/
+                                if (file_exists('instructivos/' . $booking . '/' . $cntr_number)) {
+        
+                                    $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
+                                } else {
+        
+                                    /* Si no existe la Carpeta del Contenedor dentro de la Carpeta del Booking la creamos y  la Asignamos*/
+        
+        
+                                    mkdir('instructivos/' . $booking . '/' . $cntr_number, 0777, true);
+                                    $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
+                                }
+                            } else {
+        
+                                /* si Ya existe la Carpeta Booking */
+        
+                                if (file_exists('instructivos/' . $booking . '/' . $cntr_number)) {
+                                    /* y existe la carpeta de CNTR la asignamos */
+        
+                                    $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
+                                } else {
+        
+                                    /* y si no existe la carpeta de CNTR la creamos y la asignamos */
+        
+                                    mkdir('instructivos/' . $booking . '/' . $cntr_number, 0777, true);
+                                    $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
+                                }
+                            }
+        
+                            $file_name = 'instructivo_' . $booking . '_' . $cntr_number . '.pdf';
+        
+                            // Ya sabemos que esta creada (o la creamos) entonces creamos variables para usar durante todo el proceso.
+        
+                            $save_folder = $folder . $file_name;
+        
+                            // Generamos el Archivo PDF
+                            $pdf = FacadePdf::loadView('pdf.instructivoCargaFOB', $data);
+                            file_put_contents($save_folder, $pdf->output());
+        
+                            $respuesta_update = DB::table('asign')
+                            ->where('cntr_number', $cntr_number)
+                            ->update(['file_instruction' => $file_name]);
+        
+                            return $pdf->download($file_name);
+
+                        }
+
+                        // ver cual es el tipo de instructivo
+                        // PUESTA FOB
+                        /* 
+                        FACTURAR A: + LOGO + CUIT
+                        .... DATOS DE REFERENCIA ...
+                        OPERACION $ref_customer
+                        BOOKING $booking
+                        CANTIDAD Y TIPPO 1 X $cntr_type. 
+                        PESO DE CARGA $net_weight
+                        MERCADERIA $commodity
+                        .... DESCRIPCION DE LA OPERACION ....
+                        FECHA DE CARGA $load_date CARBON: VIERNES 10-02
+                        DEPOSITO DE RETIRO $retiro_place
+                        DIAS LIBRES - OBSERVACIONES
+                        SHIPPER $shipper
+                        LUGAR DE CARGA $load_place $address $city LINK $link_maps 
+                        TARA en observaciones.
+                        ADUANA $custom_place
+                        DESPACHANTE: $custom_agent
+                        .... INGRESO A PUERTO ....
+                        ARMADOR $oceans_line
+                        VESSEL VOY $vessel $voyage
+                        STAKING $cut_off_fis (CAMBIAR POR STRING EN VEZ DE FECHA)
+                        PUERTO DE ENTREGA : unload_place
+                        DESTINO FINAL: $final_point
+                        AGENCIA DE INGRESO: $agent_port
+                        .... PROVEEDOR TERRESTRE ....
+                        TRANSPORTE $transport
+                        CONTENEDOR N $cntr_number
+                        PRECINTO $cntr_seal
+                        VALOR ACORDADO $out_usd + $modo_pago_out + $plazo_de_pago_out
+                        OBSERVACIONES FIJAS: 
+                        
+                        */
+                        
     
                         // Logica de Creado de Carpera: 
     
