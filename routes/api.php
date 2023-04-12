@@ -188,3 +188,10 @@ Route::get('/customerCnee/{id}','App\Http\Controllers\CustomerCneeController@sho
 Route::post('/customerCnee','App\Http\Controllers\CustomerCneeController@store'); //Crea un nuevo Customer Cnee
 Route::post('/customerCnee/{id}','App\Http\Controllers\CustomerCneeController@update'); //Actualiza los datos de un Customer Cnee
 Route::delete('/customerCnee/{id}','App\Http\Controllers\CustomerCneeController@destroy'); //Elimina un Customer Cnee
+
+//Deposito de Retiro
+Route::get('/depositoRetiros','App\Http\Controllers\DepositoRetiroController@index'); //Busca todos los depositos de retiro
+Route::get('/depositoRetiro/{id}','App\Http\Controllers\DepositoRetiroController@show'); //Busca un deposito de retiro
+Route::post('/depositoRetiro','App\Http\Controllers\DepositoRetiroController@store');  //Crea un nuevo deposito de retiro
+Route::post('/depositoRetiro/{id}','App\Http\Controllers\DepositoRetiroController@update'); //Actualiza los datos de un deposito de retiro
+Route::delete('/depositoRetiro/{id}','App\Http\Controllers\DepositoRetiroController@destroy'); //Elimina un deposito de retiro
