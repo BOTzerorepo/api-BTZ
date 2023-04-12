@@ -52,7 +52,7 @@ class crearpdfController extends Controller
                     ->join('customer_load_place','customer_load_place.description', '=', 'carga.load_place')
                     ->join('customer_unload_place','customer_unload_place.description', '=', 'carga.unload_place')
                     ->join('razon_social','asign.sub_empresa', '=', 'razon_social.title')
-                    ->leftJoin('agencias','asign.agent_port', '=', 'agencias.description')
+                    ->leftJoin('agencies','asign.agent_port', '=', 'agencies.description')
                     ->join('custom_agent as aduanaExpo','carga.custom_agent', '=', 'aduanaExpo.razon_social')
                     ->leftJoin('custom_agent as aduanaImpo','carga.custom_agent_impo', '=', 'aduanaImpo.razon_social')
                     ->where('cntr.cntr_number', '=', $cntr_number)
@@ -63,7 +63,7 @@ class crearpdfController extends Controller
                     'carga.custom_place','carga.bl_hbl','carga.senasa','carga.senasa_string','carga.type', 'carga.ref_customer', 'carga.load_date', 'carga.booking','carga.importador', 'carga.shipper', 'carga.commodity', 'carga.load_place', 'carga.unload_place', 'carga.cut_off_fis', 'carga.oceans_line', 'carga.vessel', 'carga.voyage', 'carga.final_point','carga.observation_customer', 'carga.custom_agent','carga.custom_place_impo', 'carga.ref_customer', 
                     'cntr.cntr_number', 'cntr.cntr_seal', 'cntr.cntr_type', 'cntr.net_weight', 'cntr.retiro_place', 'cntr.out_usd', 'cntr.modo_pago_out', 'cntr.plazo_de_pago_out', 
                     'customer_load_place.link_maps', 'customer_load_place.address', 'customer_load_place.city',
-                    'agencias.observation_gral',
+                    'agencies.observation_gral',
                     'aduanaExpo.mail','aduanaExpo.phone',
                     'aduanaImpo.razon_social as aduanaImpo_agent','aduanaImpo.mail as aduanaImpo_mail','aduanaImpo.phone as aduanaImpo_phone',
                     'customer_unload_place.description as descarga_place','customer_unload_place.address as descarga_address','customer_unload_place.city as descarga_city','customer_unload_place.link_maps as descarga_link' ]);
