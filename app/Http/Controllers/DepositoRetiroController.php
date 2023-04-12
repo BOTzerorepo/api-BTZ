@@ -37,7 +37,20 @@ class DepositoRetiroController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $depositoRetiro = new DepositoRetiro();
+        $depositoRetiro->title = $request['title'];
+        $depositoRetiro->address = $request['address'];
+        $depositoRetiro->country= $request['country'];
+        $depositoRetiro->city = $request['city'];
+        $depositoRetiro->km_from_town = $request['km_from_town'];
+        $depositoRetiro->latitud = $request['latitud'];
+        $depositoRetiro->longitud = $request['longitud'];
+        $depositoRetiro->link_maps = $request['link_maps'];
+        $depositoRetiro->user = $request['user'];
+        $depositoRetiro->empresa = $request['empresa'];
+        $depositoRetiro->save();
+
+        return $depositoRetiro;
     }
 
     /**
@@ -69,9 +82,22 @@ class DepositoRetiroController extends Controller
      * @param  \App\Models\DepositoRetiro  $depositoRetiro
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, DepositoRetiro $depositoRetiro)
+    public function update(Request $request, $id)
     {
-        //
+        $depositoRetiro = DepositoRetiro::findOrFail($id);
+        $depositoRetiro->title = $request['title'];
+        $depositoRetiro->address = $request['address'];
+        $depositoRetiro->country= $request['country'];
+        $depositoRetiro->city = $request['city'];
+        $depositoRetiro->km_from_town = $request['km_from_town'];
+        $depositoRetiro->latitud = $request['latitud'];
+        $depositoRetiro->longitud = $request['longitud'];
+        $depositoRetiro->link_maps = $request['link_maps'];
+        $depositoRetiro->user = $request['user'];
+        $depositoRetiro->empresa = $request['empresa'];
+        $depositoRetiro->save();
+
+        return $depositoRetiro;
     }
 
     /**
@@ -80,8 +106,15 @@ class DepositoRetiroController extends Controller
      * @param  \App\Models\DepositoRetiro  $depositoRetiro
      * @return \Illuminate\Http\Response
      */
-    public function destroy(DepositoRetiro $depositoRetiro)
+    public function destroy( $id)
     {
-        //
+        DepositoRetiro::destroy($id);
+
+        $existe = DepositoRetiro::find($id);
+        if($existe){
+            return 'No se elimino la Agencia';
+        }else{
+            return 'Se elimino la Agencia';
+        };
     }
 }
