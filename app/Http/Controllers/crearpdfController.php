@@ -27,9 +27,9 @@ class crearpdfController extends Controller
         $base = $variables[0]->api;
 
         $respuesta = DB::table('asign')
-        ->join('transporte','transporte.razon_social','=','asign.transport')
+        ->join('transports','transports.razon_social','=','asign.transport')
         ->where('asign.cntr_number', '=', $cntr_number)
-        ->select('asign.cntr_number', 'asign.booking', 'asign.file_instruction', 'transporte.contacto_logistica_celular' )->get();
+        ->select('asign.cntr_number', 'asign.booking', 'asign.file_instruction', 'transports.contacto_logistica_celular' )->get();
         $row = $respuesta[0];
        
         if ($respuesta->count() == 1) {
@@ -635,8 +635,8 @@ class crearpdfController extends Controller
         $cntr_number = $cntr;
        
         $query = DB::table('asign')
-        ->select('asign.cntr_number', 'asign.booking', 'asign.file_instruction','transporte.contacto_logistica_celular')
-        ->join('transporte', 'transporte.razon_social', '=', 'asign.transport')->where('asign.cntr_number', '=', $cntr_number)->get();
+        ->select('asign.cntr_number', 'asign.booking', 'asign.file_instruction','transports.contacto_logistica_celular')
+        ->join('transports', 'transports.razon_social', '=', 'asign.transport')->where('asign.cntr_number', '=', $cntr_number)->get();
        
         if ($query->count() == 1) {
           
@@ -754,7 +754,7 @@ class crearpdfController extends Controller
 
                     $qAsing = DB::table('asign')->select('transport')->where('cntr_number','=',$cntr_number)->get();
                     $empresa = $qAsing[0]->transport;
-                    $qmail = DB::table('transporte')->where('razon_social','=',$empresa)->select('contacto_logistica_mail')->get();
+                    $qmail = DB::table('transports')->where('razon_social','=',$empresa)->select('contacto_logistica_mail')->get();
                     $mail = $qmail[0]->contacto_logistica_mail;
                     $mail = Mail::to($mail)->cc('totaltrade@botzero.ar')->send(new envioInstructivo($data)); 
                     

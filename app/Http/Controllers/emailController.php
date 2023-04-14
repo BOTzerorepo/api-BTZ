@@ -29,8 +29,8 @@ class emailController extends Controller
 
         $date = Carbon::now('-03:00');
         $asign = DB::table('asign')
-        ->select('asign.*','transporte.Direccion','transporte.paut','transporte.CUIT','transporte.permiso','transporte.vto_permiso','choferes.documento', 'trucks.model','trucks.model','trucks.year','trucks.chasis','trucks.poliza','trucks.vto_poliza','trailers.domain as semi_domain','trailers.poliza as semi_poliza','trailers.vto_poliza as semi_vto_poliza')
-        ->join('transporte','asign.transport','=','transporte.razon_social')
+        ->select('asign.*','transports.Direccion','transports.paut','transports.CUIT','transports.permiso','transports.vto_permiso','choferes.documento', 'trucks.model','trucks.model','trucks.year','trucks.chasis','trucks.poliza','trucks.vto_poliza','trailers.domain as semi_domain','trailers.poliza as semi_poliza','trailers.vto_poliza as semi_vto_poliza')
+        ->join('transports','asign.transport','=','transports.razon_social')
         ->join('choferes','choferes.nombre','=','asign.driver')
         ->join('trucks','trucks.domain','=','asign.truck')
         ->join('trailers','trailers.domain','=','asign.truck_semi')
@@ -92,7 +92,7 @@ class emailController extends Controller
     public function transporteAsignado($id){
 
         $date = Carbon::now('-03:00');
-        $asign = DB::table('asign')->select('asign.id','asign.cntr_number','asign.booking','asign.transport','asign.transport_agent','asign.user','asign.company','atas.tax_id','transporte.pais')->join('transporte','asign.transport','=','transporte.razon_social')->join('atas','asign.transport_agent','=','atas.razon_social')->where('asign.id', '=', $id)->get();
+        $asign = DB::table('asign')->select('asign.id','asign.cntr_number','asign.booking','asign.transport','asign.transport_agent','asign.user','asign.company','atas.tax_id','transports.pais')->join('transports','asign.transport','=','transports.razon_social')->join('atas','asign.transport_agent','=','atas.razon_social')->where('asign.id', '=', $id)->get();
         $dAsign = $asign[0];
         
         $to = DB::table('users')->select('email')->where('username', '=', $dAsign->user)->get();
