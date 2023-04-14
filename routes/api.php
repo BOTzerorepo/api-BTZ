@@ -132,10 +132,10 @@ Route::post('/agencias/{id}','App\Http\Controllers\AgenciaController@update');
 // MAPS
 
 
-Route::get('/lugarDeCarga/{patente}','App\Http\Controllers\lugaresDeCarga@coordenadas');
-Route::get('/accionLugarDeCarga/{idTrip}','App\Http\Controllers\lugaresDeCarga@accionLugarDeCarga');
-Route::get('/accionLugarAduana/{idTrip}','App\Http\Controllers\lugaresDeCarga@accionLugarAduana');
-Route::get('/accionLugarDescarga/{idTrip}','App\Http\Controllers\lugaresDeCarga@accionLugarDescarga');
+Route::get('/lugarDeCarga/{patente}','App\Http\Controllers\CustomerLoadPlaceController@coordenadas');
+Route::get('/accionLugarDeCarga/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionLugarDeCarga');
+Route::get('/accionLugarAduana/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionLugarAduana');
+Route::get('/accionLugarDescarga/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionLugarDescarga');
 
 Route::get('/servicioSatelital','App\Http\Controllers\ServiceSatelital@serviceSatelital');
 
@@ -195,3 +195,10 @@ Route::get('/depositoRetiro/{id}','App\Http\Controllers\DepositoRetiroController
 Route::post('/depositoRetiro','App\Http\Controllers\DepositoRetiroController@store');  //Crea un nuevo deposito de retiro
 Route::post('/depositoRetiro/{id}','App\Http\Controllers\DepositoRetiroController@update'); //Actualiza los datos de un deposito de retiro
 Route::delete('/depositoRetiro/{id}','App\Http\Controllers\DepositoRetiroController@destroy'); //Elimina un deposito de retiro
+
+//Lugar de carga
+Route::get('/lugarCargas','App\Http\Controllers\CustomerLoadPlaceController@index'); //Busca todos los depositos de retiro
+Route::get('/lugarCarga/{id}','App\Http\Controllers\CustomerLoadPlaceController@show'); //Busca un deposito de retiro
+Route::post('/lugarCarga','App\Http\Controllers\CustomerLoadPlaceController@store');  //Crea un nuevo deposito de retiro
+Route::post('/lugarCarga/{id}','App\Http\Controllers\CustomerLoadPlaceController@update'); //Actualiza los datos de un deposito de retiro
+Route::delete('/lugarCarga/{id}','App\Http\Controllers\CustomerLoadPlaceController@destroy'); //Elimina un deposito de retiro
