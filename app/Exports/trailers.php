@@ -35,7 +35,7 @@ class trailers implements FromCollection, WithHeadings, ShouldAutoSize, WithStyl
     } 
     public function collection()
     {
-        $trailers = DB::table('trailers')->join('transporte','transporte.id','=','trailers.transport_id')->select('trailers.id', 'trailers.domain','trailers.type','trailers.year','transporte.razon_social')->get();
+        $trailers = DB::table('trailers')->join('transports','transports.id','=','trailers.transport_id')->select('trailers.id', 'trailers.domain','trailers.type','trailers.year','transports.razon_social')->get();
         return $trailers;
     }
 }
