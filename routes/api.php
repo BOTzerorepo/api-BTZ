@@ -202,3 +202,10 @@ Route::get('/lugarCarga/{id}','App\Http\Controllers\CustomerLoadPlaceController@
 Route::post('/lugarCarga','App\Http\Controllers\CustomerLoadPlaceController@store');  //Crea un nuevo deposito de retiro
 Route::post('/lugarCarga/{id}','App\Http\Controllers\CustomerLoadPlaceController@update'); //Actualiza los datos de un deposito de retiro
 Route::delete('/lugarCarga/{id}','App\Http\Controllers\CustomerLoadPlaceController@destroy'); //Elimina un deposito de retiro
+
+//Lugar de Descarga
+Route::get('/lugarDescargas','App\Http\Controllers\CustomerUnloadPlaceController@index'); //Busca todos los depositos de retiro
+Route::get('/lugarDescarga/{id}','App\Http\Controllers\CustomerUnloadPlaceController@show'); //Busca un deposito de retiro
+Route::post('/lugarDescarga','App\Http\Controllers\CustomerUnloadPlaceController@store');  //Crea un nuevo deposito de retiro
+Route::post('/lugarDescarga/{id}','App\Http\Controllers\CustomerUnloadPlaceController@update'); //Actualiza los datos de un deposito de retiro
+Route::delete('/lugarDescarga/{id}','App\Http\Controllers\CustomerUnloadPlaceController@destroy'); //Elimina un deposito de retiro
