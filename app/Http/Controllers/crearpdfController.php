@@ -67,7 +67,9 @@ class crearpdfController extends Controller
                     'aduanaExpo.mail','aduanaExpo.phone',
                     'aduanaImpo.razon_social as aduanaImpo_agent','aduanaImpo.mail as aduanaImpo_mail','aduanaImpo.phone as aduanaImpo_phone',
                     'customer_unload_place.description as descarga_place','customer_unload_place.address as descarga_address','customer_unload_place.city as descarga_city','customer_unload_place.link_maps as descarga_link' ]);
+                    
                     $row = $respuesta_file[0];
+
                     $weekMap = [
                         0 => 'Domingo',
                         1 => 'Lunes',
@@ -83,7 +85,7 @@ class crearpdfController extends Controller
                     $load_date = $dayW . ' ' . $date ;
                     
                   
-                    if ($respuesta_file->count() == 1) {
+                    if ($respuesta_file->count() >= 1) {
 
                         if($row->type == 'Puesta FOB'){
 
@@ -612,7 +614,7 @@ class crearpdfController extends Controller
                             return $pdf->download($file_name);
                         }
                     }
-                    return 'no hay insturcciones creadas';
+                    return 'Faltan Datos para crear instruccion';
 
                 }else{
 
