@@ -230,3 +230,12 @@ Route::get('/plazoPago/{id}','App\Http\Controllers\PayTimeController@show'); //B
 Route::post('/plazoPago','App\Http\Controllers\PayTimeController@store'); //Crea un nuevo plazo de pago
 Route::post('/plazoPago/{id}','App\Http\Controllers\PayTimeController@update'); //Actualiza los datos de un plazo de pago
 Route::delete('/plazoPago/{id}','App\Http\Controllers\PayTimeController@destroy'); //Elimina un plazo de pago
+
+//Customer agent
+Route::get('/customerAgents','App\Http\Controllers\CustomerAgentController@index'); //Busca todos los Customer Shipper
+Route::get('/customerAgentEmpresa/{empresa}','App\Http\Controllers\CustomerAgentController@indexCompany'); //Busca todos los Customer Shipper de una compania
+Route::get('/customerAgent/{id}','App\Http\Controllers\CustomerAgentController@show'); //Busca un Customer Shipper de una compania
+Route::post('/customerAgent','App\Http\Controllers\CustomerAgentController@store'); //Crea un nuevo Customer Shipper
+Route::post('/customerAgent/{id}','App\Http\Controllers\CustomerAgentController@update'); //Actualiza los datos de un Customer Shipper
+Route::delete('/customerAgent/{id}','App\Http\Controllers\CustomerAgentController@destroy'); //Elimina un Customer Shipper
+
