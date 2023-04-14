@@ -209,3 +209,10 @@ Route::get('/lugarDescarga/{id}','App\Http\Controllers\CustomerUnloadPlaceContro
 Route::post('/lugarDescarga','App\Http\Controllers\CustomerUnloadPlaceController@store');  //Crea un nuevo deposito de retiro
 Route::post('/lugarDescarga/{id}','App\Http\Controllers\CustomerUnloadPlaceController@update'); //Actualiza los datos de un deposito de retiro
 Route::delete('/lugarDescarga/{id}','App\Http\Controllers\CustomerUnloadPlaceController@destroy'); //Elimina un deposito de retiro
+
+//Type CNTR
+Route::get('/tiposCntr','App\Http\Controllers\CntrTypeController@index'); //Busca todos los tipos de cntr
+Route::get('/tipoCntr/{id}','App\Http\Controllers\CntrTypeController@show'); //Busca un tipo de cntr
+Route::post('/tipoCntr','App\Http\Controllers\CntrTypeController@store'); //Crea un nuevo tipo de cntr
+Route::post('/tipoCntr/{id}','App\Http\Controllers\CntrTypeController@update'); //Actualiza los datos de un tipo de cntr
+Route::delete('/tipoCntr/{id}','App\Http\Controllers\CntrTypeController@destroy'); //Elimina un tipo de cntr
