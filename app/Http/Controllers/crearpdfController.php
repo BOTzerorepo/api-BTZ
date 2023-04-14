@@ -49,11 +49,11 @@ class crearpdfController extends Controller
                     $respuesta_file = DB::table('carga')
                     ->join('cntr','carga.booking', '=', 'cntr.booking')
                     ->join('asign','cntr.cntr_number', '=', 'asign.cntr_number')
-                    ->join('customer_load_place','customer_load_place.description', '=', 'carga.load_place')
-                    ->join('customer_unload_place','customer_unload_place.description', '=', 'carga.unload_place')
-                    ->join('razon_social','asign.sub_empresa', '=', 'razon_social.title')
+                    ->leftJoin('customer_load_place','customer_load_place.description', '=', 'carga.load_place')
+                    ->leftJoin('customer_unload_place','customer_unload_place.description', '=', 'carga.unload_place')
+                    ->leftJoin('razon_social','asign.sub_empresa', '=', 'razon_social.title')
                     ->leftJoin('agencies','asign.agent_port', '=', 'agencies.description')
-                    ->join('custom_agent as aduanaExpo','carga.custom_agent', '=', 'aduanaExpo.razon_social')
+                    ->leftJoin('custom_agent as aduanaExpo','carga.custom_agent', '=', 'aduanaExpo.razon_social')
                     ->leftJoin('custom_agent as aduanaImpo','carga.custom_agent_impo', '=', 'aduanaImpo.razon_social')
                     ->where('cntr.cntr_number', '=', $cntr_number)
                     ->distinct()
@@ -67,7 +67,9 @@ class crearpdfController extends Controller
                     'aduanaExpo.mail','aduanaExpo.phone',
                     'aduanaImpo.razon_social as aduanaImpo_agent','aduanaImpo.mail as aduanaImpo_mail','aduanaImpo.phone as aduanaImpo_phone',
                     'customer_unload_place.description as descarga_place','customer_unload_place.address as descarga_address','customer_unload_place.city as descarga_city','customer_unload_place.link_maps as descarga_link' ]);
+                    
                     $row = $respuesta_file[0];
+
                     $weekMap = [
                         0 => 'Domingo',
                         1 => 'Lunes',
@@ -83,7 +85,7 @@ class crearpdfController extends Controller
                     $load_date = $dayW . ' ' . $date ;
                     
                   
-                    if ($respuesta_file->count() == 1) {
+                    if ($respuesta_file->count() >= 1) {
 
                         if($row->type == 'Puesta FOB'){
 
@@ -612,7 +614,7 @@ class crearpdfController extends Controller
                             return $pdf->download($file_name);
                         }
                     }
-                    return 'no hay insturcciones creadas';
+                    return 'Faltan Datos para crear instruccion';
 
                 }else{
 
