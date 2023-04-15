@@ -239,3 +239,11 @@ Route::post('/customerAgent','App\Http\Controllers\CustomerAgentController@store
 Route::post('/customerAgent/{id}','App\Http\Controllers\CustomerAgentController@update'); //Actualiza los datos de un Customer Shipper
 Route::delete('/customerAgent/{id}','App\Http\Controllers\CustomerAgentController@destroy'); //Elimina un Customer Shipper
 
+//Customer ntfy
+Route::get('/customersNtfy','App\Http\Controllers\CustomerNtfyController@index'); //Busca todos los Customer Ntfy
+Route::get('/customerNtfyCompany/{company}','App\Http\Controllers\CustomerNtfyController@indexCompany'); //Busca todos los Customer Ntfy de una compania
+Route::get('/customerNtfy/{id}','App\Http\Controllers\CustomerNtfyController@show'); //Busca un Customer Ntfy
+Route::post('/customerNtfy','App\Http\Controllers\CustomerNtfyController@store'); //Crea un nuevo Customer Ntfy
+Route::post('/customerNtfy/{id}','App\Http\Controllers\CustomerNtfyController@update'); //Actualiza los datos de un Customer Ntfy
+Route::delete('/customerNtfy/{id}','App\Http\Controllers\CustomerNtfyController@destroy'); //Elimina un Customer Ntfy
+
