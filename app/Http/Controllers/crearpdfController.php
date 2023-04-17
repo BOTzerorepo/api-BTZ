@@ -613,8 +613,11 @@ class crearpdfController extends Controller
         
                             return $pdf->download($file_name);
                         }
+                    }else{
+
+                        return 'Faltan Datos para crear instruccion';
+
                     }
-                    return 'Faltan Datos para crear instruccion';
 
                 }else{
 
@@ -632,24 +635,23 @@ class crearpdfController extends Controller
     }
     public function cargaPorMail( $cntr )
     {
+
+        // TOMO EL CNTR 
+
         $cntr_number = $cntr;
        
         $query = DB::table('asign')
         ->select('asign.cntr_number', 'asign.booking', 'asign.file_instruction','transports.contacto_logistica_celular')
         ->join('transports', 'transports.razon_social', '=', 'asign.transport')->where('asign.cntr_number', '=', $cntr_number)->get();
        
+        // REVISO QUE HAYA ALGUNA ASIGNACIÓN 
+
         if ($query->count() == 1) {
           
-            $booking = $query[0]->booking;
-            $cntr_number = $query[0]->cntr_number;
-            $file = $query[0]->file_instruction;
-            $contacto = $query[0]->contacto_logistica_celular;
-            $file_name = 'instructivo_' . $booking . '_' . $cntr_number . '.pdf';
-            $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-            $save_folder = $folder . $file_name;
-            
-            if ($file == null) {
-                // sino está generado el Instrtructivo lo creamos. 
+           
+            $cntr_number = $query[0]->cntr_number;         
+
+            // BUSCO DATOS PARA ARMAR CUERPO DEL MAIL 
 
                $respuesta_file = DB::table('carga')
                     ->join('cntr','carga.booking', '=', 'cntr.booking')
@@ -673,11 +675,8 @@ class crearpdfController extends Controller
                     $date = Carbon::parse($row->load_date)->format('d-m-Y'); 
                     $dayW = $weekMap[$day];
                     $load_date = $dayW . ' ' . $date ;
-                
-                if ($respuesta_file->count() == 1) {
-                    
-                    
-                    $date = Carbon::now()->format('d/m/Y');
+            
+            // ARMO DATOS PARA ENVIAR EN CUERPO DEL MAIL
 
                     $data = [
                         'id_asign' => $row->id,
@@ -714,111 +713,22 @@ class crearpdfController extends Controller
 
                     ];
 
-                    // Logica de Creado de Carpera: 
-
-                    if (!file_exists('instructivos/' . $booking)) {
-
-                        /* Si no Existe la Carperta Del booking */
-
-                        mkdir('instructivos/' . $booking, 0777, true);
-
-                        /* Si existe la Carpeta del Contenedor dentro de la Carpeta del Booking la Asignamos*/
-                        if (file_exists('instructivos/' . $booking . '/' . $cntr_number)) {
-
-                            $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                        } else {
-
-                            /* Si no existe la Carpeta del Contenedor dentro de la Carpeta del Booking la creamos y  la Asignamos*/
-
-
-                            mkdir('instructivos/' . $booking . '/' . $cntr_number, 0777, true);
-                            $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                        }
-                    } else {
-
-                        /* si Ya existe la Carpeta Booking */
-
-                        if (file_exists('instructivos/' . $booking . '/' . $cntr_number)) {
-                            /* y existe la carpeta de CNTR la asignamos */
-
-                            $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                        } else {
-
-                            /* y si no existe la carpeta de CNTR la creamos y la asignamos */
-
-                            mkdir('instructivos/' . $booking . '/' . $cntr_number, 0777, true);
-                            $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                        }
-                    }
-
-                    $file_name = 'instructivo_' . $booking . '_' . $cntr_number . '.pdf';
-
-                    // Ya sabemos que esta creada (o la creamos) entonces creamos variables para usar durante todo el proceso.
-
-                    $save_folder = $folder . $file_name;
-
-                    // Generamos el Archivo PDF
-                    $pdf = FacadePdf::loadView('pdf.instructivoCarga', $data);
-                    
-                    file_put_contents($save_folder, $pdf->output());
-
-                    $respuesta_update = DB::table('asign')
-                    ->where('cntr_number', $cntr_number)
-                    ->update(['file_instruction' => $file_name]);
+            // BUSCO DATOS DEL TRANSPORTE DONDE VOY A ENVIAR EL CORREO
 
                     $qAsing = DB::table('asign')->select('transport')->where('cntr_number','=',$cntr_number)->get();
                     $empresa = $qAsing[0]->transport;
                     $qmail = DB::table('transports')->where('razon_social','=',$empresa)->select('contacto_logistica_mail')->get();
                     $mail = $qmail[0]->contacto_logistica_mail;
+
+            // ENVIAMOS MAIL 
+
                     $mail = Mail::to($mail)->cc('totaltrade@botzero.ar')->send(new envioInstructivo($data)); 
                     
                     return 'ok';
-
-                }else{
-
-                    return redirect('https://ttl.botzero.tech/views/view_instructivos.php');
-
-                }
-
-            } else {
-                   
-                    $query_file = DB::table('carga')
-                    ->distinct('asign.id','carga.load_date','carga.booking','carga.shipper','carga.commodity','carga.load_place','cntr.cntr_number','cntr.cntr_type')
-                    ->join('cntr','carga.booking', '=','cntr.booking')
-                    ->join('asign','cntr.cntr_number', '=', 'asign.cntr_number')
-                    ->where('cntr.cntr_number', '=', $cntr_number)->get();
-
-                    $date = Carbon::now()->format('d/m/Y');
-                    if ($query_file->count() == 1) {
-
-                        $data = [
-
-                            'id_asign' => $query_file[0]->id,
-                            'booking' => $query_file[0]->booking,
-                            'load_place' => $query_file[0]->load_place,
-                            'cntr_type' => $query_file[0]->cntr_type,
-                            'cntr_number' => $query_file[0]->cntr_number,
-                            'load_date' => $query_file[0]->load_date,
-                            'shipper' => $query_file[0]->shipper,
-                            'commodity' => $query_file[0]->commodity,
-                            'date'=> $date
-                        
-                        ];
-
-                        $qempresa = DB::table('carga')->select('empresa')->where('booking','=',$booking)->get();
-                        $empresa = $qempresa[0]->empresa;
-                        $qmail = DB::table('empresas')->where('razon_social','=',$empresa)->select('mail_logistic')->get();
-                        $mail = $qmail[0]->mail_logistic;
-
-                        $mail = Mail::to($mail)->cc('totaltrade@botzero.ar')->send(new envioInstructivo($data)); 
-                        return 'ok';
-                }else{
-                    return 'no hay carga asignada';
-                }
-            } 
+            
         } else {
             
-            return 'no hay instrucción para enviar';
+            return 'no hay asignacio para ese camion';
         }
         
     }
