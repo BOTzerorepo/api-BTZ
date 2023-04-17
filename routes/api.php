@@ -20,8 +20,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 /* Impresion de PDF */
 
-Route::get('/imprimirCarga','App\Http\Controllers\crearpdfController@carga'); 
-Route::get('/imprimirVacio','App\Http\Controllers\crearpdfController@vacio');  
+Route::get('/imprimirCarga/{cntr_number}','App\Http\Controllers\crearpdfController@carga'); 
+Route::get('/imprimirVacio/{id_cntr}','App\Http\Controllers\crearpdfController@vacio');  
 Route::get('/imprimirEviarInstrucivo/{cntr}','App\Http\Controllers\crearpdfController@cargaPorMail');  
 Route::get('/mailCargaNueva/{idCarga}/{user}','App\Http\Controllers\emailController@avisoNuevaCarga'); // pachimanok 
 Route::get('/mailPrueba','App\Http\Controllers\emailController@apruebaEmail'); // pachimanok 
@@ -159,3 +159,39 @@ Route::post('/driverStatus/{id}','App\Http\Controllers\DriverController@status')
 Route::post('/driver/{id}','App\Http\Controllers\DriverController@update'); 
 Route::delete('/driver/{id}','App\Http\Controllers\DriverController@destroy'); 
 
+//Transporte
+Route::get('/transporteCustomer/{id}','App\Http\Controllers\TransportController@indexTransporteCustomer'); //Busca todos los transportes del customerId
+Route::get('/transportes','App\Http\Controllers\TransportController@index'); 
+Route::get('/transporte/{id}','App\Http\Controllers\TransportController@show'); 
+Route::post('/transporte','App\Http\Controllers\TransportController@store'); 
+Route::post('/transporte/{id}','App\Http\Controllers\TransportController@update'); 
+Route::delete('/transporte/{id}','App\Http\Controllers\TransportController@destroy'); 
+
+//Agencia
+Route::get('/agencias','App\Http\Controllers\AgencyController@index'); //Busca todas las agencias
+Route::get('/agencia/{id}','App\Http\Controllers\AgencyController@show'); //Busca una sola agencia
+Route::post('/agencia','App\Http\Controllers\AgencyController@store'); //Crea una nueva Agencia
+Route::post('/agencia/{id}','App\Http\Controllers\AgencyController@update'); //Actualiza los datos de una Agencia
+Route::delete('/agencia/{id}','App\Http\Controllers\AgencyController@destroy'); //Elimina una Agencia
+
+//Empresas=Cliente=Company
+Route::get('/empresas','App\Http\Controllers\CompanyController@index'); //Busca todas las empresas
+Route::get('/empresa/{id}','App\Http\Controllers\CompanyController@show'); //Busca una empresa por el id
+Route::post('/empresa','App\Http\Controllers\CompanyController@store'); //Crea un cliente
+Route::post('/empresa/{id}','App\Http\Controllers\CompanyController@update');//Actualizar datos de un cliente
+Route::delete('/empresa/{id}','App\Http\Controllers\CompanyController@destroy');//Eliminar un cliente
+
+//Customer Cnee
+Route::get('/customersCnee','App\Http\Controllers\CustomerCneeController@index'); //Busca todos los Customer Cnee
+Route::get('/customerCneeCompany/{company}','App\Http\Controllers\CustomerCneeController@indexCompany'); //Busca todos los Customer Cnee de una compania
+Route::get('/customerCnee/{id}','App\Http\Controllers\CustomerCneeController@show'); //Busca un Customer Cnee
+Route::post('/customerCnee','App\Http\Controllers\CustomerCneeController@store'); //Crea un nuevo Customer Cnee
+Route::post('/customerCnee/{id}','App\Http\Controllers\CustomerCneeController@update'); //Actualiza los datos de un Customer Cnee
+Route::delete('/customerCnee/{id}','App\Http\Controllers\CustomerCneeController@destroy'); //Elimina un Customer Cnee
+
+//Deposito de Retiro
+Route::get('/depositoRetiros','App\Http\Controllers\DepositoRetiroController@index'); //Busca todos los depositos de retiro
+Route::get('/depositoRetiro/{id}','App\Http\Controllers\DepositoRetiroController@show'); //Busca un deposito de retiro
+Route::post('/depositoRetiro','App\Http\Controllers\DepositoRetiroController@store');  //Crea un nuevo deposito de retiro
+Route::post('/depositoRetiro/{id}','App\Http\Controllers\DepositoRetiroController@update'); //Actualiza los datos de un deposito de retiro
+Route::delete('/depositoRetiro/{id}','App\Http\Controllers\DepositoRetiroController@destroy'); //Elimina un deposito de retiro

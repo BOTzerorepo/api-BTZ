@@ -42,7 +42,7 @@ class agencies implements FromCollection, WithHeadings, ShouldAutoSize, WithStyl
     
     public function collection()
     {
-        $agencies = DB::table('agencias')->select('id',"description","razon_social","tax_id","puerto","contact_name","contact_phone","contact_mail","observation_gral")->get();
+        $agencies = DB::table('agencies')->select('id',"description","razon_social","tax_id","puerto","contact_name","contact_phone","contact_mail","observation_gral")->get();
         return $agencies;
     }
 }
