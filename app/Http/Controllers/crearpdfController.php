@@ -659,6 +659,20 @@ class crearpdfController extends Controller
                     ->distinct()
                     ->get(['asign.id', 'asign.transport', 'asign.transport_agent', 'asign.observation_load', 'asign.agent_port', 'carga.custom_place', 'carga.load_date', 'carga.booking', 'carga.shipper', 'carga.commodity', 'carga.load_place', 'carga.unload_place', 'carga.cut_off_fis', 'carga.oceans_line', 'carga.vessel', 'carga.voyage', 'carga.final_point', 'carga.custom_agent', 'carga.ref_customer', 'cntr.cntr_number', 'cntr.cntr_seal', 'cntr.cntr_type', 'cntr.net_weight', 'cntr.retiro_place', 'cntr.out_usd', 'cntr.modo_pago_out', 'cntr.plazo_de_pago_out', 'customer_load_place.link_maps', 'customer_load_place.address', 'customer_load_place.city']);
                     $row = $respuesta_file[0]; 
+
+                    $weekMap = [
+                        0 => 'Domingo',
+                        1 => 'Lunes',
+                        2 => 'Martes',
+                        3 => 'Miércoles',
+                        4 => 'Jueves',
+                        5 => 'Viernes',
+                        6 => 'Sábado',
+                    ];
+                    $day = Carbon::parse($row->load_date)->dayOfWeek; 
+                    $date = Carbon::parse($row->load_date)->format('d-m-Y'); 
+                    $dayW = $weekMap[$day];
+                    $load_date = $dayW . ' ' . $date ;
                 
                 if ($respuesta_file->count() == 1) {
                     
