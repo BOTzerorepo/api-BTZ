@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\envioInstructivo;
+use App\Models\logapi;
 use Barryvdh\DomPDF\Facade\Pdf as FacadePdf;
 use Barryvdh\DomPDF\PDF;
 use Carbon\Carbon;
@@ -26,11 +27,24 @@ class crearpdfController extends Controller
         $variables = DB::table('variables')->select('api')->get();
         $base = $variables[0]->api;
 
+
+        $logApi = new logapi();
+        $logApi->detalle = 'Consulta Variable api base = :' . $base;
+        $logApi->user = 'carga('.$cntr_number.')';
+        $logApi->save();
+
+
+
         $respuesta = DB::table('asign')
         ->join('transports','transports.razon_social','=','asign.transport')
         ->where('asign.cntr_number', '=', $cntr_number)
         ->select('asign.cntr_number', 'asign.booking', 'asign.file_instruction', 'transports.contacto_logistica_celular' )->get();
         $row = $respuesta[0];
+
+        $logApi = new logapi();
+        $logApi->detalle = 'Respuesta api count = :' . $respuesta->count();
+        $logApi->user = 'carga('.$cntr_number.')';
+        $logApi->save();
        
         if ($respuesta->count() == 1) {
             
@@ -42,7 +56,11 @@ class crearpdfController extends Controller
             $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
             $save_folder = $folder . $file_name;
 
-            
+            $logApi = new logapi();
+            $logApi->detalle = 'Respuesta file = :' . $file;
+            $logApi->user = 'carga('.$cntr_number.')';
+            $logApi->save();
+
             if ($file == null) {
 
                 // sino está generado el Instrtructivo lo creamos. 
@@ -70,6 +88,11 @@ class crearpdfController extends Controller
                     
                     $row = $respuesta_file[0];
 
+                    $logApi = new logapi();
+                    $logApi->detalle = 'Respuesta file = :' . $file;
+                    $logApi->user = 'Respuesta Consulta para armar datos de intructivos count: '.$respuesta_file->count();
+                    $logApi->save();
+
                     $weekMap = [
                         0 => 'Domingo',
                         1 => 'Lunes',
@@ -89,13 +112,18 @@ class crearpdfController extends Controller
 
                         if($row->type == 'Puesta FOB'){
 
+
+                            $logApi = new logapi();
+                        $logApi->detalle = 'Respuesta file = :' . $file;
+                        $logApi->user = 'Ingreso en Puesta FOB';
+                        $logApi->save();
+
                             $data = [
                                 'id_asign' => $row->id,
                                 'img' => $base.'/public/image/empresas/'.$row->img,
                                 'cuit' => $row->cuit,
                                 'title' => $row->title,
                                 'booking' => $row->booking,
-                                
                                 'shipper' => $row->shipper,
                                 'commodity' => $row->commodity,
                                 'load_place' => $row->load_place,
@@ -132,6 +160,11 @@ class crearpdfController extends Controller
                             ];
                             
                             if (!file_exists('instructivos/' . $booking)) {
+
+                                $logApi = new logapi();
+                                $logApi->detalle = 'Respuesta file = :' . $file;
+                                $logApi->user = 'no existe la Carpeta instructivos/' . $booking;
+                                $logApi->save();
     
                                 /* Si no Existe la Carperta Del booking */
         
@@ -145,6 +178,10 @@ class crearpdfController extends Controller
         
                                     /* Si no existe la Carpeta del Contenedor dentro de la Carpeta del Booking la creamos y  la Asignamos*/
         
+                                    $logApi = new logapi();
+                                    $logApi->detalle = 'Respuesta file = :' . $file;
+                                    $logApi->user = 'no existe la Carpeta instructivos/' . $booking . '/' . $cntr_number;
+                                    $logApi->save();
         
                                     mkdir('instructivos/' . $booking . '/' . $cntr_number, 0777, true);
                                     $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
@@ -164,13 +201,25 @@ class crearpdfController extends Controller
                                     mkdir('instructivos/' . $booking . '/' . $cntr_number, 0777, true);
                                     $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
                                 }
+
                             }
+
+                            $logApi = new logapi();
+                            $logApi->detalle = 'Respuesta file = :' . $file;
+                            $logApi->user = 'La Carpeta fue creada o ya existia:' . $folder;
+                            $logApi->save();
+                            
         
                             $file_name = 'instructivo_' . $booking . '_' . $cntr_number . '.pdf';
         
                             // Ya sabemos que esta creada (o la creamos) entonces creamos variables para usar durante todo el proceso.
         
                             $save_folder = $folder . $file_name;
+
+                            $logApi = new logapi();
+                            $logApi->detalle = 'Respuesta file = :' . $file;
+                            $logApi->user = 'Vamos a guardar el Archivo aca:' .  $save_folder;
+                            $logApi->save();
         
                             // Generamos el Archivo PDF
                             $pdf = FacadePdf::loadView('pdf.instructivoCargaFOB', $data);
@@ -183,6 +232,7 @@ class crearpdfController extends Controller
                             return $pdf->download($file_name);
 
                         }elseif($row->type == 'Expo Maritima'){
+                            
                             $data = [
                                 'id_asign' => $row->id,
                                 'img' => $base.'/public/image/empresas/'.$row->img,
