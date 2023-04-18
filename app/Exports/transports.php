@@ -42,7 +42,7 @@ class transports implements FromCollection, WithHeadings, ShouldAutoSize, WithSt
     } 
     public function collection()
     {
-        $transport = DB::table('transporte')->select('id', 'razon_social', 'CUIT', 'Direccion','Provincia', 'Pais','contacto_logistica_nombre', 'contacto_logistica_celular', 'contacto_logistica_mail','contacto_admin_nombre', 'contacto_admin_celular', 'contacto_admin_mail')->get();
+        $transport = DB::table('transports')->select('id', 'razon_social', 'CUIT', 'Direccion','Provincia', 'Pais','contacto_logistica_nombre', 'contacto_logistica_celular', 'contacto_logistica_mail','contacto_admin_nombre', 'contacto_admin_celular', 'contacto_admin_mail')->get();
         return $transport;
     }
 }
