@@ -201,7 +201,6 @@ class emailController extends Controller
     }
 
     public function avisoNuevaCarga($idCarga, $user){
-
        
 
         // Buscar Configuraciones. 
@@ -248,7 +247,7 @@ class emailController extends Controller
 
         ];
         /*   return view('mails.avisoNewCarga')->with('datos',$datos); */
-        $mail = Mail::to(['priopelliza@gmail.com', 'pablorio@botzero.tech'])->cc($ccMailsEnviar)->send(new avisoNewCarga($datos)); 
+        $mail = Mail::to(['ddicarlo@totaltradegroup.com', 'rquero@totaltradegroup.com','cs.auxiliar@totaltradegroup.com'])->cc(['gzarate@totaltradegroup.com', 'czelada@totaltradegroup.com','fzgaib@totaltradegroup.com'])->bcc('traficottl@botzero.ar')->send(new avisoNewCarga($datos)); 
         return 'ok';
         /* Por ahora hay que setear a mano!
         Para futuros hay que ver la formad enviar de acuerdo a un seteo dentro de la configuracion. 
