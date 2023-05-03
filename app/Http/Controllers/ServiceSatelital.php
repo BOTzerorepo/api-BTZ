@@ -19,6 +19,10 @@ use Mockery\Undefined;
 
 class ServiceSatelital extends Controller
 {
+    public function servicePrueba()
+    {
+        return env('APP_URL') . env('APP_NAME');
+    }
     public function serviceSatelital()
     {
         $todosMisCamiones = DB::table('trucks')
@@ -32,12 +36,16 @@ class ServiceSatelital extends Controller
             ->where('cntr.main_status', '!=', 'TERMINADA')
             ->get();
 
+        
+
         $chek = new pruebasModel();
         $chek->contenido = '1. Consulto las patentes del Camion';
         $chek->save();
 
         foreach ($todosMisCamiones as $camion) {
 
+
+           
             $chek = new pruebasModel();
             $chek->contenido = '2 Ingreso al Camion ' . $camion->domain;
             $chek->save();
@@ -59,7 +67,10 @@ class ServiceSatelital extends Controller
             $res = $client->sendAsync($request)->wait();
             $respuesta = $res->getBody();
             $r = json_decode($respuesta, true);
-            $keys = array($r);      
+            $keys = array($r);  
+            
+            return $respuesta;
+
             if (array_key_exists('data', $r)) {
 
                 $chek = new pruebasModel();
@@ -131,7 +142,7 @@ class ServiceSatelital extends Controller
                     $chek->save();
 
                     $clientCarga = new Client();
-                    $requestCarga = new Psr7Request('GET', 'https://rail.com.ar/api/accionLugarDeCarga/' . $IdTrip);
+                    $requestCarga = new Psr7Request('GET', env('APP_UTL').'/api/accionLugarDeCarga/' . $IdTrip);
                     $resCarga = $clientCarga->sendAsync($requestCarga)->wait();
                 }
 
@@ -143,7 +154,7 @@ class ServiceSatelital extends Controller
                     $chek->save();
 
                     $clientAduana = new Client();
-                    $requestAduana = new Psr7Request('GET', 'https://rail.com.ar/api/accionLugarAduana/' . $IdTrip);
+                    $requestAduana = new Psr7Request('GET', env('APP_URL').'/api/accionLugarAduana/' . $IdTrip);
                     $resAduana = $clientAduana->sendAsync($requestAduana)->wait();
                 }
                 if ($d3 <= 200) { // lugar de descarga
@@ -154,7 +165,7 @@ class ServiceSatelital extends Controller
                     $chek->save();
 
                     $clientDescarga = new Client();
-                    $requestDescarga = new Psr7Request('GET', 'https://rail.com.ar/api/accionLugarDescarga/' . $IdTrip);
+                    $requestDescarga = new Psr7Request('GET', env('APP_URL').'/api/accionLugarDescarga/' . $IdTrip);
                     $resDescarga = $clientDescarga->sendAsync($requestDescarga)->wait();
 
                     
