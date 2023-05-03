@@ -36,7 +36,7 @@ class driversFree implements FromCollection, WithHeadings, ShouldAutoSize, WithS
     } 
     public function collection()
     {
-        $driversFree = DB::table('choferes')->select('id', 'nombre', 'vto_carnet', 'transporte', 'place', 'Observaciones')->where('status_chofer', '=', 'libre')->get();
+        $driversFree = DB::table('drivers')->select('id', 'nombre', 'vto_carnet', 'transporte', 'place', 'Observaciones')->where('status_chofer', '=', 'libre')->get();
         return $driversFree;
     }
 }

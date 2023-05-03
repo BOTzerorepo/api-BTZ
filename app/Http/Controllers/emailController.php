@@ -29,9 +29,9 @@ class emailController extends Controller
 
         $date = Carbon::now('-03:00');
         $asign = DB::table('asign')
-        ->select('asign.*','transports.Direccion','transports.paut','transports.CUIT','transports.permiso','transports.vto_permiso','choferes.documento', 'trucks.model','trucks.model','trucks.year','trucks.chasis','trucks.poliza','trucks.vto_poliza','trailers.domain as semi_domain','trailers.poliza as semi_poliza','trailers.vto_poliza as semi_vto_poliza')
-        ->join('transports','asign.transport','=','transports.razon_social')
-        ->join('choferes','choferes.nombre','=','asign.driver')
+        ->select('asign.*','transporte.Direccion','transporte.paut','transporte.CUIT','transporte.permiso','transporte.vto_permiso','drivers.documento', 'trucks.model','trucks.model','trucks.year','trucks.chasis','trucks.poliza','trucks.vto_poliza','trailers.domain as semi_domain','trailers.poliza as semi_poliza','trailers.vto_poliza as semi_vto_poliza')
+        ->join('transporte','asign.transport','=','transporte.razon_social')
+        ->join('drivers','drivers.nombre','=','asign.driver')
         ->join('trucks','trucks.domain','=','asign.truck')
         ->join('trailers','trailers.domain','=','asign.truck_semi')
 
