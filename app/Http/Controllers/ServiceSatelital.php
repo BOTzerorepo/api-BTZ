@@ -30,9 +30,9 @@ class ServiceSatelital extends Controller
             ->join('cntr', 'cntr.cntr_number', '=', 'asign.cntr_number')
             ->join('carga', 'carga.booking', '=', 'cntr.booking')
             ->join('aduanas', 'aduanas.description', '=', 'carga.custom_place')
-            ->join('customer_load_place', 'customer_load_place.description', '=', 'carga.load_place')
-            ->join('customer_unload_place', 'customer_unload_place.description', '=', 'carga.unload_place')
-            ->select('cntr.id_cntr as IdTrip', 'carga.id as idCarga', 'trucks.id', 'trucks.id_satelital', 'trucks.domain', 'customer_load_place.description as LugarCarga', 'customer_load_place.lat as CargaLat', 'customer_load_place.lon as CargaLng', 'aduanas.description as LugarAduana', 'aduanas.lat as aduanaLat', 'aduanas.lon as aduanaLon', 'customer_unload_place.description as lugarDescarga', 'customer_unload_place.lat as descargaLat', 'customer_unload_place.lon as descargaLon')
+            ->join('customer_load_places', 'customer_load_places.description', '=', 'carga.load_place')
+            ->join('customer_unload_places', 'customer_unload_place.description', '=', 'carga.unload_place')
+            ->select('cntr.id_cntr as IdTrip', 'carga.id as idCarga', 'trucks.id', 'trucks.id_satelital', 'trucks.domain', 'customer_load_places.description as LugarCarga', 'customer_load_places.lat as CargaLat', 'customer_load_places.lon as CargaLng', 'aduanas.description as LugarAduana', 'aduanas.lat as aduanaLat', 'aduanas.lon as aduanaLon', 'customer_unload_places.description as lugarDescarga', 'customer_unload_places.lat as descargaLat', 'customer_unload_places.lon as descargaLon')
             ->where('cntr.main_status', '!=', 'TERMINADA')
             ->get();
 
