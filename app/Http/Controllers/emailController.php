@@ -92,7 +92,7 @@ class emailController extends Controller
     public function transporteAsignado($id){
 
         $date = Carbon::now('-03:00');
-        $asign = DB::table('asign')->select('asign.id','asign.cntr_number','asign.booking','asign.transport','asign.transport_agent','asign.user','asign.company','ata.tax_id','transporte.pais')->join('transporte','asign.transport','=','transporte.razon_social')->join('ata','asign.transport_agent','=','ata.razon_social')->where('asign.id', '=', $id)->get();
+        $asign = DB::table('asign')->select('asign.id','asign.cntr_number','asign.booking','asign.transport','asign.transport_agent','asign.user','asign.company','atas.tax_id','transports.pais')->join('transports','asign.transport','=','transports.razon_social')->join('atas','asign.transport_agent','=','atas.razon_social')->where('asign.id', '=', $id)->get();
         $dAsign = $asign[0];
         
         $to = DB::table('users')->select('email')->where('username', '=', $dAsign->user)->get();
