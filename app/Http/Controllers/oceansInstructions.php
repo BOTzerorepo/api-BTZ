@@ -20,10 +20,10 @@ class oceansInstructions extends Controller
         $respuesta_file = DB::table('carga')
         ->join('cntr','carga.booking', '=', 'cntr.booking')
         ->join('asign','cntr.cntr_number', '=', 'asign.cntr_number')
-        ->join('customer_load_place','customer_load_place.description', '=', 'carga.load_place')
+        ->join('customer_load_places','customer_load_places.description', '=', 'carga.load_place')
         ->where('cntr.cntr_number', '=', $trip)
         ->distinct()
-        ->get(['asign.id', 'asign.transport', 'asign.transport_agent', 'asign.observation_load', 'asign.agent_port', 'carga.custom_place', 'carga.load_date', 'carga.booking', 'carga.shipper', 'carga.commodity', 'carga.load_place', 'carga.unload_place', 'carga.cut_off_fis', 'carga.oceans_line', 'carga.vessel', 'carga.voyage', 'carga.final_point', 'carga.custom_agent', 'carga.ref_customer', 'cntr.cntr_number', 'cntr.cntr_seal', 'cntr.cntr_type', 'cntr.net_weight', 'cntr.retiro_place', 'cntr.out_usd', 'cntr.modo_pago_out', 'cntr.plazo_de_pago_out', 'customer_load_place.link_maps', 'customer_load_place.address', 'customer_load_place.city']);
+        ->get(['asign.id', 'asign.transport', 'asign.transport_agent', 'asign.observation_load', 'asign.agent_port', 'carga.custom_place', 'carga.load_date', 'carga.booking', 'carga.shipper', 'carga.commodity', 'carga.load_place', 'carga.unload_place', 'carga.cut_off_fis', 'carga.oceans_line', 'carga.vessel', 'carga.voyage', 'carga.final_point', 'carga.custom_agent', 'carga.ref_customer', 'cntr.cntr_number', 'cntr.cntr_seal', 'cntr.cntr_type', 'cntr.net_weight', 'cntr.retiro_place', 'cntr.out_usd', 'cntr.modo_pago_out', 'cntr.plazo_de_pago_out', 'customer_load_places.link_maps', 'customer_load_place.address', 'customer_load_places.city']);
         $row = $respuesta_file[0];
 
        

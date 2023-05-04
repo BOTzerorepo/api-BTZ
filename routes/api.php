@@ -138,6 +138,8 @@ Route::get('/accionLugarAduana/{idTrip}','App\Http\Controllers\CustomerLoadPlace
 Route::get('/accionLugarDescarga/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionLugarDescarga');
 
 Route::get('/servicioSatelital','App\Http\Controllers\ServiceSatelital@serviceSatelital');
+Route::get('/pruebaSatelital','App\Http\Controllers\ServiceSatelital@servicePrueba');
+
 
 //JUANI
 

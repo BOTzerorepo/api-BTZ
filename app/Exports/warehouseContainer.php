@@ -38,7 +38,7 @@ class warehouseContainer implements FromCollection, WithHeadings, ShouldAutoSize
     } 
     public function collection()
     {
-        $warehouseContainer = DB::table('depositos_de_retiro')->select('id','title','address','country','city','km_from_town','lat_lon','link_maps')->get();
+        $warehouseContainer = DB::table('deposito_retiros')->select('id','title','address','country','city','km_from_town','latitud','longitud','link_maps')->get();
         return $warehouseContainer;
     }
 }

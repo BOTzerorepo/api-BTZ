@@ -33,7 +33,7 @@ class paymentMode implements FromCollection, WithHeadings, ShouldAutoSize, WithS
     } 
     public function collection()
     {
-        $paymentMode = DB::table('modos_de_pago')->select('id', 'title','description')->get();
+        $paymentMode = DB::table('pay_modes')->select('id', 'title','description')->get();
         return $paymentMode;
     }
 }
