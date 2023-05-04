@@ -29,20 +29,20 @@ class CustomerLoadPlaceController extends Controller
                 'carga.id as idLoad',
                 'cntr.id_cntr as IdTrip',
                 'carga.load_place',
-                'customer_load_place.lat',
-                'customer_load_place.lon',
+                'customer_load_places.lat',
+                'customer_load_places.lon',
                 'carga.custom_place',
                 'aduanas.lat as latA',
                 'aduanas.lon  as lonA',
                 'carga.unload_place',
-                'customer_unload_place.lat as latU',
-                'customer_unload_place.lon  as lonU'
+                'customer_unload_places.lat as latU',
+                'customer_unload_places.lon  as lonU'
             )
             ->join('cntr', 'carga.booking', '=', 'cntr.booking')
             ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
             ->join('aduanas', 'aduanas.description', '=', 'carga.custom_place')
-            ->join('customer_load_place', 'customer_load_place.description', '=', 'carga.load_place')
-            ->join('customer_unload_place', 'customer_unload_place.description', '=', 'carga.unload_place')
+            ->join('customer_load_places', 'customer_load_places.description', '=', 'carga.load_place')
+            ->join('customer_unload_places', 'customer_unload_places.description', '=', 'carga.unload_place')
             ->where('asign.truck', '=', $patente)
             ->get();
 
