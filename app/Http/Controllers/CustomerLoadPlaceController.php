@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CustomerLoadPlace;
 use App\Mail\cargaAduana;
 use App\Mail\cargaCargando;
 use App\Mail\cargaDescarga;
@@ -9,17 +10,14 @@ use App\Mail\ubicacion;
 use App\Models\pruebasModel;
 use App\Models\statu;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Http\Request;
 
-class lugaresDeCarga extends Controller
+
+class CustomerLoadPlaceController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
     public function coordenadas($patente)
     {
 
@@ -526,6 +524,29 @@ class lugaresDeCarga extends Controller
         }
     }
 
+
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        $customerLoadPlaces = DB::table('customer_load_places')->get();       
+        return $customerLoadPlaces;
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function create()
+    {
+        //
+    }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -534,27 +555,42 @@ class lugaresDeCarga extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $customerLoadPlace = new CustomerLoadPlace();
+        $customerLoadPlace->description = $request['description'];
+        $customerLoadPlace->address= $request['address'];
+        $customerLoadPlace->city = $request['city'];
+        $customerLoadPlace->country = $request['country'];
+        $customerLoadPlace->km_from_town = $request['km_from_town'];
+        $customerLoadPlace->remarks = $request['remarks'];
+        $customerLoadPlace->latitud = $request['latitud'];
+        $customerLoadPlace->longitud = $request['longitud'];
+        $customerLoadPlace->link_maps = $request['link_maps'];
+        $customerLoadPlace->user = $request['user'];
+        $customerLoadPlace->company = $request['company'];
+        $customerLoadPlace->save();
+
+        return $customerLoadPlace;
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Models\CustomerLoadPlace  $customerLoadPlace
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show( $id)
     {
-        //
+        $customerLoadPlace = DB::table('customer_load_places')->where('id','=',$id)->get();       
+        return $customerLoadPlace;
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Models\CustomerLoadPlace  $customerLoadPlace
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(CustomerLoadPlace $customerLoadPlace)
     {
         //
     }
@@ -563,22 +599,43 @@ class lugaresDeCarga extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \App\Models\CustomerLoadPlace  $customerLoadPlace
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request,  $id)
     {
-        //
+        $customerLoadPlace = CustomerLoadPlace::findOrFail($id);
+        $customerLoadPlace->description = $request['description'];
+        $customerLoadPlace->address= $request['address'];
+        $customerLoadPlace->city = $request['city'];
+        $customerLoadPlace->country = $request['country'];
+        $customerLoadPlace->km_from_town = $request['km_from_town'];
+        $customerLoadPlace->remarks = $request['remarks'];
+        $customerLoadPlace->latitud = $request['latitud'];
+        $customerLoadPlace->longitud = $request['longitud'];
+        $customerLoadPlace->link_maps = $request['link_maps'];
+        $customerLoadPlace->user = $request['user'];
+        $customerLoadPlace->company = $request['company'];
+        $customerLoadPlace->save();
+
+        return $customerLoadPlace;
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  \App\Models\CustomerLoadPlace  $customerLoadPlace
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy( $id)
     {
-        //
+        CustomerLoadPlace::destroy($id);
+
+        $existe = CustomerLoadPlace::find($id);
+        if($existe){
+            return 'No se elimino el Lugar de Carga';
+        }else{
+            return 'Se elimino el Lugar de Carga';
+        };
     }
 }

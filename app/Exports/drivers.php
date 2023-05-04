@@ -37,7 +37,7 @@ class drivers implements FromCollection, WithHeadings, ShouldAutoSize, WithStyle
     } 
     public function collection()
     {
-        $drivers = DB::table('choferes')->select('id', 'nombre', 'vto_carnet', 'transporte', 'place','status_chofer', 'Observaciones')->get();
+        $drivers = DB::table('drivers')->select('id', 'nombre', 'vto_carnet', 'transporte', 'place','status_chofer', 'Observaciones')->get();
         return $drivers;
     }
 }

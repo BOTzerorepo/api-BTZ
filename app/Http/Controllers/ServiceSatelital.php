@@ -19,6 +19,10 @@ use Mockery\Undefined;
 
 class ServiceSatelital extends Controller
 {
+    public function servicePrueba()
+    {
+        return env('APP_URL') . env('APP_NAME');
+    }
     public function serviceSatelital()
     {
         $todosMisCamiones = DB::table('trucks')
@@ -26,11 +30,13 @@ class ServiceSatelital extends Controller
             ->join('cntr', 'cntr.cntr_number', '=', 'asign.cntr_number')
             ->join('carga', 'carga.booking', '=', 'cntr.booking')
             ->join('aduanas', 'aduanas.description', '=', 'carga.custom_place')
-            ->join('customer_load_place', 'customer_load_place.description', '=', 'carga.load_place')
-            ->join('customer_unload_place', 'customer_unload_place.description', '=', 'carga.unload_place')
-            ->select('cntr.id_cntr as IdTrip', 'carga.id as idCarga', 'trucks.id', 'trucks.id_satelital', 'trucks.domain', 'customer_load_place.description as LugarCarga', 'customer_load_place.lat as CargaLat', 'customer_load_place.lon as CargaLng', 'aduanas.description as LugarAduana', 'aduanas.lat as aduanaLat', 'aduanas.lon as aduanaLon', 'customer_unload_place.description as lugarDescarga', 'customer_unload_place.lat as descargaLat', 'customer_unload_place.lon as descargaLon')
+            ->join('customer_load_places', 'customer_load_places.description', '=', 'carga.load_place')
+            ->join('customer_unload_places', 'customer_unload_place.description', '=', 'carga.unload_place')
+            ->select('cntr.id_cntr as IdTrip', 'carga.id as idCarga', 'trucks.id', 'trucks.id_satelital', 'trucks.domain', 'customer_load_places.description as LugarCarga', 'customer_load_places.lat as CargaLat', 'customer_load_places.lon as CargaLng', 'aduanas.description as LugarAduana', 'aduanas.lat as aduanaLat', 'aduanas.lon as aduanaLon', 'customer_unload_places.description as lugarDescarga', 'customer_unload_places.lat as descargaLat', 'customer_unload_places.lon as descargaLon')
             ->where('cntr.main_status', '!=', 'TERMINADA')
             ->get();
+
+        
 
         $chek = new pruebasModel();
         $chek->contenido = '1. Consulto las patentes del Camion';
@@ -38,6 +44,8 @@ class ServiceSatelital extends Controller
 
         foreach ($todosMisCamiones as $camion) {
 
+
+           
             $chek = new pruebasModel();
             $chek->contenido = '2 Ingreso al Camion ' . $camion->domain;
             $chek->save();
@@ -59,7 +67,10 @@ class ServiceSatelital extends Controller
             $res = $client->sendAsync($request)->wait();
             $respuesta = $res->getBody();
             $r = json_decode($respuesta, true);
-            $keys = array($r);      
+            $keys = array($r);  
+            
+            return $respuesta;
+
             if (array_key_exists('data', $r)) {
 
                 $chek = new pruebasModel();
@@ -131,7 +142,7 @@ class ServiceSatelital extends Controller
                     $chek->save();
 
                     $clientCarga = new Client();
-                    $requestCarga = new Psr7Request('GET', 'https://rail.com.ar/api/accionLugarDeCarga/' . $IdTrip);
+                    $requestCarga = new Psr7Request('GET', env('APP_UTL').'/api/accionLugarDeCarga/' . $IdTrip);
                     $resCarga = $clientCarga->sendAsync($requestCarga)->wait();
                 }
 
@@ -143,7 +154,7 @@ class ServiceSatelital extends Controller
                     $chek->save();
 
                     $clientAduana = new Client();
-                    $requestAduana = new Psr7Request('GET', 'https://rail.com.ar/api/accionLugarAduana/' . $IdTrip);
+                    $requestAduana = new Psr7Request('GET', env('APP_URL').'/api/accionLugarAduana/' . $IdTrip);
                     $resAduana = $clientAduana->sendAsync($requestAduana)->wait();
                 }
                 if ($d3 <= 200) { // lugar de descarga
@@ -154,7 +165,7 @@ class ServiceSatelital extends Controller
                     $chek->save();
 
                     $clientDescarga = new Client();
-                    $requestDescarga = new Psr7Request('GET', 'https://rail.com.ar/api/accionLugarDescarga/' . $IdTrip);
+                    $requestDescarga = new Psr7Request('GET', env('APP_URL').'/api/accionLugarDescarga/' . $IdTrip);
                     $resDescarga = $clientDescarga->sendAsync($requestDescarga)->wait();
 
                     

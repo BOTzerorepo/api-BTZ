@@ -132,12 +132,14 @@ Route::post('/agencias/{id}','App\Http\Controllers\AgenciaController@update');
 // MAPS
 
 
-Route::get('/lugarDeCarga/{patente}','App\Http\Controllers\lugaresDeCarga@coordenadas');
-Route::get('/accionLugarDeCarga/{idTrip}','App\Http\Controllers\lugaresDeCarga@accionLugarDeCarga');
-Route::get('/accionLugarAduana/{idTrip}','App\Http\Controllers\lugaresDeCarga@accionLugarAduana');
-Route::get('/accionLugarDescarga/{idTrip}','App\Http\Controllers\lugaresDeCarga@accionLugarDescarga');
+Route::get('/lugarDeCarga/{patente}','App\Http\Controllers\CustomerLoadPlaceController@coordenadas');
+Route::get('/accionLugarDeCarga/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionLugarDeCarga');
+Route::get('/accionLugarAduana/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionLugarAduana');
+Route::get('/accionLugarDescarga/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionLugarDescarga');
 
 Route::get('/servicioSatelital','App\Http\Controllers\ServiceSatelital@serviceSatelital');
+Route::get('/pruebaSatelital','App\Http\Controllers\ServiceSatelital@servicePrueba');
+
 
 //JUANI
 
@@ -195,3 +197,64 @@ Route::get('/depositoRetiro/{id}','App\Http\Controllers\DepositoRetiroController
 Route::post('/depositoRetiro','App\Http\Controllers\DepositoRetiroController@store');  //Crea un nuevo deposito de retiro
 Route::post('/depositoRetiro/{id}','App\Http\Controllers\DepositoRetiroController@update'); //Actualiza los datos de un deposito de retiro
 Route::delete('/depositoRetiro/{id}','App\Http\Controllers\DepositoRetiroController@destroy'); //Elimina un deposito de retiro
+
+//Lugar de carga
+Route::get('/lugarCargas','App\Http\Controllers\CustomerLoadPlaceController@index'); //Busca todos los depositos de retiro
+Route::get('/lugarCarga/{id}','App\Http\Controllers\CustomerLoadPlaceController@show'); //Busca un deposito de retiro
+Route::post('/lugarCarga','App\Http\Controllers\CustomerLoadPlaceController@store');  //Crea un nuevo deposito de retiro
+Route::post('/lugarCarga/{id}','App\Http\Controllers\CustomerLoadPlaceController@update'); //Actualiza los datos de un deposito de retiro
+Route::delete('/lugarCarga/{id}','App\Http\Controllers\CustomerLoadPlaceController@destroy'); //Elimina un deposito de retiro
+
+//Lugar de Descarga
+Route::get('/lugarDescargas','App\Http\Controllers\CustomerUnloadPlaceController@index'); //Busca todos los depositos de retiro
+Route::get('/lugarDescarga/{id}','App\Http\Controllers\CustomerUnloadPlaceController@show'); //Busca un deposito de retiro
+Route::post('/lugarDescarga','App\Http\Controllers\CustomerUnloadPlaceController@store');  //Crea un nuevo deposito de retiro
+Route::post('/lugarDescarga/{id}','App\Http\Controllers\CustomerUnloadPlaceController@update'); //Actualiza los datos de un deposito de retiro
+Route::delete('/lugarDescarga/{id}','App\Http\Controllers\CustomerUnloadPlaceController@destroy'); //Elimina un deposito de retiro
+
+//Type CNTR
+Route::get('/tiposCntr','App\Http\Controllers\CntrTypeController@index'); //Busca todos los tipos de cntr
+Route::get('/tipoCntr/{id}','App\Http\Controllers\CntrTypeController@show'); //Busca un tipo de cntr
+Route::post('/tipoCntr','App\Http\Controllers\CntrTypeController@store'); //Crea un nuevo tipo de cntr
+Route::post('/tipoCntr/{id}','App\Http\Controllers\CntrTypeController@update'); //Actualiza los datos de un tipo de cntr
+Route::delete('/tipoCntr/{id}','App\Http\Controllers\CntrTypeController@destroy'); //Elimina un tipo de cntr
+
+//Modos de Pago
+Route::get('/modoPagos','App\Http\Controllers\PayModeController@index'); //Busca todos los modos de pago
+Route::get('/modoPago/{id}','App\Http\Controllers\PayModeController@show'); //Busca un modo de pago
+Route::post('/modoPago','App\Http\Controllers\PayModeController@store'); //Crea un nuevo modo de pago
+Route::post('/modoPago/{id}','App\Http\Controllers\PayModeController@update'); //Actualiza los datos de un modo de pago
+Route::delete('/modoPago/{id}','App\Http\Controllers\PayModeController@destroy'); //Elimina un modo de pago
+
+//Plazo de Pago
+Route::get('/plazoPagos','App\Http\Controllers\PayTimeController@index'); //Busca todos los plazos de pago
+Route::get('/plazoPago/{id}','App\Http\Controllers\PayTimeController@show'); //Busca un plazo de pago
+Route::post('/plazoPago','App\Http\Controllers\PayTimeController@store'); //Crea un nuevo plazo de pago
+Route::post('/plazoPago/{id}','App\Http\Controllers\PayTimeController@update'); //Actualiza los datos de un plazo de pago
+Route::delete('/plazoPago/{id}','App\Http\Controllers\PayTimeController@destroy'); //Elimina un plazo de pago
+
+//Customer agent
+Route::get('/customerAgents','App\Http\Controllers\CustomerAgentController@index'); //Busca todos los Customer Shipper
+Route::get('/customerAgentEmpresa/{empresa}','App\Http\Controllers\CustomerAgentController@indexCompany'); //Busca todos los Customer Shipper de una compania
+Route::get('/customerAgent/{id}','App\Http\Controllers\CustomerAgentController@show'); //Busca un Customer Shipper de una compania
+Route::post('/customerAgent','App\Http\Controllers\CustomerAgentController@store'); //Crea un nuevo Customer Shipper
+Route::post('/customerAgent/{id}','App\Http\Controllers\CustomerAgentController@update'); //Actualiza los datos de un Customer Shipper
+Route::delete('/customerAgent/{id}','App\Http\Controllers\CustomerAgentController@destroy'); //Elimina un Customer Shipper
+
+//Customer ntfy
+Route::get('/customersNtfy','App\Http\Controllers\CustomerNtfyController@index'); //Busca todos los Customer Ntfy
+Route::get('/customerNtfyCompany/{company}','App\Http\Controllers\CustomerNtfyController@indexCompany'); //Busca todos los Customer Ntfy de una compania
+Route::get('/customerNtfy/{id}','App\Http\Controllers\CustomerNtfyController@show'); //Busca un Customer Ntfy
+Route::post('/customerNtfy','App\Http\Controllers\CustomerNtfyController@store'); //Crea un nuevo Customer Ntfy
+Route::post('/customerNtfy/{id}','App\Http\Controllers\CustomerNtfyController@update'); //Actualiza los datos de un Customer Ntfy
+Route::delete('/customerNtfy/{id}','App\Http\Controllers\CustomerNtfyController@destroy'); //Elimina un Customer Ntfy
+
+//Customer shipper
+Route::get('/customersShipper','App\Http\Controllers\CustomerShipperController@index'); //Busca todos los Customer Shipper
+Route::get('/customerShipperCompany/{company}','App\Http\Controllers\CustomerShipperController@indexCompany'); //Busca todos los Customer Shipper de una compania
+Route::get('/customerShipper/{id}','App\Http\Controllers\CustomerShipperController@show'); //Busca un Customer Shipper de una compania
+Route::post('/customerShipper','App\Http\Controllers\CustomerShipperController@store'); //Crea un nuevo Customer Shipper
+Route::post('/customerShipper/{id}','App\Http\Controllers\CustomerShipperController@update'); //Actualiza los datos de un Customer Shipper
+Route::delete('/customerShipper/{id}','App\Http\Controllers\CustomerShipperController@destroy'); //Elimina un Customer Shipper
+
+

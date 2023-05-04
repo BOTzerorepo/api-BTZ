@@ -37,7 +37,7 @@ class customAgents implements FromCollection, WithHeadings, ShouldAutoSize, With
     } 
     public function collection()
     {
-        $customAgents = DB::table('custom_agent')->select('id','razon_social', 'tax_id', 'pais', 'provincia','mail', 'phone')->get();
+        $customAgents = DB::table('customer_agents')->select('id','razon_social', 'tax_id', 'pais', 'provincia','mail', 'phone')->get();
         return $customAgents;
     }
 }
