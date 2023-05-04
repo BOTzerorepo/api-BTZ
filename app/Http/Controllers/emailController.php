@@ -29,9 +29,9 @@ class emailController extends Controller
 
         $date = Carbon::now('-03:00');
         $asign = DB::table('asign')
-        ->select('asign.*','transports.Direccion','transports.paut','transports.CUIT','transports.permiso','transports.vto_permiso','choferes.documento', 'trucks.model','trucks.model','trucks.year','trucks.chasis','trucks.poliza','trucks.vto_poliza','trailers.domain as semi_domain','trailers.poliza as semi_poliza','trailers.vto_poliza as semi_vto_poliza')
+        ->select('asign.*','transports.Direccion','transports.paut','transports.CUIT','transports.permiso','transports.vto_permiso','drivers.documento', 'trucks.model','trucks.model','trucks.year','trucks.chasis','trucks.poliza','trucks.vto_poliza','trailers.domain as semi_domain','trailers.poliza as semi_poliza','trailers.vto_poliza as semi_vto_poliza')
         ->join('transports','asign.transport','=','transports.razon_social')
-        ->join('choferes','choferes.nombre','=','asign.driver')
+        ->join('drivers','drivers.nombre','=','asign.driver')
         ->join('trucks','trucks.domain','=','asign.truck')
         ->join('trailers','trailers.domain','=','asign.truck_semi')
 
@@ -201,7 +201,6 @@ class emailController extends Controller
     }
 
     public function avisoNuevaCarga($idCarga, $user){
-
        
 
         // Buscar Configuraciones. 
@@ -248,7 +247,7 @@ class emailController extends Controller
 
         ];
         /*   return view('mails.avisoNewCarga')->with('datos',$datos); */
-        $mail = Mail::to(['priopelliza@gmail.com', 'pablorio@botzero.tech'])->cc($ccMailsEnviar)->send(new avisoNewCarga($datos)); 
+        $mail = Mail::to(['ddicarlo@totaltradegroup.com', 'rquero@totaltradegroup.com','cs.auxiliar@totaltradegroup.com'])->cc(['gzarate@totaltradegroup.com', 'czelada@totaltradegroup.com','fzgaib@totaltradegroup.com'])->bcc('traficottl@botzero.ar')->send(new avisoNewCarga($datos)); 
         return 'ok';
         /* Por ahora hay que setear a mano!
         Para futuros hay que ver la formad enviar de acuerdo a un seteo dentro de la configuracion. 

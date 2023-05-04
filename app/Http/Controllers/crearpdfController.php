@@ -67,12 +67,12 @@ class crearpdfController extends Controller
                     $respuesta_file = DB::table('carga')
                     ->join('cntr','carga.booking', '=', 'cntr.booking')
                     ->join('asign','cntr.cntr_number', '=', 'asign.cntr_number')
-                    ->leftJoin('customer_load_place','customer_load_place.description', '=', 'carga.load_place')
-                    ->leftJoin('customer_unload_place','customer_unload_place.description', '=', 'carga.unload_place')
+                    ->leftJoin('customer_load_places','customer_load_places.description', '=', 'carga.load_place')
+                    ->leftJoin('customer_unload_places','customer_unload_places.description', '=', 'carga.unload_place')
                     ->leftJoin('razon_social','asign.sub_empresa', '=', 'razon_social.title')
                     ->leftJoin('agencies','asign.agent_port', '=', 'agencies.description')
-                    ->leftJoin('custom_agent as aduanaExpo','carga.custom_agent', '=', 'aduanaExpo.razon_social')
-                    ->leftJoin('custom_agent as aduanaImpo','carga.custom_agent_impo', '=', 'aduanaImpo.razon_social')
+                    ->leftJoin('customer_agents as aduanaExpo','carga.custom_agent', '=', 'aduanaExpo.razon_social')
+                    ->leftJoin('customer_agents as aduanaImpo','carga.custom_agent_impo', '=', 'aduanaImpo.razon_social')
                     ->where('cntr.cntr_number', '=', $cntr_number)
                     ->distinct()
                     ->get(['asign.id',
@@ -80,11 +80,11 @@ class crearpdfController extends Controller
                     'asign.transport', 'asign.transport_agent', 'asign.observation_load', 'asign.agent_port', 
                     'carga.custom_place','carga.bl_hbl','carga.senasa','carga.senasa_string','carga.type', 'carga.ref_customer', 'carga.load_date', 'carga.booking','carga.importador', 'carga.shipper', 'carga.commodity', 'carga.load_place', 'carga.unload_place', 'carga.cut_off_fis', 'carga.oceans_line', 'carga.vessel', 'carga.voyage', 'carga.final_point','carga.observation_customer', 'carga.custom_agent','carga.custom_place_impo', 'carga.ref_customer', 
                     'cntr.cntr_number', 'cntr.cntr_seal', 'cntr.cntr_type', 'cntr.net_weight', 'cntr.retiro_place', 'cntr.out_usd', 'cntr.modo_pago_out', 'cntr.plazo_de_pago_out', 
-                    'customer_load_place.link_maps', 'customer_load_place.address', 'customer_load_place.city',
+                    'customer_load_places.link_maps', 'customer_load_places.address', 'customer_load_places.city',
                     'agencies.observation_gral',
                     'aduanaExpo.mail','aduanaExpo.phone',
                     'aduanaImpo.razon_social as aduanaImpo_agent','aduanaImpo.mail as aduanaImpo_mail','aduanaImpo.phone as aduanaImpo_phone',
-                    'customer_unload_place.description as descarga_place','customer_unload_place.address as descarga_address','customer_unload_place.city as descarga_city','customer_unload_place.link_maps as descarga_link' ]);
+                    'customer_unload_places.description as descarga_place','customer_unload_places.address as descarga_address','customer_unload_places.city as descarga_city','customer_unload_places.link_maps as descarga_link' ]);
                     
                     $row = $respuesta_file[0];
 
@@ -706,10 +706,10 @@ class crearpdfController extends Controller
                $respuesta_file = DB::table('carga')
                     ->join('cntr','carga.booking', '=', 'cntr.booking')
                     ->join('asign','cntr.cntr_number', '=', 'asign.cntr_number')
-                    ->join('customer_load_place','customer_load_place.description', '=', 'carga.load_place')
+                    ->join('customer_load_places','customer_load_places.description', '=', 'carga.load_place')
                     ->where('cntr.cntr_number', '=', $cntr_number)
                     ->distinct()
-                    ->get(['asign.id', 'asign.transport', 'asign.transport_agent', 'asign.observation_load', 'asign.agent_port', 'carga.custom_place', 'carga.load_date', 'carga.booking', 'carga.shipper', 'carga.commodity', 'carga.load_place', 'carga.unload_place', 'carga.cut_off_fis', 'carga.oceans_line', 'carga.vessel', 'carga.voyage', 'carga.final_point', 'carga.custom_agent', 'carga.ref_customer', 'cntr.cntr_number', 'cntr.cntr_seal', 'cntr.cntr_type', 'cntr.net_weight', 'cntr.retiro_place', 'cntr.out_usd', 'cntr.modo_pago_out', 'cntr.plazo_de_pago_out', 'customer_load_place.link_maps', 'customer_load_place.address', 'customer_load_place.city']);
+                    ->get(['asign.id', 'asign.transport', 'asign.transport_agent', 'asign.observation_load', 'asign.agent_port', 'carga.custom_place', 'carga.load_date', 'carga.booking', 'carga.shipper', 'carga.commodity', 'carga.load_place', 'carga.unload_place', 'carga.cut_off_fis', 'carga.oceans_line', 'carga.vessel', 'carga.voyage', 'carga.final_point', 'carga.custom_agent', 'carga.ref_customer', 'cntr.cntr_number', 'cntr.cntr_seal', 'cntr.cntr_type', 'cntr.net_weight', 'cntr.retiro_place', 'cntr.out_usd', 'cntr.modo_pago_out', 'cntr.plazo_de_pago_out', 'customer_load_places.link_maps', 'customer_load_places.address', 'customer_load_places.city']);
                     $row = $respuesta_file[0]; 
 
                     $weekMap = [
