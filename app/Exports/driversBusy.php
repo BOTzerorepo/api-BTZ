@@ -36,7 +36,7 @@ class driversBusy implements FromCollection, WithHeadings, ShouldAutoSize, WithS
     } 
     public function collection()
     {
-        $driversBusy = DB::table('choferes')->select('id', 'nombre', 'vto_carnet', 'transporte', 'place', 'Observaciones')->where('status_chofer', '=', 'ocupado')->get();
+        $driversBusy = DB::table('drivers')->select('id', 'nombre', 'vto_carnet', 'transporte', 'place', 'Observaciones')->where('status_chofer', '=', 'ocupado')->get();
         return $driversBusy;
     }
 }

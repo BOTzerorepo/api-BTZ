@@ -38,7 +38,7 @@ class containerTypes implements FromCollection, WithHeadings, ShouldAutoSize, Wi
     } 
     public function collection()
     {
-        $warehouseContainer = DB::table('cntr_type')->select('id','title','teu','weight','height','longitud','width','observation')->get();
+        $warehouseContainer = DB::table('cntr_types')->select('id','title','teu','weight','height','longitud','width','observation')->get();
         return $warehouseContainer;
     }
 }
