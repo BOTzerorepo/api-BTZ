@@ -257,4 +257,10 @@ Route::post('/customerShipper','App\Http\Controllers\CustomerShipperController@s
 Route::post('/customerShipper/{id}','App\Http\Controllers\CustomerShipperController@update'); //Actualiza los datos de un Customer Shipper
 Route::delete('/customerShipper/{id}','App\Http\Controllers\CustomerShipperController@destroy'); //Elimina un Customer Shipper
 
-
+//Customer trader
+Route::get('/customers','App\Http\Controllers\CustomerController@index'); //Busca todos los Customer trader
+Route::get('/customerCompany/{company}','App\Http\Controllers\CustomerController@indexCompany'); //Busca todos los Customer trader de una compania
+Route::get('/customer/{id}','App\Http\Controllers\CustomerController@show'); //Busca un Customer trader de una compania
+Route::post('/customer','App\Http\Controllers\CustomerController@store'); //Crea un nuevo Customer trader
+Route::post('/customer/{id}','App\Http\Controllers\CustomerController@update'); //Actualiza los datos de un Customer trader
+Route::delete('/customer/{id}','App\Http\Controllers\CustomerController@destroy'); //Elimina un Customer trader
