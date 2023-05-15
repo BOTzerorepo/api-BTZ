@@ -93,7 +93,7 @@
     </tr>
     <tr>
         <td align="left" width="25%" class="tdContenidoItem"><strong>VALOR POR CNTR:</strong></td>
-        <td colspan="4"  class="tdContenido">{{ $out_usd }} - {{ $modo_pago_out }} {{ $plazo_de_pago_out}} </td>
+        <td colspan="4"  class="tdContenido">{{ $out_usd }} - {{ $observation_out  }} </td>
     </tr>
     <tr>
         <td align="left" width="25%" class="tdContenidoItem"><strong>OBSERVACIONES:</strong></td>
