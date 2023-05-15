@@ -21,6 +21,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 /* Impresion de PDF */
 
 Route::get('/imprimirCarga/{cntr_number}','App\Http\Controllers\crearpdfController@carga'); 
+Route::get('/verCarga/{cntr_number}','App\Http\Controllers\verpdfController@carga'); 
+
 Route::get('/imprimirVacio/{id_cntr}','App\Http\Controllers\crearpdfController@vacio');  
 Route::get('/imprimirEviarInstrucivo/{cntr}','App\Http\Controllers\crearpdfController@cargaPorMail');  
 Route::get('/mailCargaNueva/{idCarga}/{user}','App\Http\Controllers\emailController@avisoNuevaCarga'); // pachimanok 

@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Mail;
 use Svg\Surface\SurfacePDFLib;
 
 
-class crearpdfController extends Controller
+class verpdfController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -161,49 +161,7 @@ class crearpdfController extends Controller
 
                         ];
 
-                        if (!file_exists('instructivos/' . $booking)) {
-
-                            $logApi = new logapi();
-                            $logApi->detalle = 'Respuesta file = :' . $file;
-                            $logApi->user = 'no existe la Carpeta instructivos/' . $booking;
-                            $logApi->save();
-
-                            /* Si no Existe la Carperta Del booking */
-
-                            mkdir('instructivos/' . $booking, 0777, true);
-
-                            /* Si existe la Carpeta del Contenedor dentro de la Carpeta del Booking la Asignamos*/
-                            if (file_exists('instructivos/' . $booking . '/' . $cntr_number)) {
-
-                                $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                            } else {
-
-                                /* Si no existe la Carpeta del Contenedor dentro de la Carpeta del Booking la creamos y  la Asignamos*/
-
-                                $logApi = new logapi();
-                                $logApi->detalle = 'Respuesta file = :' . $file;
-                                $logApi->user = 'no existe la Carpeta instructivos/' . $booking . '/' . $cntr_number;
-                                $logApi->save();
-
-                                mkdir('instructivos/' . $booking . '/' . $cntr_number, 0777, true);
-                                $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                            }
-                        } else {
-
-                            /* si Ya existe la Carpeta Booking */
-
-                            if (file_exists('instructivos/' . $booking . '/' . $cntr_number)) {
-                                /* y existe la carpeta de CNTR la asignamos */
-
-                                $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                            } else {
-
-                                /* y si no existe la carpeta de CNTR la creamos y la asignamos */
-
-                                mkdir('instructivos/' . $booking . '/' . $cntr_number, 0777, true);
-                                $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                            }
-                        }
+                        
 
                         $logApi = new logapi();
                         $logApi->detalle = 'Respuesta file = :' . $file;
@@ -223,14 +181,14 @@ class crearpdfController extends Controller
                         $logApi->save();
 
                         // Generamos el Archivo PDF
-                        $pdf = FacadePdf::loadView('pdf.instructivoCargaFOB', $data);
-                        file_put_contents($save_folder, $pdf->output());
+                      
+                      
 
                         $respuesta_update = DB::table('asign')
                             ->where('cntr_number', $cntr_number)
                             ->update(['file_instruction' => $file_name]);
 
-                        return $pdf->download($file_name);
+                        return view('pdf.instructivoCargaFOB', $data);
 
                     } elseif ($row->type == 'Expo Maritima') {
 
