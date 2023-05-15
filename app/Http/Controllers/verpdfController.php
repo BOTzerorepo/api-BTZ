@@ -23,28 +23,14 @@ class verpdfController extends Controller
      */
     public function carga($cntr_number)
     {
-
         $variables = DB::table('variables')->select('api')->get();
         $base = $variables[0]->api;
-
-
-        $logApi = new logapi();
-        $logApi->detalle = 'Consulta Variable api base = :' . $base;
-        $logApi->user = 'carga(' . $cntr_number . ')';
-        $logApi->save();
-
-
 
         $respuesta = DB::table('asign')
             ->join('transports', 'transports.razon_social', '=', 'asign.transport')
             ->where('asign.cntr_number', '=', $cntr_number)
             ->select('asign.cntr_number', 'asign.booking', 'asign.file_instruction', 'transports.contacto_logistica_celular')->get();
         $row = $respuesta[0];
-
-        $logApi = new logapi();
-        $logApi->detalle = 'Respuesta api count = :' . $respuesta->count();
-        $logApi->user = 'carga(' . $cntr_number . ')';
-        $logApi->save();
 
         if ($respuesta->count() == 1) {
 
@@ -56,44 +42,32 @@ class verpdfController extends Controller
             $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
             $save_folder = $folder . $file_name;
 
-            $logApi = new logapi();
-            $logApi->detalle = 'Respuesta file = :' . $file;
-            $logApi->user = 'carga(' . $cntr_number . ')';
-            $logApi->save();
-
-            if ($file == null) {
-
                 // sino está generado el Instrtructivo lo creamos. 
-                $respuesta_file = DB::table('carga')
-                    ->join('cntr', 'carga.booking', '=', 'cntr.booking')
-                    ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
-                    ->leftJoin('customer_load_places', 'customer_load_places.description', '=', 'carga.load_place')
-                    ->leftJoin('customer_unload_places', 'customer_unload_places.description', '=', 'carga.unload_place')
-                    ->leftJoin('razon_social', 'asign.sub_empresa', '=', 'razon_social.title')
-                    ->leftJoin('agencies', 'asign.agent_port', '=', 'agencies.description')
-                    ->leftJoin('customer_agents as aduanaExpo', 'carga.custom_agent', '=', 'aduanaExpo.razon_social')
-                    ->leftJoin('customer_agents as aduanaImpo', 'carga.custom_agent_impo', '=', 'aduanaImpo.razon_social')
-                    ->where('cntr.cntr_number', '=', $cntr_number)
-                    ->distinct()
-                    ->get([
-                        'asign.id',
-                        'razon_social.img', 'razon_social.cuit', 'razon_social.title',
-                        'asign.transport', 'asign.transport_agent', 'asign.observation_load', 'asign.agent_port',
-                        'carga.custom_place', 'carga.bl_hbl', 'carga.senasa', 'carga.senasa_string', 'carga.type', 'carga.ref_customer', 'carga.load_date', 'carga.booking', 'carga.importador', 'carga.shipper', 'carga.commodity', 'carga.load_place', 'carga.unload_place', 'carga.cut_off_fis', 'carga.oceans_line', 'carga.vessel', 'carga.voyage', 'carga.final_point', 'carga.observation_customer', 'carga.custom_agent', 'carga.custom_place_impo', 'carga.ref_customer',
-                        'cntr.cntr_number', 'cntr.cntr_seal', 'cntr.cntr_type', 'cntr.net_weight', 'cntr.retiro_place', 'cntr.out_usd', 'cntr.modo_pago_out', 'cntr.plazo_de_pago_out',
-                        'customer_load_places.link_maps', 'customer_load_places.address', 'customer_load_places.city',
-                        'agencies.observation_gral',
-                        'aduanaExpo.mail', 'aduanaExpo.phone',
-                        'aduanaImpo.razon_social as aduanaImpo_agent', 'aduanaImpo.mail as aduanaImpo_mail', 'aduanaImpo.phone as aduanaImpo_phone',
-                        'customer_unload_places.description as descarga_place', 'customer_unload_places.address as descarga_address', 'customer_unload_places.city as descarga_city', 'customer_unload_places.link_maps as descarga_link'
-                    ]);
+            $respuesta_file = DB::table('carga')
+                ->join('cntr', 'carga.booking', '=', 'cntr.booking')
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+                ->leftJoin('customer_load_places', 'customer_load_places.description', '=', 'carga.load_place')
+                ->leftJoin('customer_unload_places', 'customer_unload_places.description', '=', 'carga.unload_place')
+                ->leftJoin('razon_social', 'asign.sub_empresa', '=', 'razon_social.title')
+                ->leftJoin('agencies', 'asign.agent_port', '=', 'agencies.description')
+                ->leftJoin('customer_agents as aduanaExpo', 'carga.custom_agent', '=', 'aduanaExpo.razon_social')
+                ->leftJoin('customer_agents as aduanaImpo', 'carga.custom_agent_impo', '=', 'aduanaImpo.razon_social')
+                ->where('cntr.cntr_number', '=', $cntr_number)
+                ->distinct()
+                ->get([
+                    'asign.id',
+                    'razon_social.img', 'razon_social.cuit', 'razon_social.title',
+                    'asign.transport', 'asign.transport_agent', 'asign.observation_load', 'asign.agent_port',
+                    'carga.custom_place', 'carga.bl_hbl', 'carga.senasa', 'carga.senasa_string', 'carga.type', 'carga.ref_customer', 'carga.load_date', 'carga.booking', 'carga.importador', 'carga.shipper', 'carga.commodity', 'carga.load_place', 'carga.unload_place', 'carga.cut_off_fis', 'carga.oceans_line', 'carga.vessel', 'carga.voyage', 'carga.final_point', 'carga.observation_customer', 'carga.custom_agent', 'carga.custom_place_impo', 'carga.ref_customer',
+                    'cntr.cntr_number', 'cntr.cntr_seal', 'cntr.cntr_type', 'cntr.net_weight', 'cntr.retiro_place', 'cntr.out_usd', 'cntr.modo_pago_out', 'cntr.plazo_de_pago_out',
+                    'customer_load_places.link_maps', 'customer_load_places.address', 'customer_load_places.city',
+                    'agencies.observation_gral',
+                    'aduanaExpo.mail', 'aduanaExpo.phone',
+                    'aduanaImpo.razon_social as aduanaImpo_agent', 'aduanaImpo.mail as aduanaImpo_mail', 'aduanaImpo.phone as aduanaImpo_phone',
+                    'customer_unload_places.description as descarga_place', 'customer_unload_places.address as descarga_address', 'customer_unload_places.city as descarga_city', 'customer_unload_places.link_maps as descarga_link'
+                ]);
 
                 $row = $respuesta_file[0];
-
-                $logApi = new logapi();
-                $logApi->detalle = 'Respuesta file = :' . $file;
-                $logApi->user = 'Respuesta Consulta para armar datos de intructivos count: ' . $respuesta_file->count();
-                $logApi->save();
 
                 $weekMap = [
                     0 => 'Domingo',
@@ -104,21 +78,15 @@ class verpdfController extends Controller
                     5 => 'Viernes',
                     6 => 'Sábado',
                 ];
+                
                 $day = Carbon::parse($row->load_date)->dayOfWeek;
                 $date = Carbon::parse($row->load_date)->format('d-m-Y');
                 $dayW = $weekMap[$day];
                 $load_date = $dayW . ' ' . $date;
 
-
                 if ($respuesta_file->count() >= 1) {
 
                     if ($row->type == 'Puesta FOB') {
-
-
-                        $logApi = new logapi();
-                        $logApi->detalle = 'Respuesta file = :' . $file;
-                        $logApi->user = 'Ingreso en Puesta FOB';
-                        $logApi->save();
 
                         $data = [
                             'id_asign' => $row->id,
@@ -160,33 +128,6 @@ class verpdfController extends Controller
                             'observation_customer' => $row->observation_customer,
 
                         ];
-
-                        
-
-                        $logApi = new logapi();
-                        $logApi->detalle = 'Respuesta file = :' . $file;
-                        $logApi->user = 'La Carpeta fue creada o ya existia:' . $folder;
-                        $logApi->save();
-
-
-                        $file_name = 'instructivo_' . $booking . '_' . $cntr_number . '.pdf';
-
-                        // Ya sabemos que esta creada (o la creamos) entonces creamos variables para usar durante todo el proceso.
-
-                        $save_folder = $folder . $file_name;
-
-                        $logApi = new logapi();
-                        $logApi->detalle = 'Respuesta file = :' . $file;
-                        $logApi->user = 'Vamos a guardar el Archivo aca:' .  $save_folder;
-                        $logApi->save();
-
-                        // Generamos el Archivo PDF
-                      
-                      
-
-                        $respuesta_update = DB::table('asign')
-                            ->where('cntr_number', $cntr_number)
-                            ->update(['file_instruction' => $file_name]);
 
                         return view('pdf.instructivoCargaFOB', $data);
 
@@ -233,56 +174,9 @@ class verpdfController extends Controller
 
                         ];
 
-                        if (!file_exists('instructivos/' . $booking)) {
-
-                            /* Si no Existe la Carperta Del booking */
-
-                            mkdir('instructivos/' . $booking, 0777, true);
-
-                            /* Si existe la Carpeta del Contenedor dentro de la Carpeta del Booking la Asignamos*/
-                            if (file_exists('instructivos/' . $booking . '/' . $cntr_number)) {
-
-                                $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                            } else {
-
-                                /* Si no existe la Carpeta del Contenedor dentro de la Carpeta del Booking la creamos y  la Asignamos*/
-
-
-                                mkdir('instructivos/' . $booking . '/' . $cntr_number, 0777, true);
-                                $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                            }
-                        } else {
-
-                            /* si Ya existe la Carpeta Booking */
-
-                            if (file_exists('instructivos/' . $booking . '/' . $cntr_number)) {
-                                /* y existe la carpeta de CNTR la asignamos */
-
-                                $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                            } else {
-
-                                /* y si no existe la carpeta de CNTR la creamos y la asignamos */
-
-                                mkdir('instructivos/' . $booking . '/' . $cntr_number, 0777, true);
-                                $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                            }
-                        }
-
-                        $file_name = 'instructivo_' . $booking . '_' . $cntr_number . '.pdf';
-
-                        // Ya sabemos que esta creada (o la creamos) entonces creamos variables para usar durante todo el proceso.
-
-                        $save_folder = $folder . $file_name;
-
-                        // Generamos el Archivo PDF
-                        $pdf = FacadePdf::loadView('pdf.instructivoCargaExpoMar', $data);
-                        file_put_contents($save_folder, $pdf->output());
-
-                        $respuesta_update = DB::table('asign')
-                            ->where('cntr_number', $cntr_number)
-                            ->update(['file_instruction' => $file_name]);
-
-                        return $pdf->download($file_name);
+                        
+                        return view('pdf.instructivoCargaExpoMar', $data);
+    
 
                     } elseif ($row->type == 'Expo Terrestre') {
 
@@ -344,56 +238,9 @@ class verpdfController extends Controller
                         ];
 
 
-                        if (!file_exists('instructivos/' . $booking)) {
-
-                            /* Si no Existe la Carperta Del booking */
-
-                            mkdir('instructivos/' . $booking, 0777, true);
-
-                            /* Si existe la Carpeta del Contenedor dentro de la Carpeta del Booking la Asignamos*/
-                            if (file_exists('instructivos/' . $booking . '/' . $cntr_number)) {
-
-                                $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                            } else {
-
-                                /* Si no existe la Carpeta del Contenedor dentro de la Carpeta del Booking la creamos y  la Asignamos*/
-
-
-                                mkdir('instructivos/' . $booking . '/' . $cntr_number, 0777, true);
-                                $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                            }
-                        } else {
-
-                            /* si Ya existe la Carpeta Booking */
-
-                            if (file_exists('instructivos/' . $booking . '/' . $cntr_number)) {
-                                /* y existe la carpeta de CNTR la asignamos */
-
-                                $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                            } else {
-
-                                /* y si no existe la carpeta de CNTR la creamos y la asignamos */
-
-                                mkdir('instructivos/' . $booking . '/' . $cntr_number, 0777, true);
-                                $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                            }
-                        }
-
-                        $file_name = 'instructivo_' . $booking . '_' . $cntr_number . '.pdf';
-
-                        // Ya sabemos que esta creada (o la creamos) entonces creamos variables para usar durante todo el proceso.
-
-                        $save_folder = $folder . $file_name;
-
-                        // Generamos el Archivo PDF
-                        $pdf = FacadePdf::loadView('pdf.instructivoCargaExpoTer', $data);
-                        file_put_contents($save_folder, $pdf->output());
-
-                        $respuesta_update = DB::table('asign')
-                            ->where('cntr_number', $cntr_number)
-                            ->update(['file_instruction' => $file_name]);
-
-                        return $pdf->download($file_name);
+                        
+                        return view('pdf.instructivoCargaExpoTer', $data);
+                        
 
                     } elseif ($row->type == 'Impo Maritima') {
 
@@ -458,56 +305,9 @@ class verpdfController extends Controller
                         ];
 
 
-                        if (!file_exists('instructivos/' . $booking)) {
-
-                            /* Si no Existe la Carperta Del booking */
-
-                            mkdir('instructivos/' . $booking, 0777, true);
-
-                            /* Si existe la Carpeta del Contenedor dentro de la Carpeta del Booking la Asignamos*/
-                            if (file_exists('instructivos/' . $booking . '/' . $cntr_number)) {
-
-                                $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                            } else {
-
-                                /* Si no existe la Carpeta del Contenedor dentro de la Carpeta del Booking la creamos y  la Asignamos*/
-
-
-                                mkdir('instructivos/' . $booking . '/' . $cntr_number, 0777, true);
-                                $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                            }
-                        } else {
-
-                            /* si Ya existe la Carpeta Booking */
-
-                            if (file_exists('instructivos/' . $booking . '/' . $cntr_number)) {
-                                /* y existe la carpeta de CNTR la asignamos */
-
-                                $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                            } else {
-
-                                /* y si no existe la carpeta de CNTR la creamos y la asignamos */
-
-                                mkdir('instructivos/' . $booking . '/' . $cntr_number, 0777, true);
-                                $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                            }
-                        }
-
-                        $file_name = 'instructivo_' . $booking . '_' . $cntr_number . '.pdf';
-
-                        // Ya sabemos que esta creada (o la creamos) entonces creamos variables para usar durante todo el proceso.
-
-                        $save_folder = $folder . $file_name;
-
-                        // Generamos el Archivo PDF
-                        $pdf = FacadePdf::loadView('pdf.instructivoCargaImpoMar', $data);
-                        file_put_contents($save_folder, $pdf->output());
-
-                        $respuesta_update = DB::table('asign')
-                            ->where('cntr_number', $cntr_number)
-                            ->update(['file_instruction' => $file_name]);
-
-                        return $pdf->download($file_name);
+                        
+                        return view('pdf.instructivoCargaImpoMar', $data);
+                      
 
                     } elseif ($row->type == 'Impo Terrestre') {
 
@@ -571,57 +371,8 @@ class verpdfController extends Controller
 
                         ];
 
-
-                        if (!file_exists('instructivos/' . $booking)) {
-
-                            /* Si no Existe la Carperta Del booking */
-
-                            mkdir('instructivos/' . $booking, 0777, true);
-
-                            /* Si existe la Carpeta del Contenedor dentro de la Carpeta del Booking la Asignamos*/
-                            if (file_exists('instructivos/' . $booking . '/' . $cntr_number)) {
-
-                                $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                            } else {
-
-                                /* Si no existe la Carpeta del Contenedor dentro de la Carpeta del Booking la creamos y  la Asignamos*/
-
-
-                                mkdir('instructivos/' . $booking . '/' . $cntr_number, 0777, true);
-                                $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                            }
-                        } else {
-
-                            /* si Ya existe la Carpeta Booking */
-
-                            if (file_exists('instructivos/' . $booking . '/' . $cntr_number)) {
-                                /* y existe la carpeta de CNTR la asignamos */
-
-                                $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                            } else {
-
-                                /* y si no existe la carpeta de CNTR la creamos y la asignamos */
-
-                                mkdir('instructivos/' . $booking . '/' . $cntr_number, 0777, true);
-                                $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                            }
-                        }
-
-                        $file_name = 'instructivo_' . $booking . '_' . $cntr_number . '.pdf';
-
-                        // Ya sabemos que esta creada (o la creamos) entonces creamos variables para usar durante todo el proceso.
-
-                        $save_folder = $folder . $file_name;
-
-                        // Generamos el Archivo PDF
-                        $pdf = FacadePdf::loadView('pdf.instructivoCargaImpoTer', $data);
-                        file_put_contents($save_folder, $pdf->output());
-
-                        $respuesta_update = DB::table('asign')
-                            ->where('cntr_number', $cntr_number)
-                            ->update(['file_instruction' => $file_name]);
-
-                        return $pdf->download($file_name);
+                       return view('pdf.instructivoCargaImpoTer', $data);
+                       
 
                     } elseif ($row->type == 'Nacional') {
 
@@ -671,70 +422,21 @@ class verpdfController extends Controller
                         ];
 
 
-                        if (!file_exists('instructivos/' . $booking)) {
-
-                            /* Si no Existe la Carperta Del booking */
-
-                            mkdir('instructivos/' . $booking, 0777, true);
-
-                            /* Si existe la Carpeta del Contenedor dentro de la Carpeta del Booking la Asignamos*/
-                            if (file_exists('instructivos/' . $booking . '/' . $cntr_number)) {
-
-                                $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                            } else {
-
-                                /* Si no existe la Carpeta del Contenedor dentro de la Carpeta del Booking la creamos y  la Asignamos*/
-
-
-                                mkdir('instructivos/' . $booking . '/' . $cntr_number, 0777, true);
-                                $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                            }
-                        } else {
-
-                            /* si Ya existe la Carpeta Booking */
-
-                            if (file_exists('instructivos/' . $booking . '/' . $cntr_number)) {
-                                /* y existe la carpeta de CNTR la asignamos */
-
-                                $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                            } else {
-
-                                /* y si no existe la carpeta de CNTR la creamos y la asignamos */
-
-                                mkdir('instructivos/' . $booking . '/' . $cntr_number, 0777, true);
-                                $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
-                            }
-                        }
-
-                        $file_name = 'instructivo_' . $booking . '_' . $cntr_number . '.pdf';
-
-                        // Ya sabemos que esta creada (o la creamos) entonces creamos variables para usar durante todo el proceso.
-
-                        $save_folder = $folder . $file_name;
-
-                        // Generamos el Archivo PDF
-                        $pdf = FacadePdf::loadView('pdf.instructivoNacional', $data);
-                        file_put_contents($save_folder, $pdf->output());
-
-                        $respuesta_update = DB::table('asign')
-                            ->where('cntr_number', $cntr_number)
-                            ->update(['file_instruction' => $file_name]);
-
-                        return $pdf->download($file_name);
+                        return view('pdf.instructivoNacional', $data);
+                        
+                    
                     }
                 } else {
 
-                    return 'Faltan Datos para crear instruccion';
+                    return '#ERROR - No hay datos para mostrar';
+
                 }
             } else {
 
+                return '#ERROR - No hay coincidecias';
 
-                return redirect('https://botzero.tech/ttl/views/view_instructivos.php');
-            }
-        } else {
-
-            return 'no hay instrucciones creadas.';
-        }
+            }   
+       
     }
     public function cargaPorMail($cntr)
     {
