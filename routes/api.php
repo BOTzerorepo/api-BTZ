@@ -28,16 +28,12 @@ Route::get('/imprimirEviarInstrucivo/{cntr}','App\Http\Controllers\crearpdfContr
 Route::get('/mailCargaNueva/{idCarga}/{user}','App\Http\Controllers\emailController@avisoNuevaCarga'); // pachimanok 
 Route::get('/mailPrueba','App\Http\Controllers\emailController@apruebaEmail'); // pachimanok 
 
-
-
-
 /* Envio de Emails */
 
 Route::get('/mailPrueba','App\Http\Controllers\emailController@prueba');  
 Route::get('/mailStatus/{cntr}/{empresa}/{booking}/{user}/{tipo}','App\Http\Controllers\emailController@cambiaStatus');  
 Route::get('/cargaAsignada/{id}','App\Http\Controllers\emailController@cargaAsignada');  
 Route::get('/trasnsporteAsignado/{id}','App\Http\Controllers\emailController@transporteAsignado');  
-
 
 // Route::post('/imprimir/create','App\Http\Controllers\crearpdfControllerPDF@store')mostrar todos
 // Route::get('/imprimirIns','App\Http\Controllers\imprimirPDF@store'); //mostrar todos
@@ -266,3 +262,5 @@ Route::get('/customer/{id}','App\Http\Controllers\CustomerController@show'); //B
 Route::post('/customer','App\Http\Controllers\CustomerController@store'); //Crea un nuevo Customer trader
 Route::post('/customer/{id}','App\Http\Controllers\CustomerController@update'); //Actualiza los datos de un Customer trader
 Route::delete('/customer/{id}','App\Http\Controllers\CustomerController@destroy'); //Elimina un Customer trader
+
+Route::get('issetBooking/{booking}','App\Http\Controllers\cargaController@issetBooking');
