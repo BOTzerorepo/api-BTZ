@@ -309,13 +309,13 @@ class verpdfController extends Controller
 
                     } elseif ($row->type == 'Impo Terrestre') {
 
+                        
                         $data = [
 
                             'id_asign' => $row->id,
                             'img' => $base . '/public/image/empresas/' . $row->img,
                             'cuit' => $row->cuit,
                             'title' => $row->title,
-
                             'booking' => $row->booking,
                             'bl_hbl' => $row->bl_hbl,
                             'senasa' => $row->senasa,
@@ -331,13 +331,10 @@ class verpdfController extends Controller
                             'final_point' => $row->final_point,
                             'custom_agent' => $row->custom_agent,
                             'custom_agent_impo' => $row->aduanaImpo_agent,
-
                             'custom_agent_mail' => $row->mail,
                             'custom_agent_mail_impo' => $row->aduanaImpo_mail,
-
                             'custom_agent_phone' => $row->phone,
                             'custom_agent_phone_impo' => $row->aduanaImpo_phone,
-
                             'custom_place' => $row->custom_place,
                             'custom_place_impo' => $row->custom_place_impo,
 
@@ -354,7 +351,6 @@ class verpdfController extends Controller
                             'observation_load' => $row->observation_load,
                             'agent_port' => $row->agent_port,
                             'out_usd' => $row->out_usd,
-                            
                             'observation_out' => $row->observation_out,
                             'load_date' => $load_date,
                             'link_maps' => $row->link_maps,
