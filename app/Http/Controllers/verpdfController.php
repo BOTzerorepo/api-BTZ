@@ -59,7 +59,7 @@ class verpdfController extends Controller
                     'razon_social.img', 'razon_social.cuit', 'razon_social.title',
                     'asign.transport', 'asign.transport_agent', 'asign.observation_load', 'asign.agent_port',
                     'carga.custom_place', 'carga.bl_hbl', 'carga.senasa', 'carga.senasa_string', 'carga.type', 'carga.ref_customer', 'carga.load_date', 'carga.booking', 'carga.importador', 'carga.shipper', 'carga.commodity', 'carga.load_place', 'carga.unload_place', 'carga.cut_off_fis', 'carga.oceans_line', 'carga.vessel', 'carga.voyage', 'carga.final_point', 'carga.observation_customer', 'carga.custom_agent', 'carga.custom_place_impo', 'carga.ref_customer',
-                    'cntr.cntr_number', 'cntr.cntr_seal', 'cntr.cntr_type', 'cntr.net_weight', 'cntr.retiro_place', 'cntr.out_usd', 'cntr.modo_pago_out', 'cntr.oservation_out', 
+                    'cntr.cntr_number', 'cntr.cntr_seal', 'cntr.cntr_type', 'cntr.net_weight', 'cntr.retiro_place', 'cntr.out_usd', 'cntr.modo_pago_out', 'cntr.observation_out', 
                     'customer_load_places.link_maps', 'customer_load_places.address', 'customer_load_places.city',
                     'agencies.observation_gral',
                     'aduanaExpo.mail', 'aduanaExpo.phone',
