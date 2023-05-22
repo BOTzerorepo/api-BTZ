@@ -59,7 +59,7 @@ class verpdfController extends Controller
                     'razon_social.img', 'razon_social.cuit', 'razon_social.title',
                     'asign.transport', 'asign.transport_agent', 'asign.observation_load', 'asign.agent_port',
                     'carga.custom_place', 'carga.bl_hbl', 'carga.senasa', 'carga.senasa_string', 'carga.type', 'carga.ref_customer', 'carga.load_date', 'carga.booking', 'carga.importador', 'carga.shipper', 'carga.commodity', 'carga.load_place', 'carga.unload_place', 'carga.cut_off_fis', 'carga.oceans_line', 'carga.vessel', 'carga.voyage', 'carga.final_point', 'carga.observation_customer', 'carga.custom_agent', 'carga.custom_place_impo', 'carga.ref_customer',
-                    'cntr.cntr_number', 'cntr.cntr_seal', 'cntr.cntr_type', 'cntr.net_weight', 'cntr.retiro_place', 'cntr.out_usd', 'cntr.modo_pago_out', 'cntr.oservation_out', 
+                    'cntr.cntr_number', 'cntr.cntr_seal', 'cntr.cntr_type', 'cntr.net_weight', 'cntr.retiro_place', 'cntr.out_usd', 'cntr.modo_pago_out', 'cntr.observation_out', 
                     'customer_load_places.link_maps', 'customer_load_places.address', 'customer_load_places.city',
                     'agencies.observation_gral',
                     'aduanaExpo.mail', 'aduanaExpo.phone',
@@ -162,7 +162,7 @@ class verpdfController extends Controller
                             'observation_load' => $row->observation_load,
                             'agent_port' => $row->agent_port,
                             'out_usd' => $row->out_usd,
-                            'observation_outt' => $row->observation_out,
+                            'observation_out' => $row->observation_out,
                             'load_date' => $load_date,
                             'link_maps' => $row->link_maps,
                             'address' => $row->address,
@@ -309,13 +309,13 @@ class verpdfController extends Controller
 
                     } elseif ($row->type == 'Impo Terrestre') {
 
+                        
                         $data = [
 
                             'id_asign' => $row->id,
                             'img' => $base . '/public/image/empresas/' . $row->img,
                             'cuit' => $row->cuit,
                             'title' => $row->title,
-
                             'booking' => $row->booking,
                             'bl_hbl' => $row->bl_hbl,
                             'senasa' => $row->senasa,
@@ -331,13 +331,10 @@ class verpdfController extends Controller
                             'final_point' => $row->final_point,
                             'custom_agent' => $row->custom_agent,
                             'custom_agent_impo' => $row->aduanaImpo_agent,
-
                             'custom_agent_mail' => $row->mail,
                             'custom_agent_mail_impo' => $row->aduanaImpo_mail,
-
                             'custom_agent_phone' => $row->phone,
                             'custom_agent_phone_impo' => $row->aduanaImpo_phone,
-
                             'custom_place' => $row->custom_place,
                             'custom_place_impo' => $row->custom_place_impo,
 
@@ -354,7 +351,6 @@ class verpdfController extends Controller
                             'observation_load' => $row->observation_load,
                             'agent_port' => $row->agent_port,
                             'out_usd' => $row->out_usd,
-                            
                             'observation_out' => $row->observation_out,
                             'load_date' => $load_date,
                             'link_maps' => $row->link_maps,
@@ -410,7 +406,7 @@ class verpdfController extends Controller
                             'link_maps' => $row->link_maps,
                             'address' => $row->address,
                             'city' => $row->city,
-                            ' observation_out' => $row-> observation_out,
+                            'observation_out' => $row-> observation_out,
 
                            
                             'observation_customer' => $row->observation_customer,
