@@ -162,7 +162,7 @@ class verpdfController extends Controller
                             'observation_load' => $row->observation_load,
                             'agent_port' => $row->agent_port,
                             'out_usd' => $row->out_usd,
-                            'observation_outt' => $row->observation_out,
+                            'observation_out' => $row->observation_out,
                             'load_date' => $load_date,
                             'link_maps' => $row->link_maps,
                             'address' => $row->address,
@@ -406,7 +406,7 @@ class verpdfController extends Controller
                             'link_maps' => $row->link_maps,
                             'address' => $row->address,
                             'city' => $row->city,
-                            ' observation_out' => $row-> observation_out,
+                            'observation_out' => $row-> observation_out,
 
                            
                             'observation_customer' => $row->observation_customer,
