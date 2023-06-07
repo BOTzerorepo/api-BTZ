@@ -255,9 +255,9 @@ class emailController extends Controller
 
         if($sbx == 0){
 
-            $mail = Mail::to(['ddicarlo@totaltradegroup.com', 'rquero@totaltradegroup.com','cs.auxiliar@totaltradegroup.com'])->cc(['gzarate@totaltradegroup.com', 'czelada@totaltradegroup.com','fzgaib@totaltradegroup.com'])->bcc('traficottl@botzero.ar')->send(new avisoNewCarga($datos)); 
+            $mail = Mail::to(['ddicarlo@totaltradegroup.com', 'rquero@totaltradegroup.com','cs.auxiliar@totaltradegroup.com'])->cc(['gzarate@totaltradegroup.com', 'czelada@totaltradegroup.com','fzgaib@totaltradegroup.com'])->bcc('inboxplataforma@botzero.ar')->send(new avisoNewCarga($datos)); 
             return 'ok';
-            
+
         }else{
             
             $mail = Mail::to('priopelliza@gmail.com')->cc('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new avisoNewCarga($datos)); 
