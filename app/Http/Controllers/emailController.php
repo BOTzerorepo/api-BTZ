@@ -90,7 +90,7 @@ class emailController extends Controller
         $logapi->save();
 
         $sbx = DB::table('variables')->select('sandbox')->get();
-        if ($sbx == 0) {
+        if ($sbx[0]->sandbox == 0) {
 
 
             Mail::to($to)->bcc('inboxplataforma@botzero.ar')->send(new cargaAsignada($data, $date));
@@ -127,8 +127,8 @@ class emailController extends Controller
         $logapi->save();
 
         $sbx = DB::table('variables')->select('sandbox')->get();
-        if ($sbx == 0) {
-
+        
+        if ($sbx[0]->sandbox == 0) {
             Mail::to($to)->bcc('inboxplataforma@botzero.ar')->send(new transporteAsignado($data, $date));
             return 'ok';
         } else {
@@ -167,7 +167,7 @@ class emailController extends Controller
             $qmail = DB::table('empresas')->where('razon_social', '=', $empresa)->select('mail_logistic')->get();
             $mail = $qmail[0]->mail_logistic;
             $sbx = DB::table('variables')->select('sandbox')->get();
-            if ($sbx == 0) {
+            if ($sbx[0]->sandbox == 0) {
                 Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new CargaConProblemas($datos));
                 return 'ok';
             } else {
@@ -194,7 +194,7 @@ class emailController extends Controller
             $qmail = DB::table('empresas')->where('razon_social', '=', $empresa)->select('mail_logistic')->get();
             $mail = $qmail[0]->mail_logistic;
             $sbx = DB::table('variables')->select('sandbox')->get();
-            if ($sbx == 0) {
+            if ($sbx[0]->sandbox == 0) {
                 Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new IngresadoStacking($datos));
                 return 'ok';
             } else {
@@ -223,7 +223,7 @@ class emailController extends Controller
             $qmail = DB::table('empresas')->where('razon_social', '=', $empresa)->select('mail_logistic')->get();
             $mail = $qmail[0]->mail_logistic;
             $sbx = DB::table('variables')->select('sandbox')->get();
-            if ($sbx == 0) {
+            if ($sbx[0]->sandbox == 0) {
                 Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new CamnioStatus($datos));
                 return 'ok';
             } else {
@@ -300,7 +300,7 @@ class emailController extends Controller
         ];
 
         $sbx = DB::table('variables')->select('sandbox')->get();
-        if ($sbx == 0) {
+        if ($sbx[0]->sandbox == 0) {
 
             $mail = Mail::to(['ddicarlo@totaltradegroup.com', 'rquero@totaltradegroup.com', 'cs.auxiliar@totaltradegroup.com'])->cc(['gzarate@totaltradegroup.com', 'czelada@totaltradegroup.com', 'fzgaib@totaltradegroup.com'])->bcc('inboxplataforma@botzero.ar')->send(new avisoNewCarga($datos));
             return 'ok';
