@@ -19,6 +19,7 @@ use Carbon\Carbon;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
@@ -26,6 +27,8 @@ class emailController extends Controller
 {
     
     public function cargaAsignada($id){
+
+        
 
         $date = Carbon::now('-03:00');
         $asign = DB::table('asign')
@@ -245,10 +248,26 @@ class emailController extends Controller
             'date'=>$date
 
 
-        ];
-        /*   return view('mails.avisoNewCarga')->with('datos',$datos); */
-        $mail = Mail::to(['ddicarlo@totaltradegroup.com', 'rquero@totaltradegroup.com','cs.auxiliar@totaltradegroup.com'])->cc(['gzarate@totaltradegroup.com', 'czelada@totaltradegroup.com','fzgaib@totaltradegroup.com'])->bcc('traficottl@botzero.ar')->send(new avisoNewCarga($datos)); 
-        return 'ok';
+        ]; 
+        
+        $sbx = DB::table('variables')->select('sandbox')->get();
+        return $sbx;
+
+        if($sbx == 0){
+
+            $mail = Mail::to(['ddicarlo@totaltradegroup.com', 'rquero@totaltradegroup.com','cs.auxiliar@totaltradegroup.com'])->cc(['gzarate@totaltradegroup.com', 'czelada@totaltradegroup.com','fzgaib@totaltradegroup.com'])->bcc('inboxplataforma@botzero.ar')->send(new avisoNewCarga($datos)); 
+            return 'ok';
+
+        }else{
+            
+            $mail = Mail::to('priopelliza@gmail.com')->cc('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new avisoNewCarga($datos)); 
+            return 'ok';
+
+        }
+       
+                /*   return view('mails.avisoNewCarga')->with('datos',$datos); */
+        /* $mail = Mail::to(['ddicarlo@totaltradegroup.com', 'rquero@totaltradegroup.com','cs.auxiliar@totaltradegroup.com'])->cc(['gzarate@totaltradegroup.com', 'czelada@totaltradegroup.com','fzgaib@totaltradegroup.com'])->bcc('traficottl@botzero.ar')->send(new avisoNewCarga($datos)); 
+        return 'ok'; */
         /* Por ahora hay que setear a mano!
         Para futuros hay que ver la formad enviar de acuerdo a un seteo dentro de la configuracion. 
         Tiene que enviar todo en la misma cadena. 
