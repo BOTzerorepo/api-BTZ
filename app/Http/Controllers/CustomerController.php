@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Customer;
+use App\Models\customer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -37,7 +37,7 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
-        $customer = new Customer();
+        $customer = new customer();
         $customer->registered_name = $request['registered_name'];
         $customer->tax_id = $request['tax_id'];
         $customer->contact_name = $request['contact_name'];
@@ -79,7 +79,7 @@ class CustomerController extends Controller
      */
     public function update(Request $request,  $id)
     {
-        $customer = Customer::findOrFail($id);
+        $customer = customer::findOrFail($id);
         $customer->registered_name = $request['registered_name'];
         $customer->tax_id = $request['tax_id'];
         $customer->contact_name = $request['contact_name'];
@@ -98,7 +98,7 @@ class CustomerController extends Controller
      */
     public function destroy( $id)
     {
-        Customer::destroy($id);
+        customer::destroy($id);
 
         $existe = Customer::find($id);
         if($existe){
