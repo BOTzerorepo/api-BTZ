@@ -39,7 +39,7 @@ class atas implements FromCollection, WithHeadings, ShouldAutoSize, WithStyles
     
     public function collection()
     {
-        $atas = DB::table('ata')->select('id',"razon_social","tax_id","provincia","pais","mail")->get();
+        $atas = DB::table('atas')->select('id',"razon_social","tax_id","provincia","pais","mail")->get();
         return $atas;
     }
 }

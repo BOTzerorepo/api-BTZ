@@ -108,7 +108,9 @@ class emailController extends Controller
         $dAsign = $asign[0];
 
         $to = DB::table('users')->select('email')->where('username', '=', $dAsign->user)->get();
-
+        
+        // Cambiar para que este correo se para el Customer.
+        
         $data = [
 
             'cntr_number' => $dAsign->cntr_number,

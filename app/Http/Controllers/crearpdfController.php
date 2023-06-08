@@ -27,13 +27,10 @@ class crearpdfController extends Controller
         $variables = DB::table('variables')->select('api')->get();
         $base = $variables[0]->api;
 
-
         $logApi = new logapi();
         $logApi->detalle = 'Consulta Variable api base = :' . $base;
         $logApi->user = 'carga(' . $cntr_number . ')';
         $logApi->save();
-
-
 
         $respuesta = DB::table('asign')
             ->join('transports', 'transports.razon_social', '=', 'asign.transport')
