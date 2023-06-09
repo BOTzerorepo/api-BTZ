@@ -3,6 +3,7 @@
 /public/storage
 /storage/*.key
 /vendor
+/public/instructivos
 .env
 .env.backup
 .phpunit.result.cache
@@ -13,4 +14,4 @@ yarn-error.log
 /.idea
 /.vscode
 database/schema/
-
+pruebaGit.txt
