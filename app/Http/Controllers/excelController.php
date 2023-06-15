@@ -7,11 +7,13 @@ use App\Exports\allLoads;
 use App\Exports\assigned;
 use App\Exports\atas;
 use App\Exports\companies;
+use App\Exports\consignee;
 use App\Exports\containerTypes;
 use App\Exports\customAgents;
 use App\Exports\drivers;
 use App\Exports\driversBusy;
 use App\Exports\driversFree;
+use App\Exports\ExportCustomer;
 use App\Exports\goingToLoad;
 use App\Exports\lastWeek;
 use App\Exports\loadAnyProblem;
@@ -20,17 +22,21 @@ use App\Exports\loadFinish;
 use App\Exports\loading;
 use App\Exports\loadNoAssigned;
 use App\Exports\loadOnBoard;
+use App\Exports\loadPlace;
 use App\Exports\onCustomPlace;
 use App\Exports\onWay;
 use App\Exports\paymentMode;
+use App\Exports\shipper;
 use App\Exports\stacking;
 use App\Exports\thisWeek;
 use App\Exports\trailers;
 use App\Exports\transports;
 use App\Exports\trucks;
 use App\Exports\uncoming;
+use App\Exports\UnloadPlaces;
 use App\Exports\users;
 use App\Exports\warehouseContainer;
+use App\Models\CustomerCnee;
 use App\Models\truck;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -39,151 +45,175 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class excelController extends Controller
 {
-    function thisWeek(){
+    function thisWeek()
+    {
 
         return Excel::download(new thisWeek, 'cargasSemanaActual.xlsx');
-        
     }
-    function past(){
+    function past()
+    {
 
         return Excel::download(new lastWeek, 'cargasPasadas.xlsx');
-
     }
-    function uncoming(){
+    function uncoming()
+    {
 
         return Excel::download(new uncoming, 'cargasFuturas.xlsx');
-
     }
-    function noAssigned(){
+    function noAssigned()
+    {
 
         return Excel::download(new loadNoAssigned, 'CargasSinAsignar.xls');
-        
     }
-    function onBoard(){
-        
+    function onBoard()
+    {
+
         return Excel::download(new loadOnBoard, 'CargasOnBoard.xls');
-        
     }
-    function anyProblem(){
-        
+    function anyProblem()
+    {
+
         return Excel::download(new loadAnyProblem, 'CargasAnyProblem.xls');
-        
     }
-    function loadAsset(){
-        
+    function loadAsset()
+    {
+
         return Excel::download(new loadAsset, 'CargasAsset.xls');
-        
     }
-    function loadFinish(){
-        
+    function loadFinish()
+    {
         return Excel::download(new loadFinish, 'CargasTerminas.xls');
-        
     }
-    function agencies(){
-        
+    function agencies()
+    {
+
         return Excel::download(new agencies, 'Agencias.xls');
-        
     }
-    function atas(){
-        
+    function atas()
+    {
+
         return Excel::download(new atas, 'Atas.xls');
-        
     }
-    function driversFree(){
-        
+    function driversFree()
+    {
+
         return Excel::download(new driversFree, 'ChoferesLibres.xls');
-        
     }
-    function driversBusy(){
-        
+    function driversBusy()
+    {
+
         return Excel::download(new driversBusy, 'ChoferesOcupados.xls');
-        
     }
-    function drivers(){
-        
+    function drivers()
+    {
+
         return Excel::download(new drivers, 'Choferes.xls');
-        
     }
-    function trucks(){
-        
+    function trucks()
+    {
+
         return Excel::download(new trucks, 'Tractores.xls');
-        
     }
-    function trailers(){
-        
+    function trailers()
+    {
+
         return Excel::download(new trailers, 'Semiremolques.xls');
-        
     }
-    function customAgents(){
-        
+    function customAgents()
+    {
+
         return Excel::download(new customAgents, 'Despachantes.xls');
-        
     }
-    function transports(){
-        
+    function transports()
+    {
+
         return Excel::download(new transports, 'Transportes.xls');
-        
     }
-    function paymentMode(){
-        
+    function paymentMode()
+    {
+
         return Excel::download(new paymentMode, 'Metodos de Pago.xls');
-        
     }
-    function users(){
-        
+    function users()
+    {
+
         return Excel::download(new users, 'Usuario.xls');
-        
     }
-    function goningToLoad(){
-        
+    function goningToLoad()
+    {
+
         return Excel::download(new goingToLoad, 'CargasYendoACargar.xls');
-        
     }
-    function loading(){
-        
+    function loading()
+    {
+
         return Excel::download(new loading, 'CargasCargando.xls');
-        
     }
-    function onCustomPlace(){
-        
+    function onCustomPlace()
+    {
+
         return Excel::download(new onCustomPlace, 'CargasEnAduana.xls');
-        
     }
-    function onWay(){
-        
+    function onWay()
+    {
+
         return Excel::download(new onWay, 'CargasEnViaje.xls');
-        
     }
-    function allLoads(){
-        
+    function allLoads()
+    {
+
         return Excel::download(new allLoads, 'TodasLasCargas.xls');
-        
     }
-    function stacking(){
-        
+    function stacking()
+    {
+
         return Excel::download(new stacking, 'CargaEnStaking.xls');
-        
     }
-    function assigned(){
-        
+    function assigned()
+    {
+
         return Excel::download(new assigned, 'CargaAsignadas.xls');
-        
     }
-    function companies(){
-        
+    function companies()
+    {
+
         return Excel::download(new companies, 'Empresas.xls');
-        
     }
-    function warehouseContainer(){
-        
+    function warehouseContainer()
+    {
+
         return Excel::download(new warehouseContainer, 'DespositosDeContenedores.xls');
-        
     }
-    function containerTypes(){
-        
+    function containerTypes()
+    {
+
         return Excel::download(new containerTypes, 'TiposDeContenedores.xls');
-        
     }
-    
+    function customer()
+    {
+
+        return Excel::download(new ExportCustomer, 'misTrader.xls');
+    }
+
+    function customerShipper()
+    {
+
+        return Excel::download(new shipper, 'misShipper.xls');
+    }
+    function customerConsignee()
+    {
+
+        return Excel::download(new consignee(), 'misConsignee.xls');
+    }
+    function LoadPlace()
+    {
+
+        return Excel::download(new loadPlace(), 'misLugaresDeCarga.xls');
+    }
+    function UnloadPlace()
+    {
+
+        return Excel::download(new UnloadPlaces(), 'misLugaresDeDescarga.xls');
+    }
     
 }
