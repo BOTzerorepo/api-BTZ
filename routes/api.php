@@ -111,6 +111,11 @@ Route::get('/excelCustomAgents','App\Http\Controllers\excelController@customAgen
 Route::get('/excelCompanies','App\Http\Controllers\excelController@companies');
 Route::get('/excelWarehouseContainer','App\Http\Controllers\excelController@warehouseContainer');
 Route::get('/excelContainerTypes','App\Http\Controllers\excelController@containerTypes');
+Route::get('/excelMisTrader','App\Http\Controllers\excelController@customer');
+Route::get('/excelMisShipper','App\Http\Controllers\excelController@customerShipper');
+Route::get('/excelMisConsignee','App\Http\Controllers\excelController@customerConsignee');
+Route::get('/excelLoadPlace','App\Http\Controllers\excelController@LoadPlace');
+Route::get('/excelUnloadPlace','App\Http\Controllers\excelController@UnloadPlace');
 
 // Reportes Flotas
 Route::get('/excelDriversFree','App\Http\Controllers\excelController@driversFree');

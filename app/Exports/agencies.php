@@ -25,6 +25,7 @@ class agencies implements FromCollection, WithHeadings, ShouldAutoSize, WithStyl
             1    => ['font' => ['bold' => true]],
         ];
     }
+    
     public function headings():array{
         return[
             'id',
@@ -38,8 +39,7 @@ class agencies implements FromCollection, WithHeadings, ShouldAutoSize, WithStyl
             "Observaciones"
         ];
     } 
-   
-    
+
     public function collection()
     {
         $agencies = DB::table('agencies')->select('id',"description","razon_social","tax_id","puerto","contact_name","contact_phone","contact_mail","observation_gral")->get();

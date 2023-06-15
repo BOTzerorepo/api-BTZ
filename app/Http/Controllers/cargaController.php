@@ -14,6 +14,12 @@ class cargaController extends Controller
      */
     public function index()
     {
+        $query = "SELECT carga.*, cntr.* , asign.driver, asign.transport FROM cntr INNER JOIN carga INNER JOIN asign ON cntr.booking = carga.booking AND cntr.cntr_number = asign.cntr_number WHERE WEEKOFYEAR(`carga`.`load_date`)=WEEKOFYEAR(NOW()) AND carga.status != 'TERMINADA' ORDER BY `carga`.`load_date` DESC";
+        
+    }
+
+    public function loadTHisWeek()
+    {
         //
     }
 
