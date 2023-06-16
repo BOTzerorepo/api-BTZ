@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\asign;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -14,13 +16,45 @@ class cargaController extends Controller
      */
     public function index()
     {
-        $query = "SELECT carga.*, cntr.* , asign.driver, asign.transport FROM cntr INNER JOIN carga INNER JOIN asign ON cntr.booking = carga.booking AND cntr.cntr_number = asign.cntr_number WHERE WEEKOFYEAR(`carga`.`load_date`)=WEEKOFYEAR(NOW()) AND carga.status != 'TERMINADA' ORDER BY `carga`.`load_date` DESC";
+        $query = " WHERE WEEKOFYEAR(`carga`.`load_date`)=WEEKOFYEAR(NOW()) AND carga.status != 'TERMINADA' ORDER BY `carga`.`load_date` DESC";
         
     }
 
     public function loadTHisWeek()
     {
-        //
+        
+        $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr','cntr.booking', '=' ,'carga.booking')
+        ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+        ->select('carga.*', 'cntr.*' , 'asign.driver', 'asign.transport')
+        ->whereBetween('carga.load_date',[Carbon::parse('last monday')->startOfDay(),Carbon::parse('next Sunday')->endOfDay()])
+        ->where('carga.status', '!=', 'TERMINADA')
+        ->orderBy('carga.load_date', 'DESC')->get();
+        return $todasLasCargasDeEstaSemana;
+    
+    }
+    public function loadLastWeek()
+    {
+        
+        $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr','cntr.booking', '=' ,'carga.booking')
+        ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+        ->select('carga.*', 'cntr.*' , 'asign.driver', 'asign.transport')
+        ->whereBetween('carga.load_date',[Carbon::parse('next monday')->startOfDay(),Carbon::parse('next Sunday')->endOfDay()])
+        ->where('carga.status', '!=', 'TERMINADA')
+        ->orderBy('carga.load_date', 'DESC')->get();
+        return $todasLasCargasDeEstaSemana;
+    
+    }
+    public function loadNextWeek()
+    {
+        
+        $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr','cntr.booking', '=' ,'carga.booking')
+        ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+        ->select('carga.*', 'cntr.*' , 'asign.driver', 'asign.transport')
+        ->whereBetween('carga.load_date',[Carbon::parse('last monday')->startOfDay(),Carbon::parse('next Sunday')->endOfDay()])
+        ->where('carga.status', '!=', 'TERMINADA')
+        ->orderBy('carga.load_date', 'DESC')->get();
+        return $todasLasCargasDeEstaSemana;
+    
     }
 
     /**
