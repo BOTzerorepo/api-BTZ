@@ -18,11 +18,18 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+/* Home Traffic */
+
+Route::get('/allCargoThisWeek','App\Http\Controllers\cargaController@loadTHisWeek'); 
+Route::get('/allCargoNextWeek','App\Http\Controllers\cargaController@loadNextWeek'); 
+Route::get('/allCargoLastWeek','App\Http\Controllers\cargaController@loadLastWeek'); 
+
+
+
 /* Impresion de PDF */
 
 Route::get('/imprimirCarga/{cntr_number}','App\Http\Controllers\crearpdfController@carga'); 
 Route::get('/verCarga/{cntr_number}','App\Http\Controllers\verpdfController@carga'); 
-
 Route::get('/imprimirVacio/{id_cntr}','App\Http\Controllers\crearpdfController@vacio');  
 Route::get('/imprimirEviarInstrucivo/{cntr}','App\Http\Controllers\crearpdfController@cargaPorMail');  
 Route::get('/mailCargaNueva/{idCarga}/{user}','App\Http\Controllers\emailController@avisoNuevaCarga'); // pachimanok 
@@ -74,10 +81,7 @@ Route::get('/trailerTransport/{transport_id}','App\Http\Controllers\TrailerContr
 // ASIGNACIONES
 Route::get('/truckAsign/{id}','App\Http\Controllers\TruckController@trailerAsign'); // Show for Transport
 
-
-
 Route::get('/user/{user}','App\Http\Controllers\UserController@show');
-
 
 // EXPORT EXCEL
 
@@ -111,6 +115,11 @@ Route::get('/excelCustomAgents','App\Http\Controllers\excelController@customAgen
 Route::get('/excelCompanies','App\Http\Controllers\excelController@companies');
 Route::get('/excelWarehouseContainer','App\Http\Controllers\excelController@warehouseContainer');
 Route::get('/excelContainerTypes','App\Http\Controllers\excelController@containerTypes');
+Route::get('/excelMisTrader','App\Http\Controllers\excelController@customer');
+Route::get('/excelMisShipper','App\Http\Controllers\excelController@customerShipper');
+Route::get('/excelMisConsignee','App\Http\Controllers\excelController@customerConsignee');
+Route::get('/excelLoadPlace','App\Http\Controllers\excelController@LoadPlace');
+Route::get('/excelUnloadPlace','App\Http\Controllers\excelController@UnloadPlace');
 
 // Reportes Flotas
 Route::get('/excelDriversFree','App\Http\Controllers\excelController@driversFree');
@@ -126,7 +135,6 @@ Route::post('/seguro','App\Http\Controllers\seguroController@store');
 Route::post('/agencias/{id}','App\Http\Controllers\AgenciaController@update');
 
 
-
 // MAPS
 
 
@@ -134,7 +142,6 @@ Route::get('/lugarDeCarga/{patente}','App\Http\Controllers\CustomerLoadPlaceCont
 Route::get('/accionLugarDeCarga/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionLugarDeCarga');
 Route::get('/accionLugarAduana/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionLugarAduana');
 Route::get('/accionLugarDescarga/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionLugarDescarga');
-
 Route::get('/servicioSatelital','App\Http\Controllers\ServiceSatelital@serviceSatelital');
 Route::get('/pruebaSatelital','App\Http\Controllers\ServiceSatelital@servicePrueba');
 
@@ -147,7 +154,6 @@ Route::get('/ata/{id}','App\Http\Controllers\AtaController@show'); //Busca un Ag
 Route::post('/ata','App\Http\Controllers\AtaController@store'); //Crea un nuevo Agente de transporte
 Route::post('/ata/{id}','App\Http\Controllers\AtaController@update'); //Actualiza los datos de un Agente de transporte
 Route::delete('/ata/{id}','App\Http\Controllers\AtaController@destroy'); //Elimina un Agente de transporte
-
 
 // DRIVER CONTROLLLER trailerAsign
 
