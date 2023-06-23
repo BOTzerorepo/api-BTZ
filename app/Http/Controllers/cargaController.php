@@ -16,45 +16,96 @@ class cargaController extends Controller
      */
     public function index()
     {
-        $query = " WHERE WEEKOFYEAR(`carga`.`load_date`)=WEEKOFYEAR(NOW()) AND carga.status != 'TERMINADA' ORDER BY `carga`.`load_date` DESC";
-        
     }
 
-    public function loadTHisWeek()
+    public function loadTHisWeek($user)
+
     {
-        
-        $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr','cntr.booking', '=' ,'carga.booking')
-        ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
-        ->select('carga.*', 'cntr.*' , 'asign.driver', 'asign.transport')
-        ->whereBetween('carga.load_date',[Carbon::parse('last monday')->startOfDay(),Carbon::parse('next Sunday')->endOfDay()])
-        ->where('carga.status', '!=', 'TERMINADA')
-        ->orderBy('carga.load_date', 'DESC')->get();
+
+        $user = DB::table('users')->where('username', '=', $user)->first();
+        $terminaSemana = Carbon::parse('next Sunday')->endOfDay();
+        $empiezaSemana = Carbon::parse('last monday')->startOfDay();
+
+        if ($user->permiso == 'Traffic') {
+
+            $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+                ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
+                ->whereBetween('carga.load_date', [$empiezaSemana, $terminaSemana])
+                ->where('carga.status', '!=', 'TERMINADA')
+                ->where('carga.empresa', '=', $user->empresa)
+                ->orderBy('carga.load_date', 'DESC')->get();
+        } else {
+
+            $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+                ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
+                ->whereBetween('carga.load_date', [$empiezaSemana, $terminaSemana])
+                ->where('carga.status', '!=', 'TERMINADA')
+                ->where('carga.empresa', '=', $user->empresa)
+                ->where('carga.user', '=', $user->username)
+                ->orderBy('carga.load_date', 'DESC')->get();
+        }
+
         return $todasLasCargasDeEstaSemana;
-    
     }
-    public function loadLastWeek()
+    public function loadLastWeek($user)
     {
-        
-        $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr','cntr.booking', '=' ,'carga.booking')
-        ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
-        ->select('carga.*', 'cntr.*' , 'asign.driver', 'asign.transport')
-        ->whereBetween('carga.load_date',[Carbon::parse('next monday')->startOfDay(),Carbon::parse('next Sunday')->endOfDay()])
-        ->where('carga.status', '!=', 'TERMINADA')
-        ->orderBy('carga.load_date', 'DESC')->get();
+
+        $user = DB::table('users')->where('username', '=', $user)->first();
+        $empiezaSemana = Carbon::parse('last monday')->startOfDay();
+
+        if ($user->permiso == 'Traffic') {
+
+            $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+                ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
+                ->where('carga.load_date', "<", $empiezaSemana)
+                ->where('carga.empresa', '=', $user->empresa)
+                ->where('carga.status', '!=', 'TERMINADA')
+                ->orderBy('carga.load_date', 'DESC')->get();
+        } else {
+
+            $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+                ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
+                ->where('carga.load_date', "<", $empiezaSemana)
+                ->where('carga.empresa', '=', $user->empresa)
+                ->where('carga.status', '!=', 'TERMINADA')
+                ->where('carga.user', '=', $user->username)
+                ->orderBy('carga.load_date', 'DESC')->get();
+        }
+
         return $todasLasCargasDeEstaSemana;
-    
     }
-    public function loadNextWeek()
+    public function loadNextWeek($user)
     {
-        
-        $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr','cntr.booking', '=' ,'carga.booking')
-        ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
-        ->select('carga.*', 'cntr.*' , 'asign.driver', 'asign.transport')
-        ->whereBetween('carga.load_date',[Carbon::parse('last monday')->startOfDay(),Carbon::parse('next Sunday')->endOfDay()])
-        ->where('carga.status', '!=', 'TERMINADA')
-        ->orderBy('carga.load_date', 'DESC')->get();
+        $user = DB::table('users')->where('username', '=', $user)->first();
+
+        $terminaSemana = Carbon::parse('next Sunday')->endOfDay();
+
+        if ($user->permiso == 'Traffic') {
+
+            $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+                ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
+                ->where('carga.load_date', ">", $terminaSemana)
+                ->where('carga.status', '!=', 'TERMINADA')
+                ->where('carga.empresa', '=', $user->empresa)
+                ->orderBy('carga.load_date', 'DESC')->get();
+        } else {
+
+            $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+                ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
+                ->where('carga.load_date', ">", $terminaSemana)
+                ->where('carga.status', '!=', 'TERMINADA')
+                ->where('carga.empresa', '=', $user->empresa)
+                ->where('carga.user', '=', $user->username)
+                ->orderBy('carga.load_date', 'DESC')->get();
+        }
+
         return $todasLasCargasDeEstaSemana;
-    
     }
 
     /**
@@ -65,6 +116,29 @@ class cargaController extends Controller
     public function create()
     {
         //
+    }
+    public function show($id, $user)
+    {
+
+        $user = DB::table('users')->where('username', '=', $user)->first();
+
+        $cargaPorId = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
+            ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+            ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
+            ->where('carga.empresa', '=', $user->empresa)
+            ->where('carga.user', '=', $user->username)
+            ->where('carga.id', '=', $id)
+            ->orderBy('carga.load_date', 'DESC')->get();
+
+        if($cargaPorId->count() > 1){
+
+            return $cargaPorId;
+
+        }else{
+
+            return 'vacio';
+            
+        }
     }
 
     /**
@@ -86,7 +160,7 @@ class cargaController extends Controller
      */
     public function issetBooking($booking)
     {
-        $booking = DB::table('carga')->where('booking','=',$booking)->get();
+        $booking = DB::table('carga')->where('booking', '=', $booking)->get();
         return $booking->count();
     }
 
