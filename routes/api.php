@@ -20,9 +20,18 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 /* Home Traffic */
 
-Route::get('/allCargoThisWeek','App\Http\Controllers\cargaController@loadTHisWeek'); 
-Route::get('/allCargoNextWeek','App\Http\Controllers\cargaController@loadNextWeek'); 
-Route::get('/allCargoLastWeek','App\Http\Controllers\cargaController@loadLastWeek'); 
+Route::get('/allCargoThisWeek/{user}','App\Http\Controllers\cargaController@loadTHisWeek'); 
+Route::get('/allCargoNextWeek/{user}','App\Http\Controllers\cargaController@loadNextWeek'); 
+Route::get('/allCargoLastWeek/{user}','App\Http\Controllers\cargaController@loadLastWeek'); 
+Route::get('/carga/{user}/{id}','App\Http\Controllers\cargaController@show'); 
+
+Route::get('/status','App\Http\Controllers\statusController@index'); 
+Route::get('/ultimoStatus/{id}','App\Http\Controllers\statusController@showLast'); 
+Route::get('/historialStatus/{cntr}','App\Http\Controllers\statusController@showHistory'); 
+
+
+
+
 
 
 
