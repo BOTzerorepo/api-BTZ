@@ -31,7 +31,6 @@ Route::get('/historialStatus/{cntr}','App\Http\Controllers\statusController@show
 
 
 /* Impresion de PDF */
-
 Route::get('/imprimirCarga/{cntr_number}','App\Http\Controllers\crearpdfController@carga'); // No usa Funcion MAIL
 Route::get('/verCarga/{cntr_number}','App\Http\Controllers\verpdfController@carga'); 
 Route::get('/imprimirVacio/{id_cntr}','App\Http\Controllers\crearpdfController@vacio');  // No usa Funcion MAIL
@@ -138,7 +137,6 @@ Route::post('/agencias/{id}','App\Http\Controllers\AgenciaController@update');
 
 
 // MAPS
-
 
 Route::get('/lugarDeCarga/{patente}','App\Http\Controllers\CustomerLoadPlaceController@coordenadas');
 Route::get('/accionLugarDeCarga/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionLugarDeCarga'); // LLEGO OK EMAIL
