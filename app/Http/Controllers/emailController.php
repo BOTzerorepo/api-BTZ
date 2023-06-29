@@ -29,8 +29,6 @@ class emailController extends Controller
     public function cargaAsignada($id)
     {
 
-
-
         $date = Carbon::now('-03:00');
         $asign = DB::table('asign')
             ->select('asign.*', 'transports.Direccion', 'transports.paut', 'transports.CUIT', 'transports.permiso', 'transports.vto_permiso', 'drivers.documento', 'trucks.model', 'trucks.model', 'trucks.year', 'trucks.chasis', 'trucks.poliza', 'trucks.vto_poliza', 'trailers.domain as semi_domain', 'trailers.poliza as semi_poliza', 'trailers.vto_poliza as semi_vto_poliza')
@@ -38,7 +36,6 @@ class emailController extends Controller
             ->join('drivers', 'drivers.nombre', '=', 'asign.driver')
             ->join('trucks', 'trucks.domain', '=', 'asign.truck')
             ->join('trailers', 'trailers.domain', '=', 'asign.truck_semi')
-
             ->where('asign.id', '=', $id)->get();
         $dAsign = $asign[0];
         $to = DB::table('users')->select('email')->where('username', '=', $dAsign->user)->get();
@@ -84,19 +81,27 @@ class emailController extends Controller
         ];
 
 
-        $logapi = new logapi();
-        $logapi->user = $dAsign->user;
-        $logapi->detalle = 'AsignaUnidadCarga-User:' . $dAsign->user . '|Transporte:' . $dAsign->transport . '|Chofer:' . $dAsign->driver . '|Tractor:' . $dAsign->truck . '|Semi:' . $dAsign->truck_semi;
-        $logapi->save();
+        
 
         $sbx = DB::table('variables')->select('sandbox')->get();
         if ($sbx[0]->sandbox == 0) {
 
-
             Mail::to($to)->bcc('inboxplataforma@botzero.ar')->send(new cargaAsignada($data, $date));
+            
+            $logapi = new logapi();
+            $logapi->user = $dAsign->user;
+            $logapi->detalle = 'AsignaUnidadCarga-User:' . $dAsign->user . '|Transporte:' . $dAsign->transport . '|Chofer:' . $dAsign->driver . '|Tractor:' . $dAsign->truck . '|Semi:' . $dAsign->truck_semi;
+            $logapi->save();
+
             return 'ok';
         } else {
             Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new cargaAsignada($data, $date));
+
+            $logapi = new logapi();
+            $logapi->user = $dAsign->user;
+            $logapi->detalle = '+ Sandbox + to: '. $to .'AsignaUnidadCarga-User:' . $dAsign->user . '|Transporte:' . $dAsign->transport . '|Chofer:' . $dAsign->driver . '|Tractor:' . $dAsign->truck . '|Semi:' . $dAsign->truck_semi;
+            $logapi->save();
+            
             return 'ok';
         }
     }
@@ -131,11 +136,25 @@ class emailController extends Controller
         $sbx = DB::table('variables')->select('sandbox')->get();
         
         if ($sbx[0]->sandbox == 0) {
+
             Mail::to($to)->bcc('inboxplataforma@botzero.ar')->send(new transporteAsignado($data, $date));
+
+            $logapi = new logapi();
+            $logapi->user = $dAsign->user;
+            $logapi->detalle = 'to: '. $to .'AsignaUnidadTransporte-User:' . $dAsign->user . '|Transporte:' . $dAsign->transport .'| ATA:' . $dAsign->transport_agent .'| Bandera:' . $dAsign->pais .'| CUIT :' . $dAsign->tax_id ;
+            $logapi->save();
+
             return 'ok';
+            
         } else {
 
             Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new transporteAsignado($data, $date));
+            
+            $logapi =  new logapi();
+            $logapi->user = $dAsign->user;
+            $logapi->detalle = '+ Sandbox +to: '. $to .'AsignaUnidadTransporte-User:' . $dAsign->user . '|Transporte:' . $dAsign->transport .'| ATA:' . $dAsign->transport_agent .'| Bandera:' . $dAsign->pais .'| CUIT :' . $dAsign->tax_id ;
+            $logapi->save();
+
             return 'ok';
         }
     }
@@ -169,11 +188,17 @@ class emailController extends Controller
             $qmail = DB::table('empresas')->where('razon_social', '=', $empresa)->select('mail_logistic')->get();
             $mail = $qmail[0]->mail_logistic;
             $sbx = DB::table('variables')->select('sandbox')->get();
+
             if ($sbx[0]->sandbox == 0) {
+
                 Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new CargaConProblemas($datos));
+
                 return 'ok';
+
             } else {
+
                 Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new CamnioStatus($datos));
+
                 return 'ok';
             }
         } elseif ($tipo == 'stacking') {
@@ -222,14 +247,27 @@ class emailController extends Controller
 
             $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $booking)->get();
             $empresa = $qempresa[0]->empresa;
+
             $qmail = DB::table('empresas')->where('razon_social', '=', $empresa)->select('mail_logistic')->get();
             $mail = $qmail[0]->mail_logistic;
+
             $sbx = DB::table('variables')->select('sandbox')->get();
+
             if ($sbx[0]->sandbox == 0) {
+
                 Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new CamnioStatus($datos));
+
+                $logApi = new logapi();
+                $logApi->user = $user;
+                $logApi->detalle = "envio email camnioStatus to: " . $mail;
+                $logApi->save();
                 return 'ok';
             } else {
                 Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new CamnioStatus($datos));
+                $logApi = new logapi();
+                $logApi->user = $user;
+                $logApi->detalle = "+ Sandbox + envio email camnioStatus to: " . $mail;
+                $logApi->save();
                 return 'ok';
             }
         }
@@ -237,10 +275,6 @@ class emailController extends Controller
 
     public function avisoNuevaCarga($idCarga, $user)
     {
-
-
-        // Buscar Configuraciones. 
-        // buscar id Usuario
 
         $user = DB::table('users')->join('particular_soft_configurations', 'users.configCompany', '=', 'particular_soft_configurations.name')->where('users.username', '=', $user)->get();
 
@@ -302,14 +336,25 @@ class emailController extends Controller
         ];
 
         $sbx = DB::table('variables')->select('sandbox')->get();
+
         if ($sbx[0]->sandbox == 0) {
 
             $mail = Mail::to(['ddicarlo@totaltradegroup.com', 'rquero@totaltradegroup.com', 'cs.auxiliar@totaltradegroup.com'])->cc(['gzarate@totaltradegroup.com', 'czelada@totaltradegroup.com', 'fzgaib@totaltradegroup.com'])->bcc('inboxplataforma@botzero.ar')->send(new avisoNewCarga($datos));
+            $logApi = new logapi();
+            $logApi->user = $user[0]->username;
+            $logApi->detalle = "envio email to(['ddicarlo@totaltradegroup.com', 'rquero@totaltradegroup.com', 'cs.auxiliar@totaltradegroup.com'])->cc(['gzarate@totaltradegroup.com', 'czelada@totaltradegroup.com', 'fzgaib@totaltradegroup.com'])";
+            $logApi->save();
             return 'ok';
+
         } else {
 
-            $mail = Mail::to('priopelliza@gmail.com')->cc('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new avisoNewCarga($datos));
+            $mail = Mail::to(['priopelliza@gmail.com', 'pablorio@botzero.tech'])->cc(['varones@cruzdepiedra.net.ar','mujeres@cruzdepiedra.net.ar'])->bcc('inboxplataforma@botzero.ar')->send(new avisoNewCarga($datos));
+            $logApi = new logapi();
+            $logApi->user = $user[0]->username;
+            $logApi->detalle = "envio email to(['priopelliza@gmail.com', 'pablorio@botzero.tech'])->cc(['varones@cruzdepiedra.net.ar','mujeres@cruzdepiedra.net.ar'])";
+            $logApi->save();
             return 'ok';
+
         }
 
         /*   return view('mails.avisoNewCarga')->with('datos',$datos); */
