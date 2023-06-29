@@ -776,11 +776,9 @@ class crearpdfController extends Controller
     }
     public function cargaPorMail($cntr)
     {
-
         // TOMO EL CNTR 
 
         $cntr_number = $cntr;
-
         $query = DB::table('asign')
             ->select('asign.cntr_number', 'asign.booking', 'asign.file_instruction', 'transports.contacto_logistica_celular')
             ->join('transports', 'transports.razon_social', '=', 'asign.transport')->where('asign.cntr_number', '=', $cntr_number)->get();
@@ -788,7 +786,6 @@ class crearpdfController extends Controller
         // REVISO QUE HAYA ALGUNA ASIGNACIÓN 
 
         if ($query->count() == 1) {
-
 
             $cntr_number = $query[0]->cntr_number;
 
@@ -845,7 +842,6 @@ class crearpdfController extends Controller
                 'agent_port' => $row->agent_port,
                 'out_usd' => $row->out_usd,
                 'observation_out' => $row->observation_out,
-              
                 'load_date' => $load_date,
                 'link_maps' => $row->link_maps,
                 'address' => $row->address,
@@ -863,12 +859,34 @@ class crearpdfController extends Controller
 
             // ENVIAMOS MAIL 
 
-            $mail = Mail::to($mail)->cc('totaltrade@botzero.ar')->send(new envioInstructivo($data));
+        $sbx = DB::table('variables')->select('sandbox')->get();
+             
+        if ($sbx[0]->sandbox == 0) {
+
+
+            Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new envioInstructivo($data));
+
+            $logApi = new logapi();
+            $logApi->user = 'No Informa';
+            $logApi->detalle = "envio email Instructivo to:" . $mail;
+            $logApi->save();
 
             return 'ok';
+
         } else {
 
-            return 'no hay asignacio para ese camion';
+           Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new envioInstructivo($data));
+
+            $logApi = new logapi();
+            $logApi->user = 'No Informa';
+            $logApi->detalle = "envio email Instructivo to: pablorio@botzero.tech";
+            $logApi->save();
+            return 'ok';
+        }
+
+        } else {
+
+            return 'no hay asignacion para ese camion';
         }
     }
 

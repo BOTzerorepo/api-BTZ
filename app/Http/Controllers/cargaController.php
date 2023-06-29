@@ -122,7 +122,20 @@ class cargaController extends Controller
 
         $user = DB::table('users')->where('username', '=', $user)->first();
 
-        $cargaPorId = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
+        if ($user->permiso == 'Traffic') {
+
+            $cargaPorId = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
+            ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+            ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
+            ->where('carga.empresa', '=', $user->empresa)
+            ->where('carga.id', '=', $id)
+            ->orderBy('carga.load_date', 'DESC')->get();
+
+            return $cargaPorId;
+
+        }else{
+
+            $cargaPorId = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
             ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
             ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
             ->where('carga.empresa', '=', $user->empresa)
@@ -130,13 +143,7 @@ class cargaController extends Controller
             ->where('carga.id', '=', $id)
             ->orderBy('carga.load_date', 'DESC')->get();
 
-        if($cargaPorId->count() > 1){
-
             return $cargaPorId;
-
-        }else{
-
-            return 'vacio';
             
         }
     }
