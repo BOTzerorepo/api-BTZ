@@ -227,7 +227,6 @@ class crearpdfController extends Controller
                             ->update(['file_instruction' => $file_name]);
 
                         return $pdf->download($file_name);
-
                     } elseif ($row->type == 'Expo Maritima') {
 
                         $data = [
@@ -261,7 +260,7 @@ class crearpdfController extends Controller
                             'agent_port' => $row->agent_port,
                             'out_usd' => $row->out_usd,
                             'observation_out' => $row->observation_out,
-                           
+
                             'load_date' => $load_date,
                             'link_maps' => $row->link_maps,
                             'address' => $row->address,
@@ -321,7 +320,6 @@ class crearpdfController extends Controller
                             ->update(['file_instruction' => $file_name]);
 
                         return $pdf->download($file_name);
-
                     } elseif ($row->type == 'Expo Terrestre') {
 
                         $data = [
@@ -367,7 +365,7 @@ class crearpdfController extends Controller
                             'agent_port' => $row->agent_port,
                             'out_usd' => $row->out_usd,
                             'observation_out' => $row->observation_out,
-                            
+
                             'load_date' => $load_date,
                             'link_maps' => $row->link_maps,
                             'address' => $row->address,
@@ -432,7 +430,6 @@ class crearpdfController extends Controller
                             ->update(['file_instruction' => $file_name]);
 
                         return $pdf->download($file_name);
-
                     } elseif ($row->type == 'Impo Maritima') {
 
                         $data = [
@@ -481,7 +478,7 @@ class crearpdfController extends Controller
                             'agent_port' => $row->agent_port,
                             'out_usd' => $row->out_usd,
                             'observation_out' => $row->observation_out,
-                            
+
                             'load_date' => $load_date,
                             'link_maps' => $row->link_maps,
                             'address' => $row->address,
@@ -546,7 +543,6 @@ class crearpdfController extends Controller
                             ->update(['file_instruction' => $file_name]);
 
                         return $pdf->download($file_name);
-
                     } elseif ($row->type == 'Impo Terrestre') {
 
                         $data = [
@@ -660,7 +656,6 @@ class crearpdfController extends Controller
                             ->update(['file_instruction' => $file_name]);
 
                         return $pdf->download($file_name);
-
                     } elseif ($row->type == 'Nacional') {
 
                         $data = [
@@ -671,7 +666,7 @@ class crearpdfController extends Controller
                             'title' => $row->title,
 
                             'booking' => $row->booking,
-                            
+
                             'senasa' => $row->senasa,
                             'senasa_string' => $row->senasa_string,
                             'shipper' => $row->shipper,
@@ -679,27 +674,27 @@ class crearpdfController extends Controller
                             'load_place' => $row->load_place,
                             'unload_place' => $row->unload_place,
                             'cut_off_fis' => $row->cut_off_fis,
-                            
-                            
+
+
 
                             'ref_customer' => $row->ref_customer,
-                            
+
                             'cntr_number' => $row->cntr_number,
-                        
+
                             'cntr_type' => $row->cntr_type,
                             'net_weight' => $row->net_weight,
-                            
+
                             'transport' => $row->transport,
-                            
+
                             'observation_load' => $row->observation_load,
-                           
+
                             'out_usd' => $row->out_usd,
-                            
+
                             'load_date' => $load_date,
                             'link_maps' => $row->link_maps,
                             'address' => $row->address,
                             'city' => $row->city,
-                           
+
                             'observation_customer' => $row->observation_customer,
                             "descarga_place" => $row->descarga_place,
                             "descarga_address" => $row->descarga_address,
@@ -854,36 +849,36 @@ class crearpdfController extends Controller
 
             $qAsing = DB::table('asign')->select('transport')->where('cntr_number', '=', $cntr_number)->get();
             $empresa = $qAsing[0]->transport;
+
             $qmail = DB::table('transports')->where('razon_social', '=', $empresa)->select('contacto_logistica_mail')->get();
             $mail = $qmail[0]->contacto_logistica_mail;
 
             // ENVIAMOS MAIL 
 
-        $sbx = DB::table('variables')->select('sandbox')->get();
-             
-        if ($sbx[0]->sandbox == 0) {
+            $sbx = DB::table('variables')->select('sandbox')->get();
+
+            if ($sbx[0]->sandbox == 0) {
 
 
-            Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new envioInstructivo($data));
+                Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new envioInstructivo($data));
 
-            $logApi = new logapi();
-            $logApi->user = 'No Informa';
-            $logApi->detalle = "envio email Instructivo to:" . $mail;
-            $logApi->save();
+                $logApi = new logapi();
+                $logApi->user = 'No Informa';
+                $logApi->detalle = "envio email Instructivo to:" . $mail;
+                $logApi->save();
 
-            return 'ok';
+                return 'ok';
+                
+            } else {
 
-        } else {
+                Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new envioInstructivo($data));
 
-           Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new envioInstructivo($data));
-
-            $logApi = new logapi();
-            $logApi->user = 'No Informa';
-            $logApi->detalle = "envio email Instructivo to: pablorio@botzero.tech";
-            $logApi->save();
-            return 'ok';
-        }
-
+                $logApi = new logapi();
+                $logApi->user = 'No Informa';
+                $logApi->detalle = "envio email Instructivo to: pablorio@botzero.tech";
+                $logApi->save();
+                return 'ok';
+            }
         } else {
 
             return 'no hay asignacion para ese camion';
