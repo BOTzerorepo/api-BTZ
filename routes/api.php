@@ -30,26 +30,19 @@ Route::get('/ultimoStatus/{id}','App\Http\Controllers\statusController@showLast'
 Route::get('/historialStatus/{cntr}','App\Http\Controllers\statusController@showHistory'); 
 
 
-
-
-
-
-
 /* Impresion de PDF */
 
-Route::get('/imprimirCarga/{cntr_number}','App\Http\Controllers\crearpdfController@carga'); 
+Route::get('/imprimirCarga/{cntr_number}','App\Http\Controllers\crearpdfController@carga'); // No usa Funcion MAIL
 Route::get('/verCarga/{cntr_number}','App\Http\Controllers\verpdfController@carga'); 
-Route::get('/imprimirVacio/{id_cntr}','App\Http\Controllers\crearpdfController@vacio');  
-Route::get('/imprimirEviarInstrucivo/{cntr}','App\Http\Controllers\crearpdfController@cargaPorMail');  
-Route::get('/mailCargaNueva/{idCarga}/{user}','App\Http\Controllers\emailController@avisoNuevaCarga'); // pachimanok 
-Route::get('/mailPrueba','App\Http\Controllers\emailController@apruebaEmail'); // pachimanok 
+Route::get('/imprimirVacio/{id_cntr}','App\Http\Controllers\crearpdfController@vacio');  // No usa Funcion MAIL
+Route::get('/imprimirEviarInstrucivo/{cntr}','App\Http\Controllers\crearpdfController@cargaPorMail');  // Llega Correo Ok
+Route::get('/mailCargaNueva/{idCarga}/{user}','App\Http\Controllers\emailController@avisoNuevaCarga'); // Llega Correo Ok
 
 /* Envio de Emails */
 
-Route::get('/mailPrueba','App\Http\Controllers\emailController@prueba');  
-Route::get('/mailStatus/{cntr}/{empresa}/{booking}/{user}/{tipo}','App\Http\Controllers\emailController@cambiaStatus');  
-Route::get('/cargaAsignada/{id}','App\Http\Controllers\emailController@cargaAsignada');  
-Route::get('/trasnsporteAsignado/{id}','App\Http\Controllers\emailController@transporteAsignado');  
+Route::get('/mailStatus/{cntr}/{empresa}/{booking}/{user}/{tipo}','App\Http\Controllers\emailController@cambiaStatus');  // Llega Correo Ok
+Route::get('/cargaAsignada/{id}','App\Http\Controllers\emailController@cargaAsignada');  // Llega Correo Ok
+Route::get('/trasnsporteAsignado/{id}','App\Http\Controllers\emailController@transporteAsignado');  // Llega Correo Ok
 
 // Route::post('/imprimir/create','App\Http\Controllers\crearpdfControllerPDF@store')mostrar todos
 // Route::get('/imprimirIns','App\Http\Controllers\imprimirPDF@store'); //mostrar todos
@@ -148,9 +141,9 @@ Route::post('/agencias/{id}','App\Http\Controllers\AgenciaController@update');
 
 
 Route::get('/lugarDeCarga/{patente}','App\Http\Controllers\CustomerLoadPlaceController@coordenadas');
-Route::get('/accionLugarDeCarga/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionLugarDeCarga');
-Route::get('/accionLugarAduana/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionLugarAduana');
-Route::get('/accionLugarDescarga/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionLugarDescarga');
+Route::get('/accionLugarDeCarga/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionLugarDeCarga'); // LLEGO OK EMAIL
+Route::get('/accionLugarAduana/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionLugarAduana');// LLEGO OK EMAIL
+Route::get('/accionLugarDescarga/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionLugarDescarga');// LLEGO OK EMAIL
 Route::get('/servicioSatelital','App\Http\Controllers\ServiceSatelital@serviceSatelital');
 Route::get('/pruebaSatelital','App\Http\Controllers\ServiceSatelital@servicePrueba');
 
