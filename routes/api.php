@@ -25,6 +25,13 @@ Route::get('/allCargoNextWeek/{user}','App\Http\Controllers\cargaController@load
 Route::get('/allCargoLastWeek/{user}','App\Http\Controllers\cargaController@loadLastWeek'); 
 Route::get('/carga/{user}/{id}','App\Http\Controllers\cargaController@show'); 
 
+Route::get('/status','App\Http\Controllers\statusController@index'); 
+Route::get('/ultimoStatus/{id}','App\Http\Controllers\statusController@showLast'); 
+Route::get('/historialStatus/{cntr}','App\Http\Controllers\statusController@showHistory'); 
+
+
+
+
 
 
 
