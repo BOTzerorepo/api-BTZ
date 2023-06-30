@@ -6,6 +6,7 @@ use App\Mail\cargaAduana;
 use App\Mail\cargaCargando;
 use App\Mail\cargaDescarga;
 use App\Mail\ubicacion;
+use App\Models\logapi;
 use App\Models\pruebasModel;
 use App\Models\statu;
 use Carbon\Carbon;
@@ -64,10 +65,6 @@ class lugaresDeCarga extends Controller
     public function accionLugarDeCarga($idTrip)
     {
 
-        $chek = new pruebasModel();
-        $chek->contenido = 'Entro a la funcion accionLugarDeCarga de /accionLugarDeCarga/{idTrip}con el Parametro:' . $idTrip;
-        $chek->save();
-
         $date = Carbon::now('-03:00');
         $qc = DB::table('cntr')->select('cntr_number', 'booking')->where('id_cntr', '=', $idTrip)->get();
         $cntr = $qc[0];
@@ -77,7 +74,6 @@ class lugaresDeCarga extends Controller
         $description = $qd->status;
 
         
-
         if ($qd->main_status == 'CARGANDO') {
 
             $chek = new pruebasModel();
@@ -132,7 +128,25 @@ class lugaresDeCarga extends Controller
                     'date' => $date
                 ];
 
-                $mailEnviado = Mail::to($mail)->cc('totaltrade@botzero.ar')->send(new cargaCargando($datos));
+                $sbx = DB::table('variables')->select('sandbox')->get();
+             
+                if ($sbx[0]->sandbox == 0) {
+        
+                Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new cargaCargando($datos));
+
+                $logApi = new logapi();
+                $logApi->user = 'No Informa';
+                $logApi->detalle = "envio email cargaCargando to:" . $mail;
+                $logApi->save();
+
+                } else {
+
+                Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new cargaCargando($datos));
+                $logApi = new logapi();
+                $logApi->user = 'No Informa';
+                $logApi->detalle = "+ Sandbox + envio email cargaCargando to :" . $mail;
+                $logApi->save();
+                }
 
                 $actualizarAvisado = statu::find($qd->id);
                 
@@ -186,13 +200,13 @@ class lugaresDeCarga extends Controller
                     'date' => $date
                 ];
 
-
                 $actualizarAvisado = statu::find($qd->id);
                 $avisadoMas = $actualizarAvisado->avisado + 1;
                 $actualizarAvisado->avisado = $avisadoMas;
                 $actualizarAvisado->save();
                 /*  return 'ok, Actulizó Status - No envió mail.'  . $qd->avisado; */
             }
+
         } else {
 
 
@@ -225,7 +239,28 @@ class lugaresDeCarga extends Controller
                 'date' => $date
             ];
 
-            Mail::to($mail->cc('totaltrade@botzero.ar'))->send(new cargaCargando($datos));
+            $sbx = DB::table('variables')->select('sandbox')->get();
+
+            if ($sbx[0]->sandbox == 0) {
+
+                Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new cargaCargando($datos));
+
+                $logApi = new logapi();
+                $logApi->user = 'No Informa';
+                $logApi->detalle = "envio email cargaCargando to:" . $mail;
+                $logApi->save();
+
+            } else {
+
+                Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new cargaCargando($datos));
+
+                $logApi = new logapi();
+                $logApi->user = 'No Informa';
+                $logApi->detalle = "+ Sandbox + envio email cargaCargando to:" . $mail;
+                $logApi->save();
+            }
+    
+
             $actualizarAvisado = statu::find($qd->id);
             $avisadoMas = $actualizarAvisado->avisado + 1;
             $actualizarAvisado->avisado = $avisadoMas;
@@ -244,10 +279,6 @@ class lugaresDeCarga extends Controller
         $date = Carbon::now('-03:00');
         $qc = DB::table('cntr')->select('cntr_number', 'booking')->where('id_cntr', '=', $idTrip)->get();
         $cntr = $qc[0];
-
-        $chek = new pruebasModel();
-        $chek->contenido = 'Cntr:' . $cntr;
-        $chek->save();
 
         // cual es el ultimo status.
         $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
@@ -302,7 +333,27 @@ class lugaresDeCarga extends Controller
                 $chek->contenido = 'envia mail con '.$datos;
                 $chek->save();
 
-                Mail::to($mail)->cc('totaltrade@botzero.ar')->send(new cargaAduana($datos));
+                $sbx = DB::table('variables')->select('sandbox')->get();
+                
+                if ($sbx[0]->sandbox == 0) {
+                    
+                    Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new cargaAduana($datos));
+                    $logApi = new logapi();
+                    $logApi->user = 'No Informa';
+                    $logApi->detalle = "envio email cargaAduana to:" . $mail;
+                    $logApi->save();
+
+                } else {
+
+                    Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new cargaAduana($datos));
+                    $logApi = new logapi();
+                    $logApi->user = 'No Informa';
+                    $logApi->detalle = "+ Sandbox + envio email cargaAduana to:" . $mail;
+                    $logApi->save();
+
+                }
+        
+
                 $actualizarAvisado = statu::find($qd->id);
                 $avisadoMas = $actualizarAvisado->avisado + 1;
                 $actualizarAvisado->avisado = $avisadoMas;
@@ -392,7 +443,25 @@ class lugaresDeCarga extends Controller
                 'date' => $date
             ];
 
-            Mail::to($mail)->cc('totaltrade@botzero.ar')->send(new cargaAduana($datos));
+            $sbx = DB::table('variables')->select('sandbox')->get();
+            
+            if ($sbx[0]->sandbox == 0) {
+
+                Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new cargaAduana($datos));
+
+                $logApi = new logapi();
+                $logApi->user = 'No Informa';
+                $logApi->detalle = "envio email cargaAduana to:" . $mail;
+
+            } else {
+
+                Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new cargaAduana($datos));
+                $logApi = new logapi();
+                $logApi->user = 'No Informa';
+                $logApi->detalle = "+ Sandbox + envio email cargaAduana to: " . $mail;
+                $logApi->save();
+            }
+
             $actualizarAvisado = statu::find($qd->id);
             $avisadoMas = $actualizarAvisado->avisado + 1;
             $actualizarAvisado->avisado = $avisadoMas;
@@ -442,8 +511,26 @@ class lugaresDeCarga extends Controller
                     'booking' => $cntr->booking,
                     'date' => $date
                 ];
+                
+                $sbx = DB::table('variables')->select('sandbox')->get();
 
-                Mail::to($mail)->cc('totaltrade@botzero.ar')->send(new cargaDescarga($datos));
+                if ($sbx[0]->sandbox == 0) {
+
+                    Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new cargaDescarga($datos));
+
+                    $logApi = new logapi();
+                    $logApi->user = 'No Informa';
+                    $logApi->detalle = "envio email cargaDescarga to:" . $mail;
+
+                } else {
+
+                    Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new cargaDescarga($datos));
+                    $logApi = new logapi();
+                    $logApi->user = 'No Informa';
+                    $logApi->detalle = "+ Sandbox + envio email cargaDescarga to: " . $mail;
+                    $logApi->save();
+                }
+    
                 $actualizarAvisado = statu::find($qd->id);
                 $avisadoMas = $actualizarAvisado->avisado + 1;
                 $actualizarAvisado->avisado = $avisadoMas;
@@ -484,7 +571,27 @@ class lugaresDeCarga extends Controller
                     'date' => $date
                 ];
 
-                Mail::to($mail)->cc('totaltrade@botzero.ar')->send(new cargaDescarga($datos));
+                $sbx = DB::table('variables')->select('sandbox')->get();
+
+                if ($sbx[0]->sandbox == 0) {
+
+                    Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new cargaDescarga($datos));
+
+                    $logApi = new logapi();
+                    $logApi->user = 'No Informa';
+                    $logApi->detalle = "envio email cargaDescarga to:" . $mail;
+
+                } else {
+
+                    Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new cargaDescarga($datos));
+
+                    $logApi = new logapi();
+                    $logApi->user = 'No Informa';
+                    $logApi->detalle = "+ Sandbox + envio email cargaDescarga to: " . $mail;
+                    $logApi->save();
+                }
+
+
                 $actualizarAvisado = statu::find($qd->id);
                 $avisadoMas = $actualizarAvisado->avisado + 1;
                 $actualizarAvisado->avisado = $avisadoMas;
@@ -517,7 +624,26 @@ class lugaresDeCarga extends Controller
                 'date' => $date
             ];
 
-            Mail::to($mail)->cc('totaltrade@botzero.ar')->send(new cargaDescarga($datos));
+            $sbx = DB::table('variables')->select('sandbox')->get();
+
+            if ($sbx[0]->sandbox == 0) {
+
+                Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new cargaDescarga($datos));
+
+                $logApi = new logapi();
+                $logApi->user = 'No Informa';
+                $logApi->detalle = "envio email cargaDescarga to:" . $mail;
+
+            } else {
+
+                Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new cargaDescarga($datos));
+
+                $logApi = new logapi();
+                $logApi->user = 'No Informa';
+                $logApi->detalle = "+ Sandbox + envio email cargaDescarga to: " . $mail;
+                $logApi->save();
+            }
+
             $actualizarAvisado = statu::find($qd->id);
             $avisadoMas = $actualizarAvisado->avisado + 1;
             $actualizarAvisado->avisado = $avisadoMas;
