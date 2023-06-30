@@ -310,7 +310,8 @@ class emailController extends Controller
                 'carga.commodity',
                 'carga.observation_customer',
                 'cntr.retiro_place',
-                'cntr.cntr_type'
+                'cntr.cntr_type',
+                'carga.type'
             )
             ->join('cntr', 'carga.booking', '=', 'cntr.booking')->where('carga.id', '=', $idCarga)->get();
         $cantidad = $qcarga->count();
@@ -339,7 +340,8 @@ class emailController extends Controller
             'cantidad' => $cantidad,
             'cntr_type' => $carga->cntr_type,
             'user' => $user[0]->username,
-            'date' => $date
+            'date' => $date,
+            'type' => $carga->type,
 
 
         ];
@@ -360,7 +362,7 @@ class emailController extends Controller
             $mail = Mail::to(['equipoDemo1@botzero.com.ar', 'equipodemo2@botzero.com.ar','equipodemo2@botzero.com.ar'])->cc(['equipodemo2@botzero.com.ar','copiaequipodemo5@botzero.com.ar','copiaequipodemo6@botzero.com.ar'])->bcc('inboxplataforma@botzero.ar')->send(new avisoNewCarga($datos));
             $logApi = new logapi();
             $logApi->user = $user[0]->username;
-            $logApi->detalle = "envio email cto(['equipoDemo1@botzero.com.ar', 'equipodemo2@botzero.com.ar','equipodemo2@botzero.com.ar'])->cc(['equipodemo2@botzero.com.ar','copiaequipodemo5@botzero.com.ar','copiaequipodemo6@botzero.com.ar'])";
+            $logApi->detalle = "envio email to(['equipoDemo1@botzero.com.ar', 'equipodemo2@botzero.com.ar','equipodemo2@botzero.com.ar'])->cc(['equipodemo2@botzero.com.ar','copiaequipodemo5@botzero.com.ar','copiaequipodemo6@botzero.com.ar'])";
             $logApi->save();
             return 'ok';
 

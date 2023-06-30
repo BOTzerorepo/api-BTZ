@@ -19,7 +19,7 @@ class avisoNewCarga extends Mailable
     public function __construct($datos)
     {
         $this->datos = $datos;
-        $this->subject = 'INSTRUCCIONES INTERNAS // '.$datos['operacion'] .' - '. $datos['trader'] .' - '.$datos['cantidad'].'X'.$datos['cntr_type'].' // BKG: '. $datos['booking'];
+        $this->subject = 'INSTRUCCIONES INTERNAS // '.$datos['type'] . ' - '.$datos['operacion'] .' - '. $datos['trader'] .' - '.$datos['cantidad'].'X'.$datos['cntr_type'].' // BKG: '. $datos['booking'];
     }
 
     
