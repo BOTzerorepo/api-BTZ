@@ -521,11 +521,29 @@ class verpdfController extends Controller
             $qmail = DB::table('transports')->where('razon_social', '=', $empresa)->select('contacto_logistica_mail')->get();
             $mail = $qmail[0]->contacto_logistica_mail;
 
-            // ENVIAMOS MAIL 
+            // ENVIAMOS MAIL
 
-            $mail = Mail::to($mail)->cc('totaltrade@botzero.ar')->send(new envioInstructivo($data));
+            $sbx = DB::table('variables')->select('sandbox')->get();
+            
+            if ($sbx[0]->sandbox == 0) {
+
+                Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new envioInstructivo($data));
+
+                $logApi = new logapi();
+                $logApi->user = 'No Informa';
+                $logApi->detalle = "envio email envioInstructivo to:" . $mail;
+
+            } else {
+
+                Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new envioInstructivo($data));
+
+                $logApi = new logapi();
+                $logApi->user = 'No Informa';
+                $logApi->detalle = "+ Sandbox + envio email envioInstructivo to: " . $mail;
+            }
 
             return 'ok';
+            
         } else {
 
             return 'no hay asignacio para ese camion';

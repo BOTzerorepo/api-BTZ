@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Mail\envioIntructivoOceans;
+use App\Models\logapi;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -102,7 +103,26 @@ class oceansInstructions extends Controller
         $qmail = DB::table('empresas')->where('razon_social','=',$empresa)->select('mail_logistic')->get();
         $mail = $qmail[0]->mail_logistic;
 
-        $mail = Mail::to($mail)->cc('totaltrade@botzero.ar')->send(new envioIntructivoOceans($data)); 
+        $sbx = DB::table('variables')->select('sandbox')->get();
+
+        if ($sbx[0]->sandbox == 0) {
+
+            Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new envioIntructivoOceans($data)); 
+
+            $logApi = new logapi();
+            $logApi->user = 'No Informa';
+            $logApi->detalle = "envio email envioIntructivoOceans to:" . $mail;
+
+        } else {
+
+            Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new envioIntructivoOceans($data));
+            
+            $logApi = new logapi();
+            $logApi->user = 'No Informa';
+            $logApi->detalle = "+ Sandbox + envio email envioIntructivoOceans to: " . $mail;
+        }
+
+
         return 'ok';
     }
 }
