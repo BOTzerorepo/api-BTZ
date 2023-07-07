@@ -35,6 +35,7 @@ class cargaController extends Controller
                 ->where('carga.status', '!=', 'TERMINADA')
                 ->where('carga.empresa', '=', $user->empresa)
                 ->orderBy('carga.load_date', 'DESC')->get();
+                
         } else {
 
             $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
@@ -108,6 +109,35 @@ class cargaController extends Controller
         return $todasLasCargasDeEstaSemana;
     }
 
+    public function loadFinished($user)
+    {
+        $user = DB::table('users')->where('username', '=', $user)->first();
+
+      
+
+        if ($user->permiso == 'Traffic') {
+
+            $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+                ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
+                ->where('carga.status', '=', 'TERMINADA')
+                ->where('carga.empresa', '=', $user->empresa)
+                ->orderBy('carga.load_date', 'DESC')->get();
+                
+        } else {
+
+            $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+                ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
+                ->where('carga.status', '=', 'TERMINADA')
+                ->where('carga.empresa', '=', $user->empresa)
+                ->where('carga.user', '=', $user->username)
+                ->orderBy('carga.load_date', 'DESC')->get();
+        }
+
+        return $todasLasCargasDeEstaSemana;
+    }
+
     /**
      * Show the form for creating a new resource.
      *
@@ -124,9 +154,10 @@ class cargaController extends Controller
 
         if ($user->permiso == 'Traffic') {
 
-            $cargaPorId = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
+            $cargaPorId = DB::table('carga')
+            ->join('cntr', 'cntr.booking', '=', 'carga.booking')
             ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
-            ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
+            ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport','asign.file_instruction')
             ->where('carga.empresa', '=', $user->empresa)
             ->where('carga.id', '=', $id)
             ->orderBy('carga.load_date', 'DESC')->get();
@@ -137,7 +168,7 @@ class cargaController extends Controller
 
             $cargaPorId = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
             ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
-            ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
+            ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport','asign.file_instruction')
             ->where('carga.empresa', '=', $user->empresa)
             ->where('carga.user', '=', $user->username)
             ->where('carga.id', '=', $id)
