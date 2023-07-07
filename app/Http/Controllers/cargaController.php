@@ -35,6 +35,7 @@ class cargaController extends Controller
                 ->where('carga.status', '!=', 'TERMINADA')
                 ->where('carga.empresa', '=', $user->empresa)
                 ->orderBy('carga.load_date', 'DESC')->get();
+                
         } else {
 
             $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
@@ -100,6 +101,34 @@ class cargaController extends Controller
                 ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
                 ->where('carga.load_date', ">", $terminaSemana)
                 ->where('carga.status', '!=', 'TERMINADA')
+                ->where('carga.empresa', '=', $user->empresa)
+                ->where('carga.user', '=', $user->username)
+                ->orderBy('carga.load_date', 'DESC')->get();
+        }
+
+        return $todasLasCargasDeEstaSemana;
+    }
+
+    public function loadFinished($user)
+    {
+        $user = DB::table('users')->where('username', '=', $user)->first();
+
+      
+
+        if ($user->permiso == 'Traffic') {
+
+            $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+                ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
+                ->where('carga.status', '=', 'TERMINADA')
+                ->where('carga.empresa', '=', $user->empresa)
+                ->orderBy('carga.load_date', 'DESC')->get();
+        } else {
+
+            $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+                ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
+                ->where('carga.status', '=', 'TERMINADA')
                 ->where('carga.empresa', '=', $user->empresa)
                 ->where('carga.user', '=', $user->username)
                 ->orderBy('carga.load_date', 'DESC')->get();
