@@ -36,7 +36,7 @@ class ServiceSatelital extends Controller
             ->where('cntr.main_status', '!=', 'TERMINADA')
             ->get();
 
-        
+
 
         $chek = new pruebasModel();
         $chek->contenido = '1. Consulto las patentes del Camion';
@@ -45,7 +45,7 @@ class ServiceSatelital extends Controller
         foreach ($todosMisCamiones as $camion) {
 
 
-           
+
             $chek = new pruebasModel();
             $chek->contenido = '2 Ingreso al Camion ' . $camion->domain;
             $chek->save();
@@ -67,8 +67,8 @@ class ServiceSatelital extends Controller
             $res = $client->sendAsync($request)->wait();
             $respuesta = $res->getBody();
             $r = json_decode($respuesta, true);
-            $keys = array($r);  
-            
+            $keys = array($r);
+
             return $respuesta;
 
             if (array_key_exists('data', $r)) {
@@ -81,7 +81,7 @@ class ServiceSatelital extends Controller
 
                 $posicionLat = $datos['ult_latitud'];
                 $posicionLon = $datos['ult_longitud'];
-            
+
                 $positionDB = new position();
                 $positionDB->dominio = $camion->domain;
                 $positionDB->lat = $posicionLat;
@@ -89,12 +89,12 @@ class ServiceSatelital extends Controller
                 $positionDB->save();
 
                 $chek = new pruebasModel();
-                $chek->contenido = $camion->domain. '2.a. RESPUESTA Se encuentra en Lat: '. $posicionLat . ' - lon: ' . $posicionLon;
+                $chek->contenido = $camion->domain . '2.a. RESPUESTA Se encuentra en Lat: ' . $posicionLat . ' - lon: ' . $posicionLon;
                 $chek->save();
 
                 $IdTrip = $camion->IdTrip;
                 $chek = new pruebasModel();
-                $chek->contenido = '2.b. Camion '. $camion->domain .' tiene el IDTrip: ' . $IdTrip;
+                $chek->contenido = '2.b. Camion ' . $camion->domain . ' tiene el IDTrip: ' . $IdTrip;
                 $chek->save();
 
                 $Radio = 6371e3; // metres
@@ -124,16 +124,16 @@ class ServiceSatelital extends Controller
                 $d3 = $Radio * $c3; // in metres */
 
                 $chek = new pruebasModel();
-                $chek->contenido = '2.c. El camino: '. $camion->domain . 'Se encuentra a'. $d .'metros de Carga.';
+                $chek->contenido = '2.c. El camino: ' . $camion->domain . 'Se encuentra a' . $d . 'metros de Carga.';
                 $chek->save();
                 $chek = new pruebasModel();
-                $chek->contenido = '2.d. El camino: '. $camion->domain . 'Se encuentra a'. $d2 .'metros de Aduana.';
+                $chek->contenido = '2.d. El camino: ' . $camion->domain . 'Se encuentra a' . $d2 . 'metros de Aduana.';
                 $chek->save();
                 $chek = new pruebasModel();
-                $chek->contenido = '2.e. El camino: '. $camion->domain . 'Se encuentra a'. $d3 .'metros de Descarga.';
+                $chek->contenido = '2.e. El camino: ' . $camion->domain . 'Se encuentra a' . $d3 . 'metros de Descarga.';
                 $chek->save();
 
-             
+
 
                 if ($d <= 200) { // lugar de Carga
 
@@ -142,7 +142,7 @@ class ServiceSatelital extends Controller
                     $chek->save();
 
                     $clientCarga = new Client();
-                    $requestCarga = new Psr7Request('GET', env('APP_UTL').'/api/accionLugarDeCarga/' . $IdTrip);
+                    $requestCarga = new Psr7Request('GET', env('APP_UTL') . '/api/accionLugarDeCarga/' . $IdTrip);
                     $resCarga = $clientCarga->sendAsync($requestCarga)->wait();
                 }
 
@@ -154,7 +154,7 @@ class ServiceSatelital extends Controller
                     $chek->save();
 
                     $clientAduana = new Client();
-                    $requestAduana = new Psr7Request('GET', env('APP_URL').'/api/accionLugarAduana/' . $IdTrip);
+                    $requestAduana = new Psr7Request('GET', env('APP_URL') . '/api/accionLugarAduana/' . $IdTrip);
                     $resAduana = $clientAduana->sendAsync($requestAduana)->wait();
                 }
                 if ($d3 <= 200) { // lugar de descarga
@@ -165,17 +165,67 @@ class ServiceSatelital extends Controller
                     $chek->save();
 
                     $clientDescarga = new Client();
-                    $requestDescarga = new Psr7Request('GET', env('APP_URL').'/api/accionLugarDescarga/' . $IdTrip);
+                    $requestDescarga = new Psr7Request('GET', env('APP_URL') . '/api/accionLugarDescarga/' . $IdTrip);
                     $resDescarga = $clientDescarga->sendAsync($requestDescarga)->wait();
-
-                    
                 }
-                    $chek = new pruebasModel();
-                    $chek->contenido = '4. No esta cerca de ningun lado / camion: ' . $camion->domain;
-                    $chek->save();
+                $chek = new pruebasModel();
+                $chek->contenido = '4. No esta cerca de ningun lado / camion: ' . $camion->domain;
+                $chek->save();
 
-                    // Agregar punntos Criticos Globales.
+                // Agregar punntos Criticos Globales.
             }
         }
+    }
+    public function flota()
+    {
+
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'https://app.akercontrol.com/ws/flota/2612128105/C2QC20',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+        ));
+
+        $response = curl_exec($curl);
+        $json = json_decode($response);
+        $datos = $json->data;
+
+        $camiones = [];
+        foreach ($datos as $dato) {
+
+            if (property_exists($dato, 'patente')) {
+
+                $todosMisCamiones = DB::table('trucks')
+                    ->join('transports', 'trucks.transport_id', '=', 'transports.id')
+                    ->where('trucks.domain', '=', $dato->patente)
+                    ->get();
+
+                $camion = $todosMisCamiones[0];
+
+                $trcuk['model'] = $camion->model;
+                $trcuk['domain'] = $camion->domain;
+                $trcuk['year'] = $camion->year;
+                $trcuk['vto_poliza'] = $camion->vto_poliza;
+                $trcuk['razon_social'] = $camion->razon_social;
+                $trcuk['logo'] = $camion->logo;
+                $trcuk['vto_permiso'] = $camion->vto_permiso;
+                $trcuk['titulo'] = $dato->nombre;
+                $trcuk['ult_latitud'] = $dato->ult_latitud;
+                $trcuk['ult_longitud'] = $dato->ult_longitud;
+                $trcuk['ult_velocidad'] = $dato->ult_velocidad;
+                $trcuk['ult_fecha'] = $dato->ult_fecha;
+                $trcuk['ult_reporte'] = $dato->ult_reporte;
+                $trcuk['ult_direccion'] = $dato->ult_direccion;
+
+
+                array_push($camiones, $trcuk);
+            }
+        }
+        return $camiones;
     }
 }
