@@ -77,7 +77,6 @@ Route::post('/truck/{truck}','App\Http\Controllers\TruckController@update'); // 
 Route::delete('/truck/{truck}','App\Http\Controllers\TruckController@destroy'); // D 
 Route::get('/truckTransport/{truck}','App\Http\Controllers\TruckController@showTransport'); // Show For Transport
 
-
 // TRAILER CONTROLLLER 
 Route::post('/trailer','App\Http\Controllers\TrailerController@store'); // C
 Route::get('/trailer/{customer}','App\Http\Controllers\TrailerController@index');// R ALL
@@ -151,6 +150,9 @@ Route::get('/accionLugarAduana/{idTrip}','App\Http\Controllers\CustomerLoadPlace
 Route::get('/accionLugarDescarga/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionLugarDescarga');// LLEGO OK EMAIL
 Route::get('/servicioSatelital','App\Http\Controllers\ServiceSatelital@serviceSatelital');
 Route::get('/pruebaSatelital','App\Http\Controllers\ServiceSatelital@servicePrueba');
+Route::get('/flota','App\Http\Controllers\ServiceSatelital@flota');
+
+
 
 
 //JUANI
