@@ -188,8 +188,8 @@ class emailController extends Controller
                 'user' => $user,
                 'empresa' => $empresa,
                 'booking' => $booking,
-                'date' => $date
-            ];
+                'date' => $date,
+                'status' => 'con Problema'       ];
 
 
             $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $booking)->get();
@@ -287,9 +287,9 @@ class emailController extends Controller
 
         $user = DB::table('users')->join('particular_soft_configurations', 'users.configCompany', '=', 'particular_soft_configurations.name')->where('users.username', '=', $user)->get();
 
-        $toMailsEnviar = $user[0]->to_mail_trafico_Team;
+       $toMailsEnviar = $user[0]->to_mail_trafico_Team;
         $ccMailsEnviar = $user[0]->cc_mail_trafico_Team;
-
+ 
         $qcarga = DB::table('carga')
             ->select(
                 'carga.booking',
