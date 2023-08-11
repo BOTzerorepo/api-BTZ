@@ -188,8 +188,8 @@ class emailController extends Controller
                 'user' => $user,
                 'empresa' => $empresa,
                 'booking' => $booking,
-                'date' => $date
-            ];
+                'date' => $date,
+                'status' => 'con Problema'       ];
 
 
             $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $booking)->get();
