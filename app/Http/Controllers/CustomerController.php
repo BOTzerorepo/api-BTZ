@@ -37,15 +37,19 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
-        $customer = new customer();
-        $customer->registered_name = $request['registered_name'];
-        $customer->tax_id = $request['tax_id'];
-        $customer->contact_name = $request['contact_name'];
-        $customer->contact_phone = $request['contact_phone'];
-        $customer->contact_mail = $request['contact_mail'];
-        $customer->save();
+       
+            $customer = new customer();
+            $customer->registered_name = $request['registered_name'];
+            $customer->tax_id = $request['tax_id'];
+            $customer->contact_name = $request['contact_name'];
+            $customer->contact_phone = $request['contact_phone'];
+            $customer->contact_mail = $request['contact_mail'];
+            $customer->save();
 
-        return $customer;
+            return $customer;
+
+        
+        
     }
 
     /**
@@ -58,6 +62,13 @@ class CustomerController extends Controller
     {
         //
     }
+
+    public function showName(Customer $customer)
+    {
+        $customer = DB::table('customers')->where('registered_name','=',$customer)->get();
+        return $customer->count();
+    }
+
 
     /**
      * Show the form for editing the specified resource.
