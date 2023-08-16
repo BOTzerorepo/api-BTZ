@@ -112,60 +112,68 @@ class emailController extends Controller
     {
 
         $date = Carbon::now('-03:00');
+      
+    try {
         $asign = DB::table('asign')
-        ->select('asign.id', 'carga.user as userC','asign.cntr_number', 'asign.booking', 'asign.transport', 'asign.transport_agent', 'asign.user', 'asign.company', 'atas.tax_id', 'transports.pais')->join('transports', 'asign.transport', '=', 'transports.razon_social')
-        ->join('atas', 'asign.transport_agent', '=', 'atas.razon_social')
-        ->join('carga','asign.booking','=','carga.booking')
-        ->where('asign.id', '=', $id)
-        ->get();
-        $dAsign = $asign[0];
-        $to = DB::table('users')->select('email')->where('username', '=', $dAsign->userC)->get();
+            ->select('asign.id', 'carga.user as userC', 'asign.cntr_number', 'asign.booking', 'asign.transport', 'asign.transport_agent', 'asign.user', 'asign.company', 'atas.tax_id', 'transports.pais')
+            ->join('transports', 'asign.transport', '=', 'transports.razon_social')
+            ->join('atas', 'asign.transport_agent', '=', 'atas.razon_social')
+            ->join('carga', 'asign.booking', '=', 'carga.booking')
+            ->where('asign.id', '=', $id)
+            ->get();
 
-    
-        
-        // Cambiar para que este correo se para el Customer.
-        
+        if ($asign->count() === 0) {
+            return 'Assignment not found'; // Handle the case where no assignment is found
+        }
+
+        $asign = $asign[0]; // Retrieve the first assignment
+
+        // Retrieve recipient's email
+        $to = DB::table('users')->select('email')->where('username', '=', $asign->userC)->first();
+
+        // Data to be sent in the email
         $data = [
-
-            'cntr_number' => $dAsign->cntr_number,
-            'booking' => $dAsign->booking,
-            'transport' => $dAsign->transport,
-            'transport_agent' => $dAsign->transport_agent,
-            'user' => $dAsign->user,
-            'company' => $dAsign->company,
-            'transport_bandera' => $dAsign->pais,
-            'cuit_ata' => $dAsign->tax_id
+            'cntr_number' => $asign->cntr_number,
+            'booking' => $asign->booking,
+            'transport' => $asign->transport,
+            'transport_agent' => $asign->transport_agent,
+            'user' => $asign->user,
+            'company' => $asign->company,
+            'transport_bandera' => $asign->pais,
+            'cuit_ata' => $asign->tax_id
         ];
 
+        // Log API action
         $logapi = new logapi();
-        $logapi->user = $dAsign->user;
+        $logapi->user = $asign->user;
         $logapi->detalle = 'AsignaCarga';
         $logapi->save();
 
-        $sbx = DB::table('variables')->select('sandbox')->get();
-        
-        if ($sbx[0]->sandbox == 0) {
+        // Retrieve sandbox status
+        $sbx = DB::table('variables')->select('sandbox')->first();
 
-            Mail::to($to)->bcc('inboxplataforma@botzero.ar')->send(new transporteAsignado($data, $date));
+        // Determine the recipient and log message based on sandbox status
+        $recipient = $to ? $to->email : 'pablorio@botzero.tech';
+        $logMessage = '+ Sandbox +' . ($sbx->sandbox == 0 ? '' : 'to: ' . $recipient) . 'AsignaUnidadTransporte-User:' . $asign->user . '|Transporte:' . $asign->transport . '| ATA:' . $asign->transport_agent . '| Bandera:' . $asign->pais . '| CUIT :' . $asign->tax_id;
 
-            $logapi = new logapi();
-            $logapi->user = $dAsign->user;
-            $logapi->detalle = 'to: '. $to .'AsignaUnidadTransporte-User:' . $dAsign->user . '|Transporte:' . $dAsign->transport .'| ATA:' . $dAsign->transport_agent .'| Bandera:' . $dAsign->pais .'| CUIT :' . $dAsign->tax_id ;
-            $logapi->save();
-
-            return 'ok';
-            
-        } else {
-
-            Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new transporteAsignado($data, $date));
-            
-            $logapi =  new logapi();
-            $logapi->user = $dAsign->user;
-            $logapi->detalle = '+ Sandbox +to: '. $to .'AsignaUnidadTransporte-User:' . $dAsign->user . '|Transporte:' . $dAsign->transport .'| ATA:' . $dAsign->transport_agent .'| Bandera:' . $dAsign->pais .'| CUIT :' . $dAsign->tax_id ;
-            $logapi->save();
-
-            return 'ok';
+        if ($sbx->sandbox == 0) {
+            // Send email
+            Mail::to($recipient)->bcc('inboxplataforma@botzero.ar')->send(new transporteAsignado($data, $date));
         }
+
+        // Log API action again with updated log message
+        $logapi = new logapi();
+        $logapi->user = $asign->user;
+        $logapi->detalle = $logMessage;
+        $logapi->save();
+
+        return 'ok'; // Return success message
+    } catch (\Exception $e) {
+        // Handle and log the error
+        $errorMessage = 'An error occurred: ' . $e->getMessage();
+        // Log the error here using your preferred logging mechanism
+        return $errorMessage; // Return error message
+    }
     }
 
     public function cambiaStatus($cntr, $empresa, $booking, $user, $tipo)
