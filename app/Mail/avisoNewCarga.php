@@ -25,6 +25,16 @@ class avisoNewCarga extends Mailable
     
     public function build()
     {
+
+        $type = $this->datos['type'];
+
+        if ($type === 'Impo Terrestre') {
+            return $this->view('mails.avisoNewCargaImpoTerrestre');
+        } /* elseif ($type === 'tipo2') {
+            return $this->view('mails.avisoNewCarga2');
+        } */ else {
+            return $this->view('mails.avisoNewCarga');
+        }
         return $this->view('mails.avisoNewCarga');
     }
 
