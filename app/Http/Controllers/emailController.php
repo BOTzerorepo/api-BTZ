@@ -302,6 +302,7 @@ class emailController extends Controller
             ->select(
                 'carga.booking',
                 'carga.trader',
+                'carga.importador',
                 'carga.user',
                 'carga.ref_customer',
                 'carga.shipper',
@@ -309,6 +310,8 @@ class emailController extends Controller
                 'carga.load_place',
                 'carga.custom_place',
                 'carga.custom_agent',
+                'carga.custom_place_impo',
+                'carga.custom_agent_impo',
                 'carga.oceans_line',
                 'carga.vessel',
                 'carga.voyage',
@@ -319,7 +322,10 @@ class emailController extends Controller
                 'carga.observation_customer',
                 'cntr.retiro_place',
                 'cntr.cntr_type',
-                'carga.type'
+                'carga.type',
+                'carga.senasa',
+                'carga.senasa_string'
+
             )
             ->join('cntr', 'carga.booking', '=', 'cntr.booking')->where('carga.id', '=', $idCarga)->get();
         $cantidad = $qcarga->count();
@@ -330,13 +336,16 @@ class emailController extends Controller
 
             'operacion' => $carga->ref_customer,
             'trader' => $carga->trader,
+            'importador' => $carga->importador,
             'booking' => $carga->booking,
             'loadDate' => $carga->load_date,
             'depositoRetiro' => $carga->retiro_place,
             'shipper' => $carga->shipper,
             'loadPlace' => $carga->load_place,
             'customPlace' => $carga->custom_place,
+            'customPlaceImpo' => $carga->custom_place_impo,
             'customAgent' => $carga->custom_agent,
+            'customAgentImpo' => $carga->custom_agent_impo,
             'armador' => $carga->oceans_line,
             'vessel' => $carga->vessel,
             'voyage' => $carga->voyage,
