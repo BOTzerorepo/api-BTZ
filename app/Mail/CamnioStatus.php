@@ -23,8 +23,8 @@ class CamnioStatus extends Mailable
     public function __construct($datos)
     {
         $this->datos = $datos;
+        $this->subject = 'STATUS // ' . $datos['ref_customer'] . ' - ' . $datos['type'] . ' - ' . $datos['trader'] . ' - 1 * ' . $datos['cntr_type'] . '// BKG: ' . $datos['booking'] . '.';
 
-        $this->subject = '[ '.$datos['cntr'].' ]'. 'Cambio su Status a ' . $datos['status'];
     }
 
     /**

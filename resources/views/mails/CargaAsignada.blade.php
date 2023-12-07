@@ -137,33 +137,51 @@
                         <tbody>
                             <tr>
                                 <td>
-                                    <table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content"
+                                    <table align="center" border="0" cellpadding="0" cellspacing="0"
+                                        class="row-content"
                                         role="presentation"
-                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #FFFFFF; color: #333; width: 650px;"
+                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;  color: #333; width: 650px;"
                                         width="650">
                                         <tbody>
                                             <tr>
-                                                <td></td>
-                                                <td class="column column-1"
-                                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top; padding-left: 25px; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"
-                                                    width="50%">
-                                                    <table border="0" cellpadding="0" cellspacing="0"
-                                                        class="image_block" role="presentation"
-                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-                                                        width="100%">
-                                                        <tr>
-                                                            <td
-                                                                style="padding-top:30px;width:100%;padding-right:0px;padding-left:0px;padding-bottom:25px;">
-                                                                <div style="line-height:10px"><img alt="Image"
-                                                                        class="fullMobileWidth big"
-                                                                        src="https://botzero.ar/public/image/logoBotZero.svg"
-                                                                        style="display: block; height: auto; border: 0; width: 240px; max-width: 100%;margin: auto;"
-                                                                        title="Image" width="195" /></div>
-                                                            </td>
-                                                        </tr>
+                                                <td>
+                                                    <table align="center" border="0" cellpadding="0" cellspacing="0"
+                                                        class="row-content"
+                                                        role="presentation"
+                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #333; width: 650px;"
+                                                        width="650">
+                                                        <tbody>
+                                                            <tr>
+
+                                                                <td class="column column-1"
+                                                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top; padding-left: 25px; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"
+                                                                    width="50%">
+                                                                    <table border="0" cellpadding="0"
+                                                                        cellspacing="0"
+                                                                        class="image_block" role="presentation"
+                                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
+                                                                        width="100%">
+                                                                        <tr>
+                                                                            <td>
+                                                                                <div style="line-height:10px"><img
+                                                                                        alt="Image"
+                                                                                        class="fullMobileWidth big"
+
+                                                                                        src="{{ asset('image/CorreoAutomaticoTrans.png') }}"
+
+                                                                                        style="display: block; height: auto; border: 0; ; max-width: 100%;margin: auto;"
+                                                                                        title="Image" width="495" />
+                                                                                </div>
+
+                                                                            </td>
+                                                                        </tr>
+                                                                    </table>
+                                                                </td>
+
+                                                            </tr>
+                                                        </tbody>
                                                     </table>
                                                 </td>
-                                                <td></td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -172,22 +190,25 @@
                         </tbody>
                     </table>
                     <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-3"
-                        role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
+                        role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;margin-top: 20px;"
+                        width="100%">
                         <tbody>
                             <tr>
                                 <td>
                                     <table align="center" border="0" cellpadding="0" cellspacing="0"
                                         class="row-content stack" role="presentation"
-                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #d6d9f0; background-image: url('images/bg_cart_2.png'); background-position: top center; background-repeat: no-repeat; color: #000000; width: 650px;"
+                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #d6d9f0; background-image:url('{{ asset('image/AlertasMails/status.png') }}'); background-position: top center; background-repeat: no-repeat; color: #000000; width: 650px;"
                                         width="650">
+
                                         <tbody>
                                             <tr>
                                                 <td class="column column-1"
                                                     style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top; padding-top: 55px; padding-bottom: 60px; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"
                                                     width="100%">
-                                                    <table border="0" cellpadding="0" cellspacing="0" class="text_block"
+                                                    <table border="0" cellpadding="0" cellspacing="0"
+                                                        class="text_block"
                                                         role="presentation"
-                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"
+                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;margin-top: 20px;"
                                                         width="100%">
                                                         <tr>
                                                             <td
@@ -197,15 +218,17 @@
                                                                         style="font-size: 12px; font-family: Lato, Tahoma, Verdana, Segoe, sans-serif; mso-line-height-alt: 14.399999999999999px; color: #052d3d; line-height: 1.2;">
                                                                         <p
                                                                             style="margin: 0; font-size: 14px; text-align: center;">
-                                                                            <span style="font-size:38px;"><strong><span
-                                                                                        style="font-size:38px; color:#020858;">ASIGNACIÓN DE UNIDAD</strong></span>
+                                                                            <span style="font-size:25px;"><strong><span
+                                                                                        style="font-size:28px; color:white;">ASIGNACIÓN
+                                                                                        DE UNIDAD</strong></span>
                                                                         </p>
                                                                     </div>
                                                                 </div>
                                                             </td>
                                                         </tr>
                                                     </table>
-                                                    <table border="0" cellpadding="0" cellspacing="0" class="text_block"
+                                                    <table border="0" cellpadding="0" cellspacing="0"
+                                                        class="text_block"
                                                         role="presentation"
                                                         style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"
                                                         width="100%">
@@ -214,12 +237,12 @@
                                                                 style="padding-bottom:10px;padding-left:10px;padding-right:10px;">
                                                                 <div style="font-family: sans-serif">
                                                                     <div class="txtTinyMce-wrapper"
-                                                                        style="font-size: 12px; font-family: Lato, Tahoma, Verdana, Segoe, sans-serif; mso-line-height-alt: 14.399999999999999px; color: #052D3D; line-height: 1.2;">
+                                                                        style="font-size: 12px; font-family: Lato, Tahoma, Verdana, Segoe, sans-serif; mso-line-height-alt: 14.399999999999999px; color: white; line-height: 1.2;">
                                                                         <p
-                                                                            style="margin: 0; font-size: 14px; text-align: center;">
-                                                                            <span style="font-size:22px;"><strong><span
-                                                                                        style="font-size:22px;">Asignación de unidad para: 
-                                                                                        {{ $datos['cntr_number'] }} de la referencia: 
+                                                                            style="margin-top: 25px; font-size: 14px; text-align: center;">
+                                                                            <span style="font-size:15px;"><strong><span
+                                                                                        style="font-size:15px;">
+                                                                                        {{ $datos['cntr_number'] }} -
                                                                                         {{ $datos['booking'] }}
                                                                                     </span></strong></span>
                                                                         </p>
@@ -262,7 +285,8 @@
                                                                         <p
                                                                             style="margin: 0; text-align: center; font-size: 12px;">
                                                                             <span
-                                                                                style="font-size:20px;">Detalle de asignación:</span>
+                                                                                style="font-size:20px;">Detalle de
+                                                                                asignación:</span>
                                                                         </p>
                                                                     </div>
                                                                 </div>
@@ -315,48 +339,76 @@
                                                                             <div style="font-family: sans-serif">
                                                                                 <div class="txtTinyMce-wrapper"
                                                                                     style="font-size: 12px; font-family: Lato, Tahoma, Verdana, Segoe, sans-serif; mso-line-height-alt: 14.399999999999999px; color: #052d3d; line-height: 1.2;">
-                                                                                   
-                                                                                        <p style="margin: 0; font-size: 12px; text-align: center;">
-                                                                                            <span style="font-size:20px; color: gray; text-align: center;">
+
+                                                                                    <p
+                                                                                        style="margin: 0; font-size: 12px; text-align: center;">
+                                                                                        <span
+                                                                                            style="font-size:20px; color: gray; text-align: center;">
                                                                                             <h3>Datos para CRT</h3>
                                                                                             <hr>
-                                                                                              <p>Transporte:  {{$datos['transport']}} <br>
-                                                                                                Domicilio: {{$datos['direccion']}}
-                                                                                                <br>RUT|CUIT: {{$datos['cuit']}}
-                                                                                                <br>PAUT: {{$datos['paut']}}
-                                                                                                <br>Permiso Internacional: {{$datos['permiso_int']}}
-                                                                                                <br>Vto Perm. Int.: {{$datos['vto_permiso_int']}}
+                                                                                            <p>Transporte:
+                                                                                                {{ $datos['transport'] }}
                                                                                                 <br>
-                                                                                                <br> <strong style="font-size: larger; padding: 5px ; background: #aad4f5;"> CRT:{{$datos['crt']}}</strong>
+                                                                                                Domicilio:
+                                                                                                {{ $datos['direccion'] }}
+                                                                                                <br>RUT|CUIT:
+                                                                                                {{ $datos['cuit'] }}
+                                                                                                <br>PAUT:
+                                                                                                {{ $datos['paut'] }}
+                                                                                                <br>Permiso
+                                                                                                Internacional:
+                                                                                                {{ $datos['permiso_int'] }}
+                                                                                                <br>Vto Perm. Int.:
+                                                                                                {{ $datos['vto_permiso_int'] }}
+                                                                                                <br>
+                                                                                                <br> <strong
+                                                                                                    style="font-size: larger; padding: 5px ; background: #aad4f5;">
+                                                                                                    CRT:{{ $datos['crt'] }}</strong>
                                                                                             </p>
                                                                                             <h3>Datos para MIC</h3>
                                                                                             <hr>
                                                                                             <p>
-                                                                                                Transporte: {{$datos['fletero_razon_social']}}
-                                                                                                <br>Domicilio: {{$datos['fletero_domicilio']}}
-                                                                                                <br>CUIT: {{$datos['fletero_cuit']}} 
-                                                                                                <br>PAUT: {{$datos['fletero_paut']}}
-                                                                                                <br>Permiso Internacional: {{$datos['fletero_permiso']}} 
-                                                                                                <br>Vencimiento Permiso Internacional: {{$datos['fletero_vto_permiso']}}
+                                                                                                Transporte:
+                                                                                                {{ $datos['fletero_razon_social'] }}
+                                                                                                <br>Domicilio:
+                                                                                                {{ $datos['fletero_domicilio'] }}
+                                                                                                <br>CUIT:
+                                                                                                {{ $datos['fletero_cuit'] }}
+                                                                                                <br>PAUT:
+                                                                                                {{ $datos['fletero_paut'] }}
+                                                                                                <br>Permiso
+                                                                                                Internacional:
+                                                                                                {{ $datos['fletero_permiso'] }}
+                                                                                                <br>Vencimiento Permiso
+                                                                                                Internacional:
+                                                                                                {{ $datos['fletero_vto_permiso'] }}
                                                                                                 <br>
-                                                                                                <br>Chofer:{{$datos['driver']}}
-                                                                                                <br>DNI:{{$datos['documento']}}
+                                                                                                <br>Chofer:{{ $datos['driver'] }}
+                                                                                                <br>DNI:{{ $datos['documento'] }}
                                                                                                 <br>
-                                                                                                <br>Tractor:{{$datos['truck']}}
-                                                                                                <br>Modelo: {{$datos['truck_modelo']}}
-                                                                                                <br>Año: {{$datos['truck_year']}}
-                                                                                                <br>Chasis: {{$datos['truck_chasis']}}
-                                                                                                <br>Póliza: {{$datos['truck_poliza']}}
-                                                                                                <br>Vencimiento: {{$datos['truck_vto_poliza']}}
-                                                                                                <br>Semi: {{$datos['truck_semi']}}
-                                                                                                <br>Póliza Semi: {{$datos['truck_semi_poliza']}}
-                                                                                                <br>Vto póliza semi: {{$datos['truck_semi_vto_poliza']}}
+                                                                                                <br>Tractor:{{ $datos['truck'] }}
+                                                                                                <br>Modelo:
+                                                                                                {{ $datos['truck_modelo'] }}
+                                                                                                <br>Año:
+                                                                                                {{ $datos['truck_year'] }}
+                                                                                                <br>Chasis:
+                                                                                                {{ $datos['truck_chasis'] }}
+                                                                                                <br>Póliza:
+                                                                                                {{ $datos['truck_poliza'] }}
+                                                                                                <br>Vencimiento:
+                                                                                                {{ $datos['truck_vto_poliza'] }}
+                                                                                                <br>Semi:
+                                                                                                {{ $datos['truck_semi'] }}
+                                                                                                <br>Póliza Semi:
+                                                                                                {{ $datos['truck_semi_poliza'] }}
+                                                                                                <br>Vto póliza semi:
+                                                                                                {{ $datos['truck_semi_vto_poliza'] }}
                                                                                             </p>
-      
-                                                                                            </span>
+
+                                                                                        </span>
                                                                                         </span>
                                                                                     </p>
-                                                                                    
+
                                                                                 </div>
                                                                             </div>
                                                                         </td>
@@ -374,19 +426,20 @@
                                                                                     style="font-size: 12px; font-family: Lato, Tahoma, Verdana, Segoe, sans-serif; mso-line-height-alt: 18px; color: #787878; line-height: 1.5;">
 
                                                                                     <p
-                                                                                    style="margin: 2%; font-size: 14px; text-align: center; mso-line-height-alt: 27px;">
+                                                                                        style="margin: 2%; font-size: 14px; text-align: center; mso-line-height-alt: 27px;">
                                                                                         <span
                                                                                             style="font-size:15px;">
                                                                                             Status Informado por: <br>
                                                                                             <span
                                                                                                 style="color:#2190e3;font-size:18px;">
                                                                                                 <strong>
-                                                                                                    {{ $datos['user']}}
+                                                                                                    {{ $datos['user'] }}
                                                                                                 </strong>
                                                                                             </span>
-                                                                                            <br/>
-                                                                                            <strong style="font-size:10px;">Created at: {{
-                                                                                                $date}}
+                                                                                            <br />
+                                                                                            <strong
+                                                                                                style="font-size:10px;">Created
+                                                                                                at: {{ $date }}
                                                                                             </strong></span>
                                                                                     </p>
                                                                                 </div>
@@ -417,6 +470,7 @@
                         <tbody>
                             <tr>
                                 <td>
+                                    
                                     <table align="center" border="0" cellpadding="0" cellspacing="0"
                                         class="row-content stack" role="presentation"
                                         style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #FFFFFF; color: #000000; width: 650px;"
@@ -488,7 +542,8 @@
                                                                             <!--[if vml]><table align="left" cellpadding="0" cellspacing="0" role="presentation" style="display:inline-block;padding-left:0px;padding-right:0px;mso-table-lspace: 0pt;mso-table-rspace: 0pt;"><![endif]-->
                                                                             <!--[if !vml]><!-->
                                                                             <table cellpadding="0" cellspacing="0"
-                                                                                class="icons-inner" role="presentation"
+                                                                                class="icons-inner"
+                                                                                role="presentation"
                                                                                 style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; display: inline-block; margin-right: -4px; padding-left: 0px; padding-right: 0px;">
                                                                                 <!--<![endif]-->
                                                                                 <tr>
@@ -549,29 +604,51 @@
                                                                             style="vertical-align: middle; text-align: center;">
                                                                             <!--[if vml]><table align="left" cellpadding="0" cellspacing="0" role="presentation" style="display:inline-block;padding-left:0px;padding-right:0px;mso-table-lspace: 0pt;mso-table-rspace: 0pt;"><![endif]-->
                                                                             <!--[if !vml]><!-->
-                                                                            <table cellpadding="0" cellspacing="0"
-                                                                                class="icons-inner" role="presentation"
-                                                                                style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; display: inline-block; margin-right: -4px; padding-left: 0px; padding-right: 0px;">
-                                                                                <!--<![endif]-->
+                                                                            <table border="0" cellpadding="0"
+                                                                                cellspacing="0"
+                                                                                class="icons_block"
+                                                                                role="presentation"
+                                                                                style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
+                                                                                width="100%">
                                                                                 <tr>
                                                                                     <td
-                                                                                        style="vertical-align: middle; text-align: center; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 6px;">
-                                                                                        <a href="https://www.designedwithbee.com/"
-                                                                                            style="text-decoration: none;"
-                                                                                            target="_blank"><img
-                                                                                                align="center"
-                                                                                                alt="Designed with BEE"
-                                                                                                class="icon" height="32"
-                                                                                                src="images/bee.png"
-                                                                                                style="display: block; height: auto; margin: 0 auto; border: 0;"
-                                                                                                width="34" /></a>
-                                                                                    </td>
-                                                                                    <td
-                                                                                        style="font-family: Lato, Tahoma, Verdana, Segoe, sans-serif; font-size: 15px; color: #9d9d9d; vertical-align: middle; letter-spacing: undefined; text-align: center;">
-                                                                                        <a href="https://www.designedwithbee.com/"
-                                                                                            style="color: #9d9d9d; text-decoration: none;"
-                                                                                            target="_blank">Designed
-                                                                                            with BEE</a>
+                                                                                        style="vertical-align: middle; color: #9d9d9d; font-family: inherit; font-size: 15px; padding-bottom: 5px; padding-top: 5px; text-align: center;">
+                                                                                        <table cellpadding="0"
+                                                                                            cellspacing="0"
+                                                                                            role="presentation"
+                                                                                            style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
+                                                                                            width="100%">
+                                                                                            <tr>
+                                                                                                <td
+                                                                                                    style="vertical-align: middle; text-align: center;">
+                                                                                                    <!--[if vml]><table align="left" cellpadding="0" cellspacing="0" role="presentation" style="display:inline-block;padding-left:0px;padding-right:0px;mso-table-lspace: 0pt;mso-table-rspace: 0pt;"><![endif]-->
+                                                                                                    <!--[if !vml]><!-->
+                                                                                                    <table
+                                                                                                        cellpadding="0"
+                                                                                                        cellspacing="0"
+                                                                                                        class="icons-inner"
+                                                                                                        role="presentation"
+                                                                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; display: inline-block; margin-right: -4px; padding-left: 0px; padding-right: 0px;">
+                                                                                                        <!--<![endif]-->
+                                                                                                        <tr>
+                                                                                                            <td
+                                                                                                                style="vertical-align: middle; text-align: center; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 6px;">
+                                                                                                                <a href="https://botzero.tech"
+                                                                                                                    style="text-decoration: none;"
+                                                                                                                    target="_blank"><img
+                                                                                                                        align="center"
+                                                                                                                        alt="Designed with BEE"
+                                                                                                                        class="icon"
+                                                                                                                        src="{{ asset('image/joinLogisticsRevolution.gif') }}"
+                                                                                                                        style="display: block; height: auto; margin: 0 auto; border: 0;" /></a>
+
+                                                                                                            </td>
+
+                                                                                                        </tr>
+                                                                                                    </table>
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        </table>
                                                                                     </td>
                                                                                 </tr>
                                                                             </table>

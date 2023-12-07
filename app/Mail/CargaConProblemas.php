@@ -21,7 +21,7 @@ class CargaConProblemas extends Mailable
     public function __construct($datos)
     {
         $this->datos = $datos;
-        $this->subject = '[ '.$datos['cntr'].' ]'. 'Carga con Problemas.';
+        $this->subject = 'STATUS // '.$datos['ref_customer']. ' - ' . $datos['type'] . ' - '.$datos['trader']. ' - 1 * '.$datos['cntr_type'].'// BKG: '.$datos['booking'].'.';
     }
     /**
      * Build the message.
