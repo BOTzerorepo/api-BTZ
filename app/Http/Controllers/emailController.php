@@ -295,7 +295,7 @@ class emailController extends Controller
 
         $user = DB::table('users')->join('particular_soft_configurations', 'users.configCompany', '=', 'particular_soft_configurations.name')->where('users.username', '=', $user)->get();
 
-       $toMailsEnviar = $user[0]->to_mail_trafico_Team;
+        $toMailsEnviar = $user[0]->to_mail_trafico_Team;
         $ccMailsEnviar = $user[0]->cc_mail_trafico_Team;
  
         $qcarga = DB::table('carga')
@@ -324,7 +324,10 @@ class emailController extends Controller
                 'cntr.cntr_type',
                 'carga.type',
                 'carga.senasa',
-                'carga.senasa_string'
+                'carga.senasa_string',
+                'carga.bl_hbl',
+
+
 
             )
             ->join('cntr', 'carga.booking', '=', 'cntr.booking')->where('carga.id', '=', $idCarga)->get();
@@ -359,7 +362,9 @@ class emailController extends Controller
             'user' => $user[0]->username,
             'date' => $date,
             'type' => $carga->type,
-
+            'bl_hbl' => $carga->bl_hbl,
+            'senasa' => $carga->senasa,
+            'senasa_string' => $carga->senasa_string,
 
         ];
 
@@ -367,7 +372,7 @@ class emailController extends Controller
 
         if ($sbx[0]->sandbox == 0) {
 
-            $mail = Mail::to(['ddicarlo@totaltradegroup.com', 'rquero@totaltradegroup.com', 'cs.auxiliar@totaltradegroup.com'])->cc(['gzarate@totaltradegroup.com', 'czelada@totaltradegroup.com', 'fzgaib@totaltradegroup.com'])->bcc('inboxplataforma@botzero.ar')->send(new avisoNewCarga($datos));
+            $mail = Mail::to(['gzarate@totaltradegroup.com', 'czelada@totaltradegroup.com','rquero@totaltradegroup.com'])->cc(['cs.auxiliar@totaltradegroup.com'])->bcc('inboxplataforma@botzero.ar')->send(new avisoNewCarga($datos));
             $logApi = new logapi();
             $logApi->user = $user[0]->username;
             $logApi->detalle = "envio email to(['ddicarlo@totaltradegroup.com', 'rquero@totaltradegroup.com', 'cs.auxiliar@totaltradegroup.com'])->cc(['gzarate@totaltradegroup.com', 'czelada@totaltradegroup.com', 'fzgaib@totaltradegroup.com'])";

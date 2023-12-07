@@ -114,8 +114,6 @@ class cargaController extends Controller
     {
         $user = DB::table('users')->where('username', '=', $user)->first();
 
-      
-
         if ($user->permiso == 'Traffic') {
 
             $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
@@ -239,8 +237,6 @@ class cargaController extends Controller
 
     public function guardarFormulario(Request $request)
     {
-
-
 
         $carga = new Carga();
         $carga->booking = $request->input('booking');
