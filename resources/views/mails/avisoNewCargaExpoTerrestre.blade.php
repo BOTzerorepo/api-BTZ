@@ -200,7 +200,7 @@
                                                                         <p
                                                                             style="margin: 0; font-size: 14px; text-align: center;">
                                                                             <span style="font-size:38px;"><strong><span
-                                                                                        style="font-size:38px; color:white">Nueva Impo Terrestre</strong></span>
+                                                                                        style="font-size:38px; color:white">Nueva Expo Terrestre</strong></span>
                                                                         </p>
                                                                     </div>
                                                                 </div>
@@ -334,24 +334,24 @@
                                                                                         <br/>
                                                                                     </p>
                                                                                     <table style="width: 100%;">
-                                                                                        <tr style="background: white;"> {{-- siempre --}}
-                                                                                            <td style="width: 30%;">Operacion N:</td>
+                                                                                        <tr style="background: white;">
+                                                                                            <td style="width: 30%;">Operacion N:</td> {{-- siempre --}}
                                                                                             <td>{{$datos['operacion'] }}</td>
                                                                                         </tr>
                                                                                         <tr>
-                                                                                            <td>Booking:</td> {{-- siempre --}}
+                                                                                            <td>Booking:</td>{{-- siempre --}}
                                                                                             <td>{{$datos['booking'] }}</td>
                                                                                         </tr>
                                                                                         <tr style="background: white;">
-                                                                                            <td >Consignatario/Importador:</td>
-                                                                                            <td>{{$datos['importador'] }}</td>
+                                                                                            <td >Shipper:</td>
+                                                                                            <td>{{$datos['shipper'] }}</td>
                                                                                         </tr>
                                                                                         <tr >
-                                                                                            <td>Dia de Carga:</td> {{-- siempre --}}
+                                                                                            <td>Dia de Carga:</td>{{-- siempre --}}
                                                                                             <td>{{$datos['loadDate'] }}</td>
                                                                                         </tr>
                                                                                         <tr style="background: white;">
-                                                                                            <td>Cantidad y Tipo de CNTR:</td> {{-- siempre --}}
+                                                                                            <td>Cantidad y Tipo de CNTR:</td>{{-- siempre --}}
                                                                                             <td>{{$datos['cantidad'] }} x {{$datos['cntr_type'] }} </td>
                                                                                         </tr>
                                                                                         <tr>
@@ -359,7 +359,7 @@
                                                                                             <td>{{$datos['trader'] }}</td>
                                                                                         </tr>
                                                                                         <tr style="background: white;"> 
-                                                                                            <td>Lugar de Carga:</td> {{-- siempre --}}
+                                                                                            <td>Lugar de Carga:</td>{{-- siempre --}}
                                                                                             <td>{{$datos['loadPlace'] }}</td>
                                                                                         </tr>
                                                                                         <tr>
@@ -379,22 +379,23 @@
                                                                                             <td>{{$datos['customAgentImpo'] }}</td>
                                                                                         </tr>
                                                                                         <tr>
-                                                                                            <td>Cut Off Fisico:</td> {{-- siempre --}}
+                                                                                            <td>Cut Off Fisico:</td>{{-- siempre --}}
                                                                                             <td>{{$datos['cutOffFisico'] }}</td>
                                                                                         </tr>
                                                                                         <tr style="background: white;">
-                                                                                            <td>Lugar de Entrega:</td> {{-- siempre --}}
+                                                                                            <td>Lugar de Entrega:</td>{{-- siempre --}}
                                                                                             <td>{{$datos['loadPort'] }}</td>
                                                                                         </tr>
                                                                                      
                                                                                         <tr >
-                                                                                            <td>Mercaderia:</td> {{-- siempre --}}
+                                                                                            <td>Mercaderia:</td>{{-- siempre --}}
                                                                                             <td>{{$datos['commodity'] }}</td>
                                                                                         </tr> 
                                                                                         <tr style="background: white;">
-                                                                                            <td>Observaciones:</td> {{-- siempre --}}
+                                                                                            <td>Observaciones:</td>{{-- siempre --}}
                                                                                             <td>{{$datos['obeservaciones'] }}</td>
                                                                                         </tr>
+                                                                                       
                                                                                     </table>
                                                                                     <p
                                                                                     style="margin: 2%; font-size: 14px; text-align: center; mso-line-height-alt: 27px;">
