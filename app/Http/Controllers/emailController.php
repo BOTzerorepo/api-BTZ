@@ -128,6 +128,8 @@ class emailController extends Controller
                 ->join('cntr', 'asign.cntr_number', '=', 'cntr.cntr_number')
                 ->where('asign.id', '=', $id)
                 ->get();
+
+            
             if ($asign->count() === 0) {
                 return 'Assignment not found'; // Handle the case where no assignment is found
             }
@@ -168,10 +170,10 @@ class emailController extends Controller
 
             if ($sbx->sandbox == 0) {
                 // Send email
-                Mail::to($recipient)->cc(['gzarate@totaltradegroup.com'])->bcc('inboxplataforma@botzero.ar')->send(new transporteAsignado($data, $date));
+                Mail::to($to)->cc(['gzarate@totaltradegroup.com'])->bcc('inboxplataforma@botzero.ar')->send(new transporteAsignado($data, $date));
             } else {
 
-                Mail::to($recipient)->cc(['priopelliza@gmail.com'])->bcc('inboxplataforma@botzero.ar')->send(new transporteAsignado($data, $date));
+                Mail::to($to)->cc(['priopelliza@gmail.com'])->bcc('inboxplataforma@botzero.ar')->send(new transporteAsignado($data, $date));
             }
 
             // Log API action again with updated log message
@@ -221,20 +223,21 @@ class emailController extends Controller
             ];
 
 
-            $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $booking)->get();
-            $empresa = $qempresa[0]->empresa;
-            $qmail = DB::table('empresas')->where('razon_social', '=', $empresa)->select('mail_logistic')->get();
-            $mail = $qmail[0]->mail_logistic;
+            $qto = DB::table('carga')->select('users.email')
+            ->join('users', 'users.username', '=', 'carga.user')
+            ->where('carga.booking', '=', $booking)->get();
+            $to = $qto[0]->email;
+          
             $sbx = DB::table('variables')->select('sandbox')->get();
 
             if ($sbx[0]->sandbox == 0) {
 
-                Mail::to($mail)->cc(['gzarate@totaltradegroup.com'])->bcc('inboxplataforma@botzero.ar')->send(new CargaConProblemas($datos));
+                Mail::to($tipo)->cc(['gzarate@totaltradegroup.com'])->bcc('inboxplataforma@botzero.ar')->send(new CargaConProblemas($datos));
 
                 return 'ok';
             } else {
 
-                Mail::to($mail)->cc(['priopelliza@gmail.com'])->bcc('inboxplataforma@botzero.ar')->send(new CargaConProblemas($datos));
+                Mail::to($to)->cc(['priopelliza@gmail.com'])->bcc('inboxplataforma@botzero.ar')->send(new CargaConProblemas($datos));
 
                 return 'ok';
             }
@@ -260,16 +263,16 @@ class emailController extends Controller
                 'ref_customer' => $qd->ref_customer
             ];
 
-            $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $booking)->get();
-            $empresa = $qempresa[0]->empresa;
-            $qmail = DB::table('empresas')->where('razon_social', '=', $empresa)->select('mail_logistic')->get();
-            $mail = $qmail[0]->mail_logistic;
+            $qto = DB::table('carga')->select('users.email')
+            ->join('users', 'users.username', '=', 'carga.user')
+            ->where('carga.booking', '=', $booking)->get();
+            $to = $qto[0]->email;
             $sbx = DB::table('variables')->select('sandbox')->get();
             if ($sbx[0]->sandbox == 0) {
-                Mail::to($mail)->cc(['gzarate@totaltradegroup.com'])->bcc('inboxplataforma@botzero.ar')->send(new IngresadoStacking($datos));
+                Mail::to($to)->cc(['gzarate@totaltradegroup.com'])->bcc('inboxplataforma@botzero.ar')->send(new IngresadoStacking($datos));
                 return 'ok';
             } else {
-                Mail::to($mail)->cc(['priopelliza@gmail.com'])->bcc('inboxplataforma@botzero.ar')->send(new IngresadoStacking($datos));
+                Mail::to($to)->cc(['priopelliza@gmail.com'])->bcc('inboxplataforma@botzero.ar')->send(new IngresadoStacking($datos));
                 return 'ok';
             }
         } else {
@@ -296,28 +299,27 @@ class emailController extends Controller
                 'ref_customer' => $qd->ref_customer
             ];
 
-            $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $booking)->get();
-            $empresa = $qempresa[0]->empresa;
-
-            $qmail = DB::table('empresas')->where('razon_social', '=', $empresa)->select('mail_logistic')->get();
-            $mail = $qmail[0]->mail_logistic;
+            $qto = DB::table('carga')->select('users.email')
+            ->join('users', 'users.username', '=', 'carga.user')
+            ->where('carga.booking', '=', $booking)->get();
+            $to = $qto[0]->email;
 
             $sbx = DB::table('variables')->select('sandbox')->get();
 
             if ($sbx[0]->sandbox == 0) {
 
-                Mail::to($mail)->cc(['gzarate@totaltradegroup.com'])->bcc('inboxplataforma@botzero.ar')->send(new CamnioStatus($datos));
+                Mail::to($to)->cc(['gzarate@totaltradegroup.com'])->bcc('inboxplataforma@botzero.ar')->send(new CamnioStatus($datos));
 
                 $logApi = new logapi();
                 $logApi->user = $user;
-                $logApi->detalle = "envio email camnioStatus to: " . $mail;
+                $logApi->detalle = "envio email camnioStatus to: " . $to;
                 $logApi->save();
                 return 'ok';
             } else {
-                Mail::to($mail)->cc(['priopelliza@gmail.com'])->bcc('inboxplataforma@botzero.ar')->send(new CamnioStatus($datos));
+                Mail::to($to)->cc(['priopelliza@gmail.com'])->bcc('inboxplataforma@botzero.ar')->send(new CamnioStatus($datos));
                 $logApi = new logapi();
                 $logApi->user = $user;
-                $logApi->detalle = "+ Sandbox + envio email camnioStatus to: " . $mail;
+                $logApi->detalle = "+ Sandbox + envio email camnioStatus to: " . $to;
                 $logApi->save();
                 return 'ok';
             }
