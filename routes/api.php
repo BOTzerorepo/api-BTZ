@@ -61,6 +61,8 @@ Route::get('/trasnsporteAsignado/{id}','App\Http\Controllers\emailController@tra
 //////// USUARIOS INTERNOS ////////
 
 Route::post('/docs/{booking}','App\Http\Controllers\DocumentController@store');
+Route::post('/ingresoFormulario', 'App\Http\Controllers\cargaController@guardarFormulario');
+
 Route::get('/docsCntr/{booking}/{user}/{cntr}','App\Http\Controllers\DocumentController@indexCntr');
 Route::get('/docsDel','App\Http\Controllers\DocumentController@destroy'); 
 
