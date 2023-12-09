@@ -26,7 +26,7 @@ Route::get('/allCargoLastWeek/{user}','App\Http\Controllers\cargaController@load
 Route::get('/allCargoFinished/{user}','App\Http\Controllers\cargaController@loadFinished'); 
 
 Route::get('/carga/{user}/{id}','App\Http\Controllers\cargaController@show'); 
-Route::get('/statusCarga','App\Http\Controllers\statusController@updateStatusCarga'); 
+Route::post('/statusCarga','App\Http\Controllers\statusController@updateStatusCarga'); 
 
 Route::get('/status','App\Http\Controllers\statusController@index'); 
 Route::get('/ultimoStatus/{id}','App\Http\Controllers\statusController@showLast'); 
