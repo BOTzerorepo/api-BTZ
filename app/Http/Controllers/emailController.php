@@ -191,7 +191,7 @@ class emailController extends Controller
         }
     }
 
-    public function cambiaStatus($cntr, $empresa, $booking, $user, $tipo)
+    public function cambiaStatus($cntr, $empresa, $booking, $user, $tipo, $statusArchivoPath)
     {
 
         $logapi = new logapi();
@@ -232,12 +232,14 @@ class emailController extends Controller
 
             if ($sbx[0]->sandbox == 0) {
 
-                Mail::to($tipo)->cc(['gzarate@totaltradegroup.com'])->bcc('inboxplataforma@botzero.ar')->send(new CargaConProblemas($datos));
+                Mail::to($tipo)->cc(['gzarate@totaltradegroup.com'])->bcc('inboxplataforma@botzero.ar')
+                ->send(new CargaConProblemas($datos, $statusArchivoPath));
 
                 return 'ok';
             } else {
 
-                Mail::to($to)->cc(['priopelliza@gmail.com'])->bcc('inboxplataforma@botzero.ar')->send(new CargaConProblemas($datos));
+                Mail::to($to)->cc(['priopelliza@gmail.com'])->bcc('inboxplataforma@botzero.ar')
+                ->send(new CargaConProblemas($datos, $statusArchivoPath));
 
                 return 'ok';
             }
@@ -269,10 +271,12 @@ class emailController extends Controller
             $to = $qto[0]->email;
             $sbx = DB::table('variables')->select('sandbox')->get();
             if ($sbx[0]->sandbox == 0) {
-                Mail::to($to)->cc(['gzarate@totaltradegroup.com'])->bcc('inboxplataforma@botzero.ar')->send(new IngresadoStacking($datos));
+                Mail::to($to)->cc(['gzarate@totaltradegroup.com'])->bcc('inboxplataforma@botzero.ar')
+                ->send(new IngresadoStacking($datos, $statusArchivoPath));
                 return 'ok';
             } else {
-                Mail::to($to)->cc(['priopelliza@gmail.com'])->bcc('inboxplataforma@botzero.ar')->send(new IngresadoStacking($datos));
+                Mail::to($to)->cc(['priopelliza@gmail.com'])->bcc('inboxplataforma@botzero.ar')
+                ->send(new IngresadoStacking($datos, $statusArchivoPath));
                 return 'ok';
             }
         } else {
@@ -308,7 +312,8 @@ class emailController extends Controller
 
             if ($sbx[0]->sandbox == 0) {
 
-                Mail::to($to)->cc(['gzarate@totaltradegroup.com'])->bcc('inboxplataforma@botzero.ar')->send(new CamnioStatus($datos));
+                Mail::to($to)->cc(['gzarate@totaltradegroup.com'])
+                ->bcc('inboxplataforma@botzero.ar')->send(new CamnioStatus($datos, $statusArchivoPath));
 
                 $logApi = new logapi();
                 $logApi->user = $user;
@@ -316,7 +321,8 @@ class emailController extends Controller
                 $logApi->save();
                 return 'ok';
             } else {
-                Mail::to($to)->cc(['priopelliza@gmail.com'])->bcc('inboxplataforma@botzero.ar')->send(new CamnioStatus($datos));
+                Mail::to($to)->cc(['priopelliza@gmail.com'])->bcc('inboxplataforma@botzero.ar')
+                ->send(new CamnioStatus($datos, $statusArchivoPath));
                 $logApi = new logapi();
                 $logApi->user = $user;
                 $logApi->detalle = "+ Sandbox + envio email camnioStatus to: " . $to;

@@ -9,4 +9,5 @@ class cntr extends Model
 {
     use HasFactory;
     protected $table = 'cntr';
+    protected $primaryKey = 'id_cntr';
 }
