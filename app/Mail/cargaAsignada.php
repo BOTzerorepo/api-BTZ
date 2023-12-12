@@ -23,7 +23,7 @@ class cargaAsignada extends Mailable
     {
         $this->datos = $datos;
         $this->date  = $date;
-        $this->subject = '[ '.$datos['cntr_number'].' ]'. 'Asignacion de Unidad.';
+        $this->subject = 'ENVIO DE DATOS // ' . $datos['ref_customer'] . ' - ' . $datos['type'] . ' - ' . $datos['trader'] . ' – 1 x '  . $datos['cntr_type'] . ' // BKG: '  . $datos['cntr_type'] . ' .';
     }
 
     /**
