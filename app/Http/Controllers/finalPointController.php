@@ -37,17 +37,11 @@ class finalPointController extends Controller
      */
     public function store(Request $request)
     {
-        $description = $request['description'];
-        $pais = $request['pais'];
-        $provincia = $request['provincia'];
-
-        return DB::table('users')->get();
-
-        // Puedes obtener el ID del último registro insertado
-        $lastInsertedId = DB::getPdo()->lastInsertId();
-
-        // Si lo necesitas, puedes recuperar el registro insertado
-        $final_points = DB::table('port')->find($lastInsertedId);
+        $final_points = new port();
+        $final_points->description = $request['description'];
+        $final_points->pais = $request['pais'];
+        $final_points->provincia = $request['provincia'];
+        $final_points->save();
 
         return $final_points;
     }
