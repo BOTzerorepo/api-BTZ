@@ -52,7 +52,7 @@ class statusController extends Controller
         $booking = $request['booking'];
         $carga = Carga::where('booking', $booking)->first();
         $idCarga = $carga->id;
-
+        DB::beginTransaction();
         try {
             //------------GENERAL--------------------
             $request->validate([
@@ -126,11 +126,11 @@ class statusController extends Controller
                 if ($equal) {
                     Carga::where('booking', $booking)->update(['status' => $primerCntrStatus]);
                 }
-              
+                DB::commit();
                 // Devolver una respuesta JSON con información de éxito
                 return response()->json([
                     'id' => $idCarga,
-                    'message' => 'Se modificó el satus a: ' . $statusGral,
+                    'errores' => 'Se modificó el satus a: ' . $statusGral,
                 ], 200);
 
             }elseif ($statusGral == "CON PROBLEMA") {
@@ -194,16 +194,16 @@ class statusController extends Controller
                       'booking' => $booking,
                     ]);
                 
+                    DB::commit();
                     // Devolver una respuesta JSON con información de éxito
                     return response()->json([
                         'id' => $idCarga,
-                        'message' => 'Se modificó el satus a: ' . $statusGral .' y avisado por Correo al Cliente' ,
+                        'errores' => 'Se modificó el satus a: ' . $statusGral .' y avisado por Correo al Cliente' ,
                     ], 200);
 
                 } else {
-                    $errores[] = 'Algo salió mal, por favor vuelta a intentar la acción.';
-                    return response()->json(['errores' => $errores, 'id' => $idCarga], 500);
-
+                    DB::rollBack();
+                    return response()->json(['errores' => 'Algo salió mal, por favor vuelta a intentar la acción.', 'id' => $idCarga], 500);
                 }
             }elseif ($statusGral == "STACKING") {
                 // si la carga está en Staking, Actualizamos el Status en la tabla Status
@@ -258,15 +258,16 @@ class statusController extends Controller
                     // Actualizar el estado del chofer en la tabla 'drivers'
                     Driver::where('nombre', $chofer)->update(['status_chofer' => 'libre', 'place' => $port]);
                     
+                    DB::commit();
                     // Devolver una respuesta JSON con información de éxito
                     return response()->json([
                     'id' => $idCarga,
-                    'message' => 'Se modificó el satus a: ' . $statusGral .' y avisado por Correo al Cliente' ,
+                    'errores' => 'Se modificó el satus a: ' . $statusGral .' y avisado por Correo al Cliente' ,
                     ], 200);
             
                 } else {
-                    $errores[] = 'Algo salió mal, por favor vuelta a intentar la acción.';
-                    return response()->json(['errores' => $errores, 'id' => $idCarga], 500);
+                    DB::rollBack();
+                    return response()->json(['errores' => 'Algo salió mal, por favor vuelta a intentar la acción.', 'id' => $idCarga], 500);
                 }
             }else {
 
@@ -310,29 +311,32 @@ class statusController extends Controller
                     if ($equal) {
                         Carga::where('booking', $booking)->update(['status' => $primerCntrStatus]);
                     }
-            
+                    DB::commit();
                     return response()->json([
                         'id' => $idCarga,
-                        'message' => 'Se modificó el satus a: ' . $statusGral .' y avisado por Correo al Cliente' ,
+                        'errores' => 'Se modificó el satus a: ' . $statusGral .' y avisado por Correo al Cliente' ,
                     ], 200);
             
                 } else {
-                    $errores[] = 'Algo salió mal, por favor vuelta a intentar la acción.';
-                    return response()->json(['errores' => $errores, 'id' => $idCarga], 500);
+                    DB::rollBack();
+                    return response()->json(['errores' => 'Algo salió mal, por favor vuelta a intentar la acción.', 'id' => $idCarga], 500);
                 }
             }
         } catch (ModelNotFoundException $e) {
+            DB::rollBack();
             // Manejar la excepción específica para ModelNotFoundException
-            $errores[] = 'No se encontró el registro. Detalles: ' . $e->getMessage();
-            return response()->json(['errores' => $errores, 'id' => $idCarga], 404);
+            //$errores[] = 'No se encontró el registro. Detalles: ' . $e->getMessage();
+            return response()->json(['errores' => 'No se encontró el registro. Detalles: ' . $e->getMessage(), 'id' => $idCarga], 404);
         } catch (ValidationException $e) {
+            DB::rollBack();
             // Manejar la excepción específica para ValidationException
-            $errores[] = 'Error de validación. Detalles: ' . $e->getMessage();
-            return response()->json(['errores' => $errores, 'id' => $idCarga], 422);
+            //$errores[] = 'Error de validación. Detalles: ' . $e->getMessage();
+            return response()->json(['errores' => 'Error de validación. Detalles: ' . $e->getMessage(), 'id' => $idCarga], 422);
         } catch (Exception $e) {
+            DB::rollBack();
             // Manejar otras excepciones genéricas
             $errores[] = 'Error general. Detalles: ' . $e->getMessage();
-            return response()->json(['errores' => $errores, 'id' => $idCarga], 500);
+            return response()->json(['errores' => 'Error general. Detalles: ' . $e->getMessage(), 'id' => $idCarga], 500);
         }
     }
     /**
