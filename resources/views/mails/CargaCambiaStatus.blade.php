@@ -189,7 +189,7 @@
                             </tr>
                         </tbody>
                     </table>
-                    
+
                     <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-3"
                         role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;margin-top: 20px;"
                         width="100%">
@@ -221,8 +221,7 @@
                                                                             style="margin: 0; font-size: 14px; text-align: center;">
                                                                             <span style="font-size:25px;"><strong><span
                                                                                         style="font-size:28px; color:white;">CARGA
-                                                                                        {{
-                                                                                        $datos['status']}} </strong></span>
+                                                                                        {{ $datos['status'] }} </strong></span>
                                                                         </p>
                                                                     </div>
                                                                 </div>
@@ -340,23 +339,26 @@
                                                                             <div style="font-family: sans-serif">
                                                                                 <div class="txtTinyMce-wrapper"
                                                                                     style="font-size: 12px; font-family: Lato, Tahoma, Verdana, Segoe, sans-serif; mso-line-height-alt: 14.399999999999999px; color: #052d3d; line-height: 1.2;">
-                                                                                    <p style="margin: 0; font-size: 12px; text-align: center;">
+                                                                                    <p
+                                                                                        style="margin: 0; font-size: 12px; text-align: center;">
                                                                                         <span style="font-size:34px;">
-                                                                                            <span style="color:#4caf50;font-size:34px;">
+                                                                                            <span
+                                                                                                style="color:#4caf50;font-size:34px;">
                                                                                                 <strong>
-                                                                                                    <spanstyle="font-size:34px;">
-                                                                                                        {{ $datos['cntr'] }}
-                                                                                                    </span>
-                                                                                                </strong>
+                                                                                                    <span style="font-size:34px;">
+                                                                                                    {{ $datos['cntr'] }}
                                                                                             </span>
-                                                                                        </p>
-                                                                                        <p style="margin: 0; font-size: 12px; text-align: center;">
-                                                                                            <span style="font-size:20px; color: gray; text-align: center;">
-                                                                                                {{$datos['booking']}}
-                                                                                            </span>
+                                                                                            </strong>
                                                                                         </span>
                                                                                     </p>
-                                                                                    
+                                                                                    <p
+                                                                                        style="margin: 0; font-size: 12px; text-align: center;">
+                                                                                        <span
+                                                                                            style="font-size:20px; color: gray; text-align: center;">
+                                                                                            {{ $datos['booking'] }}
+                                                                                        </span>
+                                                                                        </span>
+                                                                                    </p>
                                                                                 </div>
                                                                             </div>
                                                                         </td>
@@ -375,24 +377,25 @@
                                                                                     <p
                                                                                         style="margin: 2%; font-size: 14px; text-align: center; mso-line-height-alt: 27px;">
                                                                                         <span style="font-size:18px;">
-                                                                                            {{ $datos['description']}}
+                                                                                            {{ $datos['description'] }}
                                                                                         </span>
-                                                                                        <br/>
+                                                                                        <br />
                                                                                     </p>
                                                                                     <p
-                                                                                    style="margin: 2%; font-size: 14px; text-align: center; mso-line-height-alt: 27px;">
+                                                                                        style="margin: 2%; font-size: 14px; text-align: center; mso-line-height-alt: 27px;">
                                                                                         <span
                                                                                             style="font-size:15px;">
                                                                                             Status Informado por: <br>
                                                                                             <span
                                                                                                 style="color:#2190e3;font-size:18px;">
                                                                                                 <strong>
-                                                                                                    {{ $datos['user']}}
+                                                                                                    {{ $datos['user'] }}
                                                                                                 </strong>
                                                                                             </span>
-                                                                                            <br/>
-                                                                                            <strong style="font-size:10px;">Created at: {{
-                                                                                                $datos['date']}}
+                                                                                            <br />
+                                                                                            <strong
+                                                                                                style="font-size:10px;">Created
+                                                                                                at: {{ $datos['date'] }}
                                                                                             </strong></span>
                                                                                     </p>
                                                                                 </div>
@@ -493,21 +496,39 @@
                                                                             style="vertical-align: middle; text-align: center;">
                                                                             <!--[if vml]><table align="left" cellpadding="0" cellspacing="0" role="presentation" style="display:inline-block;padding-left:0px;padding-right:0px;mso-table-lspace: 0pt;mso-table-rspace: 0pt;"><![endif]-->
                                                                             <!--[if !vml]><!-->
-                                                                            <table cellpadding="0" cellspacing="0"
-                                                                                class="icons-inner" role="presentation"
-                                                                                style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; display: inline-block; margin-right: -4px; padding-left: 0px; padding-right: 0px;">
-                                                                                <!--<![endif]-->
+                                                                            <table cellpadding="0"
+                                                                                cellspacing="0"
+                                                                                role="presentation"
+                                                                                style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
+                                                                                width="100%">
                                                                                 <tr>
-
                                                                                     <td
-                                                                                        style="font-family: Lato, Tahoma, Verdana, Segoe, sans-serif; font-size: 15px; color: #9d9d9d; vertical-align: middle; letter-spacing: undefined; text-align: center;">
-                                                                                        <a href="https://botzero.tech"
-                                                                                            style="color: #9d9d9d; text-decoration: none;"
-                                                                                            target="_blank">Tecnología
-                                                                                            programada por <strong>
-                                                                                                RailCode </strong> para
-                                                                                            <strong> BOTZero </strong>::
-                                                                                            Software de Logística.</a>
+                                                                                        style="vertical-align: middle; text-align: center;">
+                                                                                        <!--[if vml]><table align="left" cellpadding="0" cellspacing="0" role="presentation" style="display:inline-block;padding-left:0px;padding-right:0px;mso-table-lspace: 0pt;mso-table-rspace: 0pt;"><![endif]-->
+                                                                                        <!--[if !vml]><!-->
+                                                                                        <table
+                                                                                            cellpadding="0"
+                                                                                            cellspacing="0"
+                                                                                            class="icons-inner"
+                                                                                            role="presentation"
+                                                                                            style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; display: inline-block; margin-right: -4px; padding-left: 0px; padding-right: 0px;">
+                                                                                            <!--<![endif]-->
+                                                                                            <tr>
+                                                                                                <td
+                                                                                                    style="vertical-align: middle; text-align: center; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 6px;">
+                                                                                                    <a href="https://botzero.tech"
+                                                                                                        style="text-decoration: none;"
+                                                                                                        target="_blank"><img
+                                                                                                            align="center"
+                                                                                                            alt="Designed with BEE"
+                                                                                                            class="icon"
+                                                                                                            src="{{ asset('image/joinLogisticsRevolution.gif') }}"
+                                                                                                            style="display: block; height: auto; margin: 0 auto; border: 0;" /></a>
+
+                                                                                                </td>
+
+                                                                                            </tr>
+                                                                                        </table>
                                                                                     </td>
                                                                                 </tr>
                                                                             </table>
