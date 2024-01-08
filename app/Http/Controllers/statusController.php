@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
 use Exception;
 use App\Http\Controllers\emailController;
+use Illuminate\Support\Facades\Storage;
 
 class statusController extends Controller
 {
@@ -339,6 +340,45 @@ class statusController extends Controller
             return response()->json(['errores' => 'Error general. Detalles: ' . $e->getMessage(), 'id' => $idCarga], 500);
         }
     }
+
+    public function obtenerDocumentosCarga($booking)
+{
+    $carga = Carga::where('booking', $booking)->first();
+
+    if (!$carga) {
+        return response()->json(['mensaje' => 'No se encontró la carga asociada al booking'], 404);
+    }
+
+    $idCarga = $carga->id;
+    $folder = 'status/' . $idCarga;
+
+    // Verificar si la carpeta existe
+    if (Storage::exists($folder)) {
+        // Obtener la lista de archivos en la carpeta
+        $archivos = Storage::files($folder);
+
+        // Crear un array para almacenar el contenido de los archivos
+        $archivosConContenido = [];
+
+        // Obtener el contenido de cada archivo
+        foreach ($archivos as $archivo) {
+            try {
+                $contenido = Storage::get($archivo);
+                $contenidoUtf8 = mb_convert_encoding($contenido, 'UTF-8', 'UTF-8');
+                $archivosConContenido[] = ['nombre' => $archivo, 'contenido' => $contenidoUtf8];
+            } catch (FileNotFoundException $e) {
+                // Manejar la excepción si el archivo no se encuentra
+                Log::error('Archivo no encontrado: ' . $archivo);
+            }
+        }
+
+        return response()->json(['archivos' => $archivosConContenido]);
+    } else {
+        return response()->json(['mensaje' => 'La carpeta no existe o no tiene archivos'], 404);
+    }
+}
+
+
     /**
      * Display the specified resource.
      *
