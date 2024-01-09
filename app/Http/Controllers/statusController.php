@@ -3,8 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\statu;
+use App\Models\asign;
+use App\Models\Driver;
+use App\Models\cntr;
+use App\Models\Carga;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Validation\ValidationException;
+use Exception;
+use App\Http\Controllers\emailController;
+use Illuminate\Support\Facades\Storage;
 
 class statusController extends Controller
 {
@@ -40,410 +49,336 @@ class statusController extends Controller
     }
     public function updateStatusCarga(Request $request)
     {
-        
+
+        $booking = $request['booking'];
+        $carga = Carga::where('booking', $booking)->first();
+        $idCarga = $carga->id;
+        DB::beginTransaction();
         try {
+            //------------GENERAL--------------------
             $request->validate([
-                'statusGral' => 'required',
-                'cntr' => 'required',
-                'description' => 'required',
                 'user' => 'required',
-                'company' => 'required',
+                'empresa' => 'required',
                 'booking' => 'required',
+                'statusGral' => 'required',
+                'description' => 'required',
             ]);
 
-        foreach ($_POST['statusGral'] as $statusGral);
+            //Datos que recibe del front
+            $cntr = $request['cntr'];
+            $description = $request['description'];
+            $user = $request['user'];
+            $empresa = $request['empresa'];
+            $booking = $request['booking'];
+            $statusGral = $request['statusGral'];
+            //$statusArchivo = $request->file('statusArchivo');
+            
+            if ($request->hasFile('statusArchivo')) {
+                $statusArchivo = $request->file('statusArchivo');
+                $folder = 'status/'. $idCarga ;
+            
+                if (!file_exists($folder)) {
+                    mkdir($folder, 0777, true);
+                }
+                // Genera un nombre único basado en el idCarga y statusGral
+                $nombreArchivo =  $statusGral . '.' . $statusArchivo->getClientOriginalExtension();
+                // Mueve el archivo a la ubicación específica con el nombre único
+                $statusArchivo->storeAs($folder, $nombreArchivo);
+                // Resto del código si es necesario
+                // Después de guardar el archivo
+                $statusArchivoPath = $folder . '/' . $nombreArchivo;
+            }else{
+                $statusArchivoPath = null;
+            }
+            //------------GENERAL--------------------
 
-        if (isset($_POST['actualizarStatus'])) {
-        
-          $cntr = $_POST['cntr'];
-          $description = $_POST['description'];
-          $user = $_SESSION['user'];
-          $empresa = $_SESSION['company'];
-          $booking = $_POST['booking'];
-        
-          $query_id = "SELECT id_cntr FROM cntr WHERE cntr_number = '$cntr'";
-          $result_id = mysqli_query($conn, $query_id);
-        
-          if (mysqli_num_rows($result_id) == 1) {
-            $rid = mysqli_fetch_array($result_id);
-            $id_cntr = $rid['id_cntr'];
-        
-          }
-        
-          /* ACCION PARA CARGAS TERMINADAS */
-          if ($statusGral == "TERMINADA") {
-        
-            // ACTUALIZA STATUS
-        
-            $query = "INSERT INTO `status`(`status`, `main_status`, `cntr_number`, `user_status`) VALUES ('$description','$statusGral', '$cntr', '$user')";
-            $result = mysqli_query($conn, $query);
-        
-            // SI HAY ERROR LE AVISAMOS AL FRONT
-        
-            if (!$result) {
-        
-              $query_id = "SELECT id FROM carga WHERE booking = '$booking'";
-              $result_id = mysqli_query($conn, $query_id);
-        
-              if (mysqli_num_rows($result_id) == 1) {
-                $row = mysqli_fetch_array($result_id);
-                $id = $row['id'];
-              }
-              $_SESSION['message'] = 'Algo salió mal';
-              $_SESSION['message_type'] = 'danger';
-              header('location:formularios/actualizar_status.php?id_cntr=' . $id_cntr);
-            }
-        
-            // SI ESTA TODO OK --> LOGICA DE STATUS GENERAL
-        
-            // ACTULIZAMOS EL STATUS EN EL CNTR
-        
-            $query_update = "UPDATE `cntr` SET `main_status` = '$statusGral', `status_cntr` = '$description' WHERE `cntr_number` = '$cntr'";
-            mysqli_query($conn, $query_update);
-        
-            // REVISAMOS COMO ESTAN LOS DEMAS CNTR
-        
-            $query_validate_status = "SELECT * FROM cntr WHERE booking = '$booking'";
-            $resut_validate_status = mysqli_query($conn, $query_validate_status);
-        
-            $cntr_status = array();
-            // BANDERA DE ARRAY 
-        
-            $equal = true;
-            // COMPARA CADA UNO DE LOS RESULTADOS, SI ALGUNO NO TIENE UN STATUS IGUAL NO LO CAMBIA EN EL GENERAL
-            while ($row = mysqli_fetch_array($resut_validate_status)) {
-              array_push($cntr_status, ($row['main_status']));
-              if ($cntr_status[0] != $row['main_status']) {
-                // SI TODOS SON IGUALES CAMBIA LA BANDERA
-                $equal = false;
-                break;
-              }
-            }
-        
-            // SI TODOS LOS CNTR SON IGUALES CAMBIA EL STATUS GENERAL DE LA CARGA
-        
-            if ($equal) {
-              $query_update = "UPDATE carga SET `status` = '$cntr_status[0]' WHERE `booking` = '$booking'";
-              mysqli_query($conn, $query_update);
-            }
-        
-        
-        
-            $query_id = "SELECT id FROM carga WHERE booking = '$booking'";
-            $result_id = mysqli_query($conn, $query_id);
-        
-            if (mysqli_num_rows($result_id) == 1) {
-              $row = mysqli_fetch_array($result_id);
-              $id = $row['id'];
-            }
-        
-            $_SESSION['message'] = 'Se modificó el satus a: ' . $statusGral;
-            $_SESSION['message_type'] = 'success';
-            header('location:includes/view_carga_user.php?id=' . $id);
-        
-        
-          } elseif ($statusGral == "CON PROBLEMA") {
-        
-            // SI TIENE PROBLEMAS.
-            // ACTUALIZA STATUS
+            if ($statusGral == "TERMINADA") {
+                
+                // ACTUALIZA STATUS
+                $status = new statu([
+                    'status' => $description,
+                    'main_status' => $statusGral,
+                    'cntr_number' => $cntr,
+                    'user_status' => $user,
+                ]);
+                $status->save();
+
+                // Realiza la consulta buscando el cntr
+                $cntrModel = cntr::where('cntr_number', $cntr)->firstOrFail();
+                $id_cntr = $cntrModel->id_cntr;
+                // SI ESTA TODO OK --> LOGICA DE STATUS GENERAL
+                // ACTULIZAMOS EL STATUS EN EL CNTR
+                $cntrModel->main_status = $statusGral;
+                $cntrModel->status_cntr = $description;
+                $cntrModel->save();
+
+                // REVISAMOS COMO ESTAN LOS DEMAS CNTR
+                $cntrs = cntr::where('booking', $booking)->get();
             
-            $query = "INSERT INTO `status`(`status`, `main_status`, `cntr_number`, `user_status`) VALUES ('$description','$statusGral', '$cntr', '$user')";
-            $result = mysqli_query($conn, $query);
-            $tipo = 'problema';
-         
-            // ENVIAMOS MAIL POR API
-        
-        
-            $ch = curl_init();
-        
-            // Establec
-        
-            // Crea un nuevo recurso CURL
-        
-            // Establece la URL y otras opciones apropiadas
-            $url = $linkBase . "/api/mailStatus/" . $cntr . '/' . $empresa . '/' . $booking . '/' . $user . '/' . $tipo;
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_HEADER, 0);
+                // Obtener el status del primer registro
+                $primerCntrStatus = $cntrs->first()->main_status;
+
+                // Verificar si todos los registros tienen el mismo status
+                $equal = $cntrs->every(function ($cntr) use ($primerCntrStatus) {
+                    return $cntr->main_status == $primerCntrStatus;
+                });
+
+                // Si todos los registros tienen el mismo status, actualizar el status de la carga
+                if ($equal) {
+                    Carga::where('booking', $booking)->update(['status' => $primerCntrStatus]);
+                }
+                DB::commit();
+                // Devolver una respuesta JSON con información de éxito
+                return response()->json([
+                    'id' => $idCarga,
+                    'errores' => 'Se modificó el satus a: ' . $statusGral,
+                ], 200);
+
+            }elseif ($statusGral == "CON PROBLEMA") {
+                // SI TIENE PROBLEMAS.
+                // ACTUALIZA STATUS
+                $status = new statu([
+                    'status' => $description,
+                    'main_status' => $statusGral,
+                    'cntr_number' => $cntr,
+                    'user_status' => $user,
+                ]);
+                $tipo = 'problema';
+                $status->save();
             
-            // Captura la URL y la envía al navegador
-            $output = curl_exec($ch);
-        
-            if ($output == 'ok') {
-        
-              // si todo esta ok, Acualizamos el estado del CNTR
-              echo $statusGral . $description .$cntr;
-              $query_update = "UPDATE `cntr` SET `main_status` = '$statusGral', `status_cntr` = '$description' WHERE `cntr_number` = '$cntr'";
-             
-              mysqli_query($conn, $query_update);
-        
-              // Luego revisamos el status de los demás contenedores de la Carga. 
-        
-              $query_validate_status = "SELECT * FROM cntr WHERE booking = '$booking'";
-              $resut_validate_status = mysqli_query($conn, $query_validate_status);
-              $cntr_status = array();
-              $equal = true;
-        
-              while ($row = mysqli_fetch_array($resut_validate_status)) {
-                array_push($cntr_status, ($row['main_status']));
-                if ($cntr_status[0] != $row['main_status']) {
-                  $equal = false;
-                  break;
+                // ENVIAMOS MAIL
+                // Crear una instancia del controlador
+                $emailController = new emailController();
+                // Llamar directamente a la función mailStatus
+                $response = $emailController->cambiaStatus($cntr, $empresa, $booking, $user, $tipo, $statusArchivoPath);
+
+                if ($response == 'ok') {
+
+                    // si todo esta ok, Acualizamos el estado del CNTR
+                    $cntrModel = cntr::where('cntr_number', $cntr)->firstOrFail();
+                    $cntrModel->main_status = $statusGral;
+                    $cntrModel->status_cntr = $description;
+                    $cntrModel->save();
+
+                    // Luego revisamos el status de los demás contenedores de la Carga. 
+                    // Buscar todos los registros Cntr asociados a la booking
+                    $cntrs = cntr::where('booking', $booking)->get();
+
+                    // Obtener el status del primer registro
+                    $primerCntrStatus = $cntrs->first()->main_status;
+
+                    // Verificar si todos los registros tienen el mismo status
+                    $equal = $cntrs->every(function ($cntr) use ($primerCntrStatus) {
+                        return $cntr->main_status == $primerCntrStatus;
+                    });
+
+                    // Si todos los registros tienen el mismo status, actualizar el status de la carga
+                    if ($equal) {
+                        Carga::where('booking', $booking)->update(['status' => $primerCntrStatus]);
+                    }
+
+                    // ARMAMOS NOTIFICACION 
+                    $cntrModel = cntr::where('cntr_number', $cntr)->first();
+                    if ($cntrModel) {
+                        $user_to = $cntrModel->user_cntr;
+                    }
+            
+                    DB::table('notification')->insert([
+                      'title' => 'Carga ' . $cntr . ' con Problemas',
+                      'description' => $description,
+                      'user_to' => $user_to,
+                      'status' => 'No Leido',
+                      'sta_carga' => 'CON PROBLEMA',
+                      'user_create' => $user,
+                      'company_create' => $empresa,
+                      'cntr_number' => $cntr,
+                      'booking' => $booking,
+                    ]);
+                
+                    DB::commit();
+                    // Devolver una respuesta JSON con información de éxito
+                    return response()->json([
+                        'id' => $idCarga,
+                        'errores' => 'Se modificó el satus a: ' . $statusGral .' y avisado por Correo al Cliente' ,
+                    ], 200);
+
+                } else {
+                    DB::rollBack();
+                    return response()->json(['errores' => 'Algo salió mal, por favor vuelta a intentar la acción.', 'id' => $idCarga], 500);
                 }
-              }
-              // si los status de cada contenedor de la Carga son inguales, actulizamos el Status de la Carga. 
-              if ($equal) {
-                $query_update = "UPDATE carga SET `status` = '$cntr_status[0]' WHERE `booking` = '$booking'";
-                mysqli_query($conn, $query_update);
-              }
-        
-              // ARMAMOS NOTIFICACION 
-        
-              $title = 'Carga ' . $cntr . ' con Problemas';
-              $query_user = "SELECT user_cntr, id_cntr FROM cntr WHERE cntr_number = '$cntr'";
-              $result_user = mysqli_query($conn, $query_user);
-        
-              if (mysqli_num_rows($result_user) == 1) {
-                $row = mysqli_fetch_array($result_user);
-                $user_to = $row['user_cntr'];
-        
-              }
-        
-              $query_notification = "INSERT INTO notification (`title`, `description`, `user_to`,`status`,`sta_carga`, `user_create`, `company_create`, `cntr_number`, `booking`) VALUES ('$title','$description','$user_to','No Leido', 'CON PROBLEMA','$user','$empresa','$cntr','$booking')";
-              $result_notif = mysqli_query($conn, $query_notification);
-        
-              $_SESSION['message'] = 'Status Actualizado y avisado por Correo al Cliente';
-              $_SESSION['message_type'] = 'info';
-        
-              header('location:formularios/actualizar_status.php?id_cntr=' . $id_cntr);
-        
-            } else {
-        
-              $_SESSION['message'] = 'Algo salió mal, por favor vuelta a intentar la acción.';
-              $_SESSION['message_type'] = 'danger';
-        
-              header('location:formularios/actualizar_status.php?id_cntr=' . $id_cntr);
-        
-            }
-            // Cierrar el recurso CURL y libera recursos del sistema
-            curl_close($ch);
-        
-          } elseif ($statusGral == "STACKING") {
-        
-            // si la carga está en Staking, Acualizamos el Status en la tabla Status
-        
-            $query = "INSERT INTO `status`(`status`, `main_status`, `cntr_number`, `user_status`) VALUES ('$description','$statusGral', '$cntr', '$user')";
-            $result = mysqli_query($conn, $query);
-            $tipo = 'stacking';
-            echo 'post db insert';
-        
-            // ENVIAMOS MAIL POR API
-        
-            // Crea un nuevo recurso CURL
-        
-            $ch = curl_init();
-        
-            // Establece la URL y otras opciones apropiadas
-            $url = $linkBase ."/api/mailStatus/" . $cntr . '/' . $empresa . '/' . $booking . '/' . $user . '/' . $tipo;
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_HEADER, 0);
-        
-        
-            // Captura la URL y la envía al navegador
-            $output = curl_exec($ch);
-        
-            echo 'post curl exec';
-        
-            if ($output == 'ok') {
-        
-              echo 'pasamos if';
-        
-              // si todo esta ok, Acualizamos el estado del CNTR
-        
-              $query_update = "UPDATE `cntr` SET `main_status` = '$statusGral', `status_cntr` = '$description' WHERE `cntr_number` =
-              '$cntr'";
-              mysqli_query($conn, $query_update);
-        
-              // Luego revisamos el status de los demás contenedores de la Carga.
-        
-              $query_validate_status = "SELECT * FROM cntr WHERE booking = '$booking'";
-              $resut_validate_status = mysqli_query($conn, $query_validate_status);
-              $cntr_status = array();
-              $equal = true;
-        
-              while ($row = mysqli_fetch_array($resut_validate_status)) {
-                array_push($cntr_status, ($row['main_status']));
-                if ($cntr_status[0] != $row['main_status']) {
-                  $equal = false;
-                  break;
+            }elseif ($statusGral == "STACKING") {
+                // si la carga está en Staking, Actualizamos el Status en la tabla Status
+                $status = new statu([
+                    'status' => $description,
+                    'main_status' => $statusGral,
+                    'cntr_number' => $cntr,
+                    'user_status' => $user,
+                ]);
+                $tipo = 'stacking';
+                $status->save();
+            
+                // ENVIAMOS MAIL
+                // Crear una instancia del controlador
+                $emailController = new emailController();
+                // Llamar directamente a la función mailStatus
+                $response = $emailController->cambiaStatus($cntr, $empresa, $booking, $user, $tipo, $statusArchivoPath);
+
+                if ($response == 'ok') {
+
+                    // si todo esta ok, Acualizamos el estado del CNTR
+                    $cntrModel = cntr::where('cntr_number', $cntr)->firstOrFail();
+                    $cntrModel->main_status = $statusGral;
+                    $cntrModel->status_cntr = $description;
+                    $cntrModel->save();
+
+                    // Luego revisamos el status de los demás contenedores de la Carga. 
+                    // Buscar todos los registros Cntr asociados a la booking
+                    $cntrs = cntr::where('booking', $booking)->get();
+
+                    // Obtener el status del primer registro
+                    $primerCntrStatus = $cntrs->first()->main_status;
+
+                    // Verificar si todos los registros tienen el mismo status
+                    $equal = $cntrs->every(function ($cntr) use ($primerCntrStatus) {
+                        return $cntr->main_status == $primerCntrStatus;
+                    });
+
+                    // Si todos los registros tienen el mismo status, actualizar el status de la carga
+                    if ($equal) {
+                        Carga::where('booking', $booking)->update(['status' => $primerCntrStatus]);
+                    }
+
+                    // cambiamos el estado del Chofer
+                    $port = Carga::where('booking', $booking)->value('unload_place');
+            
+                    // Obtener el chofer desde la asignación
+                    $chofer = Asign::where('booking', $booking)
+                    ->where('cntr_number', $cntr)
+                    ->value('driver');
+                    
+                    // Actualizar el estado del chofer en la tabla 'drivers'
+                    Driver::where('nombre', $chofer)->update(['status_chofer' => 'libre', 'place' => $port]);
+                    
+                    DB::commit();
+                    // Devolver una respuesta JSON con información de éxito
+                    return response()->json([
+                    'id' => $idCarga,
+                    'errores' => 'Se modificó el satus a: ' . $statusGral .' y avisado por Correo al Cliente' ,
+                    ], 200);
+            
+                } else {
+                    DB::rollBack();
+                    return response()->json(['errores' => 'Algo salió mal, por favor vuelta a intentar la acción.', 'id' => $idCarga], 500);
                 }
-              }
-              // si los status de cada contenedor de la Carga son inguales, actulizamos el Status de la Carga.
-              if ($equal) {
-                $query_update = "UPDATE carga SET `status` = '$cntr_status[0]' WHERE `booking` = '$booking'";
-                mysqli_query($conn, $query_update);
-              }
-        
-              // cambiamos el estado del Chofer
-        
-              $query_port = "SELECT unload_place FROM carga WHERE booking = '$booking'";
-              $result_port = mysqli_query($conn, $query_port);
-              if (mysqli_num_rows($result_port) == 1) {
-                $row = mysqli_fetch_array($result_port);
-                $port = $row['unload_place'];
-              }
-        
-              $query_chofer = "SELECT driver FROM asign WHERE `booking` = '$booking' AND `cntr_number` = '$cntr' ";
-              $result_chofer = mysqli_query($conn, $query_chofer);
-              if (mysqli_num_rows($result_chofer) == 1) {
-                $rowch = mysqli_fetch_array($result_chofer);
-                $chofer = $rowch['driver'];
-              }
-        
-              $query_libre = "UPDATE drivers SET `status_chofer` = 'libre', place = '$port' WHERE nombre = '$chofer'";
-              $result_libre = mysqli_query($conn, $query_libre);
-        
-              $query_id = "SELECT id FROM carga WHERE booking = '$booking'";
-              $result_id = mysqli_query($conn, $query_id);
-        
-              if (mysqli_num_rows($result_id) == 1) {
-                $row = mysqli_fetch_array($result_id);
-                $id = $row['id'];
-              }
-        
-              $_SESSION['message'] = 'Se modificó el status a: ' . $statusGral;
-              $_SESSION['message_type'] = 'success';
-              header('location:includes/view_carga_user.php?id=' . $id);
-        
-            } else {
-        
-              $query_id = "SELECT id FROM carga WHERE booking = '$booking'";
-              $result_id = mysqli_query($conn, $query_id);
-        
-              if (mysqli_num_rows($result_id) == 1) {
-                $row = mysqli_fetch_array($result_id);
-                $id = $row['id'];
-              }
-        
-              $_SESSION['message'] = 'Algo salió mal, por favor vuelta a intentar la acción.';
-              $_SESSION['message_type'] = 'danger';
-              header('location:includes/view_carga_user.php?id=' . $id);
-            }
-          } else {
-        
-            // Insertamos Status en la tabla de Status
-        
-            $query = "INSERT INTO `status`(`status`, `main_status`, `cntr_number`, `user_status`) VALUES
-            ('$description','$statusGral', '$cntr', '$user')";
-            $result = mysqli_query($conn, $query);
-            $tipo = 'cambio';
-        
-            // Crea un nuevo recurso CURL
-        
-            $ch = curl_init();
-        
-            // Establece la URL y otras opciones apropiadas
-            $url = $linkBase ."/api/mailStatus/" . $cntr . '/' . $empresa . '/' . $booking . '/' . $user . '/' . $tipo;
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_HEADER, 0);
-        
-            // Captura la URL y la envía al navegador
-            $output = curl_exec($ch);
-        
-            if ($output == 'ok') {
-              // Si salio todo bien, actulizamos la tabla de CNTR.
-        
-              $query_update = "UPDATE `cntr` SET `main_status` = '$statusGral', `status_cntr` = '$description' WHERE `cntr_number` =
-            '$cntr'";
-              mysqli_query($conn, $query_update);
-        
-              // Luego revisamos el status de los demás contenedores de la Carga.
-        
-              $query_validate_status = "SELECT * FROM cntr WHERE booking = '$booking'";
-              $resut_validate_status = mysqli_query($conn, $query_validate_status);
-              $cntr_status = array();
-              $equal = true;
-        
-              while ($row = mysqli_fetch_array($resut_validate_status)) {
-        
-                array_push($cntr_status, ($row['main_status']));
-        
-                if ($cntr_status[0] != $row['main_status']) {
-                  $equal = false;
-                  break;
+            }else {
+
+                // Insertamos Status en la tabla de Status
+                $status = new statu([
+                    'status' => $description,
+                    'main_status' => $statusGral,
+                    'cntr_number' => $cntr,
+                    'user_status' => $user,
+                ]);
+                $tipo = 'cambio';
+                $status->save();
+            
+                // ENVIAMOS MAIL
+                // Crear una instancia del controlador
+                $emailController = new emailController();
+                // Llamar directamente a la función mailStatus
+                $response = $emailController->cambiaStatus($cntr, $empresa, $booking, $user, $tipo, $statusArchivoPath);
+
+                if ($response == 'ok') {
+                
+                    // si todo esta ok, Acualizamos el estado del CNTR
+                    $cntrModel = cntr::where('cntr_number', $cntr)->firstOrFail();
+                    $cntrModel->main_status = $statusGral;
+                    $cntrModel->status_cntr = $description;
+                    $cntrModel->save();
+            
+                    // Luego revisamos el status de los demás contenedores de la Carga. 
+                    // Buscar todos los registros Cntr asociados a la booking
+                    $cntrs = cntr::where('booking', $booking)->get();
+
+                    // Obtener el status del primer registro
+                    $primerCntrStatus = $cntrs->first()->main_status;
+
+                    // Verificar si todos los registros tienen el mismo status
+                    $equal = $cntrs->every(function ($cntr) use ($primerCntrStatus) {
+                        return $cntr->main_status == $primerCntrStatus;
+                    });
+
+                    // Si todos los registros tienen el mismo status, actualizar el status de la carga
+                    if ($equal) {
+                        Carga::where('booking', $booking)->update(['status' => $primerCntrStatus]);
+                    }
+                    DB::commit();
+                    return response()->json([
+                        'id' => $idCarga,
+                        'errores' => 'Se modificó el satus a: ' . $statusGral .' y avisado por Correo al Cliente' ,
+                    ], 200);
+            
+                } else {
+                    DB::rollBack();
+                    return response()->json(['errores' => 'Algo salió mal, por favor vuelta a intentar la acción.', 'id' => $idCarga], 500);
                 }
-              }
-              // si los status de cada contenedor de la Carga son inguales, actulizamos el Status de la Carga.
-        
-              if ($equal) {
-                $query_update = "UPDATE carga SET `status` = '$cntr_status[0]' WHERE `booking` = '$booking'";
-                mysqli_query($conn, $query_update);
-              }
-        
-        
-              $query_id = "SELECT id FROM carga WHERE booking = '$booking'";
-              $result_id = mysqli_query($conn, $query_id);
-        
-              if (mysqli_num_rows($result_id) == 1) {
-                $row = mysqli_fetch_array($result_id);
-                $id = $row['id'];
-              }
-        
-              $_SESSION['message'] = 'Se modificó el satus a: ' . $statusGral;
-              $_SESSION['message_type'] = 'success';
-              header('location:includes/view_carga_user.php?id=' . $id);
-        
-            } else {
-        
-              $query_id = "SELECT id FROM carga WHERE booking = '$booking'";
-              $result_id = mysqli_query($conn, $query_id);
-        
-              if (mysqli_num_rows($result_id) == 1) {
-                $row = mysqli_fetch_array($result_id);
-                $id = $row['id'];
-              }
-        
-              $_SESSION['message'] = 'Algo salió mal, por favor vuelta a intentar la acción.';
-              $_SESSION['message_type'] = 'danger';
-              header('location:includes/view_carga_user.php?id=' . $id);
-        
             }
-          }
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+            // Manejar la excepción específica para ModelNotFoundException
+            //$errores[] = 'No se encontró el registro. Detalles: ' . $e->getMessage();
+            return response()->json(['errores' => 'No se encontró el registro. Detalles: ' . $e->getMessage(), 'id' => $idCarga], 404);
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            // Manejar la excepción específica para ValidationException
+            //$errores[] = 'Error de validación. Detalles: ' . $e->getMessage();
+            return response()->json(['errores' => 'Error de validación. Detalles: ' . $e->getMessage(), 'id' => $idCarga], 422);
+        } catch (Exception $e) {
+            DB::rollBack();
+            // Manejar otras excepciones genéricas
+            $errores[] = 'Error general. Detalles: ' . $e->getMessage();
+            return response()->json(['errores' => 'Error general. Detalles: ' . $e->getMessage(), 'id' => $idCarga], 500);
         }
-
-
-            
-
-
-
-
-            // Si todo va bien, puedes devolver una respuesta exitosa
-            $respuesta = [
-                'mensaje' => 'Operación exitosa',
-                'datos' => /* tus datos aquí */,
-            ];
-    
-            // Devolver la respuesta al cliente o realizar otras operaciones según sea necesario
-            return response()->json($respuesta);
-        } catch (\Exception $e) {
-            // Captura de excepciones de Laravel
-            \Log::error('Error en la API: ' . $e->getMessage());
-    
-            // Puedes devolver un mensaje de error genérico o personalizado al cliente
-            $respuestaError = [
-                'mensaje' => 'Hubo un error en la operación',
-                'error' => $e->getMessage(),
-            ];
-    
-            // Devolver la respuesta de error al cliente o realizar otras operaciones según sea necesario
-            return response()->json($respuestaError, 500);
-        } finally {
-            // Bloque opcional 'finally' para ejecutar código, independientemente de si hubo un error o no
-            \Log::info('Operación finalizada');
-        }
-
-        
-        
     }
+
+    public function obtenerDocumentosCarga($booking)
+{
+    $carga = Carga::where('booking', $booking)->first();
+
+    if (!$carga) {
+        return response()->json(['mensaje' => 'No se encontró la carga asociada al booking'], 404);
+    }
+
+    $idCarga = $carga->id;
+    $folder = 'status/' . $idCarga;
+
+    // Verificar si la carpeta existe
+    if (Storage::exists($folder)) {
+        // Obtener la lista de archivos en la carpeta
+        $archivos = Storage::files($folder);
+
+        // Crear un array para almacenar el contenido de los archivos
+        $archivosConContenido = [];
+
+        // Obtener el contenido de cada archivo
+        foreach ($archivos as $archivo) {
+            try {
+                $contenido = Storage::get($archivo);
+                $contenidoUtf8 = mb_convert_encoding($contenido, 'UTF-8', 'UTF-8');
+                $archivosConContenido[] = ['nombre' => $archivo, 'contenido' => $contenidoUtf8];
+            } catch (FileNotFoundException $e) {
+                // Manejar la excepción si el archivo no se encuentra
+                Log::error('Archivo no encontrado: ' . $archivo);
+            }
+        }
+
+        return response()->json(['archivos' => $archivosConContenido]);
+    } else {
+        return response()->json(['mensaje' => 'La carpeta no existe o no tiene archivos'], 404);
+    }
+}
+
+
     /**
      * Display the specified resource.
      *

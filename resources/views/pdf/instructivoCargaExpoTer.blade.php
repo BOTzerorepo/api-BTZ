@@ -39,6 +39,40 @@
         <td align="left" width="25%" class="tdContenidoItem"><strong>Mercaderia:</strong></td>
         <td colspan="4"  class="tdContenido">{{ $commodity }}</td>
     </tr>
+    @if($ex_alto != null)
+    <tr>
+        <td align="left" width="25%" class="tdContenidoItem"><strong>Extramedida Alto:</strong></td>
+        <td colspan="4"  class="tdContenido">{{ $ex_alto }}</td>
+    </tr>
+    <tr>
+        <td align="left" width="25%" class="tdContenidoItem"><strong>Extramedida Ancho:</strong></td>
+        <td colspan="4"  class="tdContenido">{{ $ex_ancho }}</td>
+    </tr>
+    <tr>
+        <td align="left" width="25%" class="tdContenidoItem"><strong>Extramedida Largo:</strong></td>
+        <td colspan="4"  class="tdContenido">{{ $ex_largo }}</td>
+    </tr>
+    @endif
+    @if($obs_imo != null)
+    <tr>
+        <td align="left" width="25%" class="tdContenidoItem"><strong>IMO Observaciones:</strong></td>
+        <td colspan="4"  class="tdContenido">{{ $obs_imo }}</td>
+    </tr>
+    @endif
+    @if($rf_tem != null)
+    <tr>
+        <td align="left" width="25%" class="tdContenidoItem"><strong>Refrigerada Temperatura:</strong></td>
+        <td colspan="4"  class="tdContenido">{{ $rf_tem }}</td>
+    </tr>
+    <tr>
+        <td align="left" width="25%" class="tdContenidoItem"><strong>Refrigerada Humedad:</strong></td>
+        <td colspan="4"  class="tdContenido">{{ $rf_humedad }}</td>
+    </tr>
+    <tr>
+        <td align="left" width="25%" class="tdContenidoItem"><strong>Refrigerada Ventilación:</strong></td>
+        <td colspan="4"  class="tdContenido">{{ $rf_venti }}</td>
+    </tr>
+    @endif
     <tr>
         <td colspan="5" align="center" width="25%" bgcolor="#a9c8e4" style="border: none;" class="tdContenido">DESCRIPCIÓN DE LA OPERACION:</td>
     </tr>
