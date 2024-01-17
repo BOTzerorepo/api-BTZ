@@ -284,7 +284,7 @@ Route::post('/customer/{id}','App\Http\Controllers\CustomerController@update'); 
 Route::delete('/customer/{id}','App\Http\Controllers\CustomerController@destroy'); //Elimina un Customer trader
 
 Route::get('issetBooking/{booking}','App\Http\Controllers\cargaController@issetBooking');
-
+Route::get('issetTrader/{trader}','App\Http\Controllers\cargaController@issetTrader');
 
 //Customer Final Point
 
