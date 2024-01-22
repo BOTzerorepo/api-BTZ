@@ -25,7 +25,7 @@ class CargaConProblemas extends Mailable
         if($archivoAdjunto == null){
             $this->archivoAdjunto = $archivoAdjunto;
         }else{
-            $this->archivoAdjunto = '/app'.'/'.$archivoAdjunto;
+            $this->archivoAdjunto = '/app'.'/public' .'/'.$archivoAdjunto;
         }
         $this->subject = 'STATUS // '.$datos['ref_customer']. ' - ' . $datos['type'] . ' - '.$datos['trader']. ' - 1 * '.$datos['cntr_type'].'// BKG: '.$datos['booking'].'.';
     }
