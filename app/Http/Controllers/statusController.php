@@ -73,20 +73,30 @@ class statusController extends Controller
             $statusGral = $request['statusGral'];
             //$statusArchivo = $request->file('statusArchivo');
             
+            // ACTUALIZA STATUS
+            $status = new statu([
+                'status' => $description,
+                'main_status' => $statusGral,
+                'cntr_number' => $cntr,
+                'user_status' => $user,
+            ]);
+            $status->save();
+            
             if ($request->hasFile('statusArchivo')) {
                 $statusArchivo = $request->file('statusArchivo');
-                $folder = 'status/'. $idCarga ;
+                $folder = 'status/'. $idCarga;
             
-                if (!file_exists($folder)) {
-                    mkdir($folder, 0777, true);
-                }
+                
                 // Genera un nombre único basado en el idCarga y statusGral
-                $nombreArchivo =  $statusGral . '.' . $statusArchivo->getClientOriginalExtension();
-                // Mueve el archivo a la ubicación específica con el nombre único
-                $statusArchivo->storeAs($folder, $nombreArchivo);
+                $nombreArchivo =  $status->id . '.' . $statusArchivo->getClientOriginalExtension();
+                // Almacena el archivo en storage/app/public/status/idCarga/
+                Storage::disk('public')->putFileAs($folder, $statusArchivo, $nombreArchivo);
                 // Resto del código si es necesario
                 // Después de guardar el archivo
                 $statusArchivoPath = $folder . '/' . $nombreArchivo;
+                $status->documento = $idCarga . '/' .$nombreArchivo;
+                $status->extension = $statusArchivo->getClientOriginalExtension();
+                $status->save();
             }else{
                 $statusArchivoPath = null;
             }
@@ -94,14 +104,7 @@ class statusController extends Controller
 
             if ($statusGral == "TERMINADA") {
                 
-                // ACTUALIZA STATUS
-                $status = new statu([
-                    'status' => $description,
-                    'main_status' => $statusGral,
-                    'cntr_number' => $cntr,
-                    'user_status' => $user,
-                ]);
-                $status->save();
+                
 
                 // Realiza la consulta buscando el cntr
                 $cntrModel = cntr::where('cntr_number', $cntr)->firstOrFail();
@@ -137,14 +140,7 @@ class statusController extends Controller
             }elseif ($statusGral == "CON PROBLEMA") {
                 // SI TIENE PROBLEMAS.
                 // ACTUALIZA STATUS
-                $status = new statu([
-                    'status' => $description,
-                    'main_status' => $statusGral,
-                    'cntr_number' => $cntr,
-                    'user_status' => $user,
-                ]);
                 $tipo = 'problema';
-                $status->save();
             
                 // ENVIAMOS MAIL
                 // Crear una instancia del controlador
@@ -208,14 +204,8 @@ class statusController extends Controller
                 }
             }elseif ($statusGral == "STACKING") {
                 // si la carga está en Staking, Actualizamos el Status en la tabla Status
-                $status = new statu([
-                    'status' => $description,
-                    'main_status' => $statusGral,
-                    'cntr_number' => $cntr,
-                    'user_status' => $user,
-                ]);
+
                 $tipo = 'stacking';
-                $status->save();
             
                 // ENVIAMOS MAIL
                 // Crear una instancia del controlador
@@ -272,15 +262,8 @@ class statusController extends Controller
                 }
             }else {
 
-                // Insertamos Status en la tabla de Status
-                $status = new statu([
-                    'status' => $description,
-                    'main_status' => $statusGral,
-                    'cntr_number' => $cntr,
-                    'user_status' => $user,
-                ]);
+                // Insertamos Status en la tabla de Status         
                 $tipo = 'cambio';
-                $status->save();
             
                 // ENVIAMOS MAIL
                 // Crear una instancia del controlador
