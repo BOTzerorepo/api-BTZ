@@ -32,19 +32,16 @@ class ServiceSatelital extends Controller
             ->join('aduanas', 'aduanas.description', '=', 'carga.custom_place')
             ->join('customer_load_places', 'customer_load_places.description', '=', 'carga.load_place')
             ->join('customer_unload_places', 'customer_unload_place.description', '=', 'carga.unload_place')
-            ->select('cntr.id_cntr as IdTrip', 'carga.id as idCarga', 'trucks.id', 'trucks.id_satelital', 'trucks.domain', 'customer_load_places.description as LugarCarga', 'customer_load_places.lat as CargaLat', 'customer_load_places.lon as CargaLng', 'aduanas.description as LugarAduana', 'aduanas.lat as aduanaLat', 'aduanas.lon as aduanaLon', 'customer_unload_places.description as lugarDescarga', 'customer_unload_places.lat as descargaLat', 'customer_unload_places.lon as descargaLon')
+            ->select('cntr.id_cntr as IdTrip', 'carga.id as idCarga', 'trucks.id', 'trucks.id_satelital', 'trucks.domain', 'customer_load_places.description as LugarCarga', 'customer_load_places.latitud as CargaLat', 'customer_load_places.lonongitud as CargaLng', 'aduanas.description as LugarAduana', 'aduanas.lat as aduanaLat', 'aduanas.lon as aduanaLon', 'customer_unload_places.description as lugarDescarga', 'customer_unload_places.latitud as descargaLat', 'customer_unload_places.longitud as descargaLon')
             ->where('cntr.main_status', '!=', 'TERMINADA')
             ->get();
-
-
+        return $todosMisCamiones;
 
         $chek = new pruebasModel();
         $chek->contenido = '1. Consulto las patentes del Camion';
         $chek->save();
 
         foreach ($todosMisCamiones as $camion) {
-
-
 
             $chek = new pruebasModel();
             $chek->contenido = '2 Ingreso al Camion ' . $camion->domain;
