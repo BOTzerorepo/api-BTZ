@@ -60,7 +60,7 @@ class ServiceSatelital extends Controller
                     "patentes":["' . $camion->domain . '"],
                     "cercania":true,
                     "domicilio":false,
-                    "apiCode":"C2QC20",
+                    "apiCode":"E6HW19",
                     "phone":"2612128105"
                     }';
             $request = new Psr7Request('GET', 'https://app.akercontrol.com/ws/v2/servicios', $headers, $body);
@@ -181,7 +181,7 @@ class ServiceSatelital extends Controller
 
         $curl = curl_init();
         curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://app.akercontrol.com/ws/flota/2612128105/C2QC20',
+            CURLOPT_URL => 'https://app.akercontrol.com/ws/flota/2612128105/E6HW19',
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => '',
             CURLOPT_MAXREDIRS => 10,
