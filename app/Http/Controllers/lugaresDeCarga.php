@@ -156,7 +156,7 @@ class lugaresDeCarga extends Controller
                 
                 return 'ok, Actulizó Status - Envió mail.'  . $qd->avisado;
                 
-            } elseif ($qd->avisado != 0 && $qd->avisado <= 119) { // // Buscamos si se aviso o no al cliente. Si se aviso o no fue hace mucho actualizamos. 
+            } elseif ($qd->avisado != 0 && $qd->avisado <= 239) { // // Buscamos si se aviso o no al cliente. Si se aviso o no fue hace mucho actualizamos. 
 
 
                 $chek = new pruebasModel();
@@ -168,7 +168,7 @@ class lugaresDeCarga extends Controller
                 $actualizarAvisado->avisado = $avisadoMas;
                 $actualizarAvisado->save();
                 /*   return 'ok, No actulizó Status - No envió mail.'  . $qd->avisado; */
-            } elseif ($qd->avisado != 0 && $qd->avisado >= 120) {
+            } elseif ($qd->avisado != 0 && $qd->avisado >= 240) {
 
 
                 $chek = new pruebasModel();
@@ -360,7 +360,7 @@ class lugaresDeCarga extends Controller
                 $actualizarAvisado->save();
                 return 'ok, Actulizó Status - Envió mail.';
 
-            } elseif ($qd->avisado != 0 && $qd->avisado <= 119) { // // Buscamos si se aviso o no al cliente. Si se aviso o no fue hace mucho actualizamos. 
+            } elseif ($qd->avisado != 0 && $qd->avisado <= 239) { // // Buscamos si se aviso o no al cliente. Si se aviso o no fue hace mucho actualizamos. 
 
 
                 $chek = new pruebasModel();
@@ -373,7 +373,7 @@ class lugaresDeCarga extends Controller
                 $actualizarAvisado->save();
                 return 'ok, No actulizó Status - No envió mail.';
 
-            } elseif ($qd->avisado != 0 && $qd->avisado >= 120) {
+            } elseif ($qd->avisado != 0 && $qd->avisado >= 240) {
 
                 $chek = new pruebasModel();
                 $chek->contenido = 'entro en avisado y mas de 119 veces reportado ';
@@ -536,14 +536,14 @@ class lugaresDeCarga extends Controller
                 $actualizarAvisado->avisado = $avisadoMas;
                 $actualizarAvisado->save();
                 return 'ok, Actulizó Status - Envió mail.';
-            } elseif ($qd->avisado != 0 && $qd->avisado <= 119) { // // Buscamos si se aviso o no al cliente. Si se aviso o no fue hace mucho actualizamos. 
+            } elseif ($qd->avisado != 0 && $qd->avisado <= 239) { // // Buscamos si se aviso o no al cliente. Si se aviso o no fue hace mucho actualizamos. 
 
                 $actualizarAvisado = statu::find($qd->id);
                 $avisadoMas = $actualizarAvisado->avisado + 1;
                 $actualizarAvisado->avisado = $avisadoMas;
                 $actualizarAvisado->save();
                 return 'ok, No actulizó Status - No envió mail.';
-            } elseif ($qd->avisado != 0 && $qd->avisado >= 120) {
+            } elseif ($qd->avisado != 0 && $qd->avisado >= 240) {
 
 
                 DB::table('status')->insert([
