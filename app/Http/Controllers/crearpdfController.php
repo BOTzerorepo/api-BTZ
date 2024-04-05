@@ -111,7 +111,6 @@ class crearpdfController extends Controller
 
                     if ($row->type == 'Puesta FOB') {
 
-
                         $logApi = new logapi();
                         $logApi->detalle = 'Respuesta file = :' . $file;
                         $logApi->user = 'Ingreso en Puesta FOB';
@@ -227,6 +226,7 @@ class crearpdfController extends Controller
                             ->update(['file_instruction' => $file_name]);
 
                         return $pdf->download($file_name);
+                        
                     } elseif ($row->type == 'Expo Maritima') {
 
                         $data = [
