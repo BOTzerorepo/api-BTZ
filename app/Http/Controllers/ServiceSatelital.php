@@ -136,7 +136,7 @@ class ServiceSatelital extends Controller
                     $chek->save();
 
                     $clientCarga = new Client();
-                    $requestCarga = new Psr7Request('GET', env('APP_UTL') . '/api/accionLugarDeCarga/' . $IdTrip);
+                    $requestCarga = new Psr7Request('GET', env('APP_URL') . '/api/accionLugarDeCarga/' . $IdTrip);
                     $resCarga = $clientCarga->sendAsync($requestCarga)->wait();
                 }
 
