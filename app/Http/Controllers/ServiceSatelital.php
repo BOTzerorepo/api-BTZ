@@ -35,7 +35,7 @@ class ServiceSatelital extends Controller
             ->select('cntr.id_cntr as IdTrip', 'carga.id as idCarga', 'trucks.id', 'trucks.id_satelital', 'trucks.domain', 'customer_load_places.description as LugarCarga', 'customer_load_places.latitud as CargaLat', 'customer_load_places.longitud as CargaLng', 'aduanas.description as LugarAduana', 'aduanas.lat as aduanaLat', 'aduanas.lon as aduanaLon', 'customer_unload_places.description as lugarDescarga', 'customer_unload_places.latitud as descargaLat', 'customer_unload_places.longitud as descargaLon')
             ->where('cntr.main_status', '!=', 'TERMINADA')
             ->get();
-            
+
         return $todosMisCamiones;
 
         $chek = new pruebasModel();
@@ -66,8 +66,6 @@ class ServiceSatelital extends Controller
             $respuesta = $res->getBody();
             $r = json_decode($respuesta, true);
             $keys = array($r);
-
-            return $respuesta;
 
             if (array_key_exists('data', $r)) {
 
