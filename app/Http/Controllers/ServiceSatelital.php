@@ -36,6 +36,8 @@ class ServiceSatelital extends Controller
             ->where('cntr.main_status', '!=', 'TERMINADA')
             ->get();
 
+        return $todosMisCamiones;
+
         $chek = new pruebasModel();
         $chek->contenido = '1. Consulto las patentes del Camion';
         $chek->save();
@@ -64,8 +66,6 @@ class ServiceSatelital extends Controller
             $respuesta = $res->getBody();
             $r = json_decode($respuesta, true);
             $keys = array($r);
-
-            return $respuesta;
 
             if (array_key_exists('data', $r)) {
 
