@@ -36,8 +36,8 @@ class CustomerLoadPlaceController extends Controller
                 'aduanas.lat as latA',
                 'aduanas.lon  as lonA',
                 'carga.unload_place',
-                'customer_unload_places.lat as latU',
-                'customer_unload_places.lon  as lonU'
+                'customer_unload_places.latitud as latU',
+                'customer_unload_places.longitud  as lonU'
             )
             ->join('cntr', 'carga.booking', '=', 'cntr.booking')
             ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
