@@ -36,8 +36,6 @@ class ServiceSatelital extends Controller
             ->where('cntr.main_status', '!=', 'TERMINADA')
             ->get();
 
-        return $todosMisCamiones;
-
         $chek = new pruebasModel();
         $chek->contenido = '1. Consulto las patentes del Camion';
         $chek->save();
