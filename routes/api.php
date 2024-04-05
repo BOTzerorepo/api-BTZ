@@ -159,9 +159,6 @@ Route::get('/servicioSatelital','App\Http\Controllers\ServiceSatelital@serviceSa
 Route::get('/pruebaSatelital','App\Http\Controllers\ServiceSatelital@servicePrueba');
 Route::get('/flota','App\Http\Controllers\ServiceSatelital@flota');
 
-
-
-
 //JUANI
 
 //Ata
