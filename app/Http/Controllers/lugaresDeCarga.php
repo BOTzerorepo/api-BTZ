@@ -156,7 +156,7 @@ class lugaresDeCarga extends Controller
                 
                 return 'ok, Actulizó Status - Envió mail.'  . $qd->avisado;
                 
-            } elseif ($qd->avisado != 0 && $qd->avisado <= 239) { // // Buscamos si se aviso o no al cliente. Si se aviso o no fue hace mucho actualizamos. 
+            } /* elseif ($qd->avisado != 0 && $qd->avisado <= 239) { //}} // Buscamos si se aviso o no al cliente. Si se aviso o no fue hace mucho actualizamos. 
 
 
                 $chek = new pruebasModel();
@@ -167,7 +167,7 @@ class lugaresDeCarga extends Controller
                 $avisadoMas = $actualizarAvisado->avisado + 1;
                 $actualizarAvisado->avisado = $avisadoMas;
                 $actualizarAvisado->save();
-                /*   return 'ok, No actulizó Status - No envió mail.'  . $qd->avisado; */
+                /*   return 'ok, No actulizó Status - No envió mail.'  . $qd->avisado; 
             } elseif ($qd->avisado != 0 && $qd->avisado >= 240) {
 
 
@@ -204,8 +204,10 @@ class lugaresDeCarga extends Controller
                 $avisadoMas = $actualizarAvisado->avisado + 1;
                 $actualizarAvisado->avisado = $avisadoMas;
                 $actualizarAvisado->save();
-                /*  return 'ok, Actulizó Status - No envió mail.'  . $qd->avisado; */
-            }
+            /*  return 'ok, Actulizó Status - No envió mail.'  . $qd->avisado;
+            } */
+
+            /// Sacamos todo estas lineas porque avisa demaciado sobre el estado de la Carga. 
 
         } else {
 
@@ -215,7 +217,7 @@ class lugaresDeCarga extends Controller
             $chek->save();
 
             DB::table('status')->insert([
-                'status' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts del Lugar de Carga.',
+                'status' => '[AUTOMATICO] Camión se encuentra en un radio de 200 mts del Lugar de Carga.',
                 'main_status' => 'CARGANDO',
                 'cntr_number' => $cntr->cntr_number,
                 'user_status' => 'AUTOMATICO',
@@ -305,7 +307,7 @@ class lugaresDeCarga extends Controller
                 $chek->save();
 
                 DB::table('status')->insert([
-                    'status' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts de la aduana Asignada.',
+                    'status' => '[AUTOMATICO] Camión se encuentra en un radio de 200 mts de la aduana Asignada.',
                     'main_status' => 'EN ADUANA',
                     'cntr_number' => $cntr->cntr_number,
                     'user_status' => 'AUTOMATICO',
@@ -360,7 +362,7 @@ class lugaresDeCarga extends Controller
                 $actualizarAvisado->save();
                 return 'ok, Actulizó Status - Envió mail.';
 
-            } elseif ($qd->avisado != 0 && $qd->avisado <= 239) { // // Buscamos si se aviso o no al cliente. Si se aviso o no fue hace mucho actualizamos. 
+            } /* elseif ($qd->avisado != 0 && $qd->avisado <= 239) { // // Buscamos si se aviso o no al cliente. Si se aviso o no fue hace mucho actualizamos. 
 
 
                 $chek = new pruebasModel();
@@ -409,7 +411,7 @@ class lugaresDeCarga extends Controller
                 $actualizarAvisado->avisado = $avisadoMas;
                 $actualizarAvisado->save();
                 return 'ok, Actulizó Status - No envió mail.';
-            }
+            } */
         } else {
 
 
@@ -536,7 +538,7 @@ class lugaresDeCarga extends Controller
                 $actualizarAvisado->avisado = $avisadoMas;
                 $actualizarAvisado->save();
                 return 'ok, Actulizó Status - Envió mail.';
-            } elseif ($qd->avisado != 0 && $qd->avisado <= 239) { // // Buscamos si se aviso o no al cliente. Si se aviso o no fue hace mucho actualizamos. 
+             } /* elseif ($qd->avisado != 0 && $qd->avisado <= 239) { // // Buscamos si se aviso o no al cliente. Si se aviso o no fue hace mucho actualizamos. 
 
                 $actualizarAvisado = statu::find($qd->id);
                 $avisadoMas = $actualizarAvisado->avisado + 1;
@@ -597,7 +599,7 @@ class lugaresDeCarga extends Controller
                 $actualizarAvisado->avisado = $avisadoMas;
                 $actualizarAvisado->save();
                 return 'ok, Actulizó Status - No envió mail.';
-            }
+            } */
         } else {
             DB::table('status')->insert([
                 'status' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts del Lugar de Descarga.',
