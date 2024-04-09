@@ -42,10 +42,7 @@ class ServiceSatelital extends Controller
 
         foreach ($todosMisCamiones as $camion) {
 
-            $chek = new pruebasModel();
-            $chek->contenido = '2 Ingreso al Camion ' . $camion->domain;
-            $chek->save();
-
+           
             $client = new Client();
             $headers = [
                 'Content-Type' => 'application/json'
@@ -79,9 +76,7 @@ class ServiceSatelital extends Controller
 
             if (array_key_exists('data', $r)) {
 
-                $chek = new pruebasModel();
-                $chek->contenido = '2.a. Ingreso a a la Prueba de DATA - ' . $camion->domain;
-                $chek->save();
+              
 
                 $datos = $keys[0]['data'][$camion->domain];
 
@@ -99,9 +94,7 @@ class ServiceSatelital extends Controller
                 $chek->save();
 
                 $IdTrip = $camion->IdTrip;
-                $chek = new pruebasModel();
-                $chek->contenido = '2.b. Camion ' . $camion->domain . ' tiene el IDTrip: ' . $IdTrip;
-                $chek->save();
+            
 
                 $Radio = 6371e3; // metres
                 $φ1 = $posicionLat * pi() / 180; // φ, λ in radians
@@ -129,23 +122,13 @@ class ServiceSatelital extends Controller
                 $c3 = 2 * atan2(sqrt($a3), sqrt(1 - $a3));
                 $d3 = $Radio * $c3; // in metres */
 
-                $chek = new pruebasModel();
-                $chek->contenido = '2.c. El camino: ' . $camion->domain . 'Se encuentra a' . $d . 'metros de Carga.';
-                $chek->save();
-                $chek = new pruebasModel();
-                $chek->contenido = '2.d. El camino: ' . $camion->domain . 'Se encuentra a' . $d2 . 'metros de Aduana.';
-                $chek->save();
-                $chek = new pruebasModel();
-                $chek->contenido = '2.e. El camino: ' . $camion->domain . 'Se encuentra a' . $d3 . 'metros de Descarga.';
-                $chek->save();
+               
 
 
 
                 if ($d <= 200) { // lugar de Carga
 
-                    $chek = new pruebasModel();
-                    $chek->contenido = '3.a . Entro a lugar de carga / Camion: ' . $camion->domain;
-                    $chek->save();
+                
 
                     $clientCarga = new Client();
                     $requestCarga = new Psr7Request('GET', env('APP_URL') . '/api/accionLugarDeCarga/' . $IdTrip);
@@ -155,10 +138,7 @@ class ServiceSatelital extends Controller
                 if ($d2 <= 200) { // lugar de aduana
 
 
-                    $chek = new pruebasModel();
-                    $chek->contenido = '3.b. Entro a lugar de Aduana / Camion: ' . $camion->domain;
-                    $chek->save();
-
+                   
                     $clientAduana = new Client();
                     $requestAduana = new Psr7Request('GET', env('APP_URL') . '/api/accionLugarAduana/' . $IdTrip);
                     $resAduana = $clientAduana->sendAsync($requestAduana)->wait();
@@ -166,17 +146,14 @@ class ServiceSatelital extends Controller
                 if ($d3 <= 200) { // lugar de descarga
 
 
-                    $chek = new pruebasModel();
-                    $chek->contenido = '3.c .Entro a lugar de descarga / Camion: ' . $camion->domain;
-                    $chek->save();
+                   
 
                     $clientDescarga = new Client();
                     $requestDescarga = new Psr7Request('GET', env('APP_URL') . '/api/accionLugarDescarga/' . $IdTrip);
                     $resDescarga = $clientDescarga->sendAsync($requestDescarga)->wait();
                 }
-                $chek = new pruebasModel();
-                $chek->contenido = '4. No esta cerca de ningun lado / camion: ' . $camion->domain;
-                $chek->save();
+                
+                
 
                 // Agregar punntos Criticos Globales.
             }
