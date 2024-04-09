@@ -378,7 +378,7 @@
                                                                                     </p>
                                                                                     <p style="margin: 2%; font-size: 14px; text-align: center; mso-line-height-alt: 27px;">
                                                                                     
-                                                                                        <a href="{{env('APP_URL').'satisfaccion/satisfaccion_carga.php?cntr_number='.$datos['cntr'].'&booking='.$datos['booking']}}"
+                                                                                        <a href="{{env('APP_URL').'/satisfaccion/satisfaccion_carga.php?cntr_number='.$datos['cntr'].'&booking='.$datos['booking']}}"
                                                                                                 style="color:#109935;font-size:18px; ">
                                                                                                 <strong>
                                                                                                    Completar Encuesta de Satisfacción 

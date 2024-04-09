@@ -13,6 +13,9 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
 use Exception;
 use App\Http\Controllers\emailController;
+use App\Mail\cargaTerminada;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
 
 class statusController extends Controller
 {
@@ -101,6 +104,7 @@ class statusController extends Controller
                     'user_status' => $user,
                 ]);
                 $status->save();
+                $date = Carbon::now('-03:00');
 
                 // Realiza la consulta buscando el cntr
                 $cntrModel = cntr::where('cntr_number', $cntr)->firstOrFail();
@@ -126,7 +130,43 @@ class statusController extends Controller
                 if ($equal) {
                     Carga::where('booking', $booking)->update(['status' => $primerCntrStatus]);
                 }
+
+                $qd = DB::table('status')->select('status.main_status', 'status.id', 'status.status', 'cntr.cntr_type', 'carga.trader', 'carga.type', 'carga.ref_customer')
+                ->join('cntr', 'cntr.cntr_number', '=', 'status.cntr_number')
+                ->join('carga', 'carga.booking', '=', 'cntr.booking')
+                    ->where('status.cntr_number', '=', $cntr)->latest('status.id')->first();
+                $description = $qd->status;
+                $status = $qd->main_status;
+
+                $datos = [
+                    'cntr' => $cntr,
+                    'description' =>  $description,
+                    'user' => $user,
+                    'empresa' => $empresa,
+                    'booking' => $booking,
+                    'date' => $date,
+                    'cntr_type' => $qd->cntr_type,
+                    'trader' => $qd->trader,
+                    'type' => $qd->type,
+                    'ref_customer' => $qd->ref_customer
+                ];
+
+                $qto = DB::table('carga')->select('users.email')
+                    ->join('users', 'users.username', '=', 'carga.user')
+                    ->where('carga.booking', '=', $booking)->get();
+                $to = $qto[0]->email;
+                $sbx = DB::table('variables')->select('sandbox')->get();
+                if ($sbx[0]->sandbox == 0) {
+                    Mail::to($to)->cc(['gzarate@totaltradegroup.com'])->bcc('inboxplataforma@botzero.ar')
+                    ->send(new cargaTerminada($datos, $statusArchivoPath));
+                    return 'ok';
+                } else {
+                    Mail::to($to)->cc(['priopelliza@gmail.com'])->bcc('inboxplataforma@botzero.ar')
+                    ->send(new cargaTerminada($datos, $statusArchivoPath));
+                    return 'ok';
+                }
               
+
                 // Devolver una respuesta JSON con información de éxito
                 return response()->json([
                     'id' => $idCarga,
