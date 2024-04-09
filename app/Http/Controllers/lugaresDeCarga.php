@@ -68,7 +68,7 @@ class lugaresDeCarga extends Controller
         $date = Carbon::now('-03:00');
         $qc = DB::table('cntr')->select('cntr_number', 'booking')->where('id_cntr', '=', $idTrip)->get();
         $cntr = $qc[0];
-
+        return 'hola mostro';
         // cual es el ultimo status.
         $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
         $description = $qd->status;
@@ -96,6 +96,13 @@ class lugaresDeCarga extends Controller
                     'cntr_number' => $cntr->cntr_number,
                     'user_status' => 'AUTOMATICO',
                 ]);
+
+                DB::table('cntr')
+                    ->where('cntr_number', $cntr->cntr_number)
+                    ->update([
+                        'main_status' => 'CARGANDO',
+                        'status_cntr' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts del Lugar de Carga.'
+                    ]);
 
 
                 $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
@@ -223,6 +230,13 @@ class lugaresDeCarga extends Controller
                 'user_status' => 'AUTOMATICO',
             ]);
 
+            DB::table('cntr')
+                ->where('cntr_number', $cntr->cntr_number)
+                ->update([
+                    'main_status' => 'CARGANDO',
+                    'status_cntr' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts del Lugar de Carga.'
+                ]);
+
             $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
             $description = $qd->status;
 
@@ -312,6 +326,12 @@ class lugaresDeCarga extends Controller
                     'cntr_number' => $cntr->cntr_number,
                     'user_status' => 'AUTOMATICO',
                 ]);
+                DB::table('cntr')
+                    ->where('cntr_number', $cntr->cntr_number)
+                    ->update([
+                        'main_status' => 'EN ADUANA',
+                        'status_cntr' => '[AUTOMATICO] Camión se encuentra en un radio de 200 mts de la aduana asignada.'
+                    ]);
 
                 $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
                 $description = $qd->status;
@@ -427,6 +447,13 @@ class lugaresDeCarga extends Controller
                 'user_status' => 'AUTOMATICO',
             ]);
 
+            DB::table('cntr')
+                ->where('cntr_number', $cntr->cntr_number)
+                ->update([
+                    'main_status' => 'EN ADUANA',
+                    'status_cntr' => '[AUTOMATICO] Camión se encuentra en un radio de 200 mts de la aduana asignada.'
+                ]);
+
             $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
             $description = $qd->status;
 
@@ -494,6 +521,13 @@ class lugaresDeCarga extends Controller
                     'main_status' => 'STACKING',
                     'cntr_number' => $cntr->cntr_number,
                     'user_status' => 'AUTOMATICO',
+                ]);
+
+                DB::table('cntr')
+                    ->where('cntr_number', $cntr->cntr_number)
+                    ->update([
+                    'main_status' => 'STACKING',
+                    'status_cntr' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts del Lugar de Descarga.'
                 ]);
 
                 $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
@@ -607,6 +641,13 @@ class lugaresDeCarga extends Controller
                 'cntr_number' => $cntr->cntr_number,
                 'user_status' => 'AUTOMATICO',
             ]);
+ 
+            DB::table('cntr')
+                ->where('cntr_number', $cntr->cntr_number)
+                ->update([
+                    'main_status' => 'STACKING',
+                    'status_cntr' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts del Lugar de Descarga.'
+                ]);
 
             $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
             $description = $qd->status;
