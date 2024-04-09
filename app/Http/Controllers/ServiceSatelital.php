@@ -52,13 +52,25 @@ class ServiceSatelital extends Controller
             ];
 
             // TEST: E6HW19 - PRODUCCION: C2QC20
-            $body = '{
+
+            if(env('APP_ENV') === 'production'){
+                $body = '{
+                    "patentes":["' . $camion->domain . '"],
+                    "cercania":true,
+                    "domicilio":false,
+                    "apiCode":"C2QC20",
+                    "phone":"2612128105"
+                    }';
+            }else{
+                $body = '{
                     "patentes":["' . $camion->domain . '"],
                     "cercania":true,
                     "domicilio":false,
                     "apiCode":"E6HW19",
                     "phone":"2612128105"
                     }';
+            }
+           
             $request = new Psr7Request('GET', 'https://app.akercontrol.com/ws/v2/servicios', $headers, $body);
             $res = $client->sendAsync($request)->wait();
             $respuesta = $res->getBody();
@@ -174,16 +186,33 @@ class ServiceSatelital extends Controller
     {
 
         $curl = curl_init();
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://app.akercontrol.com/ws/flota/2612128105/E6HW19',
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'GET',
-        ));
+
+        // TEST: E6HW19 - PRODUCCION: C2QC20
+        if (env('APP_ENV') === 'production') {
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => 'https://app.akercontrol.com/ws/flota/2612128105/C2QC20',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'GET',
+            ));
+        } else {
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => 'https://app.akercontrol.com/ws/flota/2612128105/E6HW19',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'GET',
+            ));
+        }
+
+        
 
         $response = curl_exec($curl);
         $json = json_decode($response);
