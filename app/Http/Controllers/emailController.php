@@ -7,6 +7,7 @@ use App\Mail\CamnioStatus;
 use App\Mail\cargaAsignada;
 use App\Mail\cargaAsignadaEditada;
 use App\Mail\CargaConProblemas;
+use App\Mail\cargaTerminada;
 use App\Mail\IngresadoStacking;
 use App\Mail\pruebaMail;
 use App\Mail\transporteAsignado;
@@ -324,11 +325,11 @@ class emailController extends Controller
             $sbx = DB::table('variables')->select('sandbox')->get();
             if ($sbx[0]->sandbox == 0) {
                 Mail::to($to)->cc(['gzarate@totaltradegroup.com'])->bcc('inboxplataforma@botzero.ar')
-                    ->send(new IngresadoStacking($datos, $statusArchivoPath));
+                    ->send(new cargaTerminada($datos, $statusArchivoPath));
                 return 'ok';
             } else {
                 Mail::to($to)->cc(['priopelliza@gmail.com'])->bcc('inboxplataforma@botzero.ar')
-                    ->send(new IngresadoStacking($datos, $statusArchivoPath));
+                    ->send(new cargaTerminada($datos, $statusArchivoPath));
                 return 'ok';
             }
         } else {
