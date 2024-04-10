@@ -29,7 +29,8 @@ Route::get('/allCargoFinished/{user}','App\Http\Controllers\cargaController@load
 Route::get('/carga/{user}/{id}','App\Http\Controllers\cargaController@show'); 
 Route::post('/statusCarga','App\Http\Controllers\statusController@updateStatusCarga'); 
 
-Route::get('/status','App\Http\Controllers\statusController@index'); 
+
+Route::get('/status','App\Http\Controllers\statusController@index');
 Route::get('/ultimoStatus/{id}','App\Http\Controllers\statusController@showLast'); 
 Route::get('/historialStatus/{cntr}','App\Http\Controllers\statusController@showHistory'); 
 
@@ -284,7 +285,7 @@ Route::post('/customer/{id}','App\Http\Controllers\CustomerController@update'); 
 Route::delete('/customer/{id}','App\Http\Controllers\CustomerController@destroy'); //Elimina un Customer trader
 
 Route::get('issetBooking/{booking}','App\Http\Controllers\cargaController@issetBooking');
-
+Route::get('issetTrader/{trader}','App\Http\Controllers\cargaController@issetTrader');
 
 //Customer Final Point
 

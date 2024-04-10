@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
 use Exception;
 use App\Http\Controllers\emailController;
+use Illuminate\Support\Facades\Storage;
 use App\Mail\cargaTerminada;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
@@ -55,7 +56,7 @@ class statusController extends Controller
         $booking = $request['booking'];
         $carga = Carga::where('booking', $booking)->first();
         $idCarga = $carga->id;
-
+        DB::beginTransaction();
         try {
             //------------GENERAL--------------------
             $request->validate([
@@ -75,20 +76,30 @@ class statusController extends Controller
             $statusGral = $request['statusGral'];
             //$statusArchivo = $request->file('statusArchivo');
             
+            // ACTUALIZA STATUS
+            $status = new statu([
+                'status' => $description,
+                'main_status' => $statusGral,
+                'cntr_number' => $cntr,
+                'user_status' => $user,
+            ]);
+            $status->save();
+            
             if ($request->hasFile('statusArchivo')) {
                 $statusArchivo = $request->file('statusArchivo');
-                $folder = 'status/'. $idCarga ;
+                $folder = 'status/'. $idCarga;
             
-                if (!file_exists($folder)) {
-                    mkdir($folder, 0777, true);
-                }
+                
                 // Genera un nombre único basado en el idCarga y statusGral
-                $nombreArchivo =  $statusGral . '.' . $statusArchivo->getClientOriginalExtension();
-                // Mueve el archivo a la ubicación específica con el nombre único
-                $statusArchivo->storeAs($folder, $nombreArchivo);
+                $nombreArchivo =  $status->id . '.' . $statusArchivo->getClientOriginalExtension();
+                // Almacena el archivo en storage/app/public/status/idCarga/
+                Storage::disk('public')->putFileAs($folder, $statusArchivo, $nombreArchivo);
                 // Resto del código si es necesario
                 // Después de guardar el archivo
                 $statusArchivoPath = $folder . '/' . $nombreArchivo;
+                $status->documento = $idCarga . '/' .$nombreArchivo;
+                $status->extension = $statusArchivo->getClientOriginalExtension();
+                $status->save();
             }else{
                 $statusArchivoPath = null;
             }
@@ -104,7 +115,6 @@ class statusController extends Controller
                     'user_status' => $user,
                 ]);
                 $status->save();
-                $date = Carbon::now('-03:00');
 
                 // Realiza la consulta buscando el cntr
                 $cntrModel = cntr::where('cntr_number', $cntr)->firstOrFail();
@@ -130,60 +140,17 @@ class statusController extends Controller
                 if ($equal) {
                     Carga::where('booking', $booking)->update(['status' => $primerCntrStatus]);
                 }
-
-                $qd = DB::table('status')->select('status.main_status', 'status.id', 'status.status', 'cntr.cntr_type', 'carga.trader', 'carga.type', 'carga.ref_customer')
-                ->join('cntr', 'cntr.cntr_number', '=', 'status.cntr_number')
-                ->join('carga', 'carga.booking', '=', 'cntr.booking')
-                    ->where('status.cntr_number', '=', $cntr)->latest('status.id')->first();
-                $description = $qd->status;
-                $status = $qd->main_status;
-
-                $datos = [
-                    'cntr' => $cntr,
-                    'description' =>  $description,
-                    'user' => $user,
-                    'empresa' => $empresa,
-                    'booking' => $booking,
-                    'date' => $date,
-                    'cntr_type' => $qd->cntr_type,
-                    'trader' => $qd->trader,
-                    'type' => $qd->type,
-                    'ref_customer' => $qd->ref_customer
-                ];
-
-                $qto = DB::table('carga')->select('users.email')
-                    ->join('users', 'users.username', '=', 'carga.user')
-                    ->where('carga.booking', '=', $booking)->get();
-                $to = $qto[0]->email;
-                $sbx = DB::table('variables')->select('sandbox')->get();
-                if ($sbx[0]->sandbox == 0) {
-                    Mail::to($to)->cc(['gzarate@totaltradegroup.com'])->bcc('inboxplataforma@botzero.ar')
-                    ->send(new cargaTerminada($datos, $statusArchivoPath));
-                    return 'ok';
-                } else {
-                    Mail::to($to)->cc(['priopelliza@gmail.com'])->bcc('inboxplataforma@botzero.ar')
-                    ->send(new cargaTerminada($datos, $statusArchivoPath));
-                    return 'ok';
-                }
               
-
                 // Devolver una respuesta JSON con información de éxito
                 return response()->json([
                     'id' => $idCarga,
-                    'message' => 'Se modificó el satus a: ' . $statusGral,
+                    'errores' => 'Se modificó el satus a: ' . $statusGral,
                 ], 200);
 
             }elseif ($statusGral == "CON PROBLEMA") {
                 // SI TIENE PROBLEMAS.
                 // ACTUALIZA STATUS
-                $status = new statu([
-                    'status' => $description,
-                    'main_status' => $statusGral,
-                    'cntr_number' => $cntr,
-                    'user_status' => $user,
-                ]);
                 $tipo = 'problema';
-                $status->save();
             
                 // ENVIAMOS MAIL
                 // Crear una instancia del controlador
@@ -234,27 +201,21 @@ class statusController extends Controller
                       'booking' => $booking,
                     ]);
                 
+                    DB::commit();
                     // Devolver una respuesta JSON con información de éxito
                     return response()->json([
                         'id' => $idCarga,
-                        'message' => 'Se modificó el satus a: ' . $statusGral .' y avisado por Correo al Cliente' ,
+                        'errores' => 'Se modificó el satus a: ' . $statusGral .' y avisado por Correo al Cliente' ,
                     ], 200);
 
                 } else {
-                    $errores[] = 'Algo salió mal, por favor vuelta a intentar la acción.';
-                    return response()->json(['errores' => $errores, 'id' => $idCarga], 500);
-
+                    DB::rollBack();
+                    return response()->json(['errores' => 'Algo salió mal, por favor vuelta a intentar la acción.', 'id' => $idCarga], 500);
                 }
             }elseif ($statusGral == "STACKING") {
                 // si la carga está en Staking, Actualizamos el Status en la tabla Status
-                $status = new statu([
-                    'status' => $description,
-                    'main_status' => $statusGral,
-                    'cntr_number' => $cntr,
-                    'user_status' => $user,
-                ]);
+
                 $tipo = 'stacking';
-                $status->save();
             
                 // ENVIAMOS MAIL
                 // Crear una instancia del controlador
@@ -298,27 +259,21 @@ class statusController extends Controller
                     // Actualizar el estado del chofer en la tabla 'drivers'
                     Driver::where('nombre', $chofer)->update(['status_chofer' => 'libre', 'place' => $port]);
                     
+                    DB::commit();
                     // Devolver una respuesta JSON con información de éxito
                     return response()->json([
                     'id' => $idCarga,
-                    'message' => 'Se modificó el satus a: ' . $statusGral .' y avisado por Correo al Cliente' ,
+                    'errores' => 'Se modificó el satus a: ' . $statusGral .' y avisado por Correo al Cliente' ,
                     ], 200);
             
                 } else {
-                    $errores[] = 'Algo salió mal, por favor vuelta a intentar la acción.';
-                    return response()->json(['errores' => $errores, 'id' => $idCarga], 500);
+                    DB::rollBack();
+                    return response()->json(['errores' => 'Algo salió mal, por favor vuelta a intentar la acción.', 'id' => $idCarga], 500);
                 }
             }else {
 
-                // Insertamos Status en la tabla de Status
-                $status = new statu([
-                    'status' => $description,
-                    'main_status' => $statusGral,
-                    'cntr_number' => $cntr,
-                    'user_status' => $user,
-                ]);
+                // Insertamos Status en la tabla de Status         
                 $tipo = 'cambio';
-                $status->save();
             
                 // ENVIAMOS MAIL
                 // Crear una instancia del controlador
@@ -350,31 +305,73 @@ class statusController extends Controller
                     if ($equal) {
                         Carga::where('booking', $booking)->update(['status' => $primerCntrStatus]);
                     }
-            
+                    DB::commit();
                     return response()->json([
                         'id' => $idCarga,
-                        'message' => 'Se modificó el satus a: ' . $statusGral .' y avisado por Correo al Cliente' ,
+                        'errores' => 'Se modificó el satus a: ' . $statusGral .' y avisado por Correo al Cliente' ,
                     ], 200);
             
                 } else {
-                    $errores[] = 'Algo salió mal, por favor vuelta a intentar la acción.';
-                    return response()->json(['errores' => $errores, 'id' => $idCarga], 500);
+                    DB::rollBack();
+                    return response()->json(['errores' => 'Algo salió mal, por favor vuelta a intentar la acción.', 'id' => $idCarga], 500);
                 }
             }
         } catch (ModelNotFoundException $e) {
+            DB::rollBack();
             // Manejar la excepción específica para ModelNotFoundException
-            $errores[] = 'No se encontró el registro. Detalles: ' . $e->getMessage();
-            return response()->json(['errores' => $errores, 'id' => $idCarga], 404);
+            //$errores[] = 'No se encontró el registro. Detalles: ' . $e->getMessage();
+            return response()->json(['errores' => 'No se encontró el registro. Detalles: ' . $e->getMessage(), 'id' => $idCarga], 404);
         } catch (ValidationException $e) {
+            DB::rollBack();
             // Manejar la excepción específica para ValidationException
-            $errores[] = 'Error de validación. Detalles: ' . $e->getMessage();
-            return response()->json(['errores' => $errores, 'id' => $idCarga], 422);
+            //$errores[] = 'Error de validación. Detalles: ' . $e->getMessage();
+            return response()->json(['errores' => 'Error de validación. Detalles: ' . $e->getMessage(), 'id' => $idCarga], 422);
         } catch (Exception $e) {
+            DB::rollBack();
             // Manejar otras excepciones genéricas
             $errores[] = 'Error general. Detalles: ' . $e->getMessage();
-            return response()->json(['errores' => $errores, 'id' => $idCarga], 500);
+            return response()->json(['errores' => 'Error general. Detalles: ' . $e->getMessage(), 'id' => $idCarga], 500);
         }
     }
+
+    public function obtenerDocumentosCarga($booking)
+{
+    $carga = Carga::where('booking', $booking)->first();
+
+    if (!$carga) {
+        return response()->json(['mensaje' => 'No se encontró la carga asociada al booking'], 404);
+    }
+
+    $idCarga = $carga->id;
+    $folder = 'status/' . $idCarga;
+
+    // Verificar si la carpeta existe
+    if (Storage::exists($folder)) {
+        // Obtener la lista de archivos en la carpeta
+        $archivos = Storage::files($folder);
+
+        // Crear un array para almacenar el contenido de los archivos
+        $archivosConContenido = [];
+
+        // Obtener el contenido de cada archivo
+        foreach ($archivos as $archivo) {
+            try {
+                $contenido = Storage::get($archivo);
+                $contenidoUtf8 = mb_convert_encoding($contenido, 'UTF-8', 'UTF-8');
+                $archivosConContenido[] = ['nombre' => $archivo, 'contenido' => $contenidoUtf8];
+            } catch (FileNotFoundException $e) {
+                // Manejar la excepción si el archivo no se encuentra
+                Log::error('Archivo no encontrado: ' . $archivo);
+            }
+        }
+
+        return response()->json(['archivos' => $archivosConContenido]);
+    } else {
+        return response()->json(['mensaje' => 'La carpeta no existe o no tiene archivos'], 404);
+    }
+}
+
+
     /**
      * Display the specified resource.
      *
