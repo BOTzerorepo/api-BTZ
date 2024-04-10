@@ -200,6 +200,12 @@ class cargaController extends Controller
         $booking = DB::table('carga')->where('booking', '=', $booking)->get();
         return $booking->count();
     }
+    
+    public function issetTrader($trader)
+    {
+        $trader = DB::table('customers')->where('registered_name', '=', $trader)->get();
+        return $trader->count();
+    }
 
     /**
      * Show the form for editing the specified resource.
