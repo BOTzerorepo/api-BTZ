@@ -76,7 +76,7 @@ class crearpdfController extends Controller
                         'asign.id',
                         'razon_social.img', 'razon_social.cuit', 'razon_social.title',
                         'asign.transport', 'asign.transport_agent', 'asign.observation_load', 'asign.agent_port',
-                        'carga.custom_place', 'carga.bl_hbl', 'carga.senasa', 'carga.senasa_string', 'carga.type', 'carga.ref_customer', 'carga.load_date', 'carga.booking', 'carga.importador', 'carga.shipper', 'carga.commodity', 'carga.load_place', 'carga.unload_place', 'carga.cut_off_fis', 'carga.oceans_line', 'carga.vessel', 'carga.voyage', 'carga.final_point', 'carga.observation_customer', 'carga.custom_agent', 'carga.custom_place_impo', 'carga.ref_customer',
+                        'carga.custom_place', 'carga.bl_hbl', 'carga.senasa', 'carga.senasa_string', 'carga.type', 'carga.ref_customer', 'carga.load_date', 'carga.booking', 'carga.importador', 'carga.shipper', 'carga.commodity', 'carga.load_place', 'carga.unload_place', 'carga.cut_off_fis', 'carga.oceans_line', 'carga.vessel', 'carga.voyage', 'carga.final_point', 'carga.observation_customer', 'carga.custom_agent', 'carga.custom_place_impo', 'carga.ref_customer', 'carga.ex_alto', 'carga.ex_ancho', 'carga.ex_largo', 'carga.obs_imo', 'carga.rf_tem', 'carga.rf_humedad', 'carga.rf_venti',
                         'cntr.cntr_number', 'cntr.cntr_seal', 'cntr.cntr_type', 'cntr.net_weight', 'cntr.retiro_place', 'cntr.out_usd', 'cntr.observation_out',
                         'customer_load_places.link_maps', 'customer_load_places.address', 'customer_load_places.city',
                         'agencies.observation_gral',
@@ -110,7 +110,6 @@ class crearpdfController extends Controller
                 if ($respuesta_file->count() >= 1) {
 
                     if ($row->type == 'Puesta FOB') {
-
 
                         $logApi = new logapi();
                         $logApi->detalle = 'Respuesta file = :' . $file;
@@ -154,6 +153,13 @@ class crearpdfController extends Controller
                             'city' => $row->city,
                             'observaciones_agencia' => $row->observation_gral,
                             'observation_customer' => $row->observation_customer,
+                            'ex_alto' => $row->ex_alto,
+                            'ex_ancho' => $row->ex_ancho,
+                            'ex_largo' => $row->ex_largo,
+                            'obs_imo' => $row->obs_imo,
+                            'rf_tem' => $row->rf_tem,
+                            'rf_humedad' => $row->rf_humedad,
+                            'rf_venti' => $row->rf_venti
 
                         ];
 
@@ -227,6 +233,7 @@ class crearpdfController extends Controller
                             ->update(['file_instruction' => $file_name]);
 
                         return $pdf->download($file_name);
+                        
                     } elseif ($row->type == 'Expo Maritima') {
 
                         $data = [
@@ -267,6 +274,13 @@ class crearpdfController extends Controller
                             'city' => $row->city,
                             'observaciones_agencia' => $row->observation_gral,
                             'observation_customer' => $row->observation_customer,
+                            'ex_alto' => $row->ex_alto,
+                            'ex_ancho' => $row->ex_ancho,
+                            'ex_largo' => $row->ex_largo,
+                            'obs_imo' => $row->obs_imo,
+                            'rf_tem' => $row->rf_tem,
+                            'rf_humedad' => $row->rf_humedad,
+                            'rf_venti' => $row->rf_venti
 
                         ];
 
@@ -375,7 +389,14 @@ class crearpdfController extends Controller
                             "descarga_place" => $row->descarga_place,
                             "descarga_address" => $row->descarga_address,
                             "descarga_city" => $row->descarga_city,
-                            "descarga_link" => $row->descarga_link
+                            "descarga_link" => $row->descarga_link,
+                            'ex_alto' => $row->ex_alto,
+                            'ex_ancho' => $row->ex_ancho,
+                            'ex_largo' => $row->ex_largo,
+                            'obs_imo' => $row->obs_imo,
+                            'rf_tem' => $row->rf_tem,
+                            'rf_humedad' => $row->rf_humedad,
+                            'rf_venti' => $row->rf_venti
 
                         ];
 
@@ -488,7 +509,14 @@ class crearpdfController extends Controller
                             "descarga_place" => $row->descarga_place,
                             "descarga_address" => $row->descarga_address,
                             "descarga_city" => $row->descarga_city,
-                            "descarga_link" => $row->descarga_link
+                            "descarga_link" => $row->descarga_link,
+                            'ex_alto' => $row->ex_alto,
+                            'ex_ancho' => $row->ex_ancho,
+                            'ex_largo' => $row->ex_largo,
+                            'obs_imo' => $row->obs_imo,
+                            'rf_tem' => $row->rf_tem,
+                            'rf_humedad' => $row->rf_humedad,
+                            'rf_venti' => $row->rf_venti
 
                         ];
 
@@ -601,7 +629,14 @@ class crearpdfController extends Controller
                             "descarga_place" => $row->descarga_place,
                             "descarga_address" => $row->descarga_address,
                             "descarga_city" => $row->descarga_city,
-                            "descarga_link" => $row->descarga_link
+                            "descarga_link" => $row->descarga_link,
+                            'ex_alto' => $row->ex_alto,
+                            'ex_ancho' => $row->ex_ancho,
+                            'ex_largo' => $row->ex_largo,
+                            'obs_imo' => $row->obs_imo,
+                            'rf_tem' => $row->rf_tem,
+                            'rf_humedad' => $row->rf_humedad,
+                            'rf_venti' => $row->rf_venti
 
                         ];
 
@@ -699,7 +734,14 @@ class crearpdfController extends Controller
                             "descarga_place" => $row->descarga_place,
                             "descarga_address" => $row->descarga_address,
                             "descarga_city" => $row->descarga_city,
-                            "descarga_link" => $row->descarga_link
+                            "descarga_link" => $row->descarga_link,
+                            'ex_alto' => $row->ex_alto,
+                            'ex_ancho' => $row->ex_ancho,
+                            'ex_largo' => $row->ex_largo,
+                            'obs_imo' => $row->obs_imo,
+                            'rf_tem' => $row->rf_tem,
+                            'rf_humedad' => $row->rf_humedad,
+                            'rf_venti' => $row->rf_venti
 
                         ];
 

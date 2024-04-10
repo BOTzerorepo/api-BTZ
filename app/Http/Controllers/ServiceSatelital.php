@@ -31,12 +31,10 @@ class ServiceSatelital extends Controller
             ->join('carga', 'carga.booking', '=', 'cntr.booking')
             ->join('aduanas', 'aduanas.description', '=', 'carga.custom_place')
             ->join('customer_load_places', 'customer_load_places.description', '=', 'carga.load_place')
-            ->join('customer_unload_places', 'customer_unload_place.description', '=', 'carga.unload_place')
-            ->select('cntr.id_cntr as IdTrip', 'carga.id as idCarga', 'trucks.id', 'trucks.id_satelital', 'trucks.domain', 'customer_load_places.description as LugarCarga', 'customer_load_places.lat as CargaLat', 'customer_load_places.lon as CargaLng', 'aduanas.description as LugarAduana', 'aduanas.lat as aduanaLat', 'aduanas.lon as aduanaLon', 'customer_unload_places.description as lugarDescarga', 'customer_unload_places.lat as descargaLat', 'customer_unload_places.lon as descargaLon')
+            ->join('customer_unload_places', 'customer_unload_places.description', '=', 'carga.unload_place')
+            ->select('cntr.id_cntr as IdTrip', 'carga.id as idCarga', 'trucks.id', 'trucks.id_satelital', 'trucks.domain', 'customer_load_places.description as LugarCarga', 'customer_load_places.latitud as CargaLat', 'customer_load_places.longitud as CargaLng', 'aduanas.description as LugarAduana', 'aduanas.lat as aduanaLat', 'aduanas.lon as aduanaLon', 'customer_unload_places.description as lugarDescarga', 'customer_unload_places.latitud as descargaLat', 'customer_unload_places.longitud as descargaLon')
             ->where('cntr.main_status', '!=', 'TERMINADA')
             ->get();
-
-
 
         $chek = new pruebasModel();
         $chek->contenido = '1. Consulto las patentes del Camion';
@@ -44,38 +42,41 @@ class ServiceSatelital extends Controller
 
         foreach ($todosMisCamiones as $camion) {
 
-
-
-            $chek = new pruebasModel();
-            $chek->contenido = '2 Ingreso al Camion ' . $camion->domain;
-            $chek->save();
-
+           
             $client = new Client();
             $headers = [
                 'Content-Type' => 'application/json'
             ];
 
             // TEST: E6HW19 - PRODUCCION: C2QC20
-            $body = '{
+
+            if(env('APP_ENV') === 'production'){
+                $body = '{
                     "patentes":["' . $camion->domain . '"],
                     "cercania":true,
                     "domicilio":false,
                     "apiCode":"C2QC20",
                     "phone":"2612128105"
                     }';
+            }else{
+                $body = '{
+                    "patentes":["' . $camion->domain . '"],
+                    "cercania":true,
+                    "domicilio":false,
+                    "apiCode":"E6HW19",
+                    "phone":"2612128105"
+                    }';
+            }
+           
             $request = new Psr7Request('GET', 'https://app.akercontrol.com/ws/v2/servicios', $headers, $body);
             $res = $client->sendAsync($request)->wait();
             $respuesta = $res->getBody();
             $r = json_decode($respuesta, true);
             $keys = array($r);
 
-            return $respuesta;
-
             if (array_key_exists('data', $r)) {
 
-                $chek = new pruebasModel();
-                $chek->contenido = '2.a. Ingreso a a la Prueba de DATA - ' . $camion->domain;
-                $chek->save();
+              
 
                 $datos = $keys[0]['data'][$camion->domain];
 
@@ -93,9 +94,7 @@ class ServiceSatelital extends Controller
                 $chek->save();
 
                 $IdTrip = $camion->IdTrip;
-                $chek = new pruebasModel();
-                $chek->contenido = '2.b. Camion ' . $camion->domain . ' tiene el IDTrip: ' . $IdTrip;
-                $chek->save();
+            
 
                 $Radio = 6371e3; // metres
                 $φ1 = $posicionLat * pi() / 180; // φ, λ in radians
@@ -123,36 +122,23 @@ class ServiceSatelital extends Controller
                 $c3 = 2 * atan2(sqrt($a3), sqrt(1 - $a3));
                 $d3 = $Radio * $c3; // in metres */
 
-                $chek = new pruebasModel();
-                $chek->contenido = '2.c. El camino: ' . $camion->domain . 'Se encuentra a' . $d . 'metros de Carga.';
-                $chek->save();
-                $chek = new pruebasModel();
-                $chek->contenido = '2.d. El camino: ' . $camion->domain . 'Se encuentra a' . $d2 . 'metros de Aduana.';
-                $chek->save();
-                $chek = new pruebasModel();
-                $chek->contenido = '2.e. El camino: ' . $camion->domain . 'Se encuentra a' . $d3 . 'metros de Descarga.';
-                $chek->save();
+               
 
 
 
                 if ($d <= 200) { // lugar de Carga
 
-                    $chek = new pruebasModel();
-                    $chek->contenido = '3.a . Entro a lugar de carga / Camion: ' . $camion->domain;
-                    $chek->save();
+                
 
                     $clientCarga = new Client();
-                    $requestCarga = new Psr7Request('GET', env('APP_UTL') . '/api/accionLugarDeCarga/' . $IdTrip);
+                    $requestCarga = new Psr7Request('GET', env('APP_URL') . '/api/accionLugarDeCarga/' . $IdTrip);
                     $resCarga = $clientCarga->sendAsync($requestCarga)->wait();
                 }
 
                 if ($d2 <= 200) { // lugar de aduana
 
 
-                    $chek = new pruebasModel();
-                    $chek->contenido = '3.b. Entro a lugar de Aduana / Camion: ' . $camion->domain;
-                    $chek->save();
-
+                   
                     $clientAduana = new Client();
                     $requestAduana = new Psr7Request('GET', env('APP_URL') . '/api/accionLugarAduana/' . $IdTrip);
                     $resAduana = $clientAduana->sendAsync($requestAduana)->wait();
@@ -160,17 +146,14 @@ class ServiceSatelital extends Controller
                 if ($d3 <= 200) { // lugar de descarga
 
 
-                    $chek = new pruebasModel();
-                    $chek->contenido = '3.c .Entro a lugar de descarga / Camion: ' . $camion->domain;
-                    $chek->save();
+                   
 
                     $clientDescarga = new Client();
                     $requestDescarga = new Psr7Request('GET', env('APP_URL') . '/api/accionLugarDescarga/' . $IdTrip);
                     $resDescarga = $clientDescarga->sendAsync($requestDescarga)->wait();
                 }
-                $chek = new pruebasModel();
-                $chek->contenido = '4. No esta cerca de ningun lado / camion: ' . $camion->domain;
-                $chek->save();
+                
+                
 
                 // Agregar punntos Criticos Globales.
             }
@@ -180,16 +163,33 @@ class ServiceSatelital extends Controller
     {
 
         $curl = curl_init();
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => 'https://app.akercontrol.com/ws/flota/2612128105/C2QC20',
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => '',
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 0,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => 'GET',
-        ));
+
+        // TEST: E6HW19 - PRODUCCION: C2QC20
+        if (env('APP_ENV') === 'production') {
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => 'https://app.akercontrol.com/ws/flota/2612128105/C2QC20',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'GET',
+            ));
+        } else {
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => 'https://app.akercontrol.com/ws/flota/2612128105/E6HW19',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'GET',
+            ));
+        }
+
+        
 
         $response = curl_exec($curl);
         $json = json_decode($response);

@@ -41,7 +41,6 @@ class finalPointController extends Controller
         $final_points->description = $request['description'];
         $final_points->pais = $request['pais'];
         $final_points->provincia = $request['provincia'];
-        $final_points->sigla = $request['sigla'];
         $final_points->save();
 
         return $final_points;
