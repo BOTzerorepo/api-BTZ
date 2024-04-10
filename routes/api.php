@@ -18,16 +18,19 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+
 /* Home Traffic */
 
-Route::get('/allCargoThisWeek/{user}','App\Http\Controllers\cargaController@loadTHisWeek'); 
+Route::get('/allCargoThisWeek/{user}','App\Http\Controllers\cargaController@loadThisWeek'); 
 Route::get('/allCargoNextWeek/{user}','App\Http\Controllers\cargaController@loadNextWeek'); 
 Route::get('/allCargoLastWeek/{user}','App\Http\Controllers\cargaController@loadLastWeek'); 
-Route::get('/allCargoFinished/{user}','App\Http\Controllers\cargaController@loadFinished'); 
+Route::get('/allCargoFinished/{user}','App\Http\Controllers\cargaController@loadFinished');
 
 Route::get('/carga/{user}/{id}','App\Http\Controllers\cargaController@show'); 
+Route::post('/statusCarga','App\Http\Controllers\statusController@updateStatusCarga'); 
 
-Route::get('/status','App\Http\Controllers\statusController@index'); 
+
+Route::get('/status','App\Http\Controllers\statusController@index');
 Route::get('/ultimoStatus/{id}','App\Http\Controllers\statusController@showLast'); 
 Route::get('/historialStatus/{cntr}','App\Http\Controllers\statusController@showHistory'); 
 
@@ -37,7 +40,8 @@ Route::get('/instructivosdelete/{userTraffic}/{id}','App\Http\Controllers\instru
 
 
 
-/* Impresion de PDF */
+/* Impresion de PDF [RailDocs] */
+
 Route::get('/imprimirCarga/{cntr_number}','App\Http\Controllers\crearpdfController@carga'); // No usa Funcion MAIL
 Route::get('/verCarga/{cntr_number}','App\Http\Controllers\verpdfController@carga'); 
 Route::get('/imprimirVacio/{id_cntr}','App\Http\Controllers\crearpdfController@vacio');  // No usa Funcion MAIL
@@ -55,19 +59,23 @@ Route::get('/trasnsporteAsignado/{id}','App\Http\Controllers\emailController@tra
 //Route::put('/imprimir/{id}','App\Http\Controllers\imprimirPDF@update');//actualizar
 //Route::delete('/imprimir','App\Http\Controllers\imprimirPDF@destroy'); // eliminar
 
-////////////////// DOCUMENTS ///////////////////
-
-//////// USUARIOS INTERNOS ////////
+////////////////// DOCUMENTS [RAIL DOCS] //////////////////////////////////////////////////////////////////////
+                                                                                                            //
+//////// USUARIOS INTERNOS ////////                                                                         //
+                                                                                                            //
 
 Route::post('/docs/{booking}','App\Http\Controllers\DocumentController@store');
+Route::post('/ingresoFormulario', 'App\Http\Controllers\cargaController@guardarFormulario');
+                                                                                                            //
 Route::get('/docsCntr/{booking}/{user}/{cntr}','App\Http\Controllers\DocumentController@indexCntr');
 Route::get('/docsDel','App\Http\Controllers\DocumentController@destroy'); 
-
+                                                                                                            //
 //////// USUARIOS EXTERNOS ////////
-
-Route::get('/docsAtaReed/{booking}/{user}','App\Http\Controllers\DocumentController@index');
-Route::post('/docsAta/{booking}','App\Http\Controllers\DocumentController@storeAta');
-Route::post('/carga','App\Http\Controllers\LoadController@store');
+                                                                                                            //
+Route::get('/docsAtaReed/{booking}/{user}','App\Http\Controllers\DocumentController@index');                //
+Route::post('/docsAta/{booking}','App\Http\Controllers\DocumentController@storeAta');                       //
+Route::post('/carga','App\Http\Controllers\LoadController@store');                                          //
+                                                                                                            //
 
  // TRUCK CONTROLLLER 
 Route::post('/truck','App\Http\Controllers\TruckController@store'); // C
@@ -151,9 +159,6 @@ Route::get('/accionLugarDescarga/{idTrip}','App\Http\Controllers\CustomerLoadPla
 Route::get('/servicioSatelital','App\Http\Controllers\ServiceSatelital@serviceSatelital');
 Route::get('/pruebaSatelital','App\Http\Controllers\ServiceSatelital@servicePrueba');
 Route::get('/flota','App\Http\Controllers\ServiceSatelital@flota');
-
-
-
 
 //JUANI
 
@@ -280,7 +285,7 @@ Route::post('/customer/{id}','App\Http\Controllers\CustomerController@update'); 
 Route::delete('/customer/{id}','App\Http\Controllers\CustomerController@destroy'); //Elimina un Customer trader
 
 Route::get('issetBooking/{booking}','App\Http\Controllers\cargaController@issetBooking');
-
+Route::get('issetTrader/{trader}','App\Http\Controllers\cargaController@issetTrader');
 
 //Customer Final Point
 

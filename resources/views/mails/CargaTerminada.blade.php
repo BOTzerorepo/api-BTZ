@@ -219,8 +219,7 @@
                                                                         <p
                                                                             style="margin: 0; font-size: 14px; text-align: center;">
                                                                             <span style="font-size:25px;"><strong><span
-                                                                                        style="font-size:28px; color:white;">ASIGNACIÓN
-                                                                                        DE UNIDAD</strong></span>
+                                                                                        style="font-size:28px; color:white;">CARGA TERMINADA</strong></span>
                                                                         </p>
                                                                     </div>
                                                                 </div>
@@ -242,7 +241,7 @@
                                                                             style="margin-top: 25px; font-size: 14px; text-align: center;">
                                                                             <span style="font-size:15px;"><strong><span
                                                                                         style="font-size:15px;">
-                                                                                        {{ $datos['cntr_number'] }} -
+                                                                                        {{ $datos['cntr'] }} -
                                                                                         {{ $datos['booking'] }}
                                                                                     </span></strong></span>
                                                                         </p>
@@ -285,8 +284,7 @@
                                                                         <p
                                                                             style="margin: 0; text-align: center; font-size: 12px;">
                                                                             <span
-                                                                                style="font-size:20px;">Detalle de
-                                                                                asignación:</span>
+                                                                                style="font-size:20px;">Detalle:</span>
                                                                         </p>
                                                                     </div>
                                                                 </div>
@@ -339,76 +337,23 @@
                                                                             <div style="font-family: sans-serif">
                                                                                 <div class="txtTinyMce-wrapper"
                                                                                     style="font-size: 12px; font-family: Lato, Tahoma, Verdana, Segoe, sans-serif; mso-line-height-alt: 14.399999999999999px; color: #052d3d; line-height: 1.2;">
-
-                                                                                    <p
-                                                                                        style="margin: 0; font-size: 12px; text-align: center;">
-                                                                                        <span
-                                                                                            style="font-size:20px; color: gray; text-align: center;">
-                                                                                            <h3>Datos para CRT</h3>
-                                                                                            <hr>
-                                                                                            <p>Transporte:
-                                                                                                {{ $datos['transport'] }}
-                                                                                                <br>
-                                                                                                Domicilio:
-                                                                                                {{ $datos['direccion'] }}
-                                                                                                <br>RUT|CUIT:
-                                                                                                {{ $datos['cuit'] }}
-                                                                                                <br>PAUT:
-                                                                                                {{ $datos['paut'] }}
-                                                                                                <br>Permiso
-                                                                                                Internacional:
-                                                                                                {{ $datos['permiso_int'] }}
-                                                                                                <br>Vto Perm. Int.:
-                                                                                                {{ $datos['vto_permiso_int'] }}
-                                                                                                <br>
-                                                                                                <br> <strong
-                                                                                                    style="font-size: larger; padding: 5px ; background: #aad4f5;">
-                                                                                                    CRT:{{ $datos['crt'] }}</strong>
-                                                                                            </p>
-                                                                                            <h3>Datos para MIC</h3>
-                                                                                            <hr>
-                                                                                            <p>
-                                                                                                Transporte:
-                                                                                                {{ $datos['fletero_razon_social'] }}
-                                                                                                <br>Domicilio:
-                                                                                                {{ $datos['fletero_domicilio'] }}
-                                                                                                <br>CUIT:
-                                                                                                {{ $datos['fletero_cuit'] }}
-                                                                                                <br>PAUT:
-                                                                                                {{ $datos['fletero_paut'] }}
-                                                                                                <br>Permiso
-                                                                                                Internacional:
-                                                                                                {{ $datos['fletero_permiso'] }}
-                                                                                                <br>Vencimiento Permiso
-                                                                                                Internacional:
-                                                                                                {{ $datos['fletero_vto_permiso'] }}
-                                                                                                <br>
-                                                                                                <br>Chofer:{{ $datos['driver'] }}
-                                                                                                <br>DNI:{{ $datos['documento'] }}
-                                                                                                <br>
-                                                                                                <br>Tractor:{{ $datos['truck'] }}
-                                                                                                <br>Modelo:
-                                                                                                {{ $datos['truck_modelo'] }}
-                                                                                                <br>Año:
-                                                                                                {{ $datos['truck_year'] }}
-                                                                                                <br>Chasis:
-                                                                                                {{ $datos['truck_chasis'] }}
-                                                                                                <br>Póliza:
-                                                                                                {{ $datos['truck_poliza'] }}
-                                                                                                <br>Vencimiento:
-                                                                                                {{ $datos['truck_vto_poliza'] }}
-                                                                                                <br>Semi:
-                                                                                                {{ $datos['truck_semi'] }}
-                                                                                                <br>Póliza Semi:
-                                                                                                {{ $datos['truck_semi_poliza'] }}
-                                                                                                <br>Vto póliza semi:
-                                                                                                {{ $datos['truck_semi_vto_poliza'] }}
-                                                                                            </p>
-
-                                                                                        </span>
+                                                                                    <p style="margin: 0; font-size: 12px; text-align: center;">
+                                                                                        <span style="font-size:34px;">
+                                                                                            <span style="color:#0f4f94;font-size:34px;">
+                                                                                                <strong>
+                                                                                                    <span style="font-size:34px;">
+                                                                                                        {{ $datos['cntr'] }}
+                                                                                                    </span>
+                                                                                                </strong>
+                                                                                            </span>
+                                                                                        </p>
+                                                                                        <p style="margin: 0; font-size: 12px; text-align: center;">
+                                                                                            <span style="font-size:20px; color: gray; text-align: center;">
+                                                                                                {{$datos['booking']}}
+                                                                                            </span>
                                                                                         </span>
                                                                                     </p>
-
+                                                                                    
                                                                                 </div>
                                                                             </div>
                                                                         </td>
@@ -424,22 +369,36 @@
                                                                             <div style="font-family: sans-serif">
                                                                                 <div class="txtTinyMce-wrapper"
                                                                                     style="font-size: 12px; font-family: Lato, Tahoma, Verdana, Segoe, sans-serif; mso-line-height-alt: 18px; color: #787878; line-height: 1.5;">
-
                                                                                     <p
                                                                                         style="margin: 2%; font-size: 14px; text-align: center; mso-line-height-alt: 27px;">
+                                                                                        <span style="font-size:18px;">
+                                                                                            {{ $datos['description']}}
+                                                                                        </span>
+                                                                                        <br/>
+                                                                                    </p>
+                                                                                    <p style="margin: 2%; font-size: 14px; text-align: center; mso-line-height-alt: 27px;">
+                                                                                    
+                                                                                        <a href="{{env('FRONT_URL').'/satisfaccion/satisfaccion_carga.php?cntr_number='.$datos['cntr'].'&booking='.$datos['booking']}}"
+                                                                                                style="color:#109935;font-size:18px; ">
+                                                                                                <strong>
+                                                                                                   Completar Encuesta de Satisfacción 
+                                                                                                </strong>
+                                                                                            </a>
+                                                                                        </p>
+                                                                                    <p
+                                                                                    style="margin: 2%; font-size: 14px; text-align: center; mso-line-height-alt: 27px;">
                                                                                         <span
                                                                                             style="font-size:15px;">
                                                                                             Status Informado por: <br>
                                                                                             <span
                                                                                                 style="color:#2190e3;font-size:18px;">
                                                                                                 <strong>
-                                                                                                    {{ $datos['user'] }}
+                                                                                                    {{ $datos['user']}}
                                                                                                 </strong>
                                                                                             </span>
-                                                                                            <br />
-                                                                                            <strong
-                                                                                                style="font-size:10px;">Created
-                                                                                                at: {{ $date }}
+                                                                                            <br/>
+                                                                                            <strong style="font-size:10px;">Created at: {{
+                                                                                                $datos['date']}}
                                                                                             </strong></span>
                                                                                     </p>
                                                                                 </div>
@@ -470,7 +429,6 @@
                         <tbody>
                             <tr>
                                 <td>
-                                    
                                     <table align="center" border="0" cellpadding="0" cellspacing="0"
                                         class="row-content stack" role="presentation"
                                         style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #FFFFFF; color: #000000; width: 650px;"
@@ -542,8 +500,7 @@
                                                                             <!--[if vml]><table align="left" cellpadding="0" cellspacing="0" role="presentation" style="display:inline-block;padding-left:0px;padding-right:0px;mso-table-lspace: 0pt;mso-table-rspace: 0pt;"><![endif]-->
                                                                             <!--[if !vml]><!-->
                                                                             <table cellpadding="0" cellspacing="0"
-                                                                                class="icons-inner"
-                                                                                role="presentation"
+                                                                                class="icons-inner" role="presentation"
                                                                                 style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; display: inline-block; margin-right: -4px; padding-left: 0px; padding-right: 0px;">
                                                                                 <!--<![endif]-->
                                                                                 <tr>
@@ -574,7 +531,7 @@
                             </tr>
                         </tbody>
                     </table>
-                    <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-14"
+                     <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-14"
                         role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
                         <tbody>
                             <tr>
