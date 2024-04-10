@@ -14,6 +14,9 @@ use Illuminate\Validation\ValidationException;
 use Exception;
 use App\Http\Controllers\emailController;
 use Illuminate\Support\Facades\Storage;
+use App\Mail\cargaTerminada;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
 
 class statusController extends Controller
 {
@@ -104,7 +107,14 @@ class statusController extends Controller
 
             if ($statusGral == "TERMINADA") {
                 
-                
+                // ACTUALIZA STATUS
+                $status = new statu([
+                    'status' => $description,
+                    'main_status' => $statusGral,
+                    'cntr_number' => $cntr,
+                    'user_status' => $user,
+                ]);
+                $status->save();
 
                 // Realiza la consulta buscando el cntr
                 $cntrModel = cntr::where('cntr_number', $cntr)->firstOrFail();
@@ -130,7 +140,7 @@ class statusController extends Controller
                 if ($equal) {
                     Carga::where('booking', $booking)->update(['status' => $primerCntrStatus]);
                 }
-                DB::commit();
+              
                 // Devolver una respuesta JSON con información de éxito
                 return response()->json([
                     'id' => $idCarga,
