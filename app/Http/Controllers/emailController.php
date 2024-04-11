@@ -7,6 +7,7 @@ use App\Mail\CamnioStatus;
 use App\Mail\cargaAsignada;
 use App\Mail\cargaAsignadaEditada;
 use App\Mail\CargaConProblemas;
+use App\Mail\cargaTerminada;
 use App\Mail\IngresadoStacking;
 use App\Mail\pruebaMail;
 use App\Mail\transporteAsignado;
@@ -101,6 +102,14 @@ class emailController extends Controller
             $logapi->detalle = 'AsignaUnidadCarga-User:' . $dAsign->user . '|Transporte:' . $dAsign->transport . '|Chofer:' . $dAsign->driver . '|Tractor:' . $dAsign->truck . '|Semi:' . $dAsign->truck_semi;
             $logapi->save();
 
+            $status = new statu();
+            $status->status = 'Asignado Chofer:' . $dAsign->driver . '|Tractor:' . $dAsign->truck . '|Semi:' . $dAsign->truck_semi;
+            $status->avisado = 1;
+            $status->main_status = 'ASIGNADA';
+            $status->cntr_number = $dAsign->cntr_number;
+            $status->user_status = $dAsign->user;
+            $status->save();
+
             return 'ok';
         } else {
 
@@ -110,6 +119,14 @@ class emailController extends Controller
             $logapi->user = $dAsign->user;
             $logapi->detalle = '+ Sandbox + to: ' . $to . 'AsignaUnidadCarga-User:' . $dAsign->user . ' |Transporte:' . $dAsign->transport . '|Chofer:' . $dAsign->driver . '|Tractor:' . $dAsign->truck . '|Semi:' . $dAsign->truck_semi;
             $logapi->save();
+            
+            $status = new statu();
+            $status->status = 'Asignado Chofer:' . $dAsign->driver . '|Tractor:' . $dAsign->truck . '|Semi:' . $dAsign->truck_semi;
+            $status->avisado = 1;
+            $status->main_status = 'ASIGNADA';
+            $status->cntr_number = $dAsign->cntr_number;
+            $status->user_status = $dAsign->user;
+            $status->save();
 
             return 'ok';
         }
@@ -414,7 +431,7 @@ class emailController extends Controller
 
         if ($sbx[0]->sandbox == 0) {
 
-            $mail = Mail::to(['gzarate@totaltradegroup.com', 'czelada@totaltradegroup.com', 'rquero@totaltradegroup.com'])->cc(['cs.auxiliar@totaltradegroup.com'])->bcc('inboxplataforma@botzero.ar')->send(new avisoNewCarga($datos));
+            $mail = Mail::to(['gzarate@totaltradegroup.com', 'czelada@totaltradegroup.com', 'rquero@totaltradegroup.com', 'bipoliti@totaltradegroup.com'])->cc(['cs.auxiliar@totaltradegroup.com'])->bcc('inboxplataforma@botzero.ar')->send(new avisoNewCarga($datos));
             $logApi = new logapi();
             $logApi->user = $user[0]->username;
             $logApi->detalle = "envio email to(['ddicarlo@totaltradegroup.com', 'rquero@totaltradegroup.com', 'cs.auxiliar@totaltradegroup.com'])->cc(['gzarate@totaltradegroup.com', 'czelada@totaltradegroup.com', 'fzgaib@totaltradegroup.com'])";
