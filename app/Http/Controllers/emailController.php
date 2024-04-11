@@ -431,7 +431,7 @@ class emailController extends Controller
 
         if ($sbx[0]->sandbox == 0) {
 
-            $mail = Mail::to(['gzarate@totaltradegroup.com', 'czelada@totaltradegroup.com', 'rquero@totaltradegroup.com'])->cc(['cs.auxiliar@totaltradegroup.com'])->bcc('inboxplataforma@botzero.ar')->send(new avisoNewCarga($datos));
+            $mail = Mail::to(['gzarate@totaltradegroup.com', 'czelada@totaltradegroup.com', 'rquero@totaltradegroup.com', 'bipoliti@totaltradegroup.com'])->cc(['cs.auxiliar@totaltradegroup.com'])->bcc('inboxplataforma@botzero.ar')->send(new avisoNewCarga($datos));
             $logApi = new logapi();
             $logApi->user = $user[0]->username;
             $logApi->detalle = "envio email to(['ddicarlo@totaltradegroup.com', 'rquero@totaltradegroup.com', 'cs.auxiliar@totaltradegroup.com'])->cc(['gzarate@totaltradegroup.com', 'czelada@totaltradegroup.com', 'fzgaib@totaltradegroup.com'])";
