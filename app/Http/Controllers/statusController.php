@@ -167,11 +167,12 @@ class statusController extends Controller
                     ->where('carga.booking', '=', $booking)->get();
                 $to = $qto[0]->email;
                 $sbx = DB::table('variables')->select('sandbox')->get();
+                $inboxEmail = env('INBOX_EMAIL');
                 if ($sbx[0]->sandbox == 0) {
-                    Mail::to($to)->cc(['gzarate@totaltradegroup.com'])->bcc('inboxplataforma@botzero.ar')
+                    Mail::to($to)->cc(['gzarate@totaltradegroup.com'])->bcc($inboxEmail)
                     ->send(new cargaTerminada($datos, $statusArchivoPath));
                 } else {
-                    Mail::to($to)->cc(['priopelliza@gmail.com'])->bcc('inboxplataforma@botzero.ar')
+                    Mail::to($to)->cc(['priopelliza@gmail.com'])->bcc($inboxEmail)
                     ->send(new cargaTerminada($datos, $statusArchivoPath));
                 }
 
