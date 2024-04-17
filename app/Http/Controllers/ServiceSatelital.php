@@ -56,7 +56,7 @@ class ServiceSatelital extends Controller
                     "patentes":["' . $camion->domain . '"],
                     "cercania":true,
                     "domicilio":false,
-                    "apiCode":"C2QC20",
+                    "apiCode":"E6HW19",
                     "phone":"2612128105"
                     }';
             }else{
@@ -168,7 +168,7 @@ class ServiceSatelital extends Controller
         // TEST: E6HW19 - PRODUCCION: C2QC20
         if (env('APP_ENV') === 'production') {
             curl_setopt_array($curl, array(
-                CURLOPT_URL => 'https://app.akercontrol.com/ws/flota/2612128105/C2QC20',
+                CURLOPT_URL => 'https://app.akercontrol.com/ws/flota/2612128105/E6HW19',
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => '',
                 CURLOPT_MAXREDIRS => 10,
@@ -228,8 +228,6 @@ class ServiceSatelital extends Controller
                     array_push($camiones, $trcuk);
                 }
             }
-           
-        
         
     }
         return $camiones;
