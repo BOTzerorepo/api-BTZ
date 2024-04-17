@@ -104,11 +104,11 @@ class CustomerLoadPlaceController extends Controller
             ];
 
             $sbx = DB::table('variables')->select('sandbox')->get();
-
+            $inboxEmail = env('INBOX_EMAIL');
             if ($sbx[0]->sandbox == 0) {
 
 
-                Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new cargaCargando($datos));
+                Mail::to($mail)->bcc($inboxEmail)->send(new cargaCargando($datos));
 
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
@@ -116,7 +116,7 @@ class CustomerLoadPlaceController extends Controller
                 $logApi->save();
             } else {
 
-                Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new cargaCargando($datos));
+                Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaCargando($datos));
 
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
@@ -171,11 +171,12 @@ class CustomerLoadPlaceController extends Controller
                 ];
 
                 $sbx = DB::table('variables')->select('sandbox')->get();
+                $inboxEmail = env('INBOX_EMAIL');
 
                 if ($sbx[0]->sandbox == 0) {
 
 
-                    Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new cargaCargando($datos));
+                    Mail::to($mail)->bcc($inboxEmail)->send(new cargaCargando($datos));
 
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
@@ -183,7 +184,7 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->save();
                 } else {
 
-                    Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new cargaCargando($datos));
+                    Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaCargando($datos));
 
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
@@ -250,17 +251,17 @@ class CustomerLoadPlaceController extends Controller
                 ];
 
                 $sbx = DB::table('variables')->select('sandbox')->get();
-
+                $inboxEmail = env('INBOX_EMAIL');
                 if ($sbx[0]->sandbox == 0) {
 
-                    Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new cargaAduana($datos));
+                    Mail::to($mail)->bcc($inboxEmail)->send(new cargaAduana($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaAduana to:" . $mail;
                     $logApi->save();
                 } else {
 
-                    Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new cargaAduana($datos));
+                    Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaAduana($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaAduana to: 'pablorio@botzero.tech'";
@@ -315,18 +316,18 @@ class CustomerLoadPlaceController extends Controller
                 
 
                 $sbx = DB::table('variables')->select('sandbox')->get();
-
+                $inboxEmail = env('INBOX_EMAIL');
                 if ($sbx[0]->sandbox == 0) {
 
 
-                    Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new cargaAduana($datos));
+                    Mail::to($mail)->bcc($inboxEmail)->send(new cargaAduana($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaAduana to:" . $mail;
                     $logApi->save();
                 } else {
 
-                    Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new cargaAduana($datos));
+                    Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaAduana($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaAduana to: 'pablorio@botzero.tech'";
@@ -394,17 +395,17 @@ class CustomerLoadPlaceController extends Controller
                 ];
 
                 $sbx = DB::table('variables')->select('sandbox')->get();
-
+                $inboxEmail = env('INBOX_EMAIL');
                 if ($sbx[0]->sandbox == 0) {
 
-                    Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new cargaDescarga($datos));
+                    Mail::to($mail)->bcc($inboxEmail)->send(new cargaDescarga($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaDescarga to:" . $mail;
                     $logApi->save();
                 } else {
 
-                    Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new cargaDescarga($datos));
+                    Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaDescarga($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email Instructivo to: 'pablorio@botzero.tech'";
@@ -454,17 +455,17 @@ class CustomerLoadPlaceController extends Controller
                 ];
 
                 $sbx = DB::table('variables')->select('sandbox')->get();
-
+                $inboxEmail = env('INBOX_EMAIL');
                 if ($sbx[0]->sandbox == 0) {
 
-                    Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new cargaDescarga($datos));
+                    Mail::to($mail)->bcc($inboxEmail)->send(new cargaDescarga($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaDescarga to:" . $mail;
                     $logApi->save();
                 } else {
 
-                    Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new cargaDescarga($datos));
+                    Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaDescarga($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email Instructivo to: 'pablorio@botzero.tech'";
