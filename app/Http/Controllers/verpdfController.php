@@ -566,10 +566,10 @@ class verpdfController extends Controller
             // ENVIAMOS MAIL
 
             $sbx = DB::table('variables')->select('sandbox')->get();
-            
+            $inboxEmail = env('INBOX_EMAIL');
             if ($sbx[0]->sandbox == 0) {
 
-                Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new envioInstructivo($data));
+                Mail::to($mail)->bcc($inboxEmail)->send(new envioInstructivo($data));
 
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
@@ -577,7 +577,7 @@ class verpdfController extends Controller
 
             } else {
 
-                Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new envioInstructivo($data));
+                Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new envioInstructivo($data));
 
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
