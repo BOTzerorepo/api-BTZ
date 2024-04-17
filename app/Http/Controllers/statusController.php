@@ -170,11 +170,9 @@ class statusController extends Controller
                 if ($sbx[0]->sandbox == 0) {
                     Mail::to($to)->cc(['gzarate@totaltradegroup.com'])->bcc('inboxplataforma@botzero.ar')
                     ->send(new cargaTerminada($datos, $statusArchivoPath));
-                    return 'ok';
                 } else {
                     Mail::to($to)->cc(['priopelliza@gmail.com'])->bcc('inboxplataforma@botzero.ar')
                     ->send(new cargaTerminada($datos, $statusArchivoPath));
-                    return 'ok';
                 }
 
 
