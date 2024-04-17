@@ -10,6 +10,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request as Psr7Request;
 use Illuminate\Http\Client\Request as ClientRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use LDAP\Result;
 use Mockery\Undefined;
@@ -196,36 +197,41 @@ class ServiceSatelital extends Controller
         $datos = $json->data;
 
         $camiones = [];
+
         foreach ($datos as $dato) {
 
-            if (property_exists($dato, 'patente')) {
-
+            if (!empty($dato->patente)) { // Verificar si 'patente' no es nulo
                 $todosMisCamiones = DB::table('trucks')
                     ->join('transports', 'trucks.transport_id', '=', 'transports.id')
                     ->where('trucks.domain', '=', $dato->patente)
                     ->get();
 
-                $camion = $todosMisCamiones[0];
+                if ($todosMisCamiones->isNotEmpty()) { // Verificar si se encontraron camiones
+                    $camion = $todosMisCamiones->first();
 
-                $trcuk['model'] = $camion->model;
-                $trcuk['domain'] = $camion->domain;
-                $trcuk['year'] = $camion->year;
-                $trcuk['vto_poliza'] = $camion->vto_poliza;
-                $trcuk['razon_social'] = $camion->razon_social;
-                $trcuk['logo'] = $camion->logo;
-                $trcuk['vto_permiso'] = $camion->vto_permiso;
-                $trcuk['titulo'] = $dato->nombre;
-                $trcuk['ult_latitud'] = $dato->ult_latitud;
-                $trcuk['ult_longitud'] = $dato->ult_longitud;
-                $trcuk['ult_velocidad'] = $dato->ult_velocidad;
-                $trcuk['ult_fecha'] = $dato->ult_fecha;
-                $trcuk['ult_reporte'] = $dato->ult_reporte;
-                $trcuk['ult_direccion'] = $dato->ult_direccion;
+                    $trcuk['model'] = $camion->model;
+                    $trcuk['domain'] = $camion->domain;
+                    $trcuk['year'] = $camion->year;
+                    $trcuk['vto_poliza'] = $camion->vto_poliza;
+                    $trcuk['razon_social'] = $camion->razon_social;
+                    $trcuk['logo'] = $camion->logo;
+                    $trcuk['vto_permiso'] = $camion->vto_permiso;
+                    $trcuk['titulo'] = $dato->nombre;
+                    $trcuk['ult_latitud'] = $dato->ult_latitud;
+                    $trcuk['ult_longitud'] = $dato->ult_longitud;
+                    $trcuk['ult_velocidad'] = $dato->ult_velocidad;
+                    $trcuk['ult_fecha'] = $dato->ult_fecha;
+                    $trcuk['ult_reporte'] = $dato->ult_reporte;
+                    $trcuk['ult_direccion'] = $dato->ult_direccion;
+                    $truck['direccion'] = $dato->ult_direccion;
 
-
-                array_push($camiones, $trcuk);
+                    array_push($camiones, $trcuk);
+                }
             }
-        }
+           
+        
+        
+    }
         return $camiones;
     }
 }
