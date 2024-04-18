@@ -297,6 +297,49 @@ class emailController extends Controller
                 ->send(new IngresadoStacking($datos, $statusArchivoPath));
                 return 'ok';
             }
+        } elseif ($tipo == 'terminada') {
+
+
+            $qd = DB::table('status')->select('status.id', 'status.status', 'cntr.cntr_type', 'carga.trader', 'carga.type', 'carga.ref_customer')
+                ->join('cntr', 'cntr.cntr_number', '=', 'status.cntr_number')
+                ->join('carga', 'carga.booking', '=', 'cntr.booking')
+                ->where('status.cntr_number', '=', $cntr)->latest('id')->first();
+            $description = $qd->status;
+            $datos = [
+                'cntr' => $cntr,
+                'description' =>  $description,
+                'user' => $user,
+                'empresa' => $empresa,
+                'booking' => $booking,
+                'date' => $date,
+                'status' => 'con Problema',
+                'cntr_type' => $qd->cntr_type,
+                'trader' => $qd->trader,
+                'type' => $qd->type,
+                'ref_customer' => $qd->ref_customer
+            ];
+
+
+            $qto = DB::table('carga')->select('users.email')
+                ->join('users', 'users.username', '=', 'carga.user')
+                ->where('carga.booking', '=', $booking)->get();
+            $to = $qto[0]->email;
+
+            $sbx = DB::table('variables')->select('sandbox')->get();
+            $inboxEmail = env('INBOX_EMAIL');
+            if ($sbx[0]->sandbox == 0) {
+
+                Mail::to($tipo)->cc(['gzarate@totaltradegroup.com'])->bcc($inboxEmail)
+                    ->send(new cargaTerminada($datos, $statusArchivoPath));
+
+                return 'ok';
+            } else {
+
+                Mail::to($to)->cc(['priopelliza@gmail.com'])->bcc($inboxEmail)
+                    ->send(new cargaTerminada($datos, $statusArchivoPath));
+
+                return 'ok';
+            }
         } else {
 
 
