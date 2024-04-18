@@ -329,7 +329,7 @@ class emailController extends Controller
             $inboxEmail = env('INBOX_EMAIL');
             if ($sbx[0]->sandbox == 0) {
 
-                Mail::to($tipo)->cc(['gzarate@totaltradegroup.com'])->bcc($inboxEmail)
+                Mail::to($to)->cc(['gzarate@totaltradegroup.com'])->bcc($inboxEmail)
                     ->send(new cargaTerminada($datos, $statusArchivoPath));
 
                 return 'ok';
