@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\nuevoTranporte;
 use App\Models\Transport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class TransportController extends Controller
 {
@@ -61,8 +63,9 @@ class TransportController extends Controller
         $transporte->contacto_admin_mail = $request['contacto_admin_mail'];
         $transporte->user = $request['user'];
         $transporte->empresa = $request['empresa'];
-        
+        $transporte->satelital = $request['satelital'];
         $transporte->save();
+        Mail::to('pablorio@botzero.ar')->send(new nuevoTranporte($transporte));
 
         return $transporte;
     }
@@ -118,8 +121,11 @@ class TransportController extends Controller
         $transporte->contacto_admin_mail = $request['contacto_admin_mail'];
         $transporte->user = $request['user'];
         $transporte->empresa = $request['empresa'];
+        $transporte->satelital = $request['satelital'];
+
         
         $transporte->save();
+       
 
         return $transporte;
     }
