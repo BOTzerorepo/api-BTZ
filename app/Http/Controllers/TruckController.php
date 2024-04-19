@@ -60,7 +60,6 @@ class TruckController extends Controller
         $truck->transport_id = $request['transport_id'];
         $truck->user = $request['user'];
         $truck->customer_id = $cId;
-        $truck->satelital = $request['satelital'];
         $truck->save();
 
        
