@@ -141,7 +141,7 @@ class ServiceSatelital extends Controller
                 // Agregar punntos Criticos Globales.
             }
         }
-        
+
         $truckPosition = DB::table('trucks')->where('alta_aker',"!=",0)->get();
 
         foreach ($truckPosition as $camion) {
@@ -169,6 +169,10 @@ class ServiceSatelital extends Controller
 
             if (array_key_exists('data', $r)) {
 
+                $datos = $keys[0]['data'][$camion->domain];
+                $posicionLat = $datos['ult_latitud'];
+                $posicionLon = $datos['ult_longitud'];
+                
                 $positionDB = new position();
                 $positionDB->dominio = $camion->domain;
                 $positionDB->lat = $posicionLat;
