@@ -38,6 +38,8 @@ class ServiceSatelital extends Controller
             ->where('trucks.alta_aker', '!=', 0)
             ->get();
 
+           
+
         foreach ($todosMisCamiones as $camion) {
            
             $client = new Client();
@@ -76,10 +78,13 @@ class ServiceSatelital extends Controller
                 $datos = $keys[0]['data'][$camion->domain];
                 $posicionLat = $datos['ult_latitud'];
                 $posicionLon = $datos['ult_longitud'];
+                
                 $positionDB = new position();
                 $positionDB->dominio = $camion->domain;
                 $positionDB->lat = $posicionLat;
                 $positionDB->lng = $posicionLon;
+                $positionDB->asigned = 1;
+
                 $positionDB->save();
 
                 $IdTrip = $camion->IdTrip;
@@ -134,6 +139,42 @@ class ServiceSatelital extends Controller
                 
 
                 // Agregar punntos Criticos Globales.
+            }
+        }
+        
+        $truckPosition = DB::table('trucks')->where('alta_aker',"!=",0)->get();
+
+        foreach ($truckPosition as $camion) {
+
+            $client = new Client();
+            $headers = [
+                'Content-Type' => 'application/json'
+            ];
+
+           
+                $body = '{
+                    "patentes":["' . $camion->domain . '"],
+                    "cercania":true,
+                    "domicilio":false,
+                    "apiCode":"E6HW19",
+                    "phone":"2612128105"
+                    }';
+            
+
+            $request = new Psr7Request('GET', 'https://app.akercontrol.com/ws/v2/servicios', $headers, $body);
+            $res = $client->sendAsync($request)->wait();
+            $respuesta = $res->getBody();
+            $r = json_decode($respuesta, true);
+            $keys = array($r);
+
+            if (array_key_exists('data', $r)) {
+
+                $positionDB = new position();
+                $positionDB->dominio = $camion->domain;
+                $positionDB->lat = $posicionLat;
+                $positionDB->lng = $posicionLon;
+                $positionDB->save();
+
             }
         }
     }
