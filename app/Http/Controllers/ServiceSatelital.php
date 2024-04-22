@@ -38,6 +38,7 @@ class ServiceSatelital extends Controller
             ->where('trucks.alta_aker', '!=', 0)
             ->get();
 
+            
            
 
         foreach ($todosMisCamiones as $camion) {
@@ -172,7 +173,7 @@ class ServiceSatelital extends Controller
                 $datos = $keys[0]['data'][$camion->domain];
                 $posicionLat = $datos['ult_latitud'];
                 $posicionLon = $datos['ult_longitud'];
-                
+
                 $positionDB = new position();
                 $positionDB->dominio = $camion->domain;
                 $positionDB->lat = $posicionLat;
@@ -221,31 +222,125 @@ class ServiceSatelital extends Controller
         foreach ($datos as $dato) {
 
             if (!empty($dato->patente)) { // Verificar si 'patente' no es nulo
-                $todosMisCamiones = DB::table('trucks')
+              /*   $todosMisCamiones = DB::table('trucks')
                     ->join('transports', 'trucks.transport_id', '=', 'transports.id')
                     ->where('trucks.domain', '=', $dato->patente)
-                    ->get();
+                    ->get(); */
+            
+                $carga = DB::table('carga')
+                ->join('cntr','cntr.booking','=','carga.booking')
+                ->join('asign','asign.cntr_number','=','cntr.cntr_number')
+                ->join('customer_load_places','carga.load_place','=', 'customer_load_places.description')
+                ->join('customer_unload_places','carga.unload_place','=','customer_unload_places.description')
+                ->join('aduanas','carga.custom_place','=', 'aduanas.description')
+                ->join('drivers','asign.driver','=','drivers.nombre')
+                ->join('trucks','asign.truck','=', 'trucks.domain')
+                ->join('transports','asign.transport','=', 'transports.razon_social')
+                ->select('cntr.cntr_number as contenedor', 
+                'cntr.cntr_type as tipoContenedor', 
+                'cntr.retiro_place', 
+                'cntr.main_status', 
+                'cntr.status_cntr',
+                'carga.id as cargaId',
+                'carga.booking', 
+                'carga.commodity', 
+                'carga.load_place', 
+                'customer_load_places.latitud as LoadPlaceLat', 
+                'customer_load_places.longitud as LoadPlaceLng', 
+                'carga.load_date',
+                'carga.unload_place', 
+                'customer_unload_places.latitud as UnloadPlaceLat',
+                'customer_unload_places.longitud as UnloadPlaceLng',
+                'carga.custom_place', 
+                'aduanas.lat as aduanaLat', 
+                'aduanas.lon as aduanaLng',
+                'carga.ref_customer',
+                'carga.type as cargaType',
+                'carga.cut_off_fis as unload_date', 
+                'asign.driver', 
+                'drivers.documento',
+                'drivers.vto_carnet',
+                'drivers.WhatsApp',
+                'asign.agent_port',
+                'trucks.*', 
+                'asign.truck_semi',
+                'transports.*')
+                ->where('trucks.domain', '=', $dato->patente)
+                ->get();
 
-                if ($todosMisCamiones->isNotEmpty()) { // Verificar si se encontraron camiones
-                    $camion = $todosMisCamiones->first();
+                if ($carga->isNotEmpty()) { // Verificar si se encontraron camiones
+                    $camion = $carga->first();
 
-                    $trcuk['model'] = $camion->model;
-                    $trcuk['domain'] = $camion->domain;
-                    $trcuk['year'] = $camion->year;
-                    $trcuk['vto_poliza'] = $camion->vto_poliza;
-                    $trcuk['razon_social'] = $camion->razon_social;
-                    $trcuk['logo'] = $camion->logo;
-                    $trcuk['vto_permiso'] = $camion->vto_permiso;
-                    $trcuk['titulo'] = $dato->nombre;
-                    $trcuk['ult_latitud'] = $dato->ult_latitud;
-                    $trcuk['ult_longitud'] = $dato->ult_longitud;
-                    $trcuk['ult_velocidad'] = $dato->ult_velocidad;
-                    $trcuk['ult_fecha'] = $dato->ult_fecha;
-                    $trcuk['ult_reporte'] = $dato->ult_reporte;
-                    $trcuk['ult_direccion'] = $dato->ult_direccion;
+                    $truck['model'] = $camion->model;
+                    $truck['domain'] = $camion->domain;
+                    $truck['year'] = $camion->year;
+                    $truck['vto_poliza'] = $camion->vto_poliza;
+                    $truck['razon_social'] = $camion->razon_social;
+                    $truck['logo'] = $camion->logo;
+                    $truck['vto_permiso'] = $camion->vto_permiso;
+                    $truck['titulo'] = $dato->nombre;
+                    $truck['ult_latitud'] = $dato->ult_latitud;
+                    $truck['ult_longitud'] = $dato->ult_longitud;
+                    $truck['ult_velocidad'] = $dato->ult_velocidad;
+                    $truck['ult_fecha'] = $dato->ult_fecha;
+                    $truck['ult_reporte'] = $dato->ult_reporte;
+                    $truck['ult_direccion'] = $dato->ult_direccion;
                     $truck['direccion'] = $dato->ult_direccion;
 
-                    array_push($camiones, $trcuk);
+                    // Detalles del contenedor
+                    $truck['cntr'] = array(
+                        'contenedor' => $camion->contenedor,
+                        'type' => $camion->tipoContenedor,
+                        'main_status' => $camion->main_status,
+                        'status_detail' => $camion->status_cntr,
+                    );
+
+                    // Detalles generales
+                    $truck['general'] = array(
+                        'booking' => $camion->booking,
+                        'type' => $camion->cargaType,
+                        'retiro_place' => $camion->retiro_place,
+                        'commodity' => $camion->commodity,
+                        'ref_customer' => $camion->ref_customer,
+                        'agent_port' => $camion->agent_port,
+                        'id_carga' => $camion->cargaId,
+                        'url_carga' => env('FRONT_URL') . '/includes/view_carga_user.php?id=' . $camion->cargaId,
+
+                    );
+
+                    // Detalles de origen
+                    $truck['origen'] = array(
+                        'description' => $camion->load_place,
+                        'lat' => $camion->LoadPlaceLat,
+                        'lng' => $camion->LoadPlaceLng,
+                        'load_date' => $camion->load_date,
+                    );
+
+                    // Detalles de destino
+                    $truck['destino'] = array(
+                        'description' => $camion->unload_place,
+                        'lat' => $camion->UnloadPlaceLat,
+                        'lng' => $camion->UnloadPlaceLng,
+                        'load_date' => $camion->unload_date,
+                    );
+
+                    // Detalles de aduana
+                    $truck['aduana'] = array(
+                        'description' => $camion->custom_place,
+                        'lat' => $camion->aduanaLat,
+                        'lng' => $camion->aduanaLng,
+                        'load_date' => $camion->load_date,
+                    );
+
+                    // Detalles del conductor
+                    $truck['driver'] = array(
+                        'nombre' => $camion->driver,
+                        'documento' => $camion->documento,
+                        'carnet' => $camion->vto_carnet,
+                        'whatsapp' => $camion->WhatsApp,
+                    );
+
+                    array_push($camiones, $truck);
                 }
             }
         
