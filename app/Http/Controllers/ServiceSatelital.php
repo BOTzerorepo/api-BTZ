@@ -222,54 +222,59 @@ class ServiceSatelital extends Controller
         foreach ($datos as $dato) {
 
             if (!empty($dato->patente)) { // Verificar si 'patente' no es nulo
-              /*   $todosMisCamiones = DB::table('trucks')
+                /*   $todosMisCamiones = DB::table('trucks')
                     ->join('transports', 'trucks.transport_id', '=', 'transports.id')
                     ->where('trucks.domain', '=', $dato->patente)
                     ->get(); */
-            
-                $carga = DB::table('trucks')
-                ->leftJoin('transports', 'trucks.transport_id','=','transports.id')
-                ->leftJoin('asign', 'asign.transport', '=', 'transports.razon_social')
-                ->leftJoin('cntr', 'asign.cntr_number', '=', 'cntr.cntr_number')
-                ->leftJoin('carga', 'cntr.booking', '=', 'carga.booking')
-                ->leftJoin('customer_load_places','carga.load_place','=', 'customer_load_places.description')
-                ->leftJoin('customer_unload_places','carga.unload_place','=','customer_unload_places.description')
-                ->leftJoin('aduanas','carga.custom_place','=', 'aduanas.description')
-                ->leftJoin('drivers','asign.driver','=','drivers.nombre')
-                ->select('cntr.cntr_number as contenedor', 
-                'cntr.cntr_type as tipoContenedor', 
-                'cntr.retiro_place', 
-                'cntr.main_status', 
-                'cntr.status_cntr',
-                'carga.id as cargaId',
-                'carga.booking', 
-                'carga.commodity', 
-                'carga.load_place', 
-                'customer_load_places.latitud as LoadPlaceLat', 
-                'customer_load_places.longitud as LoadPlaceLng', 
-                'carga.load_date',
-                'carga.unload_place', 
-                'customer_unload_places.latitud as UnloadPlaceLat',
-                'customer_unload_places.longitud as UnloadPlaceLng',
-                'carga.custom_place', 
-                'aduanas.lat as aduanaLat', 
-                'aduanas.lon as aduanaLng',
-                'carga.ref_customer',
-                'carga.type as cargaType',
-                'carga.cut_off_fis as unload_date', 
-                'asign.driver', 
-                'drivers.documento',
-                'drivers.vto_carnet',
-                'drivers.WhatsApp',
-                'asign.agent_port',
-                'trucks.*', 
-                'asign.truck_semi',
-                'transports.*')
-                ->where('trucks.domain', '=', $dato->patente)
-                ->get();
 
-                if ($carga->isNotEmpty()) { // Verificar si se encontraron camiones
-                    $camion = $carga->first();
+                $trucks = DB::table('trucks')
+                ->leftJoin('asign', function ($join) {
+                    $join->on('trucks.domain', '=', 'asign.truck');
+                })
+                ->leftJoin('transports', 'trucks.transport_id', '=', 'transports.id')
+                ->leftJoin('drivers', 'asign.driver', '=', 'drivers.nombre')
+                ->leftJoin('cntr', 'asign.cntr_number', '=', 'cntr.cntr_number')
+                    ->leftJoin('carga', 'cntr.booking', '=', 'carga.booking')
+                    ->leftJoin('customer_load_places', 'carga.load_place', '=', 'customer_load_places.description')
+                    ->leftJoin('customer_unload_places', 'carga.unload_place', '=', 'customer_unload_places.description')
+                    ->leftJoin('aduanas', 'carga.custom_place', '=', 'aduanas.description')
+                    ->select(
+                        'cntr.cntr_number as contenedor',
+                        'cntr.cntr_type as tipoContenedor',
+                        'cntr.retiro_place',
+                        'cntr.main_status',
+                        'cntr.status_cntr',
+                        'carga.id as cargaId',
+                        'carga.booking',
+                        'carga.commodity',
+                        'carga.load_place',
+                        'customer_load_places.latitud as LoadPlaceLat',
+                        'customer_load_places.longitud as LoadPlaceLng',
+                        'carga.load_date',
+                        'carga.unload_place',
+                        'customer_unload_places.latitud as UnloadPlaceLat',
+                        'customer_unload_places.longitud as UnloadPlaceLng',
+                        'carga.custom_place',
+                        'aduanas.lat as aduanaLat',
+                        'aduanas.lon as aduanaLng',
+                        'carga.ref_customer',
+                        'carga.type as cargaType',
+                        'carga.cut_off_fis as unload_date',
+                        'asign.driver',
+                        'drivers.documento',
+                        'drivers.vto_carnet',
+                        'drivers.WhatsApp',
+                        'asign.agent_port',
+                        'trucks.*',
+                        'asign.truck_semi',
+                        'transports.*'
+                    )
+                    ->where('trucks.domain', '=', $dato->patente)
+                    ->get();
+
+
+                if ($trucks->isNotEmpty()) { // Verificar si se encontraron camiones
+                    $camion = $trucks->first();
 
                     $truck['model'] = $camion->model;
                     $truck['domain'] = $camion->domain;
