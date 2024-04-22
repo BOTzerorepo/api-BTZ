@@ -227,15 +227,15 @@ class ServiceSatelital extends Controller
                     ->where('trucks.domain', '=', $dato->patente)
                     ->get(); */
             
-                $carga = DB::table('carga')
-                ->join('cntr','cntr.booking','=','carga.booking')
-                ->join('asign','asign.cntr_number','=','cntr.cntr_number')
-                ->join('customer_load_places','carga.load_place','=', 'customer_load_places.description')
-                ->join('customer_unload_places','carga.unload_place','=','customer_unload_places.description')
-                ->join('aduanas','carga.custom_place','=', 'aduanas.description')
-                ->join('drivers','asign.driver','=','drivers.nombre')
-                ->join('trucks','asign.truck','=', 'trucks.domain')
-                ->join('transports','asign.transport','=', 'transports.razon_social')
+                $carga = DB::table('trucks')
+                ->leftJoin('transports', 'trucks.transport_id','=','transports.id')
+                ->leftJoin('asign', 'asign.transport', '=', 'transports.razon_social')
+                ->leftJoin('cntr', 'asign.cntr_number', '=', 'cntr.cntr_number')
+                ->leftJoin('carga', 'cntr.booking', '=', 'carga.booking')
+                ->leftJoin('customer_load_places','carga.load_place','=', 'customer_load_places.description')
+                ->leftJoin('customer_unload_places','carga.unload_place','=','customer_unload_places.description')
+                ->leftJoin('aduanas','carga.custom_place','=', 'aduanas.description')
+                ->leftJoin('drivers','asign.driver','=','drivers.nombre')
                 ->select('cntr.cntr_number as contenedor', 
                 'cntr.cntr_type as tipoContenedor', 
                 'cntr.retiro_place', 
