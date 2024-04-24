@@ -144,6 +144,8 @@ oooooo     oooo       .o.       ooooo        ooooo oooooooooo.         .o.      
  */
 
 Route::get('issetBooking/{booking}', 'App\Http\Controllers\cargaController@issetBooking');
+Route::get('issetTransport/{cuit}', 'App\Http\Controllers\TransportController@issetTrasnsport');
+
 Route::get('issetTrader/{trader}', 'App\Http\Controllers\cargaController@issetTrader');
 
 
@@ -362,3 +364,10 @@ Route::get('/excelDrivers', 'App\Http\Controllers\excelController@drivers');
 Route::get('/excelTrucks', 'App\Http\Controllers\excelController@trucks');
 Route::get('/excelTrailers', 'App\Http\Controllers\excelController@trailers');
 Route::get('/excelTransports', 'App\Http\Controllers\excelController@transports');
+
+
+
+// - GESTION AKER ---------------------
+
+Route::get('transportesAker','App\Http\Controllers\AkerTransportController@index');
+Route::get('truckAker', 'App\Http\Controllers\AkerTruckController@index');
