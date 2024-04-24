@@ -64,6 +64,8 @@ class TransportController extends Controller
         $transporte->user = $request['user'];
         $transporte->empresa = $request['empresa'];
         $transporte->satelital = $request['satelital'];
+        $transporte->observation = $request['observation'];
+
         $transporte->save();
         Mail::to('pablorio@botzero.ar')->send(new nuevoTranporte($transporte));
 
@@ -122,6 +124,8 @@ class TransportController extends Controller
         $transporte->user = $request['user'];
         $transporte->empresa = $request['empresa'];
         $transporte->satelital = $request['satelital'];
+        $transporte->observation = $request['observation'];
+
 
         
         $transporte->save();
@@ -146,5 +150,19 @@ class TransportController extends Controller
         }else{
             return 'Se elimino el Transporte';
         };
+    }
+    public function issetTrasnsport($cuit)
+    {
+
+        $transport = DB::table('transports')->where('CUIT', '=', $cuit)->get();
+        $count = $transport->count();
+
+        // Puedes modificar esta lógica según el detalle que desees devolver en el JSON
+        ; // Esto devuelve un array con el detalle de los transportes encontrados
+
+        return response()->json([
+            'count' => $count,
+            'detail' => $transport
+        ]);
     }
 }
