@@ -68,7 +68,7 @@ class lugaresDeCarga extends Controller
         $date = Carbon::now('-03:00');
         $qc = DB::table('cntr')->select('cntr_number', 'booking')->where('id_cntr', '=', $idTrip)->get();
         $cntr = $qc[0];
-
+        return 'hola mostro';
         // cual es el ultimo status.
         $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
         $description = $qd->status;
@@ -96,6 +96,13 @@ class lugaresDeCarga extends Controller
                     'cntr_number' => $cntr->cntr_number,
                     'user_status' => 'AUTOMATICO',
                 ]);
+
+                DB::table('cntr')
+                    ->where('cntr_number', $cntr->cntr_number)
+                    ->update([
+                        'main_status' => 'CARGANDO',
+                        'status_cntr' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts del Lugar de Carga.'
+                    ]);
 
 
                 $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
@@ -129,10 +136,10 @@ class lugaresDeCarga extends Controller
                 ];
 
                 $sbx = DB::table('variables')->select('sandbox')->get();
-             
+                $inboxEmail = env('INBOX_EMAIL');
                 if ($sbx[0]->sandbox == 0) {
         
-                Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new cargaCargando($datos));
+                Mail::to($mail)->bcc($inboxEmail)->send(new cargaCargando($datos));
 
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
@@ -141,7 +148,7 @@ class lugaresDeCarga extends Controller
 
                 } else {
 
-                Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new cargaCargando($datos));
+                Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaCargando($datos));
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
                 $logApi->detalle = "+ Sandbox + envio email cargaCargando to :" . $mail;
@@ -156,7 +163,7 @@ class lugaresDeCarga extends Controller
                 
                 return 'ok, Actulizó Status - Envió mail.'  . $qd->avisado;
                 
-            } elseif ($qd->avisado != 0 && $qd->avisado <= 119) { // // Buscamos si se aviso o no al cliente. Si se aviso o no fue hace mucho actualizamos. 
+            } /* elseif ($qd->avisado != 0 && $qd->avisado <= 239) { //}} // Buscamos si se aviso o no al cliente. Si se aviso o no fue hace mucho actualizamos. 
 
 
                 $chek = new pruebasModel();
@@ -167,8 +174,8 @@ class lugaresDeCarga extends Controller
                 $avisadoMas = $actualizarAvisado->avisado + 1;
                 $actualizarAvisado->avisado = $avisadoMas;
                 $actualizarAvisado->save();
-                /*   return 'ok, No actulizó Status - No envió mail.'  . $qd->avisado; */
-            } elseif ($qd->avisado != 0 && $qd->avisado >= 120) {
+                /*   return 'ok, No actulizó Status - No envió mail.'  . $qd->avisado; 
+            } elseif ($qd->avisado != 0 && $qd->avisado >= 240) {
 
 
                 $chek = new pruebasModel();
@@ -204,8 +211,10 @@ class lugaresDeCarga extends Controller
                 $avisadoMas = $actualizarAvisado->avisado + 1;
                 $actualizarAvisado->avisado = $avisadoMas;
                 $actualizarAvisado->save();
-                /*  return 'ok, Actulizó Status - No envió mail.'  . $qd->avisado; */
-            }
+            /*  return 'ok, Actulizó Status - No envió mail.'  . $qd->avisado;
+            } */
+
+            /// Sacamos todo estas lineas porque avisa demaciado sobre el estado de la Carga. 
 
         } else {
 
@@ -215,11 +224,18 @@ class lugaresDeCarga extends Controller
             $chek->save();
 
             DB::table('status')->insert([
-                'status' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts del Lugar de Carga.',
+                'status' => '[AUTOMATICO] Camión se encuentra en un radio de 200 mts del Lugar de Carga.',
                 'main_status' => 'CARGANDO',
                 'cntr_number' => $cntr->cntr_number,
                 'user_status' => 'AUTOMATICO',
             ]);
+
+            DB::table('cntr')
+                ->where('cntr_number', $cntr->cntr_number)
+                ->update([
+                    'main_status' => 'CARGANDO',
+                    'status_cntr' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts del Lugar de Carga.'
+                ]);
 
             $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
             $description = $qd->status;
@@ -240,10 +256,10 @@ class lugaresDeCarga extends Controller
             ];
 
             $sbx = DB::table('variables')->select('sandbox')->get();
-
+            $inboxEmail = env('INBOX_EMAIL');
             if ($sbx[0]->sandbox == 0) {
 
-                Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new cargaCargando($datos));
+                Mail::to($mail)->bcc($inboxEmail)->send(new cargaCargando($datos));
 
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
@@ -252,7 +268,7 @@ class lugaresDeCarga extends Controller
 
             } else {
 
-                Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new cargaCargando($datos));
+                Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaCargando($datos));
 
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
@@ -305,11 +321,17 @@ class lugaresDeCarga extends Controller
                 $chek->save();
 
                 DB::table('status')->insert([
-                    'status' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts de la aduana Asignada.',
+                    'status' => '[AUTOMATICO] Camión se encuentra en un radio de 200 mts de la aduana Asignada.',
                     'main_status' => 'EN ADUANA',
                     'cntr_number' => $cntr->cntr_number,
                     'user_status' => 'AUTOMATICO',
                 ]);
+                DB::table('cntr')
+                    ->where('cntr_number', $cntr->cntr_number)
+                    ->update([
+                        'main_status' => 'EN ADUANA',
+                        'status_cntr' => '[AUTOMATICO] Camión se encuentra en un radio de 200 mts de la aduana asignada.'
+                    ]);
 
                 $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
                 $description = $qd->status;
@@ -334,10 +356,10 @@ class lugaresDeCarga extends Controller
                 $chek->save();
 
                 $sbx = DB::table('variables')->select('sandbox')->get();
-                
+                $inboxEmail = env('INBOX_EMAIL');
                 if ($sbx[0]->sandbox == 0) {
                     
-                    Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new cargaAduana($datos));
+                    Mail::to($mail)->bcc($inboxEmail)->send(new cargaAduana($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaAduana to:" . $mail;
@@ -345,7 +367,7 @@ class lugaresDeCarga extends Controller
 
                 } else {
 
-                    Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new cargaAduana($datos));
+                    Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaAduana($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "+ Sandbox + envio email cargaAduana to:" . $mail;
@@ -360,7 +382,7 @@ class lugaresDeCarga extends Controller
                 $actualizarAvisado->save();
                 return 'ok, Actulizó Status - Envió mail.';
 
-            } elseif ($qd->avisado != 0 && $qd->avisado <= 119) { // // Buscamos si se aviso o no al cliente. Si se aviso o no fue hace mucho actualizamos. 
+            } /* elseif ($qd->avisado != 0 && $qd->avisado <= 239) { // // Buscamos si se aviso o no al cliente. Si se aviso o no fue hace mucho actualizamos. 
 
 
                 $chek = new pruebasModel();
@@ -373,7 +395,7 @@ class lugaresDeCarga extends Controller
                 $actualizarAvisado->save();
                 return 'ok, No actulizó Status - No envió mail.';
 
-            } elseif ($qd->avisado != 0 && $qd->avisado >= 120) {
+            } elseif ($qd->avisado != 0 && $qd->avisado >= 240) {
 
                 $chek = new pruebasModel();
                 $chek->contenido = 'entro en avisado y mas de 119 veces reportado ';
@@ -409,7 +431,7 @@ class lugaresDeCarga extends Controller
                 $actualizarAvisado->avisado = $avisadoMas;
                 $actualizarAvisado->save();
                 return 'ok, Actulizó Status - No envió mail.';
-            }
+            } */
         } else {
 
 
@@ -424,6 +446,13 @@ class lugaresDeCarga extends Controller
                 'cntr_number' => $cntr->cntr_number,
                 'user_status' => 'AUTOMATICO',
             ]);
+
+            DB::table('cntr')
+                ->where('cntr_number', $cntr->cntr_number)
+                ->update([
+                    'main_status' => 'EN ADUANA',
+                    'status_cntr' => '[AUTOMATICO] Camión se encuentra en un radio de 200 mts de la aduana asignada.'
+                ]);
 
             $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
             $description = $qd->status;
@@ -444,10 +473,10 @@ class lugaresDeCarga extends Controller
             ];
 
             $sbx = DB::table('variables')->select('sandbox')->get();
-            
+            $inboxEmail = env('INBOX_EMAIL');
             if ($sbx[0]->sandbox == 0) {
 
-                Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new cargaAduana($datos));
+                Mail::to($mail)->bcc($inboxEmail)->send(new cargaAduana($datos));
 
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
@@ -455,7 +484,7 @@ class lugaresDeCarga extends Controller
 
             } else {
 
-                Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new cargaAduana($datos));
+                Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaAduana($datos));
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
                 $logApi->detalle = "+ Sandbox + envio email cargaAduana to: " . $mail;
@@ -494,6 +523,13 @@ class lugaresDeCarga extends Controller
                     'user_status' => 'AUTOMATICO',
                 ]);
 
+                DB::table('cntr')
+                    ->where('cntr_number', $cntr->cntr_number)
+                    ->update([
+                    'main_status' => 'STACKING',
+                    'status_cntr' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts del Lugar de Descarga.'
+                ]);
+
                 $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
                 $description = $qd->status;
 
@@ -513,10 +549,10 @@ class lugaresDeCarga extends Controller
                 ];
                 
                 $sbx = DB::table('variables')->select('sandbox')->get();
-
+                $inboxEmail = env('INBOX_EMAIL');
                 if ($sbx[0]->sandbox == 0) {
 
-                    Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new cargaDescarga($datos));
+                    Mail::to($mail)->bcc($inboxEmail)->send(new cargaDescarga($datos));
 
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
@@ -524,7 +560,7 @@ class lugaresDeCarga extends Controller
 
                 } else {
 
-                    Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new cargaDescarga($datos));
+                    Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaDescarga($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "+ Sandbox + envio email cargaDescarga to: " . $mail;
@@ -536,14 +572,14 @@ class lugaresDeCarga extends Controller
                 $actualizarAvisado->avisado = $avisadoMas;
                 $actualizarAvisado->save();
                 return 'ok, Actulizó Status - Envió mail.';
-            } elseif ($qd->avisado != 0 && $qd->avisado <= 119) { // // Buscamos si se aviso o no al cliente. Si se aviso o no fue hace mucho actualizamos. 
+             } /* elseif ($qd->avisado != 0 && $qd->avisado <= 239) { // // Buscamos si se aviso o no al cliente. Si se aviso o no fue hace mucho actualizamos. 
 
                 $actualizarAvisado = statu::find($qd->id);
                 $avisadoMas = $actualizarAvisado->avisado + 1;
                 $actualizarAvisado->avisado = $avisadoMas;
                 $actualizarAvisado->save();
                 return 'ok, No actulizó Status - No envió mail.';
-            } elseif ($qd->avisado != 0 && $qd->avisado >= 120) {
+            } elseif ($qd->avisado != 0 && $qd->avisado >= 240) {
 
 
                 DB::table('status')->insert([
@@ -575,7 +611,7 @@ class lugaresDeCarga extends Controller
 
                 if ($sbx[0]->sandbox == 0) {
 
-                    Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new cargaDescarga($datos));
+                    Mail::to($mail)->bcc($inboxEmail)->send(new cargaDescarga($datos));
 
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
@@ -583,7 +619,7 @@ class lugaresDeCarga extends Controller
 
                 } else {
 
-                    Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new cargaDescarga($datos));
+                    Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaDescarga($datos));
 
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
@@ -597,7 +633,7 @@ class lugaresDeCarga extends Controller
                 $actualizarAvisado->avisado = $avisadoMas;
                 $actualizarAvisado->save();
                 return 'ok, Actulizó Status - No envió mail.';
-            }
+            } */
         } else {
             DB::table('status')->insert([
                 'status' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts del Lugar de Descarga.',
@@ -605,6 +641,13 @@ class lugaresDeCarga extends Controller
                 'cntr_number' => $cntr->cntr_number,
                 'user_status' => 'AUTOMATICO',
             ]);
+ 
+            DB::table('cntr')
+                ->where('cntr_number', $cntr->cntr_number)
+                ->update([
+                    'main_status' => 'STACKING',
+                    'status_cntr' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts del Lugar de Descarga.'
+                ]);
 
             $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
             $description = $qd->status;
@@ -625,10 +668,10 @@ class lugaresDeCarga extends Controller
             ];
 
             $sbx = DB::table('variables')->select('sandbox')->get();
-
+            $inboxEmail = env('INBOX_EMAIL');
             if ($sbx[0]->sandbox == 0) {
 
-                Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new cargaDescarga($datos));
+                Mail::to($mail)->bcc($inboxEmail)->send(new cargaDescarga($datos));
 
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
@@ -636,7 +679,7 @@ class lugaresDeCarga extends Controller
 
             } else {
 
-                Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new cargaDescarga($datos));
+                Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaDescarga($datos));
 
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';

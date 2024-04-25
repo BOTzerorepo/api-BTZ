@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoretruckRequest;
 use App\Http\Requests\UpdatetruckRequest;
+use App\Mail\nuevoTranporte;
 use App\Models\truck;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Mail;
 
 class TruckController extends Controller
 {
@@ -61,6 +62,8 @@ class TruckController extends Controller
         $truck->customer_id = $cId;
         $truck->save();
 
+       
+
         return $truck;
         
         
@@ -111,8 +114,6 @@ class TruckController extends Controller
     public function update(UpdatetruckRequest $request, truck $truck)
     {
 
-
-
         $customerId = DB::table('users')->select('customer_id')->where('username','=',$request['user'])->get(0); 
         $cId =  $customerId[0]->customer_id;
 
@@ -127,8 +128,11 @@ class TruckController extends Controller
         $truck->satelital_location = $request['satelital_location'];
         $truck->transport_id = $request['transport_id'];
         $truck->user = $request['user'];
+        $truck->satelital = $request['satelital'];
         $truck->customer_id = $cId;
         $truck->save();
+
+
 
         return $truck;
 
@@ -156,5 +160,22 @@ class TruckController extends Controller
             return 'Se elimino el Tractor';
 
         };
+    }
+    public function issetTruck($domain)
+    {
+
+        $truck = DB::table('trucks')
+        ->leftJoin('transports','transports.id','=','trucks.transport_id')
+        ->select('trucks.id', 'trucks.domain', 'trucks.model','transports.razon_social')
+        ->where('trucks.domain', '=', $domain)->get();
+        $count = $truck->count();
+
+            // Puedes modificar esta lógica según el detalle que desees devolver en el JSON
+        ; // Esto devuelve un array con el detalle de los transportes encontrados
+
+        return response()->json([
+            'count' => $count,
+            'detail' => $truck
+        ]);
     }
 }
