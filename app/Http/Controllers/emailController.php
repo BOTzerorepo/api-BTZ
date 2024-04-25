@@ -188,6 +188,11 @@ class emailController extends Controller
             if ($sbx->sandbox == 0) {
                 // Send email
                 Mail::to($to)->cc(['gzarate@totaltradegroup.com'])->bcc($inboxEmail)->send(new transporteAsignado($data, $date));
+            
+            } elseif ($sbx[0]->sandbox == 2) {
+
+                Mail::to($to)->cc(['abel.mazzitelli@gmail.com'])->bcc($inboxEmail)->send(new transporteAsignado($data, $date));
+
             } else {
 
                 Mail::to($to)->cc(['priopelliza@gmail.com'])->bcc($inboxEmail)->send(new transporteAsignado($data, $date));
@@ -481,7 +486,16 @@ class emailController extends Controller
             $logApi->detalle = "envio email to(['ddicarlo@totaltradegroup.com', 'rquero@totaltradegroup.com', 'cs.auxiliar@totaltradegroup.com'])->cc(['gzarate@totaltradegroup.com', 'czelada@totaltradegroup.com', 'fzgaib@totaltradegroup.com'])";
             $logApi->save();
             return 'ok';
-        } else {
+        } elseif ($sbx[0]->sandbox == 2) {
+
+            $mail = Mail::to(['customer@qa.botzero.com.ar', 'abel.mazzitelli@gmail.com'])->cc(['copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])->bcc($inboxEmail)->send(new avisoNewCarga($datos));
+            $logApi = new logapi();
+            $logApi->user = $user[0]->username;
+            $logApi->detalle = "envio email to(['customer@qa.botzero.com.ar', 'abel.mazzitelli@gmail.com'])->cc(['copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])";
+            $logApi->save();
+            return 'ok';
+            
+        }else {
 
             $mail = Mail::to(['equipoDemo1@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo2@botzero.com.ar'])->cc(['equipodemo2@botzero.com.ar', 'copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])->bcc($inboxEmail)->send(new avisoNewCarga($datos));
             $logApi = new logapi();
