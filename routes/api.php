@@ -18,29 +18,58 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-/* Home Traffic */
+/* 
+ooooo   ooooo   .oooooo.   ooo        ooooo oooooooooooo      ooooo ooooo      ooo oooooooooooo   .oooooo.        8 8 8 8 8 8 8 8 8 8 8 8 8 8
+`888'   `888'  d8P'  `Y8b  `88.       .888' `888'     `8      `888' `888b.     `8' `888'     `8  d8P'  `Y8b       8 8 8 8 8 8 8 8 8 8 8 8 8 8
+ 888     888  888      888  888b     d'888   888               888   8 `88b.    8   888         888      888      8 8 8 8 8 8 8 8 8 8 8 8 8 8
+ 888ooooo888  888      888  8 Y88. .P  888   888oooo8          888   8   `88b.  8   888oooo8    888      888                                 
+ 888     888  888      888  8  `888'   888   888    "          888   8     `88b.8   888    "    888      888      8 8 8 8 8 8 8 8 8 8 8 8 8 8
+ 888     888  `88b    d88'  8    Y     888   888       o       888   8       `888   888         `88b    d88'      8 8 8 8 8 8 8 8 8 8 8 8 8 8
+o888o   o888o  `Y8bood8P'  o8o        o888o o888ooooood8      o888o o8o        `8  o888o         `Y8bood8P'       8 8 8 8 8 8 8 8 8 8 8 8 8 8
+*/
 
-Route::get('/allCargoThisWeek/{user}','App\Http\Controllers\cargaController@loadTHisWeek'); 
+// CARGAS
+
+Route::get('/allCargoThisWeek/{user}','App\Http\Controllers\cargaController@loadThisWeek'); 
 Route::get('/allCargoNextWeek/{user}','App\Http\Controllers\cargaController@loadNextWeek'); 
 Route::get('/allCargoLastWeek/{user}','App\Http\Controllers\cargaController@loadLastWeek'); 
-Route::get('/allCargoFinished/{user}','App\Http\Controllers\cargaController@loadFinished'); 
+Route::get('/allCargoFinished/{user}','App\Http\Controllers\cargaController@loadFinished');
+Route::get('/carga/{user}/{id}','App\Http\Controllers\cargaController@show');
 
-Route::get('/carga/{user}/{id}','App\Http\Controllers\cargaController@show'); 
+// STATUS
 
-Route::get('/status','App\Http\Controllers\statusController@index'); 
+Route::post('/statusCarga', 'App\Http\Controllers\statusController@updateStatusCarga'); 
+Route::get('/status','App\Http\Controllers\statusController@index');
 Route::get('/ultimoStatus/{id}','App\Http\Controllers\statusController@showLast'); 
 Route::get('/historialStatus/{cntr}','App\Http\Controllers\statusController@showHistory'); 
 
+// INSTRUCTIVOS
+
 Route::get('/instructivos/{userTraffic}','App\Http\Controllers\instructivosController@index'); 
-Route::get('/instructivosdelete/{userTraffic}/{id}','App\Http\Controllers\instructivosController@destroy'); 
+Route::get('/instructivosdelete/{userTraffic}/{id}','App\Http\Controllers\instructivosController@destroy');
+
+// ASIGNACIONES
+Route::get('/truckAsign/{id}', 'App\Http\Controllers\TruckController@trailerAsign'); // Show for Transport
+
+// SEGUROS
+
+Route::post('/seguro', 'App\Http\Controllers\seguroController@store');
 
 
 
 
-/* Impresion de PDF */
-Route::get('/imprimirCarga/{cntr_number}','App\Http\Controllers\crearpdfController@carga'); // No usa Funcion MAIL
-Route::get('/verCarga/{cntr_number}','App\Http\Controllers\verpdfController@carga'); 
-Route::get('/imprimirVacio/{id_cntr}','App\Http\Controllers\crearpdfController@vacio');  // No usa Funcion MAIL
+
+
+/* 
+oooooooooooo ooo        ooooo       .o.       ooooo ooooo         .oooooo..o      8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8
+`888'     `8 `88.       .888'      .888.      `888' `888'        d8P'    `Y8      8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8
+ 888          888b     d'888      .8"888.      888   888         Y88bo.           8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8
+ 888oooo8     8 Y88. .P  888     .8' `888.     888   888          `"Y8888o.                                                                  
+ 888    "     8  `888'   888    .88ooo8888.    888   888              `"Y88b      8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8
+ 888       o  8    Y     888   .8'     `888.   888   888       o oo     .d8P      8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8
+o888ooooood8 o8o        o888o o88o     o8888o o888o o888ooooood8 8""88888P'       8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8
+*/
+
 Route::get('/imprimirEviarInstrucivo/{cntr}','App\Http\Controllers\crearpdfController@cargaPorMail');  // Llega Correo Ok
 Route::get('/mailCargaNueva/{idCarga}/{user}','App\Http\Controllers\emailController@avisoNuevaCarga'); // Llega Correo Ok
 
@@ -52,97 +81,48 @@ Route::get('/trasnsporteAsignado/{id}','App\Http\Controllers\emailController@tra
 
 // Route::post('/imprimir/create','App\Http\Controllers\crearpdfControllerPDF@store')mostrar todos
 // Route::get('/imprimirIns','App\Http\Controllers\imprimirPDF@store'); //mostrar todos
-//Route::put('/imprimir/{id}','App\Http\Controllers\imprimirPDF@update');//actualizar
-//Route::delete('/imprimir','App\Http\Controllers\imprimirPDF@destroy'); // eliminar
+// Route::put('/imprimir/{id}','App\Http\Controllers\imprimirPDF@update');//actualizar
+// Route::delete('/imprimir','App\Http\Controllers\imprimirPDF@destroy'); // eliminar
 
-////////////////// DOCUMENTS ///////////////////
 
-//////// USUARIOS INTERNOS ////////
+/* 
+oooooooooo.     .oooooo.     .oooooo.    .oooooo..o 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8
+`888'   `Y8b   d8P'  `Y8b   d8P'  `Y8b  d8P'    `Y8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8
+ 888      888 888      888 888          Y88bo.      8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8
+ 888      888 888      888 888           `"Y8888o.                                                                                           
+ 888      888 888      888 888               `"Y88b 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8
+ 888     d88' `88b    d88' `88b    ooo  oo     .d8P 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8
+o888bood8P'    `Y8bood8P'   `Y8bood8P'  8""88888P'  8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8
+*/
 
 Route::post('/docs/{booking}','App\Http\Controllers\DocumentController@store');
+Route::post('/ingresoFormulario', 'App\Http\Controllers\cargaController@guardarFormulario');
 Route::get('/docsCntr/{booking}/{user}/{cntr}','App\Http\Controllers\DocumentController@indexCntr');
 Route::get('/docsDel','App\Http\Controllers\DocumentController@destroy'); 
 
+
 //////// USUARIOS EXTERNOS ////////
+                                                                                                            //
+Route::get('/docsAtaReed/{booking}/{user}','App\Http\Controllers\DocumentController@index');                //
+Route::post('/docsAta/{booking}','App\Http\Controllers\DocumentController@storeAta');                       //
+Route::post('/carga','App\Http\Controllers\LoadController@store');                                          //
+                                                                                                            //
 
-Route::get('/docsAtaReed/{booking}/{user}','App\Http\Controllers\DocumentController@index');
-Route::post('/docsAta/{booking}','App\Http\Controllers\DocumentController@storeAta');
-Route::post('/carga','App\Http\Controllers\LoadController@store');
+/* Impresion de PDF [RailDocs] */
 
- // TRUCK CONTROLLLER 
-Route::post('/truck','App\Http\Controllers\TruckController@store'); // C
-Route::get('/trucks/{customer}','App\Http\Controllers\TruckController@index');// R ALL
-Route::get('/truck/{truck}','App\Http\Controllers\TruckController@show'); // R ONE
-Route::post('/truck/{truck}','App\Http\Controllers\TruckController@update'); // U 
-Route::delete('/truck/{truck}','App\Http\Controllers\TruckController@destroy'); // D 
-Route::get('/truckTransport/{truck}','App\Http\Controllers\TruckController@showTransport'); // Show For Transport
+Route::get('/imprimirCarga/{cntr_number}', 'App\Http\Controllers\crearpdfController@carga'); // No usa Funcion MAIL
+Route::get('/verCarga/{cntr_number}', 'App\Http\Controllers\verpdfController@carga');
+Route::get('/imprimirVacio/{id_cntr}', 'App\Http\Controllers\crearpdfController@vacio');  // No usa Funcion MAIL
 
-// TRAILER CONTROLLLER 
-Route::post('/trailer','App\Http\Controllers\TrailerController@store'); // C
-Route::get('/trailer/{customer}','App\Http\Controllers\TrailerController@index');// R ALL
-Route::get('/trailer/{trailer}','App\Http\Controllers\TrailerController@show'); // R ONE
-Route::post('/trailer/{trailer}','App\Http\Controllers\TrailerController@update'); // U
-Route::delete('/trailer/{trailer}','App\Http\Controllers\TrailerController@destroy'); // D
-Route::get('/trailerTransport/{transport_id}','App\Http\Controllers\TrailerController@showTrailer'); // Show for Transport
-
-// ASIGNACIONES
-Route::get('/truckAsign/{id}','App\Http\Controllers\TruckController@trailerAsign'); // Show for Transport
-
-Route::get('/user/{user}','App\Http\Controllers\UserController@show');
-
-// EXPORT EXCEL
-
-// Reportes de Cargas por fechas
-
-Route::get('/excelCargasThisWeek','App\Http\Controllers\excelController@thisWeek');
-Route::get('/excelCargasUncoming','App\Http\Controllers\excelController@uncoming');
-Route::get('/excelCargasPast','App\Http\Controllers\excelController@past');
-
-// Reportes por Status
-Route::get('/excelNoAssigned','App\Http\Controllers\excelController@noAssigned');
-Route::get('/excelOnBoard','App\Http\Controllers\excelController@onBoard');
-Route::get('/excelAnyProblem','App\Http\Controllers\excelController@anyProblem');
-Route::get('/excelFinish','App\Http\Controllers\excelController@loadFinish');
-Route::get('/excelGoingToLoad','App\Http\Controllers\excelController@goingToLoad');
-Route::get('/excelLoading','App\Http\Controllers\excelController@loading');
-Route::get('/excelOnCustomPlace','App\Http\Controllers\excelController@onCustomPlace');
-Route::get('/excelOnWay','App\Http\Controllers\excelController@onWay');
-Route::get('/excelAllLoads','App\Http\Controllers\excelController@allLoads');
-Route::get('/excelStacking','App\Http\Controllers\excelController@stacking');
-Route::get('/excelAssigned','App\Http\Controllers\excelController@assigned');
-Route::get('/excelAssigned','App\Http\Controllers\excelController@assigned');
-
-// Reportes de DB Select
-
-Route::get('/excelAgencies','App\Http\Controllers\excelController@agencies');
-Route::get('/excelAtas','App\Http\Controllers\excelController@atas');
-Route::get('/excelPaymentMode','App\Http\Controllers\excelController@paymentMode');
-Route::get('/excelUsers','App\Http\Controllers\excelController@users');
-Route::get('/excelCustomAgents','App\Http\Controllers\excelController@customAgents');
-Route::get('/excelCompanies','App\Http\Controllers\excelController@companies');
-Route::get('/excelWarehouseContainer','App\Http\Controllers\excelController@warehouseContainer');
-Route::get('/excelContainerTypes','App\Http\Controllers\excelController@containerTypes');
-Route::get('/excelMisTrader','App\Http\Controllers\excelController@customer');
-Route::get('/excelMisShipper','App\Http\Controllers\excelController@customerShipper');
-Route::get('/excelMisConsignee','App\Http\Controllers\excelController@customerConsignee');
-Route::get('/excelLoadPlace','App\Http\Controllers\excelController@LoadPlace');
-Route::get('/excelUnloadPlace','App\Http\Controllers\excelController@UnloadPlace');
-
-// Reportes Flotas
-Route::get('/excelDriversFree','App\Http\Controllers\excelController@driversFree');
-Route::get('/excelDriversBusy','App\Http\Controllers\excelController@driversBusy');
-Route::get('/excelDrivers','App\Http\Controllers\excelController@drivers');
-Route::get('/excelTrucks','App\Http\Controllers\excelController@trucks');
-Route::get('/excelTrailers','App\Http\Controllers\excelController@trailers');
-Route::get('/excelTransports','App\Http\Controllers\excelController@transports');
-
-// SEGUROS
-
-Route::post('/seguro','App\Http\Controllers\seguroController@store');
-Route::post('/agencias/{id}','App\Http\Controllers\AgenciaController@update');
-
-
-// MAPS
+/* 
+ooooo     ooo oooooooooo.  ooooo   .oooooo.      ooooo     ooo ooooo ooooooooooooo oooooo   oooo 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 
+`888'     `8' `888'   `Y8b `888'  d8P'  `Y8b     `888'     `8' `888' 8'   888   `8  `888.   .8'  8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 
+ 888       8   888     888  888  888      888     888       8   888       888        `888. .8'   8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 
+ 888       8   888oooo888'  888  888      888     888       8   888       888         `888.8'                                                
+ 888       8   888    `88b  888  888      888     888       8   888       888          `888'     8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 
+ `88.    .8'   888    .88P  888  `88b    d88b     `88.    .8'   888       888           888      8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 
+   `YbodP'    o888bood8P'  o888o  `Y8bood8P'Ybd'    `YbodP'    o888o     o888o         o888o     8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 
+ */
 
 Route::get('/lugarDeCarga/{patente}','App\Http\Controllers\CustomerLoadPlaceController@coordenadas');
 Route::get('/accionLugarDeCarga/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionLugarDeCarga'); // LLEGO OK EMAIL
@@ -153,9 +133,52 @@ Route::get('/pruebaSatelital','App\Http\Controllers\ServiceSatelital@servicePrue
 Route::get('/flota','App\Http\Controllers\ServiceSatelital@flota');
 
 
+/* 
+oooooo     oooo       .o.       ooooo        ooooo oooooooooo.         .o.         .oooooo.   ooooo   .oooooo.   ooooo      ooo 8 8 8 8 8 8 8
+ `888.     .8'       .888.      `888'        `888' `888'   `Y8b       .888.       d8P'  `Y8b  `888'  d8P'  `Y8b  `888b.     `8' 8 8 8 8 8 8 8
+  `888.   .8'       .8"888.      888          888   888      888     .8"888.     888           888  888      888  8 `88b.    8  8 8 8 8 8 8 8
+   `888. .8'       .8' `888.     888          888   888      888    .8' `888.    888           888  888      888  8   `88b.  8               
+    `888.8'       .88ooo8888.    888          888   888      888   .88ooo8888.   888           888  888      888  8     `88b.8  8 8 8 8 8 8 8
+     `888'       .8'     `888.   888       o  888   888     d88'  .8'     `888.  `88b    ooo   888  `88b    d88'  8       `888  8 8 8 8 8 8 8
+      `8'       o88o     o8888o o888ooooood8 o888o o888bood8P'   o88o     o8888o  `Y8bood8P'  o888o  `Y8bood8P'  o8o        `8  8 8 8 8 8 8 8
+ */
+
+Route::get('issetBooking/{booking}', 'App\Http\Controllers\cargaController@issetBooking');
+Route::get('issetTransport/{cuit}', 'App\Http\Controllers\TransportController@issetTrasnsport');
+Route::get('issetTruck/{domain}', 'App\Http\Controllers\TruckController@issetTruck');
+Route::get('issetTrader/{trader}', 'App\Http\Controllers\cargaController@issetTrader');
 
 
-//JUANI
+/* 
+ooo        ooooo       .o.       ooooo      ooo           .o.         .oooooo.    oooooooooooo ooooo      ooo 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 
+`88.       .888'      .888.      `888b.     `8'          .888.       d8P'  `Y8b   `888'     `8 `888b.     `8' 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 
+ 888b     d'888      .8"888.      8 `88b.    8          .8"888.     888            888          8 `88b.    8  8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 
+ 8 Y88. .P  888     .8' `888.     8   `88b.  8         .8' `888.    888            888oooo8     8   `88b.  8                                  
+ 8  `888'   888    .88ooo8888.    8     `88b.8        .88ooo8888.   888     ooooo  888    "     8     `88b.8  8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 
+ 8    Y     888   .8'     `888.   8       `888  .o.  .8'     `888.  `88.    .88'   888       o  8       `888  8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 
+o8o        o888o o88o     o8888o o8o        `8  Y8P o88o     o8888o  `Y8bood8P'   o888ooooood8 o8o        `8  8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 
+
+*/
+
+// USER
+
+Route::get('/user/{user}', 'App\Http\Controllers\UserController@show');
+
+// TRUCK CONTROLLLER 
+Route::post('/truck', 'App\Http\Controllers\TruckController@store'); // C
+Route::get('/trucks/{customer}', 'App\Http\Controllers\TruckController@index'); // R ALL
+Route::get('/truck/{truck}', 'App\Http\Controllers\TruckController@show'); // R ONE
+Route::post('/truck/{truck}', 'App\Http\Controllers\TruckController@update'); // U 
+Route::delete('/truck/{truck}', 'App\Http\Controllers\TruckController@destroy'); // D 
+Route::get('/truckTransport/{truck}', 'App\Http\Controllers\TruckController@showTransport'); // Show For Transport
+
+// TRAILER CONTROLLLER 
+Route::post('/trailer', 'App\Http\Controllers\TrailerController@store'); // C
+Route::get('/trailer/{customer}', 'App\Http\Controllers\TrailerController@index'); // R ALL
+Route::get('/trailer/{trailer}', 'App\Http\Controllers\TrailerController@show'); // R ONE
+Route::post('/trailer/{trailer}', 'App\Http\Controllers\TrailerController@update'); // U
+Route::delete('/trailer/{trailer}', 'App\Http\Controllers\TrailerController@destroy'); // D
+Route::get('/trailerTransport/{transport_id}', 'App\Http\Controllers\TrailerController@showTrailer'); // Show for Transport
 
 //Ata
 Route::get('/atas','App\Http\Controllers\AtaController@index'); //Busca todos los Agente de transporte
@@ -188,6 +211,7 @@ Route::get('/agencia/{id}','App\Http\Controllers\AgencyController@show'); //Busc
 Route::post('/agencia','App\Http\Controllers\AgencyController@store'); //Crea una nueva Agencia
 Route::post('/agencia/{id}','App\Http\Controllers\AgencyController@update'); //Actualiza los datos de una Agencia
 Route::delete('/agencia/{id}','App\Http\Controllers\AgencyController@destroy'); //Elimina una Agencia
+Route::post('/agencias/{id}', 'App\Http\Controllers\AgenciaController@update');
 
 //Empresas=Cliente=Company
 Route::get('/empresas','App\Http\Controllers\CompanyController@index'); //Busca todas las empresas
@@ -279,9 +303,6 @@ Route::post('/customer','App\Http\Controllers\CustomerController@store'); //Crea
 Route::post('/customer/{id}','App\Http\Controllers\CustomerController@update'); //Actualiza los datos de un Customer trader
 Route::delete('/customer/{id}','App\Http\Controllers\CustomerController@destroy'); //Elimina un Customer trader
 
-Route::get('issetBooking/{booking}','App\Http\Controllers\cargaController@issetBooking');
-
-
 //Customer Final Point
 
 Route::get('/finalPoints','App\Http\Controllers\finalPointController@index'); //Busca todos los final Points
@@ -289,3 +310,64 @@ Route::get('/finalPoints/{id}','App\Http\Controllers\finalPointController@show')
 Route::post('/finalPoints','App\Http\Controllers\finalPointController@store'); //Crea un nuevo final Points
 Route::post('/finalPoints/{id}','App\Http\Controllers\finalPointController@update'); //Actualiza los datos de un final Points
 Route::delete('/finalPoints/{id}','App\Http\Controllers\finalPointController@destroy'); //Elimina un final Points
+
+/*                                                                
+oooooooooooo ooooooo  ooooo   .oooooo.   oooooooooooo ooooo             8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 
+`888'     `8  `8888    d8'   d8P'  `Y8b  `888'     `8 `888'             8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 
+ 888            Y888..8P    888           888          888              8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 
+ 888oooo8        `8888'     888           888oooo8     888                                                                              
+ 888    "       .8PY888.    888           888    "     888              8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 
+ 888       o   d8'  `888b   `88b    ooo   888       o  888       o      8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 
+o888ooooood8 o888o  o88888o  `Y8bood8P'  o888ooooood8 o888ooooood8      8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 
+*/
+
+// Reportes de Cargas por fechas
+
+Route::get('/excelCargasThisWeek', 'App\Http\Controllers\excelController@thisWeek');
+Route::get('/excelCargasUncoming', 'App\Http\Controllers\excelController@uncoming');
+Route::get('/excelCargasPast', 'App\Http\Controllers\excelController@past');
+
+// Reportes por Status
+Route::get('/excelNoAssigned', 'App\Http\Controllers\excelController@noAssigned');
+Route::get('/excelOnBoard', 'App\Http\Controllers\excelController@onBoard');
+Route::get('/excelAnyProblem', 'App\Http\Controllers\excelController@anyProblem');
+Route::get('/excelFinish', 'App\Http\Controllers\excelController@loadFinish');
+Route::get('/excelGoingToLoad', 'App\Http\Controllers\excelController@goingToLoad');
+Route::get('/excelLoading', 'App\Http\Controllers\excelController@loading');
+Route::get('/excelOnCustomPlace', 'App\Http\Controllers\excelController@onCustomPlace');
+Route::get('/excelOnWay', 'App\Http\Controllers\excelController@onWay');
+Route::get('/excelAllLoads', 'App\Http\Controllers\excelController@allLoads');
+Route::get('/excelStacking', 'App\Http\Controllers\excelController@stacking');
+Route::get('/excelAssigned', 'App\Http\Controllers\excelController@assigned');
+Route::get('/excelAssigned', 'App\Http\Controllers\excelController@assigned');
+
+// Reportes de DB Select
+
+Route::get('/excelAgencies', 'App\Http\Controllers\excelController@agencies');
+Route::get('/excelAtas', 'App\Http\Controllers\excelController@atas');
+Route::get('/excelPaymentMode', 'App\Http\Controllers\excelController@paymentMode');
+Route::get('/excelUsers', 'App\Http\Controllers\excelController@users');
+Route::get('/excelCustomAgents', 'App\Http\Controllers\excelController@customAgents');
+Route::get('/excelCompanies', 'App\Http\Controllers\excelController@companies');
+Route::get('/excelWarehouseContainer', 'App\Http\Controllers\excelController@warehouseContainer');
+Route::get('/excelContainerTypes', 'App\Http\Controllers\excelController@containerTypes');
+Route::get('/excelMisTrader', 'App\Http\Controllers\excelController@customer');
+Route::get('/excelMisShipper', 'App\Http\Controllers\excelController@customerShipper');
+Route::get('/excelMisConsignee', 'App\Http\Controllers\excelController@customerConsignee');
+Route::get('/excelLoadPlace', 'App\Http\Controllers\excelController@LoadPlace');
+Route::get('/excelUnloadPlace', 'App\Http\Controllers\excelController@UnloadPlace');
+
+// Reportes Flotas
+Route::get('/excelDriversFree', 'App\Http\Controllers\excelController@driversFree');
+Route::get('/excelDriversBusy', 'App\Http\Controllers\excelController@driversBusy');
+Route::get('/excelDrivers', 'App\Http\Controllers\excelController@drivers');
+Route::get('/excelTrucks', 'App\Http\Controllers\excelController@trucks');
+Route::get('/excelTrailers', 'App\Http\Controllers\excelController@trailers');
+Route::get('/excelTransports', 'App\Http\Controllers\excelController@transports');
+
+
+
+// - GESTION AKER ---------------------
+
+Route::get('transportesAker','App\Http\Controllers\AkerTransportController@index');
+Route::get('truckAker', 'App\Http\Controllers\AkerTruckController@index');

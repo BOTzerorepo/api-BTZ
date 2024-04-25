@@ -19,13 +19,41 @@ class avisoNewCarga extends Mailable
     public function __construct($datos)
     {
         $this->datos = $datos;
-        $this->subject = 'INSTRUCCIONES INTERNAS // '.$datos['type'] . ' - '.$datos['operacion'] .' - '. $datos['trader'] .' - '.$datos['cantidad'].'X'.$datos['cntr_type'].' // BKG: '. $datos['booking'];
+        $this->subject = 'INSTRUCCIONES INTERNAS // '.$datos['operacion'] . ' - '.$datos['type'] .' - '. $datos['trader'] .' - '.$datos['cantidad'].'X'.$datos['cntr_type'].' // BKG: '. $datos['booking'];
     }
 
     
     public function build()
     {
-        return $this->view('mails.avisoNewCarga');
+
+        $type = $this->datos['type'];
+
+        if ($type === 'Impo Terrestre') {
+
+            return $this->view('mails.avisoNewCargaImpoTerrestre');
+
+        } elseif ($type === 'Expo Maritima') {
+
+            return $this->view('mails.avisoNewCargaExpoMaritima');
+
+        } elseif ($type === 'Expo Terrestre') {
+
+            return $this->view('mails.avisoNewCargaExpoTerrestre');
+
+        } elseif ($type === 'Impo Maritima') {
+
+            return $this->view('mails.avisoNewCargaImpoMaritima');
+
+        } elseif ($type === 'Nacional') {
+
+            return $this->view('mails.avisoNewCargaNacional');
+
+        }
+         else {
+
+            return $this->view('mails.avisoNewCargaFOB');
+        }
+
     }
 
    
