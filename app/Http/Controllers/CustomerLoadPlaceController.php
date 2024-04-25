@@ -114,6 +114,16 @@ class CustomerLoadPlaceController extends Controller
                 $logApi->user = 'No Informa';
                 $logApi->detalle = "envio email cargaCargando to:" . $mail;
                 $logApi->save();
+
+            } elseif($sbx[0]->sandbox == 2) { 
+
+                Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new cargaCargando($datos));
+
+                $logApi = new logapi();
+                $logApi->user = 'No Informa';
+                $logApi->detalle = "envio email cargaCargando to:" . $mail;
+                $logApi->save();
+
             } else {
 
                 Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaCargando($datos));
@@ -122,6 +132,7 @@ class CustomerLoadPlaceController extends Controller
                 $logApi->user = 'No Informa';
                 $logApi->detalle = "envio email cargaCargando to:" . $mail;
                 $logApi->save();
+
             }
 
             $actualizarAvisado = statu::find($qd->id);
@@ -182,8 +193,17 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaCargando to:" . $mail;
                     $logApi->save();
-                } else {
 
+                } elseif($sbx[0]->sandbox == 2) { 
+
+                    Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new cargaCargando($datos));
+
+                    $logApi = new logapi();
+                    $logApi->user = 'No Informa';
+                    $logApi->detalle = "envio email cargaCargando to:" . $mail;
+                    $logApi->save();
+
+                } else {
                     Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaCargando($datos));
 
                     $logApi = new logapi();
@@ -259,13 +279,22 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaAduana to:" . $mail;
                     $logApi->save();
-                } else {
 
+                } elseif($sbx[0]->sandbox == 2) {
+
+                    Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new cargaAduana($datos));
+                    $logApi = new logapi();
+                    $logApi->user = 'No Informa';
+                    $logApi->detalle = "envio email cargaAduana to: 'pablorio@botzero.tech'";
+                    $logApi->save();
+
+                }else {
                     Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaAduana($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaAduana to: 'pablorio@botzero.tech'";
                     $logApi->save();
+
                 }
 
                 $actualizarAvisado = statu::find($qd->id);
@@ -325,6 +354,15 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaAduana to:" . $mail;
                     $logApi->save();
+
+                } elseif($sbx[0]->sandbox == 2) {
+
+                    Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new cargaAduana($datos));
+                    $logApi = new logapi();
+                    $logApi->user = 'No Informa';
+                    $logApi->detalle = "envio email cargaAduana to: 'pablorio@botzero.tech'";
+                    $logApi->save();
+
                 } else {
 
                     Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaAduana($datos));
@@ -333,7 +371,6 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->detalle = "envio email cargaAduana to: 'pablorio@botzero.tech'";
                     $logApi->save();
                 }
-
                 $actualizarAvisado = statu::find($qd->id);
                 $avisadoMas = $actualizarAvisado->avisado + 1;
                 $actualizarAvisado->avisado = $avisadoMas;
@@ -403,13 +440,23 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaDescarga to:" . $mail;
                     $logApi->save();
-                } else {
+
+                } elseif ($sbx[0]->sandbox == 2) { 
+
+                    Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new cargaDescarga($datos));
+                    $logApi = new logapi();
+                    $logApi->user = 'No Informa';
+                    $logApi->detalle = "envio email Instructivo to: 'pablorio@botzero.tech'";
+                    $logApi->save();
+
+                }else{
 
                     Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaDescarga($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email Instructivo to: 'pablorio@botzero.tech'";
                     $logApi->save();
+
                 }
                 $actualizarAvisado = statu::find($qd->id);
                 $avisadoMas = $actualizarAvisado->avisado + 1;
@@ -463,7 +510,13 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaDescarga to:" . $mail;
                     $logApi->save();
-                } else {
+                } elseif ($sbx[0]->sandbox == 2) {
+                    Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new cargaDescarga($datos));
+                    $logApi = new logapi();
+                    $logApi->user = 'No Informa';
+                    $logApi->detalle = "envio email Instructivo to: 'pablorio@botzero.tech'";
+                    $logApi->save();
+                }else {
 
                     Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaDescarga($datos));
                     $logApi = new logapi();
