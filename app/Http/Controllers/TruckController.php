@@ -161,4 +161,21 @@ class TruckController extends Controller
 
         };
     }
+    public function issetTruck($domain)
+    {
+
+        $truck = DB::table('trucks')
+        ->leftJoin('transports','transports.id','=','trucks.transport_id')
+        ->select('trucks.id', 'trucks.domain', 'trucks.model','transports.razon_social')
+        ->where('trucks.domain', '=', $domain)->get();
+        $count = $truck->count();
+
+            // Puedes modificar esta lógica según el detalle que desees devolver en el JSON
+        ; // Esto devuelve un array con el detalle de los transportes encontrados
+
+        return response()->json([
+            'count' => $count,
+            'detail' => $truck
+        ]);
+    }
 }
