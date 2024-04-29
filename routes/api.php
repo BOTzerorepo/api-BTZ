@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\cntrController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -160,9 +161,14 @@ o8o        o888o o88o     o8888o o8o        `8  Y8P o88o     o8888o  `Y8bood8P' 
 
 */
 
+
 // USER
 
 Route::get('/user/{user}', 'App\Http\Controllers\UserController@show');
+
+// CNTR
+
+Route::resource('/cntr',cntrController::class);
 
 // TRUCK CONTROLLLER 
 Route::post('/truck', 'App\Http\Controllers\TruckController@store'); // C
@@ -211,7 +217,7 @@ Route::get('/agencia/{id}','App\Http\Controllers\AgencyController@show'); //Busc
 Route::post('/agencia','App\Http\Controllers\AgencyController@store'); //Crea una nueva Agencia
 Route::post('/agencia/{id}','App\Http\Controllers\AgencyController@update'); //Actualiza los datos de una Agencia
 Route::delete('/agencia/{id}','App\Http\Controllers\AgencyController@destroy'); //Elimina una Agencia
-Route::post('/agencias/{id}', 'App\Http\Controllers\AgenciaController@update');
+Route::post('/agencias/{id}', 'App\Http\Controllers\AgencyController@update');
 
 //Empresas=Cliente=Company
 Route::get('/empresas','App\Http\Controllers\CompanyController@index'); //Busca todas las empresas
