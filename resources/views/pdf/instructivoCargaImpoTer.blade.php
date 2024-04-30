@@ -126,6 +126,17 @@
         <td colspan="4"  class="tdContenido">{{ $transport }} [ {{ $transport_agent }} ]</td>
     </tr>
     <tr>
+        <td align="left" width="25%" class="tdContenidoItem"><strong>CONTENEDOR N°:</strong></td>
+        @if($confirmacion == 1 ) 
+        <td colspan="4"  class="tdContenido">
+            {{ $cntr_number }}
+        </td>
+        @else
+        <td colspan="4"  class="tdContenido">
+           SIN CONFIRMAR
+        </td>
+    </tr>
+    <tr>
         <td align="left" width="25%" class="tdContenidoItem"><strong>VALOR POR CNTR:</strong></td>
         <td colspan="4"  class="tdContenido">{{ $out_usd }} - {{ $observation_out  }} </td>
     </tr>
