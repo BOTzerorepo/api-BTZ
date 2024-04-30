@@ -20,13 +20,13 @@ class instructivosController extends Controller
         
         if ($user->permiso == 'Traffic') {
 
-        $instructivos = DB::table('asign')->where('file_instruction', '!=', null)->where('company','=',$user->empresa)->orderBy('created_at','desc')->get();
+        $instructivos = DB::table('asign')->where('file_instruction', '!=', null)->select('asign.*','cntr.confirmacion')->join('cntr','cntr.cntr_number','asign.cntr_number')->where('asign.company','=',$user->empresa)->orderBy('asign.created_at','desc')->get();
         return $instructivos;
 
         }else{
 
         
-        $instructivos = DB::table('asign')->where('file_instruction', '!=', null)->where('company','=',$user->empresa)->orderBy('created_at','desc')->get();
+        $instructivos = DB::table('asign')->where('file_instruction', '!=', null)->select('asign.*', 'cntr.confirmacion')->join('cntr', 'cntr.cntr_number', 'asign.cntr_number')->where('asign.company','=',$user->empresa)->orderBy('asign.created_at','desc')->get();
         return $instructivos;
         
         }
