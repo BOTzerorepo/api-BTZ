@@ -150,6 +150,9 @@ Route::get('issetBooking/{booking}', 'App\Http\Controllers\cargaController@isset
 Route::get('issetTransport/{cuit}', 'App\Http\Controllers\TransportController@issetTrasnsport');
 Route::get('issetTruck/{domain}', 'App\Http\Controllers\TruckController@issetTruck');
 Route::get('issetTrader/{trader}', 'App\Http\Controllers\cargaController@issetTrader');
+Route::get('issetLoadPlace/{description}', 'App\Http\Controllers\CustomerLoadPlaceController@issetLugarDeCarga');
+Route::get('issetUnloadPlace/{description}', 'App\Http\Controllers\CustomerLoadPlaceController@issetLugarDeDescarga');
+
 
 
 /* 
