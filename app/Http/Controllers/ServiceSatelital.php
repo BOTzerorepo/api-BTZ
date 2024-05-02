@@ -24,6 +24,44 @@ class ServiceSatelital extends Controller
     {
         return env('APP_URL') . env('APP_NAME');
     }
+    public function issetDominio($domain)
+    {
+
+        $client = new Client();
+        $headers = [
+            'Content-Type' => 'application/json'
+        ];
+
+        // TEST: E6HW19 - PRODUCCION: C2QC20
+
+        
+            $body = '{
+                    "patentes":["' . $domain . '"],
+                    "cercania":true,
+                    "domicilio":false,
+                    "apiCode":"E6HW19",
+                    "phone":"2612128105"
+                    }';
+       
+
+        $request = new Psr7Request('GET', 'https://app.akercontrol.com/ws/v2/servicios', $headers, $body);
+        $res = $client->sendAsync($request)->wait();
+        $respuesta = $res->getBody();
+        $r = json_decode($respuesta, true);
+        $keys = array($r);
+
+        if(isset($keys[0]['data'])){
+
+            return 'existe';
+
+        }else{
+
+            return 'no existe';
+            
+        }
+       // return $keys[0]['data'][$domain];
+    }
+
     public function serviceSatelital()
     {
         $todosMisCamiones = DB::table('trucks')
