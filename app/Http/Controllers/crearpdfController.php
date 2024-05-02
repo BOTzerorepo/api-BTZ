@@ -845,7 +845,7 @@ class crearpdfController extends Controller
                 ->join('customer_load_places', 'customer_load_places.description', '=', 'carga.load_place')
                 ->where('cntr.cntr_number', '=', $cntr_number)
                 ->distinct()
-                ->get(['asign.id', 'asign.transport', 'asign.transport_agent', 'asign.observation_load', 'asign.agent_port', 'carga.custom_place', 'carga.load_date', 'carga.booking', 'carga.shipper', 'carga.commodity', 'carga.load_place', 'carga.unload_place', 'carga.cut_off_fis', 'carga.oceans_line', 'carga.vessel', 'carga.voyage', 'carga.final_point', 'carga.custom_agent', 'carga.ref_customer','cntr.cntr_number','cntr.confirmation', 'cntr.cntr_seal', 'cntr.cntr_type', 'cntr.net_weight', 'cntr.retiro_place', 'cntr.out_usd', 'cntr.observation_out',  'customer_load_places.link_maps', 'customer_load_places.address', 'customer_load_places.city']);
+                ->get(['asign.id', 'asign.transport', 'asign.transport_agent', 'asign.observation_load', 'asign.agent_port', 'carga.custom_place', 'carga.load_date', 'carga.booking', 'carga.shipper', 'carga.commodity', 'carga.load_place', 'carga.unload_place', 'carga.cut_off_fis', 'carga.oceans_line', 'carga.vessel', 'carga.voyage', 'carga.final_point', 'carga.custom_agent', 'carga.ref_customer','cntr.cntr_number','cntr.confirmacion', 'cntr.cntr_seal', 'cntr.cntr_type', 'cntr.net_weight', 'cntr.retiro_place', 'cntr.out_usd', 'cntr.observation_out',  'customer_load_places.link_maps', 'customer_load_places.address', 'customer_load_places.city']);
             $row = $respuesta_file[0];
 
             $weekMap = [
@@ -880,7 +880,7 @@ class crearpdfController extends Controller
                 'custom_place' => $row->custom_place,
                 'ref_customer' => $row->ref_customer,
                 'cntr_number' => $row->cntr_number,
-                'confirmacion' => $row->confirmation,
+                'confirmacion' => $row->confirmacion,
 
                 'cntr_seal' => $row->cntr_seal,
                 'cntr_type' => $row->cntr_type,

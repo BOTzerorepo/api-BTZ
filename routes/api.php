@@ -132,6 +132,8 @@ Route::get('/accionLugarDescarga/{idTrip}','App\Http\Controllers\CustomerLoadPla
 Route::get('/servicioSatelital','App\Http\Controllers\ServiceSatelital@serviceSatelital');
 Route::get('/pruebaSatelital','App\Http\Controllers\ServiceSatelital@servicePrueba');
 Route::get('/flota','App\Http\Controllers\ServiceSatelital@flota');
+Route::get('/dominioAker/{dominio}', 'App\Http\Controllers\ServiceSatelital@issetDominio');
+
 
 
 /* 
@@ -148,6 +150,9 @@ Route::get('issetBooking/{booking}', 'App\Http\Controllers\cargaController@isset
 Route::get('issetTransport/{cuit}', 'App\Http\Controllers\TransportController@issetTrasnsport');
 Route::get('issetTruck/{domain}', 'App\Http\Controllers\TruckController@issetTruck');
 Route::get('issetTrader/{trader}', 'App\Http\Controllers\cargaController@issetTrader');
+Route::get('issetLoadPlace/{description}', 'App\Http\Controllers\CustomerLoadPlaceController@issetLugarDeCarga');
+Route::get('issetUnloadPlace/{description}', 'App\Http\Controllers\CustomerLoadPlaceController@issetLugarDeDescarga');
+
 
 
 /* 
