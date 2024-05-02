@@ -551,6 +551,18 @@ class CustomerLoadPlaceController extends Controller
         return $customerLoadPlaces;
     }
 
+    public function issetLugarDeCarga($description)
+    {
+        $loadPlace = DB::table('customer_load_places')->where('description','=',$description)->count();
+        return $loadPlace;
+    }
+    public function issetLugarDeDescarga($description)
+    {
+
+        $unloadPlace = DB::table('customer_unload_places')->where('description', '=', $description)->count();
+        return $unloadPlace;
+    }
+
     /**
      * Show the form for creating a new resource.
      *
