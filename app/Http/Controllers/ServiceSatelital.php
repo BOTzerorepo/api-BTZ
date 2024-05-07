@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\akerTruck;
 use App\Models\asign;
 use App\Models\position;
 use App\Models\pruebasModel;
@@ -23,6 +24,55 @@ class ServiceSatelital extends Controller
     public function servicePrueba()
     {
         return env('APP_URL') . env('APP_NAME');
+    }
+    public function reviewDomains(){
+        
+        $trucks = truck::all();
+
+        foreach ($trucks as $truck) {
+
+            $client = new Client();
+            $headers = [
+                'Content-Type' => 'application/json'
+            ];
+
+            // TEST: E6HW19 - PRODUCCION: C2QC20
+
+
+            $body = '{
+                    "patentes":["' . $truck->domain . '"],
+                    "cercania":true,
+                    "domicilio":false,
+                    "apiCode":"E6HW19",
+                    "phone":"2612128105"
+                    }';
+
+
+            $request = new Psr7Request('GET', 'https://app.akercontrol.com/ws/v2/servicios', $headers, $body);
+            $res = $client->sendAsync($request)->wait();
+            $respuesta = $res->getBody();
+            $data = json_decode($respuesta, true);
+
+            if (isset($data['data'])) {
+
+                $datos = $data['data'];
+                $details = reset($datos);
+                // Hacer algo con el primer elemento aquí
+
+                $truck = truck::where('domain', $details['patente'])->first();
+                if ($truck) {
+                    // Si se encuentra un camión con el dominio, actualizar el estado a 1
+                    $truck->alta_aker = 1;
+                    $truck->id_satelital = $details['id'];
+                    $truck->save();
+
+                } else {
+                    // Si no se encuentra un camión con el dominio, devolver un mensaje de error
+                    return 'No se encontró un camión con el dominio especificado';
+                }
+
+            }
+        }
     }
     public function issetDominio($domain)
     {
@@ -47,19 +97,43 @@ class ServiceSatelital extends Controller
         $request = new Psr7Request('GET', 'https://app.akercontrol.com/ws/v2/servicios', $headers, $body);
         $res = $client->sendAsync($request)->wait();
         $respuesta = $res->getBody();
-        $r = json_decode($respuesta, true);
-        $keys = array($r);
+        $data = json_decode($respuesta, true);
 
-        if(isset($keys[0]['data'])){
+        if(isset($data['data'])){
 
-            return 'existe';
+            $datos = $data['data'];
+            $details = reset($datos);
+            // Hacer algo con el primer elemento aquí
+            
+            $truck = truck::where('domain', $details['patente'])->first();
 
-        }else{
+            if ($truck) {
+                // Si se encuentra un camión con el dominio, actualizar el estado a 1
+                $truck->alta_aker = 1;
+                $truck->id_satelital = $details['id'] ;
+                $truck->save();
+
+                // Cargamos en la Planilla de Aker:
+
+                $akerTruck = new akerTruck();
+                $akerTruck->domain = $details['patente'];
+                $akerTruck->satelital = $details['id'];
+                $akerTruck->estado = 1;
+                $akerTruck->save();
+
+                // Devolver el camión actualizado
+                return $truck;
+            } else {
+                // Si no se encuentra un camión con el dominio, devolver un mensaje de error
+                return 'No se encontró un camión con el dominio especificado';
+            }
+
+        } else{
 
             return 'no existe';
             
         }
-       // return $keys[0]['data'][$domain];
+       
     }
 
     public function serviceSatelital()
