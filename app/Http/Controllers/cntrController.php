@@ -46,6 +46,7 @@ class cntrController extends Controller
             $cntr_number = $request['cntr_number'];
 
         } else {
+            
             $cntr_number = $booking . $numero;
 
         }
