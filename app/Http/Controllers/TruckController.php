@@ -12,6 +12,12 @@ use Illuminate\Support\Facades\Mail;
 
 class TruckController extends Controller
 {
+
+    protected $serviceSatelital;
+    public function __construct(ServiceSatelital $serviceSatelital)
+    {
+        $this->serviceSatelital = $serviceSatelital;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -62,7 +68,9 @@ class TruckController extends Controller
         $truck->customer_id = $cId;
         $truck->save();
 
-       
+        $resultado = $this->serviceSatelital->issetDominio($request['domain']);
+
+        return $resultado;
 
         return $truck;
         
