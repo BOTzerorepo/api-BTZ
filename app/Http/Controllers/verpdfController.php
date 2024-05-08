@@ -59,7 +59,7 @@ class verpdfController extends Controller
                     'razon_social.img', 'razon_social.cuit', 'razon_social.title',
                     'asign.transport', 'asign.transport_agent', 'asign.observation_load', 'asign.agent_port',
                     'carga.custom_place', 'carga.bl_hbl', 'carga.senasa', 'carga.senasa_string', 'carga.type', 'carga.ref_customer', 'carga.load_date', 'carga.booking', 'carga.importador', 'carga.shipper', 'carga.commodity', 'carga.load_place', 'carga.unload_place', 'carga.cut_off_fis', 'carga.oceans_line', 'carga.vessel', 'carga.voyage', 'carga.final_point', 'carga.observation_customer', 'carga.custom_agent', 'carga.custom_place_impo', 'carga.ref_customer', 'carga.ex_alto', 'carga.ex_ancho', 'carga.ex_largo', 'carga.obs_imo', 'carga.rf_tem', 'carga.rf_humedad', 'carga.rf_venti',
-                    'cntr.cntr_number', 'cntr.cntr_seal', 'cntr.cntr_type', 'cntr.net_weight', 'cntr.retiro_place', 'cntr.out_usd', 'cntr.modo_pago_out', 'cntr.observation_out', 
+                    'cntr.cntr_number', 'cntr.confirmacion', 'cntr.cntr_seal', 'cntr.cntr_type', 'cntr.net_weight', 'cntr.retiro_place', 'cntr.out_usd', 'cntr.modo_pago_out', 'cntr.observation_out', 
                     'customer_load_places.link_maps', 'customer_load_places.address', 'customer_load_places.city',
                     'agencies.observation_gral',
                     'aduanaExpo.mail', 'aduanaExpo.phone',
@@ -109,6 +109,7 @@ class verpdfController extends Controller
                             'custom_place' => $row->custom_place,
                             'ref_customer' => $row->ref_customer,
                             'cntr_number' => $row->cntr_number,
+                            'confirmacion' => $row->confirmacion,
                             'cntr_seal' => $row->cntr_seal,
                             'cntr_type' => $row->cntr_type,
                             'net_weight' => $row->net_weight,
@@ -160,6 +161,7 @@ class verpdfController extends Controller
                             'custom_place' => $row->custom_place,
                             'ref_customer' => $row->ref_customer,
                             'cntr_number' => $row->cntr_number,
+                            'confirmacion' => $row->confirmacion,
                             'cntr_seal' => $row->cntr_seal,
                             'cntr_type' => $row->cntr_type,
                             'net_weight' => $row->net_weight,
@@ -225,6 +227,8 @@ class verpdfController extends Controller
                             'importador' => $row->importador,
 
                             'cntr_number' => $row->cntr_number,
+                            'confirmacion' => $row->confirmacion,
+
                             'cntr_seal' => $row->cntr_seal,
                             'cntr_type' => $row->cntr_type,
                             'net_weight' => $row->net_weight,
@@ -299,6 +303,8 @@ class verpdfController extends Controller
                             'importador' => $row->importador,
 
                             'cntr_number' => $row->cntr_number,
+                            'confirmacion' => $row->confirmacion,
+
                             'cntr_seal' => $row->cntr_seal,
                             'cntr_type' => $row->cntr_type,
                             'net_weight' => $row->net_weight,
@@ -370,6 +376,8 @@ class verpdfController extends Controller
                             'importador' => $row->importador,
 
                             'cntr_number' => $row->cntr_number,
+                            'confirmacion' => $row->confirmacion,
+
                             'cntr_seal' => $row->cntr_seal,
                             'cntr_type' => $row->cntr_type,
                             'net_weight' => $row->net_weight,
@@ -427,6 +435,8 @@ class verpdfController extends Controller
                             'ref_customer' => $row->ref_customer,
                             
                             'cntr_number' => $row->cntr_number,
+                            'confirmacion' => $row->confirmacion,
+
                         
                             'cntr_type' => $row->cntr_type,
                             'net_weight' => $row->net_weight,
@@ -502,7 +512,7 @@ class verpdfController extends Controller
                 ->join('customer_load_places', 'customer_load_places.description', '=', 'carga.load_place')
                 ->where('cntr.cntr_number', '=', $cntr_number)
                 ->distinct()
-                ->get(['asign.id', 'asign.transport', 'asign.transport_agent', 'asign.observation_load', 'asign.agent_port', 'carga.custom_place', 'carga.load_date', 'carga.booking', 'carga.shipper', 'carga.commodity', 'carga.load_place', 'carga.unload_place', 'carga.cut_off_fis', 'carga.oceans_line', 'carga.vessel', 'carga.voyage', 'carga.final_point', 'carga.custom_agent', 'carga.ref_customer', 'cntr.cntr_number', 'cntr.cntr_seal', 'cntr.cntr_type', 'cntr.net_weight', 'cntr.retiro_place', 'cntr.out_usd', 'cntr.modo_pago_out', 'cntr.plazo_de_pago_out', 'customer_load_places.link_maps', 'customer_load_places.address', 'customer_load_places.city']);
+                ->get(['asign.id', 'asign.transport', 'asign.transport_agent', 'asign.observation_load', 'asign.agent_port', 'carga.custom_place', 'carga.load_date', 'carga.booking', 'carga.shipper', 'carga.commodity', 'carga.load_place', 'carga.unload_place', 'carga.cut_off_fis', 'carga.oceans_line', 'carga.vessel', 'carga.voyage', 'carga.final_point', 'carga.custom_agent', 'carga.ref_customer','cntr.cntr_number','cntr.confirmacion', 'cntr.cntr_seal', 'cntr.cntr_type', 'cntr.net_weight', 'cntr.retiro_place', 'cntr.out_usd', 'cntr.modo_pago_out', 'cntr.plazo_de_pago_out', 'customer_load_places.link_maps', 'customer_load_places.address', 'customer_load_places.city']);
             $row = $respuesta_file[0];
 
             $weekMap = [
@@ -537,6 +547,8 @@ class verpdfController extends Controller
                 'custom_place' => $row->custom_place,
                 'ref_customer' => $row->ref_customer,
                 'cntr_number' => $row->cntr_number,
+                'cntr_number' => $row->confirmacion,
+
                 'cntr_seal' => $row->cntr_seal,
                 'cntr_type' => $row->cntr_type,
                 'net_weight' => $row->net_weight,
