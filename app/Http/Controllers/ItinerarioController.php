@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Itinerario;
+use App\Models\itinerario;
 use App\Models\PuntoDeInteres;
 use Illuminate\Http\Request;
 
