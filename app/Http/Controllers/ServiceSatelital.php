@@ -2,10 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\puntoDeInteres as MailPuntoDeInteres;
 use App\Models\akerTruck;
 use App\Models\asign;
+use App\Models\cntr;
+use App\Models\Itinerario;
+use App\Models\logapi;
 use App\Models\position;
 use App\Models\pruebasModel;
+use App\Models\PuntoDeInteres;
+use App\Models\statu;
 use App\Models\truck;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request as Psr7Request;
@@ -13,8 +19,12 @@ use Illuminate\Http\Client\Request as ClientRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 use LDAP\Result;
 use Mockery\Undefined;
+
+use function PHPUnit\Framework\returnSelf;
 
 // wget -O /dev/null "https://rail.com.ar/api/servicioSatelital"
 // tiempo */2 * * * *
@@ -464,4 +474,207 @@ class ServiceSatelital extends Controller
     }
         return $camiones;
     }
+
+
+
+
+    public function revisarCoordenadas()
+    {
+        $detalleComparaciones = [];
+        // Obtener todas las unidades desde el modelo Truck
+        $unidades = Truck::all();
+        foreach ($unidades as $unidad) {
+
+            // Realizar una solicitud a la API para obtener las coordenadas de la unidad
+            $client = new Client();
+            $headers = [
+                'Content-Type' => 'application/json'
+            ];
+
+
+            $body = '{
+                    "patentes":["' . $unidad->domain . '"],
+                    "cercania":true,
+                    "domicilio":false,
+                    "apiCode":"E6HW19",
+                    "phone":"2612128105"
+                    }';
+
+
+            $request = new Psr7Request('GET', 'https://app.akercontrol.com/ws/v2/servicios', $headers, $body);
+            $res = $client->sendAsync($request)->wait();
+            $respuesta = $res->getBody();
+            $r = json_decode($respuesta, true);
+            $keys = array($r);
+
+            // Verificar si la solicitud fue exitosa y si hay coordenadas disponibles
+            if (isset($r['data'])) {
+                $datos = $r['data'][$unidad->domain];
+                $latitud = $datos['ult_latitud'];
+                $longitud = $datos['ult_longitud'];
+
+                // Obtener los itinerarios activos que tienen puntos de interés asociados
+                $itinerarios = Itinerario::where('estado', 1)
+                ->with(['puntosDeInteres' => function ($query) {
+                    $query->where('estado', 1);
+                }])
+                ->get();
+
+                foreach ($itinerarios as $itinerario) {
+                    foreach ($itinerario->puntosDeInteres as $puntoDeInteres) {
+                        // Calcular la distancia entre la coordenada de la unidad y la coordenada del punto de interés
+                        $distancia = ServiceSatelital::calcularDistancia($latitud, $longitud, $puntoDeInteres->latitud, $puntoDeInteres->longitud);
+
+                        // Si la distancia es menor o igual al rango de aviso del punto de interés, ejecutar la acción asociada
+                        if ($distancia <= $puntoDeInteres->rango) { // ver como hacer para comparar en metros
+
+                            $accion = ServiceSatelital::ejecutarAccion($puntoDeInteres, $itinerario->trip_id);
+
+                            $detalleComparacion = [
+                                'itinerario_id' => $itinerario->id,
+                                'unidad' => $itinerario->unidad_asignada,
+
+                                'punto_de_interes_id' => $puntoDeInteres->id,
+                                'distancia' => $distancia ,
+                                'lugar' => 'esta cerca',
+                                'accion_ejecutada' => $puntoDeInteres->accion_id ?? null,
+                                'accion' => $accion
+                            ];
+                            $detalleComparaciones[] = $detalleComparacion;
+                        } else{
+
+                            $detalleComparacion = [
+                                'itinerario_id' => $itinerario->id,
+                                'unidad' => $itinerario->unidad_asignada,
+
+                                'punto_de_interes_id' => $puntoDeInteres->id,
+                                'distancia' => $distancia ,
+                                'lugar' => 'esta lejos',
+                                'accion_ejecutada' => $puntoDeInteres->accion_id ?? null,
+                                'accion' => 'nada'
+
+                            ];
+                            $detalleComparaciones[] = $detalleComparacion;
+                        }
+
+                    }
+                }
+            }
+        }
+        
+        return response()->json(['detalle_comparaciones' => $detalleComparaciones]);
+        return response()->json(['message' => 'Revisión de coordenadas completada.']);
+    }
+    public function calcularDistancia($latitud1, $longitud1, $latitud2, $longitud2)
+    {
+        // Fórmula de Haversine para calcular la distancia entre dos puntos en coordenadas geográficas
+        $radioTierra = 6371; // Radio de la Tierra en kilómetros
+        $dLatitud = deg2rad($latitud2 - $latitud1);
+        $dLongitud = deg2rad($longitud2 - $longitud1);
+        $a = sin($dLatitud / 2) * sin($dLatitud / 2) +
+            cos(deg2rad($latitud1)) * cos(deg2rad($latitud2)) *
+            sin($dLongitud / 2) * sin($dLongitud / 2);
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+        $distanciaEnKilometros = $radioTierra * $c * 1000;
+         // Convertir de kilómetros a metros
+
+        return $distanciaEnKilometros; // Distancia en metros // Distancia en kilómetros
+    }
+    
+    public function ejecutarAccion(PuntoDeInteres $puntoDeInteres, $trip_id)
+    {
+
+        //return 'se envia correo:' . $puntoDeInteres;
+
+        $datos =  DB::table('cntr')
+        ->join('users', 'cntr.user_cntr', '=', 'users.username')
+        ->leftjoin('itinerarios', 'cntr.id_cntr', '=', 'itinerarios.trip_id')
+        ->leftjoin('punto_de_interes', 'itinerarios.id', '=', 'punto_de_interes.itinerario_id')
+        ->join('carga', 'carga.booking', '=', 'cntr.booking')
+        ->select('carga.ref_customer', 'cntr.id_cntr', 'cntr.booking', 'cntr.cntr_number', 'cntr.cntr_type', 'cntr.confirmacion', 'cntr.retiro_place', 'cntr.company','cntr.status_cntr', 'cntr.main_status', 'users.username', 'users.email', 'users.celular', 'users.empresa', 'punto_de_interes.*', 'itinerarios.unidad_asignada')
+        ->where('cntr.id_cntr', '=', $trip_id)
+        ->where('punto_de_interes.id', '=', $puntoDeInteres->id)
+        ->get();
+
+        if($puntoDeInteres->accion_mail == 1 ){
+
+            // revisa si status tambien hay que cambiar
+
+            // avisa por correo normal 
+
+
+            $sbx = DB::table('variables')->select('sandbox')->get();
+            $inboxEmail = env('INBOX_EMAIL');
+
+            if ($sbx[0]->sandbox == 0) {
+
+                Mail::to($datos[0]->email)->bcc($inboxEmail)->send(new MailPuntoDeInteres($datos[0]));
+
+                $logApi = new logapi();
+                $logApi->user = 'No Informa';
+                $logApi->detalle = "envio email punto de interes to:" . $datos[0]->email;
+                $logApi->save();
+
+              
+            } elseif ($sbx[0]->sandbox == 2) {
+
+                Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new MailPuntoDeInteres($datos[0]));
+
+                $logApi = new logapi();
+                $logApi->user = 'No Informa';
+                $logApi->detalle = "envio email Instructivo to: pablorio@botzero.tech";
+                $logApi->save();
+                
+            } else {
+
+                Mail::to($datos[0]->email)->bcc($inboxEmail)->send(new MailPuntoDeInteres($datos[0]));
+
+                $logApi = new logapi();
+                $logApi->user = 'No Informa';
+                $logApi->detalle = "envio email punto de interes to:" . $datos[0]->email;
+                $logApi->save();
+               
+            }
+
+
+        }
+
+        if($puntoDeInteres->accion_status == 1){
+
+            // buscar el status que está y subir un nivel. 
+
+            $status = DB::table('status_type')->where('STATUS',$datos[0]->main_status)->first();
+            $findId = $status->id + 1;
+            $newstatus = DB::table('status_type')->where('id', $findId)->first();
+
+            DB::table('cntr')
+            ->where('id_cntr', $trip_id)
+            ->update([
+                'main_status' => $newstatus->STATUS,
+                'status_cntr' => 'modificado automáticamente por punto de interés: ' . $datos[0]->descripcion
+            ]);
+            $status = new statu();
+            $status->status = 'modificado automáticamente por punto de interés: ' . $datos[0]->descripcion;
+            if ($puntoDeInteres->accion_mail == 1) {
+                $status->avisado = 1;
+            }else{
+                $status->avisado = 0;
+
+            }
+            $status->main_status = $newstatus->STATUS;
+            $status->cntr_number = $datos[0]->cntr_number;
+            $status->user_status = 'Automatico';
+            $status->save();
+
+        }
+
+        $puntoDeInteres->estado = 2;
+        $puntoDeInteres->save();
+
+        
+    }
+
+    
+
+
 }
