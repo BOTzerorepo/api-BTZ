@@ -5,6 +5,7 @@
 /vendor
 /public/instructivos
 .env
+.env copy
 .env.backup
 .phpunit.result.cache
 Homestead.json
