@@ -6,7 +6,7 @@ use App\Mail\puntoDeInteres as MailPuntoDeInteres;
 use App\Models\akerTruck;
 use App\Models\asign;
 use App\Models\cntr;
-use App\Models\Itinerario;
+use App\Models\itinerario;
 use App\Models\logapi;
 use App\Models\position;
 use App\Models\pruebasModel;
