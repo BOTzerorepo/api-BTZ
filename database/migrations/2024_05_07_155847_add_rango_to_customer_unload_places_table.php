@@ -13,9 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-       /*  Schema::table('customer_unload_places', function (Blueprint $table) {
+       Schema::table('customer_unload_places', function (Blueprint $table) {
             $table->integer('rango')->default(100)->after('longitud');
-        }); */
+        }); 
     }
 
     /**
@@ -25,8 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-     /*    Schema::table('customer_unload_places', function (Blueprint $table) {
+     Schema::table('customer_unload_places', function (Blueprint $table) {
             $table->dropColumn('rango');
-        }); */
+        });
     }
 };
