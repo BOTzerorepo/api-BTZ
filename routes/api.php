@@ -135,6 +135,9 @@ Route::get('/flota','App\Http\Controllers\ServiceSatelital@flota');
 Route::get('/dominioAker/{dominio}', 'App\Http\Controllers\ServiceSatelital@issetDominio');
 Route::get('/revierDomain', 'App\Http\Controllers\ServiceSatelital@reviewDomains');
 
+Route::get('/revisarCoordenadas', 'App\Http\Controllers\ServiceSatelital@revisarCoordenadas');
+
+Route::get('/itinerarios/{id}', 'App\Http\Controllers\ItinerarioController@show');
 
 
 /* 
