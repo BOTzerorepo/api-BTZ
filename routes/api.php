@@ -111,7 +111,7 @@ Route::post('/carga','App\Http\Controllers\LoadController@store');              
 
 /* Impresion de PDF [RailDocs] */
 
-Route::get('/imprimirCarga/{cntr_number}', 'App\Http\Controllers\crearpdfController@carga'); // No usa Funcion MAIL
+Route::get('imprimirCarga/{cntr_number}', 'App\Http\Controllers\crearpdfController@carga'); // No usa Funcion MAIL
 Route::get('/verCarga/{cntr_number}', 'App\Http\Controllers\verpdfController@carga');
 Route::get('/imprimirVacio/{id_cntr}', 'App\Http\Controllers\crearpdfController@vacio');  // No usa Funcion MAIL
 

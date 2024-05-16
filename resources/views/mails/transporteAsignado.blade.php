@@ -244,8 +244,12 @@
                                                                             style="margin-top: 25px; font-size: 14px; text-align: center;">
                                                                             <span style="font-size:15px;"><strong><span
                                                                                         style="font-size:15px;">
-                                                                                        {{ $datos['cntr_number'] }} -
-                                                                                        {{ $datos['booking'] }}
+                                                                                        @if( $datos['confirmacion'] != 0) 
+                                                                                        Carga {{ $datos['cntr_number'] }} para el {{ $datos['booking'] }}
+                                                                                        @else
+                                                                                        Carga CNTR SIN CONFIRMAR para el {{ $datos['booking'] }}
+                                                                                        @endif
+                                                                                       
                                                                                     </span></strong></span>
                                                                         </p>
                                                                     </div>
@@ -345,7 +349,12 @@
                                                                                             <span style="color:#3116a9;font-size:24px;">
                                                                                                 <strong>
                                                                                                     <span style="font-size:24px;">
-                                                                                                        {{ $datos['cntr_number'] }}
+                                                                                                        @if( $datos['confirmacion'] != 0) 
+                                                                                        {{ $datos['cntr_number'] }}
+                                                                                        @else
+                                                                                    SIN CONFIRMAR
+                                                                                        @endif
+                                                                                                      
                                                                                                     </span>
                                                                                                 </strong>
                                                                                             </span>
@@ -355,8 +364,12 @@
 
                                                                                               <p>Transporte:  {{$datos['transport']}} 
                                                                                                 <br> Bandera: {{ $datos['transport_bandera']}}
+                                                                                                @if($datos['transport_agent'] == null )
+                                                                                                <br>ATA: A CONFIRMAR
+                                                                                                @else
                                                                                                 <br> ATA:  {{$datos['transport_agent']}}
                                                                                                 <br>CUIT ATA: {{ $datos['cuit_ata']}} 
+                                                                                                @endif
       
                                                                                             </span>
                                                                                         </span>
