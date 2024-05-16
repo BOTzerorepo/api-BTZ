@@ -306,7 +306,7 @@ class lugaresDeCarga extends Controller
         $chek->save();
 
         $date = Carbon::now('-03:00');
-        $qc = DB::table('cntr')->select('cntr_number', 'booking')->where('id_cntr', '=', $idTrip)->get();
+        $qc = DB::table('cntr')->select('cntr_number', 'booking','confirmacion')->where('id_cntr', '=', $idTrip)->get();
         $cntr = $qc[0];
 
         // cual es el ultimo status.
@@ -358,6 +358,7 @@ class lugaresDeCarga extends Controller
                 $datos = [
                     'cntr' => $cntr->cntr_number,
                     'description' =>  $description,
+                    'confirmacion' => $cntr->confirmacion,
                     'user' => $qd->user_status,
                     'empresa' => $empresa,
                     'booking' => $cntr->booking,
@@ -485,6 +486,7 @@ class lugaresDeCarga extends Controller
             $datos = [
                 'cntr' => $cntr->cntr_number,
                 'description' =>  $description,
+                'confirmacion' => $cntr->confirmacion,
                 'user' => $qd->user_status,
                 'empresa' => $empresa,
                 'booking' => $cntr->booking,
@@ -567,6 +569,8 @@ class lugaresDeCarga extends Controller
                 $datos = [
                     'cntr' => $cntr->cntr_number,
                     'description' =>  $description,
+                    'confirmacion' => $cntr->confirmacion,
+
                     'user' => $qd->user_status,
                     'empresa' => $empresa,
                     'booking' => $cntr->booking,
@@ -692,6 +696,7 @@ class lugaresDeCarga extends Controller
             $datos = [
                 'cntr' => $cntr->cntr_number,
                 'description' =>  $description,
+                'confirmacion' => $cntr->confirmacion,
                 'user' => $qd->user_status,
                 'empresa' => $empresa,
                 'booking' => $cntr->booking,
