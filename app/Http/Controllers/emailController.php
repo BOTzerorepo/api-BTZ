@@ -140,14 +140,14 @@ class emailController extends Controller
             $asign = DB::table('asign')
                 ->select('asign.id', 'carga.*', 'cntr.cntr_type', 'carga.user as userC', 'asign.cntr_number', 'asign.booking', 'asign.transport', 'asign.transport_agent', 'asign.user', 'asign.company', 'atas.tax_id', 'transports.pais','cntr.confirmacion')
                 ->join('transports', 'asign.transport', '=', 'transports.razon_social')
-                ->join('atas', 'asign.transport_agent', '=', 'atas.razon_social')
+                ->leftJoin('atas', 'asign.transport_agent', '=', 'atas.razon_social')
                 ->join('carga', 'asign.booking', '=', 'carga.booking')
                 ->join('cntr', 'asign.cntr_number', '=', 'cntr.cntr_number')
                 ->where('asign.id', '=', $id)
                 ->get();
-
             
             if ($asign->count() === 0) {
+
                 return 'Assignment not found'; // Handle the case where no assignment is found
             }
 
@@ -185,12 +185,11 @@ class emailController extends Controller
             // Determine the recipient and log message based on sandbox status
             $recipient = $to ? $to->email : 'pablorio@botzero.tech';
             $logMessage = '+ Sandbox +' . ($sbx->sandbox == 0 ? '' : 'to: ' . $recipient) . 'AsignaUnidadTransporte-User:' . $asign->user . '|Transporte:' . $asign->transport . '| ATA:' . $asign->transport_agent . '| Bandera:' . $asign->pais . '| CUIT :' . $asign->tax_id;
-
             if ($sbx->sandbox == 0) {
                 // Send email
                 Mail::to($to)->cc(['gzarate@totaltradegroup.com'])->bcc($inboxEmail)->send(new transporteAsignado($data, $date));
             
-            } elseif ($sbx[0]->sandbox == 2) {
+            } elseif ($sbx->sandbox == 2) {
 
                 Mail::to($to)->cc(['abel.mazzitelli@gmail.com'])->bcc($inboxEmail)->send(new transporteAsignado($data, $date));
 

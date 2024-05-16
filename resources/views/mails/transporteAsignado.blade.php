@@ -364,8 +364,12 @@
 
                                                                                               <p>Transporte:  {{$datos['transport']}} 
                                                                                                 <br> Bandera: {{ $datos['transport_bandera']}}
+                                                                                                @if($datos['transport_agent'] == null )
+                                                                                                <br>ATA: A CONFIRMAR
+                                                                                                @else
                                                                                                 <br> ATA:  {{$datos['transport_agent']}}
                                                                                                 <br>CUIT ATA: {{ $datos['cuit_ata']}} 
+                                                                                                @endif
       
                                                                                             </span>
                                                                                         </span>
