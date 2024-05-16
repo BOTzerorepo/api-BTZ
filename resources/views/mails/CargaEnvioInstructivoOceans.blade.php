@@ -333,7 +333,12 @@
                                                                                                 <strong>
                                                                                                     <span
                                                                                                         style="font-size:34px;">
-                                                                                                        {{ $datos['cntr_number'] }}
+                                                                                                        @if( $datos['confirmacion'] != 0) 
+                                                                                        {{ $datos['cntr_number'] }}
+                                                                                        @else
+                                                                                        SIN CONFIRMAR
+                                                                                        @endif
+                                                                                                        
                                                                                                     </span>
                                                                                                 </strong>
                                                                                             </span>
