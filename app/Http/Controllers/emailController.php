@@ -447,6 +447,12 @@ class emailController extends Controller
         $carga = $qcarga[0];
         $date = Carbon::now('-03:00');
 
+        $fecha = Carbon::parse($carga->load_date);
+        //$loadDate = $fecha->format('d/m/Y');
+        $loadDate = $fecha->locale('es')->isoFormat('dddd D [de] MMMM [de] YYYY');
+
+       
+       
         $datos = [
             
             'id' => $carga->id,
@@ -454,7 +460,7 @@ class emailController extends Controller
             'trader' => $carga->trader,
             'importador' => $carga->importador,
             'booking' => $carga->booking,
-            'loadDate' => $carga->load_date,
+            'loadDate' => $loadDate,
             'depositoRetiro' => $carga->retiro_place,
             'shipper' => $carga->shipper,
             'loadPlace' => $carga->load_place,
