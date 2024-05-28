@@ -255,7 +255,7 @@ class emailController extends Controller
             $inboxEmail = env('INBOX_EMAIL');
             if ($sbx[0]->sandbox == 0) {
 
-                Mail::to($tipo)->cc(['gzarate@totaltradegroup.com'])->bcc($inboxEmail)
+                Mail::to($to)->cc(['gzarate@totaltradegroup.com'])->bcc($inboxEmail)
                 ->send(new CargaConProblemas($datos, $statusArchivoPath));
 
                 return 'ok';
@@ -414,6 +414,7 @@ class emailController extends Controller
 
         $qcarga = DB::table('carga')
             ->select(
+                'carga.id',
                 'carga.booking',
                 'carga.trader',
                 'carga.importador',
@@ -447,7 +448,8 @@ class emailController extends Controller
         $date = Carbon::now('-03:00');
 
         $datos = [
-
+            
+            'id' => $carga->id,
             'operacion' => $carga->ref_customer,
             'trader' => $carga->trader,
             'importador' => $carga->importador,
@@ -476,6 +478,7 @@ class emailController extends Controller
             'bl_hbl' => $carga->bl_hbl,
             'senasa' => $carga->senasa,
             'senasa_string' => $carga->senasa_string,
+
 
         ];
 
