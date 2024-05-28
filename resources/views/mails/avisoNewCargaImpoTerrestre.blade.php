@@ -339,26 +339,26 @@
                                                                                             <td>{{$datos['operacion'] }}</td>
                                                                                         </tr>
                                                                                         <tr>
-                                                                                            <td>Booking:</td> {{-- siempre --}}
+                                                                                            <td>REF:</td> {{-- siempre --}}
                                                                                             <td>{{$datos['booking'] }}</td>
                                                                                         </tr>
-                                                                                        <tr style="background: white;">
-                                                                                            <td >Consignatario/Importador:</td>
-                                                                                            <td>{{$datos['importador'] }}</td>
-                                                                                        </tr>
-                                                                                        <tr >
-                                                                                            <td>Dia de Carga:</td> {{-- siempre --}}
-                                                                                            <td>{{$datos['loadDate'] }}</td>
-                                                                                        </tr>
-                                                                                        <tr style="background: white;">
+                                                                                         <tr style="background: white;">
                                                                                             <td>Cantidad y Tipo de CNTR:</td> {{-- siempre --}}
                                                                                             <td>{{$datos['cantidad'] }} x {{$datos['cntr_type'] }} </td>
                                                                                         </tr>
-                                                                                        <tr>
-                                                                                            <td>Trader:</td>
-                                                                                            <td>{{$datos['trader'] }}</td>
+                                                                                        <tr >
+                                                                                            <td>Mercaderia:</td> {{-- siempre --}}
+                                                                                            <td>{{$datos['commodity'] }}</td>
                                                                                         </tr>
-                                                                                        <tr style="background: white;"> 
+                                                                                         <tr style="background: white;">
+                                                                                            <td >Dia de Carga:</td> {{-- siempre --}}
+                                                                                            <td>{{$datos['loadDate'] }}</td>
+                                                                                        </tr>
+                                                                                        <tr >
+                                                                                            <td >Exportador:</td>
+                                                                                            <td>{{$datos['shipper'] }}</td>
+                                                                                        </tr>
+                                                                                       <tr style="background: white;"> 
                                                                                             <td>Lugar de Carga:</td> {{-- siempre --}}
                                                                                             <td>{{$datos['loadPlace'] }}</td>
                                                                                         </tr>
@@ -370,28 +370,31 @@
                                                                                             <td>Despachante Expo:</td>
                                                                                             <td>{{$datos['customAgent'] }}</td>
                                                                                         </tr>
-                                                                                         <tr>
+                                                                                        <tr>
+                                                                                            <td>Senasa:</td>
+                                                                                            <td>{{$datos['senasa'] }} - {{$datos['senasa_string'] }}</td>
+                                                                                        </tr>
+                                                                                         <tr style="background: white;">
                                                                                             <td>Lugar de Aduana Impo:</td>
                                                                                             <td>{{$datos['customPlaceImpo'] }}</td>
                                                                                         </tr>
-                                                                                        <tr style="background: white;">
+                                                                                        <tr >
                                                                                             <td>Despachante Impo:</td>
                                                                                             <td>{{$datos['customAgentImpo'] }}</td>
                                                                                         </tr>
-                                                                                        <tr>
-                                                                                            <td>Cut Off Fisico:</td> {{-- siempre --}}
-                                                                                            <td>{{$datos['cutOffFisico'] }}</td>
+                                                                                         <tr style="background: white;">
+                                                                                            <td>Importador</td>
+                                                                                            <td>{{$datos['importador'] }}</td>
                                                                                         </tr>
-                                                                                        <tr style="background: white;">
+                                                                                        <tr >
                                                                                             <td>Lugar de Entrega:</td> {{-- siempre --}}
                                                                                             <td>{{$datos['loadPort'] }}</td>
                                                                                         </tr>
-                                                                                     
-                                                                                        <tr >
-                                                                                            <td>Mercaderia:</td> {{-- siempre --}}
-                                                                                            <td>{{$datos['commodity'] }}</td>
-                                                                                        </tr> 
                                                                                         <tr style="background: white;">
+                                                                                            <td>Cut Off Fisico:</td> {{-- siempre --}}
+                                                                                            <td>{{$datos['cutOffFisico'] }}</td>
+                                                                                        </tr>
+                                                                                        <tr style="border-bottom: #052d3d 1px solid;">
                                                                                             <td>Observaciones:</td> {{-- siempre --}}
                                                                                             <td>{{$datos['obeservaciones'] }}</td>
                                                                                         </tr>
@@ -458,7 +461,7 @@
                                                                 style="padding-bottom:10px;padding-left:10px;padding-right:10px;padding-top:30px;text-align:center;">
                                                                 <div align="center">
                                                                     <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="#" style="height:46px;width:307px;v-text-anchor:middle;" arcsize="33%" stroke="false" fillcolor="#fc7318"><w:anchorlock/><v:textbox inset="0px,0px,0px,0px"><center style="color:#ffffff; font-family:Tahoma, Verdana, sans-serif; font-size:18px"><![endif]--><a
-                                                                        href="#"
+                                                                        href="{{env('FRONT_URL').'/includes/view_carga.php?id='.$datos['id']}}"
                                                                         style="text-decoration:none;display:inline-block;color:#ffffff;background-color:#fc7318;border-radius:15px;width:auto;border-top:1px solid #fc7318;font-weight:undefined;border-right:1px solid #fc7318;border-bottom:1px solid #fc7318;border-left:1px solid #fc7318;padding-top:5px;padding-bottom:5px;font-family:Lato, Tahoma, Verdana, Segoe, sans-serif;text-align:center;mso-border-alt:none;word-break:keep-all;"
                                                                         target="_blank"><span
                                                                             style="padding-left:20px;padding-right:20px;font-size:18px;display:inline-block;letter-spacing:normal;"><span
