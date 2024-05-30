@@ -35,8 +35,9 @@ class ServiceSatelital extends Controller
     {
         return env('APP_URL') . env('APP_NAME');
     }
-    public function reviewDomains(){
-        
+    public function reviewDomains()
+    {
+
         $trucks = truck::all();
 
         foreach ($trucks as $truck) {
@@ -75,12 +76,10 @@ class ServiceSatelital extends Controller
                     $truck->alta_aker = 1;
                     $truck->id_satelital = $details['id'];
                     $truck->save();
-
                 } else {
                     // Si no se encuentra un camión con el dominio, devolver un mensaje de error
                     return 'No se encontró un camión con el dominio especificado';
                 }
-
             }
         }
     }
@@ -94,33 +93,33 @@ class ServiceSatelital extends Controller
 
         // TEST: E6HW19 - PRODUCCION: C2QC20
 
-        
-            $body = '{
+
+        $body = '{
                     "patentes":["' . $domain . '"],
                     "cercania":true,
                     "domicilio":false,
                     "apiCode":"E6HW19",
                     "phone":"2612128105"
                     }';
-       
+
 
         $request = new Psr7Request('GET', 'https://app.akercontrol.com/ws/v2/servicios', $headers, $body);
         $res = $client->sendAsync($request)->wait();
         $respuesta = $res->getBody();
         $data = json_decode($respuesta, true);
 
-        if(isset($data['data'])){
+        if (isset($data['data'])) {
 
             $datos = $data['data'];
             $details = reset($datos);
             // Hacer algo con el primer elemento aquí
-            
+
             $truck = truck::where('domain', $details['patente'])->first();
 
             if ($truck) {
                 // Si se encuentra un camión con el dominio, actualizar el estado a 1
                 $truck->alta_aker = 1;
-                $truck->id_satelital = $details['id'] ;
+                $truck->id_satelital = $details['id'];
                 $truck->save();
 
                 // Cargamos en la Planilla de Aker:
@@ -137,13 +136,10 @@ class ServiceSatelital extends Controller
                 // Si no se encuentra un camión con el dominio, devolver un mensaje de error
                 return 'No se encontró un camión con el dominio especificado';
             }
-
-        } else{
+        } else {
 
             return 'no existe';
-            
         }
-       
     }
 
     public function serviceSatelital()
@@ -160,11 +156,11 @@ class ServiceSatelital extends Controller
             ->where('trucks.alta_aker', '!=', 0)
             ->get();
 
-            
-           
+
+
 
         foreach ($todosMisCamiones as $camion) {
-           
+
             $client = new Client();
             $headers = [
                 'Content-Type' => 'application/json'
@@ -172,7 +168,7 @@ class ServiceSatelital extends Controller
 
             // TEST: E6HW19 - PRODUCCION: C2QC20
 
-            if(env('APP_ENV') === 'production'){
+            if (env('APP_ENV') === 'production') {
                 $body = '{
                     "patentes":["' . $camion->domain . '"],
                     "cercania":true,
@@ -180,7 +176,7 @@ class ServiceSatelital extends Controller
                     "apiCode":"E6HW19",
                     "phone":"2612128105"
                     }';
-            }else{
+            } else {
                 $body = '{
                     "patentes":["' . $camion->domain . '"],
                     "cercania":true,
@@ -189,7 +185,7 @@ class ServiceSatelital extends Controller
                     "phone":"2612128105"
                     }';
             }
-           
+
             $request = new Psr7Request('GET', 'https://app.akercontrol.com/ws/v2/servicios', $headers, $body);
             $res = $client->sendAsync($request)->wait();
             $respuesta = $res->getBody();
@@ -201,7 +197,7 @@ class ServiceSatelital extends Controller
                 $datos = $keys[0]['data'][$camion->domain];
                 $posicionLat = $datos['ult_latitud'];
                 $posicionLon = $datos['ult_longitud'];
-                
+
                 $positionDB = new position();
                 $positionDB->dominio = $camion->domain;
                 $positionDB->lat = $posicionLat;
@@ -211,7 +207,7 @@ class ServiceSatelital extends Controller
                 $positionDB->save();
 
                 $IdTrip = $camion->IdTrip;
-            
+
                 $Radio = 6371e3; // metres
                 $φ1 = $posicionLat * pi() / 180; // φ, λ in radians
                 $φ2 = $camion->CargaLat * pi() / 180;
@@ -240,14 +236,14 @@ class ServiceSatelital extends Controller
 
                 if ($d <= 200) { // lugar de Carga
 
-            
+
                     $clientCarga = new Client();
                     $requestCarga = new Psr7Request('GET', env('APP_URL') . '/api/accionLugarDeCarga/' . $IdTrip);
                     $resCarga = $clientCarga->sendAsync($requestCarga)->wait();
                 }
 
                 if ($d2 <= 200) { // lugar de aduana
-                   
+
                     $clientAduana = new Client();
                     $requestAduana = new Psr7Request('GET', env('APP_URL') . '/api/accionLugarAduana/' . $IdTrip);
                     $resAduana = $clientAduana->sendAsync($requestAduana)->wait();
@@ -258,14 +254,14 @@ class ServiceSatelital extends Controller
                     $requestDescarga = new Psr7Request('GET', env('APP_URL') . '/api/accionLugarDescarga/' . $IdTrip);
                     $resDescarga = $clientDescarga->sendAsync($requestDescarga)->wait();
                 }
-                
-                
+
+
 
                 // Agregar punntos Criticos Globales.
             }
         }
 
-        $truckPosition = DB::table('trucks')->where('alta_aker',"!=",0)->get();
+        $truckPosition = DB::table('trucks')->where('alta_aker', "!=", 0)->get();
 
         foreach ($truckPosition as $camion) {
 
@@ -274,15 +270,15 @@ class ServiceSatelital extends Controller
                 'Content-Type' => 'application/json'
             ];
 
-           
-                $body = '{
+
+            $body = '{
                     "patentes":["' . $camion->domain . '"],
                     "cercania":true,
                     "domicilio":false,
                     "apiCode":"E6HW19",
                     "phone":"2612128105"
                     }';
-            
+
 
             $request = new Psr7Request('GET', 'https://app.akercontrol.com/ws/v2/servicios', $headers, $body);
             $res = $client->sendAsync($request)->wait();
@@ -301,7 +297,6 @@ class ServiceSatelital extends Controller
                 $positionDB->lat = $posicionLat;
                 $positionDB->lng = $posicionLon;
                 $positionDB->save();
-
             }
         }
     }
@@ -350,12 +345,12 @@ class ServiceSatelital extends Controller
                     ->get(); */
 
                 $trucks = DB::table('trucks')
-                ->leftJoin('asign', function ($join) {
-                    $join->on('trucks.domain', '=', 'asign.truck');
-                })
-                ->leftJoin('transports', 'trucks.transport_id', '=', 'transports.id')
-                ->leftJoin('drivers', 'asign.driver', '=', 'drivers.nombre')
-                ->leftJoin('cntr', 'asign.cntr_number', '=', 'cntr.cntr_number')
+                    ->leftJoin('asign', function ($join) {
+                        $join->on('trucks.domain', '=', 'asign.truck');
+                    })
+                    ->leftJoin('transports', 'trucks.transport_id', '=', 'transports.id')
+                    ->leftJoin('drivers', 'asign.driver', '=', 'drivers.nombre')
+                    ->leftJoin('cntr', 'asign.cntr_number', '=', 'cntr.cntr_number')
                     ->leftJoin('carga', 'cntr.booking', '=', 'carga.booking')
                     ->leftJoin('customer_load_places', 'carga.load_place', '=', 'customer_load_places.description')
                     ->leftJoin('customer_unload_places', 'carga.unload_place', '=', 'customer_unload_places.description')
@@ -470,11 +465,163 @@ class ServiceSatelital extends Controller
                     array_push($camiones, $truck);
                 }
             }
-        
-    }
+        }
         return $camiones;
     }
 
+    public function flotaId($domain)
+    {
+        $client = new Client();
+        $headers = [
+            'Content-Type' => 'application/json'
+        ];
+
+        // TEST: E6HW19 - PRODUCCION: C2QC20
+
+        $camiones = [];
+        $body = '{
+                    "patentes":["' . $domain . '"],
+                    "cercania":true,
+                    "domicilio":false,
+                    "apiCode":"E6HW19",
+                    "phone":"2612128105"
+                    }';
+
+
+        $request = new Psr7Request('GET', 'https://app.akercontrol.com/ws/v2/servicios', $headers, $body);
+        $res = $client->sendAsync($request)->wait();
+        $respuesta = $res->getBody();
+        $data = json_decode($respuesta, true);
+
+        if (isset($data['data'])) {
+
+            $dato = $data['data'][$domain];
+
+            $unidad = DB::table('trucks')
+            ->leftJoin('asign', function ($join) {
+                $join->on('trucks.domain', '=', 'asign.truck');
+            })
+            ->leftJoin('transports', 'trucks.transport_id', '=', 'transports.id')
+            ->leftJoin('drivers', 'asign.driver', '=', 'drivers.nombre')
+            ->leftJoin('cntr', 'asign.cntr_number', '=', 'cntr.cntr_number')
+            ->leftJoin('carga', 'cntr.booking', '=', 'carga.booking')
+            ->leftJoin('customer_load_places', 'carga.load_place', '=', 'customer_load_places.description')
+            ->leftJoin('customer_unload_places', 'carga.unload_place', '=', 'customer_unload_places.description')
+            ->leftJoin('aduanas', 'carga.custom_place', '=', 'aduanas.description')
+            ->select(
+                'cntr.cntr_number as contenedor',
+                'cntr.cntr_type as tipoContenedor',
+                'cntr.retiro_place',
+                'cntr.main_status',
+                'cntr.status_cntr',
+                'carga.id as cargaId',
+                'carga.booking',
+                'carga.commodity',
+                'carga.load_place',
+                'customer_load_places.latitud as LoadPlaceLat',
+                'customer_load_places.longitud as LoadPlaceLng',
+                'carga.load_date',
+                'carga.unload_place',
+                'customer_unload_places.latitud as UnloadPlaceLat',
+                'customer_unload_places.longitud as UnloadPlaceLng',
+                'carga.custom_place',
+                'aduanas.lat as aduanaLat',
+                'aduanas.lon as aduanaLng',
+                'carga.ref_customer',
+                'carga.type as cargaType',
+                'carga.cut_off_fis as unload_date',
+                'asign.driver',
+                'drivers.documento',
+                'drivers.vto_carnet',
+                'drivers.WhatsApp',
+                'asign.agent_port',
+                'trucks.*',
+                'asign.truck_semi',
+                'transports.*'
+            )
+            ->where('asign.truck', '=', $domain)
+            ->whereNotNull('trucks.domain') // Aseguramos que la unión principal se mantenga
+            ->get();
+
+              
+            
+                if ($unidad->isNotEmpty()) { // Verificar si se encontraron camiones
+
+                    $camion = $unidad[0];
+
+                    $truck['model'] = $camion->model;
+                    $truck['domain'] = $camion->domain;
+                    $truck['year'] = $camion->year;
+                    $truck['vto_poliza'] = $camion->vto_poliza;
+                    $truck['razon_social'] = $camion->razon_social;
+                    $truck['logo'] = $camion->logo;
+                    $truck['vto_permiso'] = $camion->vto_permiso;
+                    $truck['titulo'] = $dato['nombre'];
+                    $truck['ult_latitud'] = $dato['ult_latitud'];
+                    $truck['ult_longitud'] = $dato['ult_longitud'];
+                    $truck['ult_velocidad'] = $dato['ult_velocidad'];
+                    $truck['ult_reporte'] = $dato['ult_reporte'];
+                    $truck['ult_direccion'] = $dato['ult_direccion'];
+                    $truck['direccion'] = $dato['ult_direccion'];
+
+                    // Detalles del contenedor
+                    $truck['cntr'] = array(
+                        'contenedor' => $camion->contenedor,
+                        'type' => $camion->tipoContenedor,
+                        'main_status' => $camion->main_status,
+                        'status_detail' => $camion->status_cntr,
+                    );
+
+                    // Detalles generales
+                    $truck['general'] = array(
+                        'booking' => $camion->booking,
+                        'type' => $camion->cargaType,
+                        'retiro_place' => $camion->retiro_place,
+                        'commodity' => $camion->commodity,
+                        'ref_customer' => $camion->ref_customer,
+                        'agent_port' => $camion->agent_port,
+                        'id_carga' => $camion->cargaId,
+                        'url_carga' => env('FRONT_URL') . '/includes/view_carga_user.php?id=' . $camion->cargaId,
+
+                    );
+
+                    // Detalles de origen
+                    $truck['origen'] = array(
+                        'description' => $camion->load_place,
+                        'lat' => $camion->LoadPlaceLat,
+                        'lng' => $camion->LoadPlaceLng,
+                        'load_date' => $camion->load_date,
+                    );
+
+                    // Detalles de destino
+                    $truck['destino'] = array(
+                        'description' => $camion->unload_place,
+                        'lat' => $camion->UnloadPlaceLat,
+                        'lng' => $camion->UnloadPlaceLng,
+                        'load_date' => $camion->unload_date,
+                    );
+
+                    // Detalles de aduana
+                    $truck['aduana'] = array(
+                        'description' => $camion->custom_place,
+                        'lat' => $camion->aduanaLat,
+                        'lng' => $camion->aduanaLng,
+                        'load_date' => $camion->load_date,
+                    );
+
+                    // Detalles del conductor
+                    $truck['driver'] = array(
+                        'nombre' => $camion->driver,
+                        'documento' => $camion->documento,
+                        'carnet' => $camion->vto_carnet,
+                        'whatsapp' => $camion->WhatsApp,
+                    );
+                }
+            array_push($camiones, $truck);
+            }
+        
+        return $camiones;
+    }
 
 
 
@@ -515,10 +662,10 @@ class ServiceSatelital extends Controller
 
                 // Obtener los itinerarios activos que tienen puntos de interés asociados
                 $itinerarios = Itinerario::where('estado', 1)
-                ->with(['puntosDeInteres' => function ($query) {
-                    $query->where('estado', 1);
-                }])
-                ->get();
+                    ->with(['puntosDeInteres' => function ($query) {
+                        $query->where('estado', 1);
+                    }])
+                    ->get();
 
                 foreach ($itinerarios as $itinerario) {
                     foreach ($itinerario->puntosDeInteres as $puntoDeInteres) {
@@ -535,20 +682,20 @@ class ServiceSatelital extends Controller
                                 'unidad' => $itinerario->unidad_asignada,
 
                                 'punto_de_interes_id' => $puntoDeInteres->id,
-                                'distancia' => $distancia ,
+                                'distancia' => $distancia,
                                 'lugar' => 'esta cerca',
                                 'accion_ejecutada' => $puntoDeInteres->accion_id ?? null,
                                 'accion' => $accion
                             ];
                             $detalleComparaciones[] = $detalleComparacion;
-                        } else{
+                        } else {
 
                             $detalleComparacion = [
                                 'itinerario_id' => $itinerario->id,
                                 'unidad' => $itinerario->unidad_asignada,
 
                                 'punto_de_interes_id' => $puntoDeInteres->id,
-                                'distancia' => $distancia ,
+                                'distancia' => $distancia,
                                 'lugar' => 'esta lejos',
                                 'accion_ejecutada' => $puntoDeInteres->accion_id ?? null,
                                 'accion' => 'nada'
@@ -556,12 +703,11 @@ class ServiceSatelital extends Controller
                             ];
                             $detalleComparaciones[] = $detalleComparacion;
                         }
-
                     }
                 }
             }
         }
-        
+
         return response()->json(['detalle_comparaciones' => $detalleComparaciones]);
         return response()->json(['message' => 'Revisión de coordenadas completada.']);
     }
@@ -576,27 +722,27 @@ class ServiceSatelital extends Controller
             sin($dLongitud / 2) * sin($dLongitud / 2);
         $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
         $distanciaEnKilometros = $radioTierra * $c * 1000;
-         // Convertir de kilómetros a metros
+        // Convertir de kilómetros a metros
 
         return $distanciaEnKilometros; // Distancia en metros // Distancia en kilómetros
     }
-    
+
     public function ejecutarAccion(PuntoDeInteres $puntoDeInteres, $trip_id)
     {
 
         //return 'se envia correo:' . $puntoDeInteres;
 
         $datos =  DB::table('cntr')
-        ->join('users', 'cntr.user_cntr', '=', 'users.username')
-        ->leftjoin('itinerarios', 'cntr.id_cntr', '=', 'itinerarios.trip_id')
-        ->leftjoin('punto_de_interes', 'itinerarios.id', '=', 'punto_de_interes.itinerario_id')
-        ->join('carga', 'carga.booking', '=', 'cntr.booking')
-        ->select('carga.ref_customer', 'cntr.id_cntr', 'cntr.booking', 'cntr.cntr_number', 'cntr.cntr_type', 'cntr.confirmacion', 'cntr.retiro_place', 'cntr.company','cntr.status_cntr', 'cntr.main_status', 'users.username', 'users.email', 'users.celular', 'users.empresa', 'punto_de_interes.*', 'itinerarios.unidad_asignada')
-        ->where('cntr.id_cntr', '=', $trip_id)
-        ->where('punto_de_interes.id', '=', $puntoDeInteres->id)
-        ->get();
+            ->join('users', 'cntr.user_cntr', '=', 'users.username')
+            ->leftjoin('itinerarios', 'cntr.id_cntr', '=', 'itinerarios.trip_id')
+            ->leftjoin('punto_de_interes', 'itinerarios.id', '=', 'punto_de_interes.itinerario_id')
+            ->join('carga', 'carga.booking', '=', 'cntr.booking')
+            ->select('carga.ref_customer', 'cntr.id_cntr', 'cntr.booking', 'cntr.cntr_number', 'cntr.cntr_type', 'cntr.confirmacion', 'cntr.retiro_place', 'cntr.company', 'cntr.status_cntr', 'cntr.main_status', 'users.username', 'users.email', 'users.celular', 'users.empresa', 'punto_de_interes.*', 'itinerarios.unidad_asignada')
+            ->where('cntr.id_cntr', '=', $trip_id)
+            ->where('punto_de_interes.id', '=', $puntoDeInteres->id)
+            ->get();
 
-        if($puntoDeInteres->accion_mail == 1 ){
+        if ($puntoDeInteres->accion_mail == 1) {
 
             // revisa si status tambien hay que cambiar
 
@@ -614,8 +760,6 @@ class ServiceSatelital extends Controller
                 $logApi->user = 'No Informa';
                 $logApi->detalle = "envio email punto de interes to:" . $datos[0]->email;
                 $logApi->save();
-
-              
             } elseif ($sbx[0]->sandbox == 2) {
 
                 Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new MailPuntoDeInteres($datos[0]));
@@ -624,7 +768,6 @@ class ServiceSatelital extends Controller
                 $logApi->user = 'No Informa';
                 $logApi->detalle = "envio email Instructivo to: pablorio@botzero.tech";
                 $logApi->save();
-                
             } else {
 
                 Mail::to($datos[0]->email)->bcc($inboxEmail)->send(new MailPuntoDeInteres($datos[0]));
@@ -633,48 +776,37 @@ class ServiceSatelital extends Controller
                 $logApi->user = 'No Informa';
                 $logApi->detalle = "envio email punto de interes to:" . $datos[0]->email;
                 $logApi->save();
-               
             }
-
-
         }
 
-        if($puntoDeInteres->accion_status == 1){
+        if ($puntoDeInteres->accion_status == 1) {
 
             // buscar el status que está y subir un nivel. 
 
-            $status = DB::table('status_type')->where('STATUS',$datos[0]->main_status)->first();
+            $status = DB::table('status_type')->where('STATUS', $datos[0]->main_status)->first();
             $findId = $status->id + 1;
             $newstatus = DB::table('status_type')->where('id', $findId)->first();
 
             DB::table('cntr')
-            ->where('id_cntr', $trip_id)
-            ->update([
-                'main_status' => $newstatus->STATUS,
-                'status_cntr' => 'modificado automáticamente por punto de interés: ' . $datos[0]->descripcion
-            ]);
+                ->where('id_cntr', $trip_id)
+                ->update([
+                    'main_status' => $newstatus->STATUS,
+                    'status_cntr' => 'modificado automáticamente por punto de interés: ' . $datos[0]->descripcion
+                ]);
             $status = new statu();
             $status->status = 'modificado automáticamente por punto de interés: ' . $datos[0]->descripcion;
             if ($puntoDeInteres->accion_mail == 1) {
                 $status->avisado = 1;
-            }else{
+            } else {
                 $status->avisado = 0;
-
             }
             $status->main_status = $newstatus->STATUS;
             $status->cntr_number = $datos[0]->cntr_number;
             $status->user_status = 'Automatico';
             $status->save();
-
         }
 
         $puntoDeInteres->estado = 2;
         $puntoDeInteres->save();
-
-        
     }
-
-    
-
-
 }
