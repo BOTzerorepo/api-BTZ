@@ -132,6 +132,8 @@ Route::get('/accionLugarDescarga/{idTrip}','App\Http\Controllers\CustomerLoadPla
 Route::get('/servicioSatelital','App\Http\Controllers\ServiceSatelital@serviceSatelital');
 Route::get('/pruebaSatelital','App\Http\Controllers\ServiceSatelital@servicePrueba');
 Route::get('/flota','App\Http\Controllers\ServiceSatelital@flota');
+Route::get('/flotaId/{id}', 'App\Http\Controllers\ServiceSatelital@flotaID');
+
 Route::get('/dominioAker/{dominio}', 'App\Http\Controllers\ServiceSatelital@issetDominio');
 Route::get('/revierDomain', 'App\Http\Controllers\ServiceSatelital@reviewDomains');
 
