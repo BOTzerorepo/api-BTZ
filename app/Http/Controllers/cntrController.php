@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\asign;
 use App\Models\cntr;
+use App\Models\statu;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -117,19 +118,26 @@ class cntrController extends Controller
     public function update(Request $request, $id)
     {
         $cntr = cntr::find($id);
-        if ($cntr) {
-            $cntrOld = $cntr->cntr_number;
-        }
 
+        if ($cntr) {
+
+            $cntrOld = $cntr->cntr_number;
+
+        }
 
         $cntr->cntr_number = $request['cntr_number'];
         $cntr->cntr_seal = $request['cntr_seal'];
         $cntr->confirmacion = $request['confirmacion'];
         $cntr->save();
 
+
+
+
         $asign = asign::where('cntr_number', $cntrOld)->update(['cntr_number' => $request['cntr_number']]);
+        $status = statu::where('cntr_number', $cntrOld)->update(['cntr_number' => $cntr->cntr_number]);
         $idCarga = DB::table('carga')->where('booking', '=', $cntr->booking)->select('carga.id')->get();
 
+      
 
         if ($asign === 1) {
             return response()->json([
