@@ -111,7 +111,7 @@ Route::post('/carga','App\Http\Controllers\LoadController@store');              
 
 /* Impresion de PDF [RailDocs] */
 
-Route::get('/imprimirCarga/{cntr_number}', 'App\Http\Controllers\crearpdfController@carga'); // No usa Funcion MAIL
+Route::get('imprimirCarga/{cntr_number}', 'App\Http\Controllers\crearpdfController@carga'); // No usa Funcion MAIL
 Route::get('/verCarga/{cntr_number}', 'App\Http\Controllers\verpdfController@carga');
 Route::get('/imprimirVacio/{id_cntr}', 'App\Http\Controllers\crearpdfController@vacio');  // No usa Funcion MAIL
 
@@ -132,9 +132,14 @@ Route::get('/accionLugarDescarga/{idTrip}','App\Http\Controllers\CustomerLoadPla
 Route::get('/servicioSatelital','App\Http\Controllers\ServiceSatelital@serviceSatelital');
 Route::get('/pruebaSatelital','App\Http\Controllers\ServiceSatelital@servicePrueba');
 Route::get('/flota','App\Http\Controllers\ServiceSatelital@flota');
+Route::get('/flotaId/{id}', 'App\Http\Controllers\ServiceSatelital@flotaID');
+
 Route::get('/dominioAker/{dominio}', 'App\Http\Controllers\ServiceSatelital@issetDominio');
 Route::get('/revierDomain', 'App\Http\Controllers\ServiceSatelital@reviewDomains');
 
+Route::get('/revisarCoordenadas', 'App\Http\Controllers\ServiceSatelital@revisarCoordenadas');
+
+Route::get('/itinerarios/{id}', 'App\Http\Controllers\ItinerarioController@show');
 
 
 /* 
