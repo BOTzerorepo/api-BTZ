@@ -242,8 +242,12 @@
                                                                             style="margin-top: 25px; font-size: 14px; text-align: center;">
                                                                             <span style="font-size:15px;"><strong><span
                                                                                         style="font-size:15px;">
-                                                                                        {{ $datos['cntr_number'] }} -
-                                                                                        {{ $datos['booking'] }}
+                                                                                        @if( $datos['confirmacion'] != 0) 
+                                                                                        Carga {{ $datos['cntr_number'] }} para el {{ $datos['booking'] }}
+                                                                                        @else
+                                                                                        Carga CNTR SIN CONFIRMAR para el {{ $datos['booking'] }}
+                                                                                        @endif
+                                                                                      
                                                                                     </span></strong></span>
                                                                         </p>
                                                                     </div>

@@ -13,9 +13,9 @@ class AddUpdatedAtToCargaTable extends Migration
      */
     public function up()
     {
-        Schema::table('carga', function (Blueprint $table) {
+    /*     Schema::table('carga', function (Blueprint $table) {
             $table->timestamps(); // Si ya tienes 'created_at', esto también agrega 'updated_at'
-        });
+        }); */
     }
 
     /**
@@ -25,8 +25,8 @@ class AddUpdatedAtToCargaTable extends Migration
      */
     public function down()
     {
-        Schema::table('carga', function (Blueprint $table) {
+       /*  Schema::table('carga', function (Blueprint $table) {
             $table->dropTimestamps(); // Esto eliminará 'created_at' y 'updated_at'
-        });
+        }); */
     }
 }

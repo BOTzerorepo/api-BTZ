@@ -104,18 +104,26 @@ class oceansInstructions extends Controller
         $mail = $qmail[0]->mail_logistic;
 
         $sbx = DB::table('variables')->select('sandbox')->get();
-
+        $inboxEmail = env('INBOX_EMAIL');
         if ($sbx[0]->sandbox == 0) {
 
-            Mail::to($mail)->bcc('inboxplataforma@botzero.ar')->send(new envioIntructivoOceans($data)); 
+            Mail::to($mail)->bcc($inboxEmail)->send(new envioIntructivoOceans($data)); 
 
             $logApi = new logapi();
             $logApi->user = 'No Informa';
             $logApi->detalle = "envio email envioIntructivoOceans to:" . $mail;
 
-        } else {
+        } elseif ($sbx[0]->sandbox == 2) {
 
-            Mail::to('pablorio@botzero.tech')->bcc('inboxplataforma@botzero.ar')->send(new envioIntructivoOceans($data));
+            Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new envioIntructivoOceans($data));
+
+            $logApi = new logapi();
+            $logApi->user = 'No Informa';
+            $logApi->detalle = "+ Sandbox + envio email envioIntructivoOceans to: " . $mail;
+        
+        }else {
+
+            Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new envioIntructivoOceans($data));
             
             $logApi = new logapi();
             $logApi->user = 'No Informa';

@@ -342,25 +342,33 @@
                                                                                             <td>Booking:</td>
                                                                                             <td>{{$datos['booking'] }}</td>
                                                                                         </tr>
-                                                                                        <tr style="background: white;">
-                                                                                            <td >Shipper:</td>
-                                                                                            <td>{{$datos['shipper'] }}</td>
+                                                                                        <tr>
+                                                                                            <td style="background: white;">Trader:</td>
+                                                                                            <td>{{$datos['trader'] }}</td>
                                                                                         </tr>
                                                                                         <tr >
-                                                                                            <td>Dia de Carga:</td>
-                                                                                            <td>{{$datos['loadDate'] }}</td>
+                                                                                            <td >Shipper:</td>
+                                                                                            <td>{{$datos['shipper'] }}</td>
                                                                                         </tr>
                                                                                         <tr style="background: white;">
                                                                                             <td>Cantidad y Tipo de CNTR:</td>
                                                                                             <td>{{$datos['cantidad'] }} x {{$datos['cntr_type'] }} </td>
                                                                                         </tr>
-                                                                                        <tr>
-                                                                                            <td>Trader:</td>
-                                                                                            <td>{{$datos['trader'] }}</td>
+                                                                                        <tr >
+                                                                                            <td>Mercaderia:</td>
+                                                                                            <td>{{$datos['commodity'] }}</td>
+                                                                                        </tr> 
+                                                                                         <tr style="background: white;">
+                                                                                            <td>Deposito de Retiro:</td>
+                                                                                            <td>{{$datos['depositoRetiro'] }}</td>
                                                                                         </tr>
-                                                                                        <tr style="background: white;"> 
+                                                                                        <tr > 
                                                                                             <td>Lugar de Carga:</td>
                                                                                             <td>{{$datos['loadPlace'] }}</td>
+                                                                                        </tr>
+                                                                                        <tr style="background: white;">
+                                                                                            <td>Dia de Carga:</td>
+                                                                                            <td>{{$datos['loadDate'] }}</td>
                                                                                         </tr>
                                                                                         <tr>
                                                                                             <td>Lugar de Aduana Expo:</td>
@@ -370,6 +378,14 @@
                                                                                             <td>Despachante Expo:</td>
                                                                                             <td>{{$datos['customAgent'] }}</td>
                                                                                         </tr>
+                                                                                        <tr >
+                                                                                            <td>Lugar de Entrega:</td>
+                                                                                            <td>{{$datos['loadPort'] }}</td>
+                                                                                        </tr>
+                                                                                        <tr style="background: white;">
+                                                                                            <td>Cut Off Fisico:</td>
+                                                                                            <td>{{$datos['cutOffFisico'] }}</td>
+                                                                                        </tr>
                                                                                         <tr>
                                                                                             <td>Armador:</td>
                                                                                             <td>{{$datos['armador'] }}</td>
@@ -378,26 +394,10 @@
                                                                                             <td>Nave y Viaje</td>
                                                                                             <td>{{$datos['vessel'] }} - {{$datos['voyage'] }}</td>
                                                                                         </tr>
-                                                                                        <tr>
-                                                                                            <td>Cut Off Fisico:</td>
-                                                                                            <td>{{$datos['cutOffFisico'] }}</td>
-                                                                                        </tr>
-                                                                                        <tr style="background: white;">
-                                                                                            <td>Lugar de Entrega:</td>
-                                                                                            <td>{{$datos['loadPort'] }}</td>
-                                                                                        </tr>
-                                                                                         <tr>
-                                                                                            <td>Deposito de Retiro:</td>
-                                                                                            <td>{{$datos['depositoRetiro'] }}</td>
-                                                                                        </tr>
-                                                                                        <tr style="background: white;">
+                                                                                        <tr >
                                                                                             <td>Destino Final:</td>
                                                                                             <td>{{$datos['finalPoint'] }}</td>
                                                                                         </tr>
-                                                                                        <tr >
-                                                                                            <td>Mercaderia:</td>
-                                                                                            <td>{{$datos['commodity'] }}</td>
-                                                                                        </tr> 
                                                                                         <tr style="background: white;">
                                                                                             <td>Observaciones:</td>
                                                                                             <td>{{$datos['obeservaciones'] }}</td>
