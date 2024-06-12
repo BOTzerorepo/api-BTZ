@@ -492,10 +492,10 @@ class emailController extends Controller
         $inboxEmail = env('INBOX_EMAIL');
         if ($sbx[0]->sandbox == 0) {
 
-            $mail = Mail::to(['gzarate@totaltradegroup.com', 'czelada@totaltradegroup.com', 'rquero@totaltradegroup.com', 'bipoliti@totaltradegroup.com'])->cc(['cs.auxiliar@totaltradegroup.com'])->bcc($inboxEmail)->send(new avisoNewCarga($datos));
+            $mail = Mail::to(['gzarate@totaltradegroup.com', 'rquero@totaltradegroup.com', 'bipoliti@totaltradegroup.com'])->cc(['cs.auxiliar@totaltradegroup.com'])->bcc($inboxEmail)->send(new avisoNewCarga($datos));
             $logApi = new logapi();
             $logApi->user = $user[0]->username;
-            $logApi->detalle = "envio email to(['ddicarlo@totaltradegroup.com', 'rquero@totaltradegroup.com', 'cs.auxiliar@totaltradegroup.com'])->cc(['gzarate@totaltradegroup.com', 'czelada@totaltradegroup.com', 'fzgaib@totaltradegroup.com'])";
+            $logApi->detalle = "envio email to(['ddicarlo@totaltradegroup.com', 'rquero@totaltradegroup.com', 'cs.auxiliar@totaltradegroup.com'])->cc(['gzarate@totaltradegroup.com', 'fzgaib@totaltradegroup.com'])";
             $logApi->save();
             return 'ok';
         } elseif ($sbx[0]->sandbox == 2) {
@@ -518,7 +518,7 @@ class emailController extends Controller
         }
 
         /*   return view('mails.avisoNewCarga')->with('datos',$datos); */
-        /* $mail = Mail::to(['ddicarlo@totaltradegroup.com', 'rquero@totaltradegroup.com','cs.auxiliar@totaltradegroup.com'])->cc(['gzarate@totaltradegroup.com', 'czelada@totaltradegroup.com','fzgaib@totaltradegroup.com'])->bcc('traficottl@botzero.ar')->send(new avisoNewCarga($datos)); 
+        /* $mail = Mail::to(['ddicarlo@totaltradegroup.com', 'rquero@totaltradegroup.com','cs.auxiliar@totaltradegroup.com'])->cc(['gzarate@totaltradegroup.com', 'fzgaib@totaltradegroup.com'])->bcc('traficottl@botzero.ar')->send(new avisoNewCarga($datos)); 
         return 'ok'; */
         /* Por ahora hay que setear a mano!
         Para futuros hay que ver la formad enviar de acuerdo a un seteo dentro de la configuracion. 
