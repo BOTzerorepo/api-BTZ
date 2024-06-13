@@ -20,7 +20,6 @@ class cargaController extends Controller
     }
 
     public function loadTHisWeek($user)
-
     {
 
         $user = DB::table('users')->where('username', '=', $user)->first();
@@ -180,6 +179,20 @@ class cargaController extends Controller
         }
     }
 
+    public function showCargaDomain($domain)
+    {
+
+            $cargaPorId = DB::table('carga')
+            ->leftjoin('cntr', 'cntr.booking', '=', 'carga.booking')
+            ->leftjoin('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+            ->leftjoin('trucks', 'trucks.domain', '=', 'asign.truck')
+            ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport', 'asign.truck', 'asign.truck_semi', 'asign.file_instruction', 'trucks.alta_aker')
+            ->where('asign.truck', '=', $domain)
+            ->orderBy('carga.load_date', 'DESC')->get();
+            return $cargaPorId;
+       
+    }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -292,6 +305,30 @@ class cargaController extends Controller
         $carga->document_bookingConf = $request->input('document_bookingConf');
         $carga->type = $request->input('type');
         $carga->save();
+
+
+        for ($i = 1; $i <= $request->input('qviajes'); $i++) {
+
+            $numAleatorio = $request->input('booking') . $i;
+
+            DB::table('cntr')->insert([
+                'booking' => $request->input('booking'),
+                'cntr_number' => $numAleatorio,
+                'user_cntr' => $request->input('user'),
+                'cntr_type' => $request->input('cntr_type'),
+                'company' => $request->input('empresa'),
+            ]);
+
+            DB::table('asign')->insert([
+                'cntr_number' => $numAleatorio,
+                'booking' => $request->input('booking'),
+                'user' => $request->input('user'),
+                'company' => $request->input('empresa'),
+            ]);
+
+
+        }
+
 
         if ($carga->exists) {
             return response()->json(['message' => 'Carga ingresada correctamente', 'carga' => $carga, 'last_id' => $carga->id], 200);
