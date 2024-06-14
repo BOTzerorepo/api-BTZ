@@ -437,6 +437,8 @@ class verpdfController extends Controller
                             'ref_customer' => $row->ref_customer,
                             
                             'cntr_number' => $row->cntr_number,
+                            'cntr_seal' => $row->cntr_seal,
+
                             'confirmacion' => $row->confirmacion,
 
                         
