@@ -419,6 +419,8 @@ class verpdfController extends Controller
                             'img' => $base . '/public/image/empresas/' . $row->img,
                             'cuit' => $row->cuit,
                             'title' => $row->title,
+                            'retiro_place' => $row->retiro_place,
+
 
                             'booking' => $row->booking,
                             
