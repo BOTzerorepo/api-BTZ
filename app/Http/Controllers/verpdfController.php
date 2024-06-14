@@ -444,6 +444,8 @@ class verpdfController extends Controller
                             'net_weight' => $row->net_weight,
                             
                             'transport' => $row->transport,
+                            'transport_agent' => $row->transport_agent,
+
                             
                             'observation_load' => $row->observation_load,
                            
