@@ -440,6 +440,8 @@ class emailController extends Controller
                 'carga.type',
                 'carga.senasa',
                 'carga.senasa_string',
+                'carga.tara',
+                'carga.tara_string',
                 'carga.bl_hbl',
             )
             ->join('cntr', 'carga.booking', '=', 'cntr.booking')->where('carga.id', '=', $idCarga)->get();
@@ -484,7 +486,8 @@ class emailController extends Controller
             'bl_hbl' => $carga->bl_hbl,
             'senasa' => $carga->senasa,
             'senasa_string' => $carga->senasa_string,
-
+            'tara' => $carga->tara,
+            'tara_string' => $carga->tara_string,
 
         ];
 

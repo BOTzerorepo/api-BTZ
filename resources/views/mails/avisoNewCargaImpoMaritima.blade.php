@@ -366,7 +366,17 @@
                                                                                             <td >Senasa:</td>
                                                                                             <td>{{$datos['senasa'] }} -  {{ $datos['senasa_string']}}</td>
                                                                                         </tr>
-                                                                                         <tr style="background: white;"> 
+                                                                                        <tr style="background: white;">
+                                                                                            <td>Tara:</td>
+                                                                                            <td>
+                                                                                                @if ($datos['tara'] === 'tf')
+                                                                                                    TARA FISCAL - {{ $datos['tara_string']  }}
+                                                                                                @else
+                                                                                                    {{ $datos['tara'] }} - {{ $datos['tara_string']  }}
+                                                                                                @endif
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                        <tr style="background: white;"> 
                                                                                             <td>Lugar de Carga:</td>
                                                                                             <td>{{$datos['loadPlace'] }}</td>
                                                                                         </tr>
