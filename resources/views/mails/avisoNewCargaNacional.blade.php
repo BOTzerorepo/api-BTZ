@@ -378,6 +378,16 @@
                                                                                             <td>{{$datos['loadPort'] }}</td>
                                                                                         </tr>
                                                                                         <tr style="background: white;">
+                                                                                            <td>Tara:</td>
+                                                                                            <td>
+                                                                                                @if ($datos['tara'] === 'tf')
+                                                                                                    TARA FISCAL - {{ $datos['tara_string']  }}
+                                                                                                @else
+                                                                                                    {{ $datos['tara'] }} - {{ $datos['tara_string']  }}
+                                                                                                @endif
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                        <tr style="background: white;">
                                                                                             <td>Observaciones:</td>
                                                                                             <td>{{$datos['obeservaciones'] }}</td>
                                                                                         </tr>

@@ -35,7 +35,7 @@ class cargaController extends Controller
                 ->whereBetween('carga.load_date', [$empiezaSemana, $terminaSemana])
                 ->where('carga.status', '!=', 'TERMINADA')
                 ->where('carga.empresa', '=', $user->empresa)
-                ->orderBy('carga.load_date', 'DESC')->get();
+                ->orderBy('carga.load_date', 'ASC')->get();
                 
         } else {
 
@@ -46,7 +46,7 @@ class cargaController extends Controller
                 ->where('carga.status', '!=', 'TERMINADA')
                 ->where('carga.empresa', '=', $user->empresa)
                 ->where('carga.user', '=', $user->username)
-                ->orderBy('carga.load_date', 'DESC')->get();
+                ->orderBy('carga.load_date', 'ASC')->get();
         }
 
         return $todasLasCargasDeEstaSemana;
@@ -65,7 +65,7 @@ class cargaController extends Controller
                 ->where('carga.load_date', "<", $empiezaSemana)
                 ->where('carga.empresa', '=', $user->empresa)
                 ->where('carga.status', '!=', 'TERMINADA')
-                ->orderBy('carga.load_date', 'DESC')->get();
+                ->orderBy('carga.load_date', 'ASC')->get();
         } else {
 
             $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
@@ -75,7 +75,7 @@ class cargaController extends Controller
                 ->where('carga.empresa', '=', $user->empresa)
                 ->where('carga.status', '!=', 'TERMINADA')
                 ->where('carga.user', '=', $user->username)
-                ->orderBy('carga.load_date', 'DESC')->get();
+                ->orderBy('carga.load_date', 'ASC')->get();
         }
 
         return $todasLasCargasDeEstaSemana;
@@ -94,7 +94,7 @@ class cargaController extends Controller
                 ->where('carga.load_date', ">", $terminaSemana)
                 ->where('carga.status', '!=', 'TERMINADA')
                 ->where('carga.empresa', '=', $user->empresa)
-                ->orderBy('carga.load_date', 'DESC')->get();
+                ->orderBy('carga.load_date', 'ASC')->get();
         } else {
 
             $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
@@ -104,7 +104,7 @@ class cargaController extends Controller
                 ->where('carga.status', '!=', 'TERMINADA')
                 ->where('carga.empresa', '=', $user->empresa)
                 ->where('carga.user', '=', $user->username)
-                ->orderBy('carga.load_date', 'DESC')->get();
+                ->orderBy('carga.load_date', 'ASC')->get();
         }
 
         return $todasLasCargasDeEstaSemana;
@@ -121,7 +121,7 @@ class cargaController extends Controller
                 ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
                 ->where('carga.status', '=', 'TERMINADA')
                 ->where('carga.empresa', '=', $user->empresa)
-                ->orderBy('carga.load_date', 'DESC')->get();
+                ->orderBy('carga.load_date', 'ASC')->get();
                 
         } else {
 
@@ -131,7 +131,7 @@ class cargaController extends Controller
                 ->where('carga.status', '=', 'TERMINADA')
                 ->where('carga.empresa', '=', $user->empresa)
                 ->where('carga.user', '=', $user->username)
-                ->orderBy('carga.load_date', 'DESC')->get();
+                ->orderBy('carga.load_date', 'ASC')->get();
         }
 
         return $todasLasCargasDeEstaSemana;
@@ -273,6 +273,8 @@ class cargaController extends Controller
         $carga->ref_customer = $request->input('ref_customer');
         $carga->senasa = $request->input('senasa');
         $carga->senasa_string = $request->input('senasa_string');
+        $carga->tara = $request->input('tara');
+        $carga->tara_string = $request->input('tara_string');
         $carga->referencia_carga = $request->input('referencia_carga');
         $carga->comercial_reference = $request->input('comercial_reference');
         $carga->observation_customer = $request->input('observation_customer');
