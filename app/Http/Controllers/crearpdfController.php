@@ -709,10 +709,7 @@ class crearpdfController extends Controller
                             'cuit' => $row->cuit,
                             'title' => $row->title,
                             'retiro_place' => $row->retiro_place,
-
-
-                            'booking' => $row->booking,
-
+                            'booking' => $row->booking,                            
                             'senasa' => $row->senasa,
                             'senasa_string' => $row->senasa_string,
                             'shipper' => $row->shipper,
@@ -720,33 +717,21 @@ class crearpdfController extends Controller
                             'load_place' => $row->load_place,
                             'unload_place' => $row->unload_place,
                             'cut_off_fis' => $row->cut_off_fis,
-
-
-
-                            'ref_customer' => $row->ref_customer,
-
+                            'ref_customer' => $row->ref_customer,                         
                             'cntr_number' => $row->cntr_number,
-                            'cntr_seal' => $row->cntr_seal,
-
                             'confirmacion' => $row->confirmacion,
-
-
+                            'cntr_seal' => $row->cntr_seal,                        
                             'cntr_type' => $row->cntr_type,
                             'net_weight' => $row->net_weight,
-
                             'transport' => $row->transport,
                             'transport_agent' => $row->transport_agent,
-
-
                             'observation_load' => $row->observation_load,
-
                             'out_usd' => $row->out_usd,
-
                             'load_date' => $load_date,
                             'link_maps' => $row->link_maps,
                             'address' => $row->address,
                             'city' => $row->city,
-
+                            'observation_out' => $row-> observation_out,
                             'observation_customer' => $row->observation_customer,
                             "descarga_place" => $row->descarga_place,
                             "descarga_address" => $row->descarga_address,
@@ -759,7 +744,6 @@ class crearpdfController extends Controller
                             'rf_tem' => $row->rf_tem,
                             'rf_humedad' => $row->rf_humedad,
                             'rf_venti' => $row->rf_venti
-
                         ];
 
 
