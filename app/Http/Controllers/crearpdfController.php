@@ -725,7 +725,6 @@ class crearpdfController extends Controller
                             'rf_tem' => $row->rf_tem,
                             'rf_humedad' => $row->rf_humedad,
                             'rf_venti' => $row->rf_venti
-
                         ];
 
 
