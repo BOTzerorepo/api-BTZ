@@ -39,6 +39,8 @@ class Carga extends Model
         'ref_customer',
         'senasa',
         'senasa_string',
+        'tara',
+        'tara_string',
         'referencia_carga',
         'comercial_reference',
         'observation_customer',
