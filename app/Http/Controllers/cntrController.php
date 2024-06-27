@@ -130,14 +130,9 @@ class cntrController extends Controller
         $cntr->confirmacion = $request['confirmacion'];
         $cntr->save();
 
-
-
-
         $asign = asign::where('cntr_number', $cntrOld)->update(['cntr_number' => $request['cntr_number']]);
         $status = statu::where('cntr_number', $cntrOld)->update(['cntr_number' => $cntr->cntr_number]);
         $idCarga = DB::table('carga')->where('booking', '=', $cntr->booking)->select('carga.id')->get();
-
-      
 
         if ($asign === 1) {
             return response()->json([
@@ -158,5 +153,44 @@ class cntrController extends Controller
     public function destroy($id)
     {
         //
+    }
+    public function issetCntr($cntr){
+        
+        
+
+        $cntr = cntr::where('cntr_number',$cntr)->get();
+        
+
+        $count = $cntr->count();
+
+        // Prepara la respuesta en formato JSON
+        $response = [
+            'count' => $count,
+            'details' => $cntr
+        ];
+
+        // Devuelve la respuesta en formato JSON
+        return response()->json($response);
+
+    }
+    public function issetAsign($dominio)
+    {
+
+        $asign = cntr::where('cntr.main_status','!=','TERMINADA')
+        ->where('asign.truck',$dominio)
+        ->join('asign','asign.cntr_number','=','cntr.cntr_number')
+        ->join('trucks','asign.truck', '=', 'trucks.domain')
+        ->get();
+
+        $count = $asign->count();
+
+        // Prepara la respuesta en formato JSON
+        $response = [
+            'count' => $count,
+            'details' => $asign
+        ];
+
+        // Devuelve la respuesta en formato JSON
+        return response()->json($response);
     }
 }
