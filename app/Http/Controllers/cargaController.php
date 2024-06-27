@@ -7,6 +7,9 @@ use App\Models\Carga;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Storage;
 
 class cargaController extends Controller
 {
@@ -257,8 +260,30 @@ class cargaController extends Controller
     }
 
     public function guardarFormulario(Request $request)
-    {
+{
+    DB::beginTransaction();
+    try {
+        // Validación de datos
+        $request->validate([
+            'ref_customer' => 'required',
+            'tarifa_ref' => 'required',
+            'trader' => 'required',
+            'booking' => 'required',
+            'qviajes' => 'required',
+            'cntr_type' => 'required',
+            'commodity' => 'required',
+            'tara' => 'required',
+            'load_place' => 'required',
+            'load_date' => 'required',
+            'unload_place' => 'required',
+            'cut_off_fis' => 'required',
+            'user' => 'required',
+            'status' => 'required',
+            'empresa' => 'required',
+            'type' => 'required',
+        ]);
 
+        // Crear una carga
         $carga = new Carga();
         $carga->booking = $request->input('booking');
         $carga->bl_hbl = $request->input('bl_hbl');
@@ -308,15 +333,14 @@ class cargaController extends Controller
         $carga->type = $request->input('type');
         $carga->save();
 
-
         for ($i = 1; $i <= $request->input('qviajes'); $i++) {
-
             $numAleatorio = $request->input('booking') . $i;
 
             DB::table('cntr')->insert([
                 'booking' => $request->input('booking'),
                 'cntr_number' => $numAleatorio,
                 'user_cntr' => $request->input('user'),
+                'retiro_place' => $request->input('retiro_place'),
                 'cntr_type' => $request->input('cntr_type'),
                 'company' => $request->input('empresa'),
             ]);
@@ -327,17 +351,33 @@ class cargaController extends Controller
                 'user' => $request->input('user'),
                 'company' => $request->input('empresa'),
             ]);
-
-
         }
 
+        DB::commit();
 
-        if ($carga->exists) {
-            return response()->json(['message' => 'Carga ingresada correctamente', 'carga' => $carga, 'last_id' => $carga->id], 200);
-        } else {
-            return response()->json(['message' => 'Error al registrar la carga', 'error' => 'Ups! no pudimos registrar la carga, por favor revisá que no esté repetica bajo el id: ' . $carga->booking], 500);
+        // Devuelvo que se creó correctamente el código
+        return response()->json(['message' => 'Carga ingresada correctamente Booking: ' . $request->input('booking'), 'message_type' => 'success', 'carga' => $carga, 'last_id' => $carga->id], 200);
+    } catch (ValidationException $e) {
+        DB::rollBack();
+        $errors = [];
+        foreach ($e->errors() as $field => $errorMessages) {
+            foreach ($errorMessages as $errorMessage) {
+                $errors[] = $errorMessage;
+            }
         }
-
+    
+        return response()->json([
+            'message' => 'Datos ingresados incorrectamente',
+            'message_type' => 'danger',
+            'error' => $errors
+        ], 422);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        $errorMessage = $e->getMessage();
+        // Manejar otras excepciones si es necesario
+        return response()->json(['error' => $errorMessage, 'message_type' => 'danger'], 500);
     }
+
+}
 
 }
