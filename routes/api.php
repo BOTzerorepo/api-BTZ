@@ -177,6 +177,8 @@ o8o        o888o o88o     o8888o o8o        `8  Y8P o88o     o8888o  `Y8bood8P' 
 
 */
 
+//CARGA
+Route::delete('/carga/{id}', 'App\Http\Controllers\cargaController@destroy')->name('cargas.destroy');
 
 // USER
 
