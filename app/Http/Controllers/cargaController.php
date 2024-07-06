@@ -256,128 +256,156 @@ class cargaController extends Controller
      */
     public function destroy($id)
     {
-        //
+        DB::beginTransaction();
+        try {
+            // Busca la carga por su ID
+            $carga = DB::table('carga')->where('id', $id)->first();
+    
+            // Verifica si la carga existe
+            if (!$carga) {
+                return response()->json(['error' => 'La carga no fue encontrada.'], 404);
+            }
+            // Elimina los registros relacionados en las tablas cntr y asign
+            DB::table('cntr')->where('booking', $carga->booking)->delete();
+            DB::table('asign')->where('booking', $carga->booking)->delete();
+
+            // Elimina la carga
+            DB::table('carga')->where('id', $id)->delete();
+    
+            DB::commit();
+    
+            // Devuelve una respuesta de éxito
+            return response()->json([
+                'message' => 'La carga ha sido eliminada correctamente.',
+                'message_type' => 'success'
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $errorMessage = $e->getMessage();
+            // Manejar otras excepciones si es necesario
+            return response()->json(['error' => $errorMessage, 'message_type' => 'danger'], 500);
+        }
     }
 
     public function guardarFormulario(Request $request)
-{
-    DB::beginTransaction();
-    try {
-        // Validación de datos
-        $request->validate([
-            'ref_customer' => 'required',
-            'tarifa_ref' => 'required',
-            'trader' => 'required',
-            'booking' => 'required',
-            'qviajes' => 'required',
-            'cntr_type' => 'required',
-            'commodity' => 'required',
-            'tara' => 'required',
-            'load_place' => 'required',
-            'load_date' => 'required',
-            'unload_place' => 'required',
-            'cut_off_fis' => 'required',
-            'user' => 'required',
-            'status' => 'required',
-            'empresa' => 'required',
-            'type' => 'required',
-        ]);
-
-        // Crear una carga
-        $carga = new Carga();
-        $carga->booking = $request->input('booking');
-        $carga->bl_hbl = $request->input('bl_hbl');
-        $carga->shipper = $request->input('shipper');
-        $carga->commodity = $request->input('commodity');
-        $carga->load_place = $request->input('load_place');
-        $carga->trader = $request->input('trader');
-        $carga->importador = $request->input('importador');
-        $carga->load_date = $request->input('load_date');
-        $carga->unload_place = $request->input('unload_place');
-        $carga->cut_off_fis = $request->input('cut_off_fis');
-        $carga->cut_off_doc = $request->input('cut_off_doc');
-        $carga->oceans_line = $request->input('oceans_line');
-        $carga->vessel = $request->input('vessel');
-        $carga->voyage = $request->input('voyage');
-        $carga->final_point = $request->input('final_point');
-        $carga->ETA = $request->input('ETA');
-        $carga->ETD = $request->input('ETD');
-        $carga->consignee = $request->input('consignee');
-        $carga->notify = $request->input('notify');
-        $carga->custom_place = $request->input('custom_place');
-        $carga->custom_agent = $request->input('custom_agent');
-        $carga->custom_place_impo = $request->input('custom_place_impo');
-        $carga->custom_agent_impo = $request->input('custom_agent_impo');
-        $carga->ref_customer = $request->input('ref_customer');
-        $carga->senasa = $request->input('senasa');
-        $carga->senasa_string = $request->input('senasa_string');
-        $carga->tara = $request->input('tara');
-        $carga->tara_string = $request->input('tara_string');
-        $carga->referencia_carga = $request->input('referencia_carga');
-        $carga->comercial_reference = $request->input('comercial_reference');
-        $carga->observation_customer = $request->input('observation_customer');
-        $carga->tarifa_ref = $request->input('tarifa_ref');
-        $carga->user = $request->input('user');
-        $carga->empresa = $request->input('empresa');
-        $carga->status = $request->input('status');
-        $carga->big_state = $request->input('big_state');
-        $carga->confirm_date = $request->input('confirm_date');
-        $carga->ex_alto = $request->input('ex_alto');
-        $carga->ex_ancho = $request->input('ex_ancho');
-        $carga->ex_largo = $request->input('ex_largo');
-        $carga->obs_imo = $request->input('obs_imo');
-        $carga->rf_tem = $request->input('rf_tem');
-        $carga->rf_humedad = $request->input('rf_humedad');
-        $carga->rf_venti = $request->input('rf_venti');
-        $carga->document_bookingConf = $request->input('document_bookingConf');
-        $carga->type = $request->input('type');
-        $carga->save();
-
-        for ($i = 1; $i <= $request->input('qviajes'); $i++) {
-            $numAleatorio = $request->input('booking') . $i;
-
-            DB::table('cntr')->insert([
-                'booking' => $request->input('booking'),
-                'cntr_number' => $numAleatorio,
-                'user_cntr' => $request->input('user'),
-                'retiro_place' => $request->input('retiro_place'),
-                'cntr_type' => $request->input('cntr_type'),
-                'company' => $request->input('empresa'),
+    {
+        DB::beginTransaction();
+        try {
+            // Validación de datos
+            $request->validate([
+                'ref_customer' => 'required',
+                'tarifa_ref' => 'required',
+                'trader' => 'required',
+                'booking' => 'required',
+                'qviajes' => 'required',
+                'cntr_type' => 'required',
+                'commodity' => 'required',
+                'tara' => 'required',
+                'load_place' => 'required',
+                'load_date' => 'required',
+                'unload_place' => 'required',
+                'cut_off_fis' => 'required',
+                'user' => 'required',
+                'status' => 'required',
+                'empresa' => 'required',
+                'type' => 'required',
             ]);
 
-            DB::table('asign')->insert([
-                'cntr_number' => $numAleatorio,
-                'booking' => $request->input('booking'),
-                'user' => $request->input('user'),
-                'company' => $request->input('empresa'),
-            ]);
-        }
+            // Crear una carga
+            $carga = new Carga();
+            $carga->booking = $request->input('booking');
+            $carga->bl_hbl = $request->input('bl_hbl');
+            $carga->shipper = $request->input('shipper');
+            $carga->commodity = $request->input('commodity');
+            $carga->load_place = $request->input('load_place');
+            $carga->trader = $request->input('trader');
+            $carga->importador = $request->input('importador');
+            $carga->load_date = $request->input('load_date');
+            $carga->unload_place = $request->input('unload_place');
+            $carga->cut_off_fis = $request->input('cut_off_fis');
+            $carga->cut_off_doc = $request->input('cut_off_doc');
+            $carga->oceans_line = $request->input('oceans_line');
+            $carga->vessel = $request->input('vessel');
+            $carga->voyage = $request->input('voyage');
+            $carga->final_point = $request->input('final_point');
+            $carga->ETA = $request->input('ETA');
+            $carga->ETD = $request->input('ETD');
+            $carga->consignee = $request->input('consignee');
+            $carga->notify = $request->input('notify');
+            $carga->custom_place = $request->input('custom_place');
+            $carga->custom_agent = $request->input('custom_agent');
+            $carga->custom_place_impo = $request->input('custom_place_impo');
+            $carga->custom_agent_impo = $request->input('custom_agent_impo');
+            $carga->ref_customer = $request->input('ref_customer');
+            $carga->senasa = $request->input('senasa');
+            $carga->senasa_string = $request->input('senasa_string');
+            $carga->tara = $request->input('tara');
+            $carga->tara_string = $request->input('tara_string');
+            $carga->referencia_carga = $request->input('referencia_carga');
+            $carga->comercial_reference = $request->input('comercial_reference');
+            $carga->observation_customer = $request->input('observation_customer');
+            $carga->tarifa_ref = $request->input('tarifa_ref');
+            $carga->user = $request->input('user');
+            $carga->empresa = $request->input('empresa');
+            $carga->status = $request->input('status');
+            $carga->big_state = $request->input('big_state');
+            $carga->confirm_date = $request->input('confirm_date');
+            $carga->ex_alto = $request->input('ex_alto');
+            $carga->ex_ancho = $request->input('ex_ancho');
+            $carga->ex_largo = $request->input('ex_largo');
+            $carga->obs_imo = $request->input('obs_imo');
+            $carga->rf_tem = $request->input('rf_tem');
+            $carga->rf_humedad = $request->input('rf_humedad');
+            $carga->rf_venti = $request->input('rf_venti');
+            $carga->document_bookingConf = $request->input('document_bookingConf');
+            $carga->type = $request->input('type');
+            $carga->save();
 
-        DB::commit();
+            for ($i = 1; $i <= $request->input('qviajes'); $i++) {
+                $numAleatorio = $request->input('booking') . $i;
 
-        // Devuelvo que se creó correctamente el código
-        return response()->json(['message' => 'Carga ingresada correctamente Booking: ' . $request->input('booking'), 'message_type' => 'success', 'carga' => $carga, 'last_id' => $carga->id], 200);
-    } catch (ValidationException $e) {
-        DB::rollBack();
-        $errors = [];
-        foreach ($e->errors() as $field => $errorMessages) {
-            foreach ($errorMessages as $errorMessage) {
-                $errors[] = $errorMessage;
+                DB::table('cntr')->insert([
+                    'booking' => $request->input('booking'),
+                    'cntr_number' => $numAleatorio,
+                    'user_cntr' => $request->input('user'),
+                    'retiro_place' => $request->input('retiro_place'),
+                    'cntr_type' => $request->input('cntr_type'),
+                    'company' => $request->input('empresa'),
+                ]);
+
+                DB::table('asign')->insert([
+                    'cntr_number' => $numAleatorio,
+                    'booking' => $request->input('booking'),
+                    'user' => $request->input('user'),
+                    'company' => $request->input('empresa'),
+                ]);
             }
-        }
-    
-        return response()->json([
-            'message' => 'Datos ingresados incorrectamente',
-            'message_type' => 'danger',
-            'error' => $errors
-        ], 422);
-    } catch (\Exception $e) {
-        DB::rollBack();
-        $errorMessage = $e->getMessage();
-        // Manejar otras excepciones si es necesario
-        return response()->json(['error' => $errorMessage, 'message_type' => 'danger'], 500);
-    }
 
-}
+            DB::commit();
+
+            // Devuelvo que se creó correctamente el código
+            return response()->json(['message' => 'Carga ingresada correctamente Booking: ' . $request->input('booking'), 'message_type' => 'success', 'carga' => $carga, 'last_id' => $carga->id], 200);
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            $errors = [];
+            foreach ($e->errors() as $field => $errorMessages) {
+                foreach ($errorMessages as $errorMessage) {
+                    $errors[] = $errorMessage;
+                }
+            }
+        
+            return response()->json([
+                'message' => 'Datos ingresados incorrectamente',
+                'message_type' => 'danger',
+                'error' => $errors
+            ], 422);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $errorMessage = $e->getMessage();
+            // Manejar otras excepciones si es necesario
+            return response()->json(['error' => $errorMessage, 'message_type' => 'danger'], 500);
+        }
+
+    }
 
 }
