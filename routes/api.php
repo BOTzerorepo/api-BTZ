@@ -155,13 +155,14 @@ oooooo     oooo       .o.       ooooo        ooooo oooooooooo.         .o.      
 
 Route::get('issetBooking/{booking}', 'App\Http\Controllers\cargaController@issetBooking');
 Route::get('issetTransport/{cuit}', 'App\Http\Controllers\TransportController@issetTrasnsport');
+Route::get('issetTransportRazon/{razon_social}', 'App\Http\Controllers\TransportController@issetTransportRazon');
 Route::get('issetTruck/{domain}', 'App\Http\Controllers\TruckController@issetTruck');
 Route::get('issetTrader/{trader}', 'App\Http\Controllers\cargaController@issetTrader');
 Route::get('issetLoadPlace/{description}', 'App\Http\Controllers\CustomerLoadPlaceController@issetLugarDeCarga');
 Route::get('issetUnloadPlace/{description}', 'App\Http\Controllers\CustomerLoadPlaceController@issetLugarDeDescarga');
 Route::get('issetCntr/{cntr_number}', 'App\Http\Controllers\cntrController@issetCntr');
 Route::get('issetAsignacion/{dominio}', 'App\Http\Controllers\cntrController@issetAsign');
-
+Route::get('issetDriver', 'App\Http\Controllers\DriverController@issetDriver');
 
 
 
