@@ -161,7 +161,7 @@ Route::get('issetLoadPlace/{description}', 'App\Http\Controllers\CustomerLoadPla
 Route::get('issetUnloadPlace/{description}', 'App\Http\Controllers\CustomerLoadPlaceController@issetLugarDeDescarga');
 Route::get('issetCntr/{cntr_number}', 'App\Http\Controllers\cntrController@issetCntr');
 Route::get('issetAsignacion/{dominio}', 'App\Http\Controllers\cntrController@issetAsign');
-
+Route::get('issetDriver', 'App\Http\Controllers\DriverController@issetDriver');
 
 
 
