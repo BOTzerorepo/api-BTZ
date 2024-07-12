@@ -120,7 +120,6 @@ class cntrController extends Controller
         $cntr = cntr::find($id);
 
         if ($cntr) {
-
             $cntrOld = $cntr->cntr_number;
 
         }
@@ -154,24 +153,10 @@ class cntrController extends Controller
     {
         //
     }
-    public function issetCntr($cntr){
-        
-        
-
-        $cntr = cntr::where('cntr_number',$cntr)->get();
-        
-
-        $count = $cntr->count();
-
-        // Prepara la respuesta en formato JSON
-        $response = [
-            'count' => $count,
-            'details' => $cntr
-        ];
-
-        // Devuelve la respuesta en formato JSON
-        return response()->json($response);
-
+    public function issetCntr($cntr) {
+        $cntrCount = cntr::where('cntr_number', $cntr)->count();
+        $asignCount = asign::where('cntr_number', $cntr)->count();
+        return $cntrCount + $asignCount;
     }
     public function issetAsign($dominio)
     {
