@@ -142,4 +142,24 @@ class DriverController extends Controller
             return 'Se elimino el Chofer';
         };
     }
+    
+    public function issetDriver(Request $request)
+    {
+        $nombre = $request->query('nombre');
+        $transporte = $request->query('transporte'); // Obtener el valor del transporte
+
+        // Realiza las operaciones necesarias con los parámetros
+        $driver = DB::table('drivers')
+            ->leftJoin('transports', 'transports.razon_social', '=', 'drivers.transporte')
+            ->select('drivers.id', 'drivers.nombre', 'transports.razon_social')
+            ->where('drivers.nombre', '=', $nombre)
+            ->where('transports.razon_social', '=', $transporte) // Filtrar también por transporte
+            ->get();
+        $count = $driver->count();
+
+        return response()->json([
+            'count' => $count,
+            'detail' => $driver
+        ]);
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\asign;
 use App\Models\cntr;
+use App\Models\statu;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -117,10 +118,11 @@ class cntrController extends Controller
     public function update(Request $request, $id)
     {
         $cntr = cntr::find($id);
+
         if ($cntr) {
             $cntrOld = $cntr->cntr_number;
-        }
 
+        }
 
         $cntr->cntr_number = $request['cntr_number'];
         $cntr->cntr_seal = $request['cntr_seal'];
@@ -128,8 +130,8 @@ class cntrController extends Controller
         $cntr->save();
 
         $asign = asign::where('cntr_number', $cntrOld)->update(['cntr_number' => $request['cntr_number']]);
+        $status = statu::where('cntr_number', $cntrOld)->update(['cntr_number' => $cntr->cntr_number]);
         $idCarga = DB::table('carga')->where('booking', '=', $cntr->booking)->select('carga.id')->get();
-
 
         if ($asign === 1) {
             return response()->json([
@@ -150,5 +152,30 @@ class cntrController extends Controller
     public function destroy($id)
     {
         //
+    }
+    public function issetCntr($cntr) {
+        $cntrCount = cntr::where('cntr_number', $cntr)->count();
+        $asignCount = asign::where('cntr_number', $cntr)->count();
+        return $cntrCount + $asignCount;
+    }
+    public function issetAsign($dominio)
+    {
+
+        $asign = cntr::where('cntr.main_status','!=','TERMINADA')
+        ->where('asign.truck',$dominio)
+        ->join('asign','asign.cntr_number','=','cntr.cntr_number')
+        ->join('trucks','asign.truck', '=', 'trucks.domain')
+        ->get();
+
+        $count = $asign->count();
+
+        // Prepara la respuesta en formato JSON
+        $response = [
+            'count' => $count,
+            'details' => $asign
+        ];
+
+        // Devuelve la respuesta en formato JSON
+        return response()->json($response);
     }
 }

@@ -58,7 +58,7 @@ class verpdfController extends Controller
                     'asign.id',
                     'razon_social.img', 'razon_social.cuit', 'razon_social.title',
                     'asign.transport', 'asign.transport_agent', 'asign.observation_load', 'asign.agent_port',
-                    'carga.custom_place', 'carga.bl_hbl', 'carga.senasa', 'carga.senasa_string', 'carga.type', 'carga.ref_customer', 'carga.load_date', 'carga.booking', 'carga.importador', 'carga.shipper', 'carga.commodity', 'carga.load_place', 'carga.unload_place', 'carga.cut_off_fis', 'carga.oceans_line', 'carga.vessel', 'carga.voyage', 'carga.final_point', 'carga.observation_customer', 'carga.custom_agent', 'carga.custom_place_impo', 'carga.ref_customer', 'carga.ex_alto', 'carga.ex_ancho', 'carga.ex_largo', 'carga.obs_imo', 'carga.rf_tem', 'carga.rf_humedad', 'carga.rf_venti',
+                    'carga.custom_place', 'carga.bl_hbl', 'carga.senasa', 'carga.senasa_string', 'carga.tara', 'carga.tara_string', 'carga.type', 'carga.ref_customer', 'carga.load_date', 'carga.booking', 'carga.importador', 'carga.shipper', 'carga.commodity', 'carga.load_place', 'carga.unload_place', 'carga.cut_off_fis', 'carga.oceans_line', 'carga.vessel', 'carga.voyage', 'carga.final_point', 'carga.observation_customer', 'carga.custom_agent', 'carga.custom_place_impo', 'carga.ref_customer', 'carga.ex_alto', 'carga.ex_ancho', 'carga.ex_largo', 'carga.obs_imo', 'carga.rf_tem', 'carga.rf_humedad', 'carga.rf_venti',
                     'cntr.cntr_number', 'cntr.confirmacion', 'cntr.cntr_seal', 'cntr.cntr_type', 'cntr.net_weight', 'cntr.retiro_place', 'cntr.out_usd', 'cntr.modo_pago_out', 'cntr.observation_out', 
                     'customer_load_places.link_maps', 'customer_load_places.address', 'customer_load_places.city',
                     'agencies.observation_gral',
@@ -96,6 +96,8 @@ class verpdfController extends Controller
                             'booking' => $row->booking,
                             'shipper' => $row->shipper,
                             'commodity' => $row->commodity,
+                            'tara' => $row->tara,
+                            'tara_string' => $row->tara_string,
                             'load_place' => $row->load_place,
                             'unload_place' => $row->unload_place,
                             'cut_off_fis' => $row->cut_off_fis,
@@ -148,6 +150,8 @@ class verpdfController extends Controller
                             'booking' => $row->booking,
                             'shipper' => $row->shipper,
                             'commodity' => $row->commodity,
+                            'tara' => $row->tara,
+                            'tara_string' => $row->tara_string,
                             'load_place' => $row->load_place,
                             'unload_place' => $row->unload_place,
                             'cut_off_fis' => $row->cut_off_fis,
@@ -204,6 +208,8 @@ class verpdfController extends Controller
                             'booking' => $row->booking,
                             'shipper' => $row->shipper,
                             'commodity' => $row->commodity,
+                            'tara' => $row->tara,
+                            'tara_string' => $row->tara_string,
                             'load_place' => $row->load_place,
                             'unload_place' => $row->unload_place,
                             'cut_off_fis' => $row->cut_off_fis,
@@ -273,11 +279,14 @@ class verpdfController extends Controller
                             'img' => $base . '/public/image/empresas/' . $row->img,
                             'cuit' => $row->cuit,
                             'title' => $row->title,
+                            
 
                             'booking' => $row->booking,
                             'bl_hbl' => $row->bl_hbl,
                             'senasa' => $row->senasa,
                             'senasa_string' => $row->senasa_string,
+                            'tara' => $row->tara,
+                            'tara_string' => $row->tara_string,
                             'shipper' => $row->shipper,
                             'commodity' => $row->commodity,
                             'load_place' => $row->load_place,
@@ -354,6 +363,8 @@ class verpdfController extends Controller
                             'bl_hbl' => $row->bl_hbl,
                             'senasa' => $row->senasa,
                             'senasa_string' => $row->senasa_string,
+                            'tara' => $row->tara,
+                            'tara_string' => $row->tara_string,
                             'shipper' => $row->shipper,
                             'commodity' => $row->commodity,
                             'load_place' => $row->load_place,
@@ -419,41 +430,32 @@ class verpdfController extends Controller
                             'img' => $base . '/public/image/empresas/' . $row->img,
                             'cuit' => $row->cuit,
                             'title' => $row->title,
-
-                            'booking' => $row->booking,
-                            
+                            'retiro_place' => $row->retiro_place,
+                            'booking' => $row->booking,                            
                             'senasa' => $row->senasa,
                             'senasa_string' => $row->senasa_string,
+                            'tara' => $row->tara,
+                            'tara_string' => $row->tara_string,
                             'shipper' => $row->shipper,
                             'commodity' => $row->commodity,
                             'load_place' => $row->load_place,
                             'unload_place' => $row->unload_place,
                             'cut_off_fis' => $row->cut_off_fis,
-                            
-                            
-
-                            'ref_customer' => $row->ref_customer,
-                            
+                            'ref_customer' => $row->ref_customer,                         
                             'cntr_number' => $row->cntr_number,
                             'confirmacion' => $row->confirmacion,
-
-                        
+                            'cntr_seal' => $row->cntr_seal,                        
                             'cntr_type' => $row->cntr_type,
                             'net_weight' => $row->net_weight,
-                            
                             'transport' => $row->transport,
-                            
+                            'transport_agent' => $row->transport_agent,
                             'observation_load' => $row->observation_load,
-                           
                             'out_usd' => $row->out_usd,
-                            
                             'load_date' => $load_date,
                             'link_maps' => $row->link_maps,
                             'address' => $row->address,
                             'city' => $row->city,
                             'observation_out' => $row-> observation_out,
-
-                           
                             'observation_customer' => $row->observation_customer,
                             "descarga_place" => $row->descarga_place,
                             "descarga_address" => $row->descarga_address,

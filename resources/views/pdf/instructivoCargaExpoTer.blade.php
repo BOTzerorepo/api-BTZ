@@ -93,6 +93,16 @@
         <td colspan="4" class="tdContenido">{{ $custom_place }}</td>
     </tr>
     <tr>
+        <td align="left" width="25%" class="tdContenidoItem"><strong>Tara:</strong></td>
+        <td colspan="4" class="tdContenido">
+            @if ($tara === 'tf')
+                TARA FISCAL - {{ $tara_string }}
+            @else
+                {{ $tara }} - {{ $tara_string }}
+            @endif
+        </td>
+    </tr>
+    <tr>
         <td align="left" width="25%" class="tdContenidoItem"><strong>Despachante Expo:</strong></td>
         <td colspan="4" class="tdContenido">{{ $custom_agent }} [ {{ $custom_agent_mail }} - {{ $custom_agent_phone }}]</td>
     </tr>

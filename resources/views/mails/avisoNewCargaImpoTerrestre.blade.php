@@ -362,6 +362,16 @@
                                                                                             <td>Senasa:</td>
                                                                                             <td>{{$datos['senasa'] }} - {{$datos['senasa_string'] }}</td>
                                                                                         </tr>
+                                                                                        <tr style="background: white;">
+                                                                                            <td>Tara:</td>
+                                                                                            <td>
+                                                                                                @if ($datos['tara'] === 'tf')
+                                                                                                    TARA FISCAL - {{ $datos['tara_string']  }}
+                                                                                                @else
+                                                                                                    {{ $datos['tara'] }} - {{ $datos['tara_string']  }}
+                                                                                                @endif
+                                                                                            </td>
+                                                                                        </tr>
                                                                                        <tr > 
                                                                                             <td>Lugar de Carga:</td> {{-- siempre --}}
                                                                                             <td>{{$datos['loadPlace'] }}</td>
