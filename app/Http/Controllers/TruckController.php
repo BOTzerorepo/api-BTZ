@@ -12,6 +12,12 @@ use Illuminate\Support\Facades\Mail;
 
 class TruckController extends Controller
 {
+
+    protected $serviceSatelital;
+    public function __construct(ServiceSatelital $serviceSatelital)
+    {
+        $this->serviceSatelital = $serviceSatelital;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -62,7 +68,9 @@ class TruckController extends Controller
         $truck->customer_id = $cId;
         $truck->save();
 
-       
+        $resultado = $this->serviceSatelital->issetDominio($request['domain']);
+
+        return $resultado;
 
         return $truck;
         
@@ -160,5 +168,22 @@ class TruckController extends Controller
             return 'Se elimino el Tractor';
 
         };
+    }
+    public function issetTruck($domain)
+    {
+
+        $truck = DB::table('trucks')
+        ->leftJoin('transports','transports.id','=','trucks.transport_id')
+        ->select('trucks.id', 'trucks.domain', 'trucks.model','transports.razon_social')
+        ->where('trucks.domain', '=', $domain)->get();
+        $count = $truck->count();
+
+            // Puedes modificar esta lógica según el detalle que desees devolver en el JSON
+        ; // Esto devuelve un array con el detalle de los transportes encontrados
+
+        return response()->json([
+            'count' => $count,
+            'detail' => $truck
+        ]);
     }
 }

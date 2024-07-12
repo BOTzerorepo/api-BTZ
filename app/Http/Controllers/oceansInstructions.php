@@ -113,7 +113,15 @@ class oceansInstructions extends Controller
             $logApi->user = 'No Informa';
             $logApi->detalle = "envio email envioIntructivoOceans to:" . $mail;
 
-        } else {
+        } elseif ($sbx[0]->sandbox == 2) {
+
+            Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new envioIntructivoOceans($data));
+
+            $logApi = new logapi();
+            $logApi->user = 'No Informa';
+            $logApi->detalle = "+ Sandbox + envio email envioIntructivoOceans to: " . $mail;
+        
+        }else {
 
             Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new envioIntructivoOceans($data));
             

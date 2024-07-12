@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\ActionController;
 
 
 /*
@@ -25,4 +26,15 @@ Route::get('/', function () {
 Route::get('/seguros', function () {
     return view('seguro');
 });
+Route::get('/itinerarios', function () {
+    return view('itinerarios');
+});
+Route::get('/itinerario', function () {
+    return view('itinerarioShow');
+});
+Route::post('/itinerarios', 'App\Http\Controllers\ItinerarioController@guardarFormulario');
+
+
+Route::resource('actions', ActionController::class);
+
 

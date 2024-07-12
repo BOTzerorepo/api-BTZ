@@ -124,6 +124,7 @@ class TrailerController extends Controller
         trailer::destroy($id);
 
         $existe = trailer::find($id);
+        
         if($existe){
             return 'No se elimino el Trailer';
         }else{

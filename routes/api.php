@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\cntrController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -34,7 +35,9 @@ Route::get('/allCargoThisWeek/{user}','App\Http\Controllers\cargaController@load
 Route::get('/allCargoNextWeek/{user}','App\Http\Controllers\cargaController@loadNextWeek'); 
 Route::get('/allCargoLastWeek/{user}','App\Http\Controllers\cargaController@loadLastWeek'); 
 Route::get('/allCargoFinished/{user}','App\Http\Controllers\cargaController@loadFinished');
-Route::get('/carga/{user}/{id}','App\Http\Controllers\cargaController@show');
+Route::get('/carga/{id}/{user}','App\Http\Controllers\cargaController@show');
+Route::get('/cargaDomain/{domain}', 'App\Http\Controllers\cargaController@showCargaDomain');
+
 
 // STATUS
 
@@ -49,7 +52,7 @@ Route::get('/instructivos/{userTraffic}','App\Http\Controllers\instructivosContr
 Route::get('/instructivosdelete/{userTraffic}/{id}','App\Http\Controllers\instructivosController@destroy');
 
 // ASIGNACIONES
-Route::get('/truckAsign/{id}', 'App\Http\Controllers\TruckController@trailerAsign'); // Show for Transport
+Route::get('/truckAsign/{id}', 'App\Http\Controllers\TruckController@trailerAsign'); // Show for Transport no existe.
 
 // SEGUROS
 
@@ -110,7 +113,7 @@ Route::post('/carga','App\Http\Controllers\LoadController@store');              
 
 /* Impresion de PDF [RailDocs] */
 
-Route::get('/imprimirCarga/{cntr_number}', 'App\Http\Controllers\crearpdfController@carga'); // No usa Funcion MAIL
+Route::get('imprimirCarga/{cntr_number}', 'App\Http\Controllers\crearpdfController@carga'); // No usa Funcion MAIL
 Route::get('/verCarga/{cntr_number}', 'App\Http\Controllers\verpdfController@carga');
 Route::get('/imprimirVacio/{id_cntr}', 'App\Http\Controllers\crearpdfController@vacio');  // No usa Funcion MAIL
 
@@ -131,6 +134,13 @@ Route::get('/accionLugarDescarga/{idTrip}','App\Http\Controllers\CustomerLoadPla
 Route::get('/servicioSatelital','App\Http\Controllers\ServiceSatelital@serviceSatelital');
 Route::get('/pruebaSatelital','App\Http\Controllers\ServiceSatelital@servicePrueba');
 Route::get('/flota','App\Http\Controllers\ServiceSatelital@flota');
+Route::get('/flotaId/{id}', 'App\Http\Controllers\ServiceSatelital@flotaID');
+
+Route::get('/dominioAker/{dominio}', 'App\Http\Controllers\ServiceSatelital@issetDominio');
+Route::get('/revierDomain', 'App\Http\Controllers\ServiceSatelital@reviewDomains');
+
+Route::get('/revisarCoordenadas', 'App\Http\Controllers\ServiceSatelital@revisarCoordenadas');
+Route::get('/itinerarios/{id}', 'App\Http\Controllers\ItinerarioController@show');
 
 
 /* 
@@ -144,7 +154,17 @@ oooooo     oooo       .o.       ooooo        ooooo oooooooooo.         .o.      
  */
 
 Route::get('issetBooking/{booking}', 'App\Http\Controllers\cargaController@issetBooking');
+Route::get('issetTransport/{cuit}', 'App\Http\Controllers\TransportController@issetTrasnsport');
+Route::get('issetTransportRazon/{razon_social}', 'App\Http\Controllers\TransportController@issetTransportRazon');
+Route::get('issetTruck/{domain}', 'App\Http\Controllers\TruckController@issetTruck');
 Route::get('issetTrader/{trader}', 'App\Http\Controllers\cargaController@issetTrader');
+Route::get('issetLoadPlace/{description}', 'App\Http\Controllers\CustomerLoadPlaceController@issetLugarDeCarga');
+Route::get('issetUnloadPlace/{description}', 'App\Http\Controllers\CustomerLoadPlaceController@issetLugarDeDescarga');
+Route::get('issetCntr/{cntr_number}', 'App\Http\Controllers\cntrController@issetCntr');
+Route::get('issetAsignacion/{dominio}', 'App\Http\Controllers\cntrController@issetAsign');
+Route::get('issetDriver', 'App\Http\Controllers\DriverController@issetDriver');
+
+
 
 
 /* 
@@ -158,9 +178,16 @@ o8o        o888o o88o     o8888o o8o        `8  Y8P o88o     o8888o  `Y8bood8P' 
 
 */
 
+//CARGA
+Route::delete('/carga/{id}', 'App\Http\Controllers\cargaController@destroy')->name('cargas.destroy');
+
 // USER
 
 Route::get('/user/{user}', 'App\Http\Controllers\UserController@show');
+
+// CNTR
+
+Route::resource('/cntr',cntrController::class);
 
 // TRUCK CONTROLLLER 
 Route::post('/truck', 'App\Http\Controllers\TruckController@store'); // C
@@ -209,7 +236,7 @@ Route::get('/agencia/{id}','App\Http\Controllers\AgencyController@show'); //Busc
 Route::post('/agencia','App\Http\Controllers\AgencyController@store'); //Crea una nueva Agencia
 Route::post('/agencia/{id}','App\Http\Controllers\AgencyController@update'); //Actualiza los datos de una Agencia
 Route::delete('/agencia/{id}','App\Http\Controllers\AgencyController@destroy'); //Elimina una Agencia
-Route::post('/agencias/{id}', 'App\Http\Controllers\AgenciaController@update');
+Route::post('/agencias/{id}', 'App\Http\Controllers\AgencyController@update');
 
 //Empresas=Cliente=Company
 Route::get('/empresas','App\Http\Controllers\CompanyController@index'); //Busca todas las empresas
@@ -362,3 +389,10 @@ Route::get('/excelDrivers', 'App\Http\Controllers\excelController@drivers');
 Route::get('/excelTrucks', 'App\Http\Controllers\excelController@trucks');
 Route::get('/excelTrailers', 'App\Http\Controllers\excelController@trailers');
 Route::get('/excelTransports', 'App\Http\Controllers\excelController@transports');
+
+
+
+// - GESTION AKER ---------------------
+
+Route::get('transportesAker','App\Http\Controllers\AkerTransportController@index');
+Route::get('truckAker', 'App\Http\Controllers\AkerTruckController@index');

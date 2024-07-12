@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa del Clima</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map {
+            height: 100vh;
+        }
+        .weather-popup {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script >
+        // Reemplaza 'YOUR_API_KEY' con tu clave de API de OpenWeatherMap
+const API_KEY = 'f6848557ed000162a748e8e1585c5f3f';
+
+// Inicializa el mapa
+const map = L.map('map').setView([20.0, 0.0], 2); // Coordenadas iniciales y zoom
+
+// Añade la capa de mapas
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors'
+}).addTo(map);
+
+// Función para obtener el clima
+async function getWeather(lat, lon) {
+    
+    const url = `https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&exclude={part}&appid=${API_KEY}&units=metric&lang=es`;
+    const response = await fetch(url);
+    return response.json();
+    console.log(response.json());
+}
+
+// Añade un marcador al mapa y muestra el clima en un popup
+async function addWeatherMarker(lat, lon) {
+    const weatherData = await getWeather(lat, lon);
+    const popupContent = `
+        <div class="weather-popup">
+            <strong>${weatherData.name}</strong><br>
+            Clima: ${weatherData.weather[0].description}<br>
+            Temperatura: ${weatherData.main.temp} &deg;C<br>
+            Humedad: ${weatherData.main.humidity} %
+        </div>
+    `;
+    L.marker([lat, lon]).addTo(map)
+        .bindPopup(popupContent);
+}
+
+// Añade marcadores en algunas localidades
+const locations = [
+   { lat: -32.8894, lon: -68.8458, name: 'Mendoza' },
+    { lat: -32.5925, lon: -69.3456, name: 'Uspallata' }
+];
+
+locations.forEach(location => addWeatherMarker(location.lat, location.lon));
+
+    </script>
+
+</body>
+</html>

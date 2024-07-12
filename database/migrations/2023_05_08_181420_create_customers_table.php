@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('customers', function (Blueprint $table) {
+       /*  Schema::create('customers', function (Blueprint $table) {
             $table->id();
             $table->string('registered_name', 255);
             $table->bigInteger('tax_id');
@@ -21,7 +21,7 @@ return new class extends Migration
             $table->string('contact_mail', 50);
             $table->bigInteger('contact_phone');
             $table->timestamps();
-        });
+        }); */
     }
 
     /**
@@ -30,7 +30,7 @@ return new class extends Migration
      * @return void
      */
     public function down()
-    {
-        Schema::dropIfExists('customers');
+    {/* 
+       */  Schema::dropIfExists('customers');
     }
 };

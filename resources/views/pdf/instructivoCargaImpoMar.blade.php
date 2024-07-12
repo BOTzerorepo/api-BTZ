@@ -98,6 +98,16 @@
         <td colspan="4"  class="tdContenido">{{ $senasa }} - {{ $senasa_string }}</td>
     </tr>
     <tr>
+        <td align="left" width="25%" class="tdContenidoItem"><strong>Tara:</strong></td>
+        <td colspan="4" class="tdContenido">
+            @if ($tara === 'tf')
+                TARA FISCAL - {{ $tara_string }}
+            @else
+                {{ $tara }} - {{ $tara_string }}
+            @endif
+        </td>
+    </tr>
+    <tr>
         <td align="left" width="25%" class="tdContenidoItem"><strong>Aduana Impo:</strong></td>
         <td colspan="4"  class="tdContenido">{{ $custom_place_impo }}</td>
     </tr>
@@ -119,7 +129,15 @@
     </tr>
     <tr>
         <td align="left" width="25%" class="tdContenidoItem"><strong>CONTENEDOR N°:</strong></td>
-        <td colspan="4"  class="tdContenido">{{ $cntr_number }}</td>
+        @if($confirmacion == 1 ) 
+        <td colspan="4"  class="tdContenido">
+            {{ $cntr_number }}
+        </td>
+        @else
+        <td colspan="4"  class="tdContenido">
+           SIN CONFIRMAR
+        </td>
+        @endif
     </tr>
     <tr>
         <td align="left" width="25%" class="tdContenidoItem"><strong>PRECINTO:</strong></td>

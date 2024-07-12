@@ -64,7 +64,7 @@ class CustomerLoadPlaceController extends Controller
     {
 
         $date = Carbon::now('-03:00');
-        $qc = DB::table('cntr')->select('cntr_number', 'booking')->where('id_cntr', '=', $idTrip)->get();
+        $qc = DB::table('cntr')->select('cntr_number', 'booking', 'confirmacion')->where('id_cntr', '=', $idTrip)->get();
         $cntr = $qc[0];
         // cual es el ultimo status.
         $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
@@ -96,6 +96,7 @@ class CustomerLoadPlaceController extends Controller
 
             $datos = [
                 'cntr' => $cntr->cntr_number,
+                'confirmacion' => $cntr->confirmacion,
                 'description' =>  $description,
                 'user' => $qd->user_status,
                 'empresa' => $empresa,
@@ -114,6 +115,16 @@ class CustomerLoadPlaceController extends Controller
                 $logApi->user = 'No Informa';
                 $logApi->detalle = "envio email cargaCargando to:" . $mail;
                 $logApi->save();
+
+            } elseif($sbx[0]->sandbox == 2) { 
+
+                Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new cargaCargando($datos));
+
+                $logApi = new logapi();
+                $logApi->user = 'No Informa';
+                $logApi->detalle = "envio email cargaCargando to:" . $mail;
+                $logApi->save();
+
             } else {
 
                 Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaCargando($datos));
@@ -122,6 +133,7 @@ class CustomerLoadPlaceController extends Controller
                 $logApi->user = 'No Informa';
                 $logApi->detalle = "envio email cargaCargando to:" . $mail;
                 $logApi->save();
+
             }
 
             $actualizarAvisado = statu::find($qd->id);
@@ -164,6 +176,7 @@ class CustomerLoadPlaceController extends Controller
                 $datos = [
                     'cntr' => $cntr->cntr_number,
                     'description' =>  $description,
+                    'confirmacion' => $cntr->confirmacion,
                     'user' => $qd->user_status,
                     'empresa' => $empresa,
                     'booking' => $cntr->booking,
@@ -182,8 +195,17 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaCargando to:" . $mail;
                     $logApi->save();
-                } else {
 
+                } elseif($sbx[0]->sandbox == 2) { 
+
+                    Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new cargaCargando($datos));
+
+                    $logApi = new logapi();
+                    $logApi->user = 'No Informa';
+                    $logApi->detalle = "envio email cargaCargando to:" . $mail;
+                    $logApi->save();
+
+                } else {
                     Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaCargando($datos));
 
                     $logApi = new logapi();
@@ -209,7 +231,7 @@ class CustomerLoadPlaceController extends Controller
     {
 
         $date = Carbon::now('-03:00');
-        $qc = DB::table('cntr')->select('cntr_number', 'booking')->where('id_cntr', '=', $idTrip)->get();
+        $qc = DB::table('cntr')->select('cntr_number', 'booking','confirmacion')->where('id_cntr', '=', $idTrip)->get();
         $cntr = $qc[0];
 
         // cual es el ultimo status.
@@ -244,6 +266,7 @@ class CustomerLoadPlaceController extends Controller
                 $datos = [
                     'cntr' => $cntr->cntr_number,
                     'description' =>  $description,
+                    'confirmacion' => $cntr->confirmacion,
                     'user' => $qd->user_status,
                     'empresa' => $empresa,
                     'booking' => $cntr->booking,
@@ -259,13 +282,22 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaAduana to:" . $mail;
                     $logApi->save();
-                } else {
 
+                } elseif($sbx[0]->sandbox == 2) {
+
+                    Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new cargaAduana($datos));
+                    $logApi = new logapi();
+                    $logApi->user = 'No Informa';
+                    $logApi->detalle = "envio email cargaAduana to: 'pablorio@botzero.tech'";
+                    $logApi->save();
+
+                }else {
                     Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaAduana($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaAduana to: 'pablorio@botzero.tech'";
                     $logApi->save();
+
                 }
 
                 $actualizarAvisado = statu::find($qd->id);
@@ -307,6 +339,7 @@ class CustomerLoadPlaceController extends Controller
                 $datos = [
                     'cntr' => $cntr->cntr_number,
                     'description' =>  $description,
+                    'confirmacion' => $cntr->confirmacion,
                     'user' => $qd->user_status,
                     'empresa' => $empresa,
                     'booking' => $cntr->booking,
@@ -325,6 +358,15 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaAduana to:" . $mail;
                     $logApi->save();
+
+                } elseif($sbx[0]->sandbox == 2) {
+
+                    Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new cargaAduana($datos));
+                    $logApi = new logapi();
+                    $logApi->user = 'No Informa';
+                    $logApi->detalle = "envio email cargaAduana to: 'pablorio@botzero.tech'";
+                    $logApi->save();
+
                 } else {
 
                     Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaAduana($datos));
@@ -333,7 +375,6 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->detalle = "envio email cargaAduana to: 'pablorio@botzero.tech'";
                     $logApi->save();
                 }
-
                 $actualizarAvisado = statu::find($qd->id);
                 $avisadoMas = $actualizarAvisado->avisado + 1;
                 $actualizarAvisado->avisado = $avisadoMas;
@@ -351,7 +392,7 @@ class CustomerLoadPlaceController extends Controller
     public function accionLugarDescarga($idTrip)
     {
         $date = Carbon::now('-03:00');
-        $qc = DB::table('cntr')->select('cntr_number', 'booking')->where('id_cntr', '=', $idTrip)->get();
+        $qc = DB::table('cntr')->select('cntr_number', 'booking','confirmacion')->where('id_cntr', '=', $idTrip)->get();
         $cntr = $qc[0];
 
         // cual es el ultimo status.
@@ -388,6 +429,7 @@ class CustomerLoadPlaceController extends Controller
                 $datos = [
                     'cntr' => $cntr->cntr_number,
                     'description' =>  $description,
+                    'confirmacion' => $cntr->confirmacion,
                     'user' => $qd->user_status,
                     'empresa' => $empresa,
                     'booking' => $cntr->booking,
@@ -403,13 +445,23 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaDescarga to:" . $mail;
                     $logApi->save();
-                } else {
+
+                } elseif ($sbx[0]->sandbox == 2) { 
+
+                    Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new cargaDescarga($datos));
+                    $logApi = new logapi();
+                    $logApi->user = 'No Informa';
+                    $logApi->detalle = "envio email Instructivo to: 'pablorio@botzero.tech'";
+                    $logApi->save();
+
+                }else{
 
                     Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaDescarga($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email Instructivo to: 'pablorio@botzero.tech'";
                     $logApi->save();
+
                 }
                 $actualizarAvisado = statu::find($qd->id);
                 $avisadoMas = $actualizarAvisado->avisado + 1;
@@ -447,6 +499,7 @@ class CustomerLoadPlaceController extends Controller
 
                 $datos = [
                     'cntr' => $cntr->cntr_number,
+                    'confirmacion' => $cntr->confirmacion,
                     'description' =>  $description,
                     'user' => $qd->user_status,
                     'empresa' => $empresa,
@@ -463,7 +516,13 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaDescarga to:" . $mail;
                     $logApi->save();
-                } else {
+                } elseif ($sbx[0]->sandbox == 2) {
+                    Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new cargaDescarga($datos));
+                    $logApi = new logapi();
+                    $logApi->user = 'No Informa';
+                    $logApi->detalle = "envio email Instructivo to: 'pablorio@botzero.tech'";
+                    $logApi->save();
+                }else {
 
                     Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaDescarga($datos));
                     $logApi = new logapi();
@@ -496,6 +555,18 @@ class CustomerLoadPlaceController extends Controller
     {
         $customerLoadPlaces = DB::table('customer_load_places')->get();
         return $customerLoadPlaces;
+    }
+
+    public function issetLugarDeCarga($description)
+    {
+        $loadPlace = DB::table('customer_load_places')->where('description','=',$description)->count();
+        return $loadPlace;
+    }
+    public function issetLugarDeDescarga($description)
+    {
+
+        $unloadPlace = DB::table('customer_unload_places')->where('description', '=', $description)->count();
+        return $unloadPlace;
     }
 
     /**

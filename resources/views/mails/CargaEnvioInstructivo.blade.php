@@ -333,7 +333,12 @@
                                                                                                 <strong>
                                                                                                     <span
                                                                                                         style="font-size:34px;">
-                                                                                                        {{ $datos['cntr_number'] }}
+                                                                                                        @if( $datos['confirmacion'] != 0) 
+                                                                                        {{ $datos['cntr_number'] }}
+                                                                                        @else
+                                                                                        SIN CONFIRMAR
+                                                                                        @endif
+                                                                                                       
                                                                                                     </span>
                                                                                                 </strong>
                                                                                             </span>
@@ -393,12 +398,7 @@
                                                                                         style="margin: 2%; font-size: 14px; text-align: center; mso-line-height-alt: 27px;">
                                                                                         <span style="font-size:15px;">
                                                                                             Status Informado por: <br>
-                                                                                            {{-- <span
-                                                                                                style="color:#2190e3;font-size:18px;">
-                                                                                                <strong>
-                                                                                                    {{ $datos['cntr_number'] }}
-                                                                                                </strong>
-                                                                                            </span> --}}
+                                                                                            
                                                                                             <br />
                                                                                             <strong
                                                                                                 style="font-size:10px;">Created

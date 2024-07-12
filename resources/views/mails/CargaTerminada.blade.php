@@ -241,8 +241,12 @@
                                                                             style="margin-top: 25px; font-size: 14px; text-align: center;">
                                                                             <span style="font-size:15px;"><strong><span
                                                                                         style="font-size:15px;">
-                                                                                        {{ $datos['cntr'] }} -
-                                                                                        {{ $datos['booking'] }}
+                                                                                        @if( $datos['confirmacion'] != 0) 
+                                                                                        Carga {{ $datos['cntr'] }} para el {{ $datos['booking'] }}
+                                                                                        @else
+                                                                                        Carga CNTR SIN CONFIRMAR para el {{ $datos['booking'] }}
+                                                                                        @endif
+                                                                                        
                                                                                     </span></strong></span>
                                                                         </p>
                                                                     </div>
@@ -342,7 +346,12 @@
                                                                                             <span style="color:#0f4f94;font-size:34px;">
                                                                                                 <strong>
                                                                                                     <span style="font-size:34px;">
-                                                                                                        {{ $datos['cntr'] }}
+                                                                                                        @if( $datos['confirmacion'] != 0) 
+                                                                                        {{ $datos['cntr'] }}
+                                                                                        @else
+                                                                                        SIN CONFIRMAR
+                                                                                        @endif
+                                                                                                    
                                                                                                     </span>
                                                                                                 </strong>
                                                                                             </span>

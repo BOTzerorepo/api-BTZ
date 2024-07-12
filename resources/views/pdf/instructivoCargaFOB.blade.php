@@ -98,6 +98,16 @@
         <td colspan="4"  class="tdContenido">{{ $custom_agent }} [ {{ $custom_agent_mail }} - {{ $custom_agent_phone }}]</td>
     </tr>
     <tr>
+        <td align="left" width="25%" class="tdContenidoItem"><strong>Tara:</strong></td>
+        <td colspan="4" class="tdContenido">
+            @if ($tara === 'tf')
+                TARA FISCAL - {{ $tara_string }}
+            @else
+                {{ $tara }} - {{ $tara_string }}
+            @endif
+        </td>
+    </tr>
+    <tr>
         <td colspan="5" align="center" width="25%" bgcolor="#a9c8e4" style="border: none;" class="tdContenido">INGRESO A PUERTO:</td>
     </tr>
     <tr>
@@ -133,7 +143,15 @@
     </tr>
     <tr>
         <td align="left" width="25%" class="tdContenidoItem"><strong>CONTENEDOR N°:</strong></td>
-        <td colspan="4"  class="tdContenido">{{ $cntr_number }}</td>
+        @if($confirmacion == 1 ) 
+        <td colspan="4"  class="tdContenido">
+            {{ $cntr_number }}
+        </td>
+        @else
+        <td colspan="4"  class="tdContenido">
+           SIN CONFIRMAR
+        </td>
+        @endif
     </tr>
     <tr>
         <td align="left" width="25%" class="tdContenidoItem"><strong>PRECINTO:</strong></td>
