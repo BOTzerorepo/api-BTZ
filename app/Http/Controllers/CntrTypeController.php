@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\CntrType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Support\Facades\Storage;
 
 class CntrTypeController extends Controller
 {
@@ -37,19 +40,49 @@ class CntrTypeController extends Controller
      */
     public function store(Request $request)
     {
-        $cntrType = new CntrType();
-        $cntrType->title = $request['title'];
-        $cntrType->teu= $request['teu'];
-        $cntrType->weight = $request['weight'];
-        $cntrType->height = $request['height'];
-        $cntrType->width = $request['width'];
-        $cntrType->longitud = $request['longitud'];
-        $cntrType->observation = $request['observation'];
-        $cntrType->user = $request['user'];
-        $cntrType->company = $request['company'];
-        $cntrType->save();
+        DB::beginTransaction();
+        try {
+            // Validación de datos
+            $request->validate([
+                'title' => 'required',
+                'teu' => 'required',
+                'weight' => 'required',
+                'height' => 'required',
+                'width' => 'required',
+                'longitud' => 'required',
+                'observation' => 'required',
+                'user' => 'required',
+                'company' => 'required',
+            ]);
+            // Crear un nuevo cntr
+            $cntrType = new CntrType();
+            $cntrType->title = $request['title'];
+            $cntrType->teu= $request['teu'];
+            $cntrType->weight = $request['weight'];
+            $cntrType->height = $request['height'];
+            $cntrType->width = $request['width'];
+            $cntrType->longitud = $request['longitud'];
+            $cntrType->observation = $request['observation'];
+            $cntrType->user = $request['user'];
+            $cntrType->company = $request['company'];
+            $cntrType->save();
 
-        return $cntrType;
+            DB::commit();
+
+            //Devuelvo que se creo correctamente el codigo 
+            return response()->json(['message' => 'Tipo Cntr creado exitosamente.', 'message_type' => 'success', 'cntrType'=>$cntrType], 200);
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            $errors = $e->errors();
+
+            return response()->json(['message' => 'No se pudo crear el tipo Cntr.', 'message_type' => 'danger', 'errores' => $errors], 206);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $errorMessage = $e->getMessage();
+            // Manejar otras excepciones si es necesario
+            return response()->json(['message' => $errorMessage , 'message_type' => 'danger',], 500);
+        }
     }
 
     /**
