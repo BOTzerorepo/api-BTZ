@@ -35,7 +35,9 @@ Route::get('/allCargoThisWeek/{user}','App\Http\Controllers\cargaController@load
 Route::get('/allCargoNextWeek/{user}','App\Http\Controllers\cargaController@loadNextWeek'); 
 Route::get('/allCargoLastWeek/{user}','App\Http\Controllers\cargaController@loadLastWeek'); 
 Route::get('/allCargoFinished/{user}','App\Http\Controllers\cargaController@loadFinished');
-Route::get('/carga/{user}/{id}','App\Http\Controllers\cargaController@show');
+Route::get('/carga/{id}/{user}','App\Http\Controllers\cargaController@show');
+Route::get('/cargaDomain/{domain}', 'App\Http\Controllers\cargaController@showCargaDomain');
+
 
 // STATUS
 
@@ -50,7 +52,7 @@ Route::get('/instructivos/{userTraffic}','App\Http\Controllers\instructivosContr
 Route::get('/instructivosdelete/{userTraffic}/{id}','App\Http\Controllers\instructivosController@destroy');
 
 // ASIGNACIONES
-Route::get('/truckAsign/{id}', 'App\Http\Controllers\TruckController@trailerAsign'); // Show for Transport
+Route::get('/truckAsign/{id}', 'App\Http\Controllers\TruckController@trailerAsign'); // Show for Transport no existe.
 
 // SEGUROS
 
@@ -138,7 +140,6 @@ Route::get('/dominioAker/{dominio}', 'App\Http\Controllers\ServiceSatelital@isse
 Route::get('/revierDomain', 'App\Http\Controllers\ServiceSatelital@reviewDomains');
 
 Route::get('/revisarCoordenadas', 'App\Http\Controllers\ServiceSatelital@revisarCoordenadas');
-
 Route::get('/itinerarios/{id}', 'App\Http\Controllers\ItinerarioController@show');
 
 
@@ -154,10 +155,15 @@ oooooo     oooo       .o.       ooooo        ooooo oooooooooo.         .o.      
 
 Route::get('issetBooking/{booking}', 'App\Http\Controllers\cargaController@issetBooking');
 Route::get('issetTransport/{cuit}', 'App\Http\Controllers\TransportController@issetTrasnsport');
+Route::get('issetTransportRazon/{razon_social}', 'App\Http\Controllers\TransportController@issetTransportRazon');
 Route::get('issetTruck/{domain}', 'App\Http\Controllers\TruckController@issetTruck');
 Route::get('issetTrader/{trader}', 'App\Http\Controllers\cargaController@issetTrader');
 Route::get('issetLoadPlace/{description}', 'App\Http\Controllers\CustomerLoadPlaceController@issetLugarDeCarga');
 Route::get('issetUnloadPlace/{description}', 'App\Http\Controllers\CustomerLoadPlaceController@issetLugarDeDescarga');
+Route::get('issetCntr/{cntr_number}', 'App\Http\Controllers\cntrController@issetCntr');
+Route::get('issetAsignacion/{dominio}', 'App\Http\Controllers\cntrController@issetAsign');
+Route::get('issetDriver', 'App\Http\Controllers\DriverController@issetDriver');
+
 
 
 
@@ -172,6 +178,8 @@ o8o        o888o o88o     o8888o o8o        `8  Y8P o88o     o8888o  `Y8bood8P' 
 
 */
 
+//CARGA
+Route::delete('/carga/{id}', 'App\Http\Controllers\cargaController@destroy')->name('cargas.destroy');
 
 // USER
 
