@@ -489,6 +489,7 @@ class emailController extends Controller
             'tara' => $carga->tara,
             'tara_string' => $carga->tara_string,
 
+
         ];
 
         $sbx = DB::table('variables')->select('sandbox')->get();

@@ -120,7 +120,6 @@ class cntrController extends Controller
         $cntr = cntr::find($id);
 
         if ($cntr) {
-
             $cntrOld = $cntr->cntr_number;
 
         }
