@@ -165,4 +165,19 @@ class TransportController extends Controller
             'detail' => $transport
         ]);
     }
+
+    public function issetTransportRazon($razonSocial)
+    {
+
+        $transport = DB::table('transports')->where('razon_social', '=', $razonSocial)->get();
+        $count = $transport->count();
+
+        // Puedes modificar esta lógica según el detalle que desees devolver en el JSON
+        ; // Esto devuelve un array con el detalle de los transportes encontrados
+
+        return response()->json([
+            'count' => $count,
+            'detail' => $transport
+        ]);
+    }
 }
