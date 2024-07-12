@@ -376,7 +376,7 @@
                                                                                                 @endif
                                                                                             </td>
                                                                                         </tr>
-                                                                                        <tr style="background: white;"> 
+                                                                                         <tr style="background: white;"> 
                                                                                             <td>Lugar de Carga:</td>
                                                                                             <td>{{$datos['loadPlace'] }}</td>
                                                                                         </tr>
