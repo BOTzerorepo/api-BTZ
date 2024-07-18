@@ -154,10 +154,10 @@ class cntrController extends Controller
         //
     }
     public function issetCntr($cntr) {
-        $cntr = cntr::where('cntr_number',$cntr)->get();
+        $cntrCount = cntr::where('cntr_number',$cntr)->get();
         $asignCount = asign::where('cntr_number', $cntr)->get();
 
-        $count = $cntr->count() + $asignCount->count();
+        $count = $cntrCount->count() + $asignCount->count();
 
         // Prepara la respuesta en formato JSON
         $response = [
