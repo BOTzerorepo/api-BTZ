@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\asign;
 use App\Models\Carga;
+use App\Models\cntr;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -259,21 +260,18 @@ class cargaController extends Controller
         DB::beginTransaction();
         try {
             // Busca la carga por su ID
-            $carga = DB::table('carga')->where('id', $id)->first();
-    
+            $carga = Carga::find($id);
             // Verifica si la carga existe
             if (!$carga) {
                 return response()->json(['error' => 'La carga no fue encontrada.'], 404);
             }
-            // Elimina los registros relacionados en las tablas cntr y asign
+            // Elimina los registros relacionados en las tablas cntr y asign basados en el atributo 'booking'
             DB::table('cntr')->where('booking', $carga->booking)->delete();
             DB::table('asign')->where('booking', $carga->booking)->delete();
-
             // Elimina la carga
-            DB::table('carga')->where('id', $id)->delete();
-    
+            $carga->delete();
+
             DB::commit();
-    
             // Devuelve una respuesta de éxito
             return response()->json([
                 'message' => 'La carga ha sido eliminada correctamente.',
