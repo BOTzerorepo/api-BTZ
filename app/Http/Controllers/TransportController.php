@@ -17,13 +17,13 @@ class TransportController extends Controller
      */
     public function index()
     {
-        $transportes = DB::table('transports')->get();
+        $transportes = Transport::whereNull('deleted_at')->get();
 
         return $transportes;
     }
     public function indexTransporteCustomer($id_customer)
     {
-        $transportes = DB::table('transports')->where('customer_id','=',$id_customer)->get();
+        $transportes = Transport::whereNull('deleted_at')->where('customer_id','=',$id_customer)->get();
 
         return $transportes;
     }
@@ -46,7 +46,20 @@ class TransportController extends Controller
      */
     public function store(Request $request)
     {
-        $transporte = new Transport();
+        $transporte = Transport::withTrashed()
+                          ->where('cuit', $request['cuit'])
+                          ->orWhere('razon_social', $request['razon_social'])
+                          ->first();
+
+        if ($transporte) {
+            // Si el registro está eliminado, lo restauramos
+            if ($transporte->trashed()) {
+                $transporte->restore();
+            }
+        } else {
+            // Crear un nuevo registro
+            $transporte = new Transport();
+        }
         $transporte->razon_social = $request['razon_social'];
         $transporte->CUIT = $request['CUIT'];
         $transporte->Direccion = $request['direccion'];
@@ -65,10 +78,8 @@ class TransportController extends Controller
         $transporte->empresa = $request['empresa'];
         $transporte->satelital = $request['satelital'];
         $transporte->observation = $request['observation'];
-
         $transporte->save();
         Mail::to('pablorio@botzero.ar')->send(new nuevoTranporte($transporte));
-
         return $transporte;
     }
 
@@ -80,7 +91,7 @@ class TransportController extends Controller
      */
     public function show($id)
     {
-        $transport = DB::table('transports')->where('id','=',$id)->get();
+        $transport = Transport::whereNull('deleted_at')->where('id','=',$id)->get();
 
         return $transport;
     }
@@ -125,9 +136,6 @@ class TransportController extends Controller
         $transporte->empresa = $request['empresa'];
         $transporte->satelital = $request['satelital'];
         $transporte->observation = $request['observation'];
-
-
-        
         $transporte->save();
        
 
@@ -142,23 +150,31 @@ class TransportController extends Controller
      */
     public function destroy($id)
     {
-        Transport::destroy($id);
+       // Buscar el registro del transporte por su ID
+        $transport = Transport::find($id);
 
-        $existe = Transport::find($id);
-        if($existe){
-            return 'No se elimino el Transporte';
-        }else{
-            return 'Se elimino el Transporte';
-        };
+        // Verificar si el transporte existe
+        if ($transport) {
+            // Eliminar el registro (soft delete)
+            $transport->delete();
+
+            // Verificar si el registro aún existe (incluso como soft deleted)
+            if ($transport->trashed()) {
+                return response()->json(['message' => 'El transporte se eliminó correctamente.'], 200);
+            } else {
+                return response()->json(['message' => 'No se pudo eliminar el transporte.'], 500);
+            }
+        } else {
+            // Respuesta si el transporte no se encuentra
+            return response()->json(['message' => 'El transporte no existe.'], 404);
+        }
     }
     public function issetTrasnsport($cuit)
     {
 
-        $transport = DB::table('transports')->where('CUIT', '=', $cuit)->get();
+        $transport = Transport::whereNull('deleted_at')->where('CUIT', '=', $cuit)->get();
         $count = $transport->count();
 
-        // Puedes modificar esta lógica según el detalle que desees devolver en el JSON
-        ; // Esto devuelve un array con el detalle de los transportes encontrados
 
         return response()->json([
             'count' => $count,
@@ -169,11 +185,9 @@ class TransportController extends Controller
     public function issetTransportRazon($razonSocial)
     {
 
-        $transport = DB::table('transports')->where('razon_social', '=', $razonSocial)->get();
+        $transport = Transport::whereNull('deleted_at')->where('razon_social', '=', $razonSocial)->get();
         $count = $transport->count();
 
-        // Puedes modificar esta lógica según el detalle que desees devolver en el JSON
-        ; // Esto devuelve un array con el detalle de los transportes encontrados
 
         return response()->json([
             'count' => $count,
