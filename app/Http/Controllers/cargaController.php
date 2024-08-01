@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\asign;
 use App\Models\Carga;
 use App\Models\cntr;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -26,25 +27,29 @@ class cargaController extends Controller
     public function loadTHisWeek($user)
     {
 
-        $user = DB::table('users')->where('username', '=', $user)->first();
+        $user = User::where('username', '=', $user)->first();
         $terminaSemana = Carbon::parse('next Sunday')->endOfDay();
         $empiezaSemana = Carbon::parse('last monday')->startOfDay();
 
         if ($user->permiso == 'Traffic') {
-
-            $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
-                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
-                ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
-                ->whereBetween('carga.load_date', [$empiezaSemana, $terminaSemana])
-                ->where('carga.status', '!=', 'TERMINADA')
-                ->where('carga.empresa', '=', $user->empresa)
-                ->orderBy('carga.load_date', 'ASC')->get();
-                
+            $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
+            ->join('cntr', 'cntr.booking', '=', 'carga.booking')
+            ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+            ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
+            ->whereNull('cntr.deleted_at')
+            ->whereNull('asign.deleted_at')
+            ->whereBetween('carga.load_date', [$empiezaSemana, $terminaSemana])
+            ->where('carga.status', '!=', 'TERMINADA')
+            ->where('carga.empresa', '=', $user->empresa)
+            ->orderBy('carga.load_date', 'ASC')
+            ->get();   
         } else {
-
-            $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
+            $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
+                ->join('cntr', 'cntr.booking', '=', 'carga.booking')
                 ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                 ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
+                ->whereNull('cntr.deleted_at')
+                ->whereNull('asign.deleted_at')
                 ->whereBetween('carga.load_date', [$empiezaSemana, $terminaSemana])
                 ->where('carga.status', '!=', 'TERMINADA')
                 ->where('carga.empresa', '=', $user->empresa)
@@ -57,27 +62,33 @@ class cargaController extends Controller
     public function loadLastWeek($user)
     {
 
-        $user = DB::table('users')->where('username', '=', $user)->first();
+        $user = User::where('username', '=', $user)->first();
         $empiezaSemana = Carbon::parse('last monday')->startOfDay();
 
         if ($user->permiso == 'Traffic') {
 
-            $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
+            $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
+                ->join('cntr', 'cntr.booking', '=', 'carga.booking')
                 ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                 ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
                 ->where('carga.load_date', "<", $empiezaSemana)
                 ->where('carga.empresa', '=', $user->empresa)
                 ->where('carga.status', '!=', 'TERMINADA')
+                ->whereNull('cntr.deleted_at')
+                ->whereNull('asign.deleted_at')
                 ->orderBy('carga.load_date', 'ASC')->get();
         } else {
 
-            $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
+            $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
+                ->join('cntr', 'cntr.booking', '=', 'carga.booking')
                 ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                 ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
                 ->where('carga.load_date', "<", $empiezaSemana)
                 ->where('carga.empresa', '=', $user->empresa)
                 ->where('carga.status', '!=', 'TERMINADA')
                 ->where('carga.user', '=', $user->username)
+                ->whereNull('cntr.deleted_at')
+                ->whereNull('asign.deleted_at')
                 ->orderBy('carga.load_date', 'ASC')->get();
         }
 
@@ -85,28 +96,34 @@ class cargaController extends Controller
     }
     public function loadNextWeek($user)
     {
-        $user = DB::table('users')->where('username', '=', $user)->first();
+        $user = User::where('username', '=', $user)->first();
 
         $terminaSemana = Carbon::parse('next Sunday')->endOfDay();
 
         if ($user->permiso == 'Traffic') {
 
-            $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
+            $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
+                ->join('cntr', 'cntr.booking', '=', 'carga.booking')
                 ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                 ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
                 ->where('carga.load_date', ">", $terminaSemana)
                 ->where('carga.status', '!=', 'TERMINADA')
                 ->where('carga.empresa', '=', $user->empresa)
+                ->whereNull('cntr.deleted_at')
+                ->whereNull('asign.deleted_at')
                 ->orderBy('carga.load_date', 'ASC')->get();
         } else {
 
-            $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
+            $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
+                ->join('cntr', 'cntr.booking', '=', 'carga.booking')
                 ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                 ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
                 ->where('carga.load_date', ">", $terminaSemana)
                 ->where('carga.status', '!=', 'TERMINADA')
                 ->where('carga.empresa', '=', $user->empresa)
                 ->where('carga.user', '=', $user->username)
+                ->whereNull('cntr.deleted_at')
+                ->whereNull('asign.deleted_at')
                 ->orderBy('carga.load_date', 'ASC')->get();
         }
 
@@ -115,25 +132,31 @@ class cargaController extends Controller
 
     public function loadFinished($user)
     {
-        $user = DB::table('users')->where('username', '=', $user)->first();
+        $user = User::where('username', '=', $user)->first();
 
         if ($user->permiso == 'Traffic') {
 
-            $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
+            $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
+                ->join('cntr', 'cntr.booking', '=', 'carga.booking')
                 ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                 ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
                 ->where('carga.status', '=', 'TERMINADA')
                 ->where('carga.empresa', '=', $user->empresa)
+                ->whereNull('cntr.deleted_at')
+                ->whereNull('asign.deleted_at')
                 ->orderBy('carga.load_date', 'ASC')->get();
                 
         } else {
 
-            $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
+            $todasLasCargasDeEstaSemana =  Carga::whereNull('carga.deleted_at')
+                ->join('cntr', 'cntr.booking', '=', 'carga.booking')
                 ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                 ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
                 ->where('carga.status', '=', 'TERMINADA')
                 ->where('carga.empresa', '=', $user->empresa)
                 ->where('carga.user', '=', $user->username)
+                ->whereNull('cntr.deleted_at')
+                ->whereNull('asign.deleted_at')
                 ->orderBy('carga.load_date', 'ASC')->get();
         }
 
@@ -152,30 +175,35 @@ class cargaController extends Controller
     public function show($id, $user)
     {
 
-        $user = DB::table('users')->where('username', '=', $user)->first();
+        $user = User::where('username', '=', $user)->first();
 
         if ($user->permiso == 'Traffic') {
 
-            $cargaPorId = DB::table('carga')
+            $cargaPorId = Carga::whereNull('carga.deleted_at')
             ->join('cntr', 'cntr.booking', '=', 'carga.booking')
             ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
             ->leftjoin('trucks', 'trucks.domain', '=', 'asign.truck')
             ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport','asign.truck','asign.truck_semi','asign.file_instruction', 'trucks.alta_aker')
             ->where('carga.empresa', '=', $user->empresa)
             ->where('carga.id', '=', $id)
+            ->whereNull('cntr.deleted_at')
+            ->whereNull('asign.deleted_at')
             ->orderBy('carga.load_date', 'DESC')->get();
 
             return $cargaPorId;
 
         }else{
 
-            $cargaPorId = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
+            $cargaPorId = Carga::whereNull('carga.deleted_at')
+            ->join('cntr', 'cntr.booking', '=', 'carga.booking')
             ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
             ->leftjoin('trucks', 'trucks.domain', '=', 'asign.truck')
             ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport','asign.truck','asign.truck_semi','asign.file_instruction','trucks.alta_aker')
             ->where('carga.empresa', '=', $user->empresa)
             ->where('carga.user', '=', $user->username)
             ->where('carga.id', '=', $id)
+            ->whereNull('cntr.deleted_at')
+            ->whereNull('asign.deleted_at')
             ->orderBy('carga.load_date', 'DESC')->get();
 
             return $cargaPorId;
@@ -186,7 +214,7 @@ class cargaController extends Controller
     public function showCargaDomain($domain)
     {
 
-            $cargaPorId = DB::table('carga')
+            $cargaPorId = Carga::whereNull('carga.deleted_at')
             ->leftjoin('cntr', 'cntr.booking', '=', 'carga.booking')
             ->leftjoin('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
             ->leftjoin('trucks', 'trucks.domain', '=', 'asign.truck')
@@ -216,7 +244,7 @@ class cargaController extends Controller
      */
     public function issetBooking($booking)
     {
-        $booking = DB::table('carga')->where('booking', '=', $booking)->get();
+        $booking = Carga::whereNull('deleted_at')->where('booking', '=', $booking)->get();
         return $booking->count();
     }
     
@@ -265,9 +293,11 @@ class cargaController extends Controller
             if (!$carga) {
                 return response()->json(['error' => 'La carga no fue encontrada.'], 404);
             }
-            // Elimina los registros relacionados en las tablas cntr y asign basados en el atributo 'booking'
-            DB::table('cntr')->where('booking', $carga->booking)->delete();
-            DB::table('asign')->where('booking', $carga->booking)->delete();
+            // Eliminar los registros de la tabla 'cntr' que coinciden con el 'booking'
+            Cntr::where('booking', $carga->booking)->delete();
+
+            // Eliminar los registros de la tabla 'asign' que coinciden con el 'booking'
+            Asign::where('booking', $carga->booking)->delete();
             // Elimina la carga
             $carga->delete();
 
@@ -309,8 +339,23 @@ class cargaController extends Controller
                 'type' => 'required',
             ]);
 
-            // Crear una carga
-            $carga = new Carga();
+            // Buscar una carga con booking o ref_customer, incluyendo eliminados
+            $carga = Carga::withTrashed()
+                ->where('booking', $request->input('booking'))
+                ->first();
+
+            if ($carga) {
+                // Si el registro está eliminado, restaurarlo
+                if ($carga->trashed()) {
+                    $carga->restore();
+                    
+                }
+            } else {
+                // Crear una nueva carga si no existe
+                $carga = new Carga();
+            }
+
+            // Asignar los valores de la solicitud al modelo
             $carga->booking = $request->input('booking');
             $carga->bl_hbl = $request->input('bl_hbl');
             $carga->shipper = $request->input('shipper');
@@ -359,30 +404,58 @@ class cargaController extends Controller
             $carga->type = $request->input('type');
             $carga->save();
 
+          
+
             for ($i = 1; $i <= $request->input('qviajes'); $i++) {
                 $numAleatorio = $request->input('booking') . $i;
 
-                DB::table('cntr')->insert([
-                    'booking' => $request->input('booking'),
-                    'cntr_number' => $numAleatorio,
-                    'user_cntr' => $request->input('user'),
-                    'retiro_place' => $request->input('retiro_place'),
-                    'cntr_type' => $request->input('cntr_type'),
-                    'company' => $request->input('empresa'),
-                ]);
+                $cntr = Cntr::withTrashed()
+                    ->where('cntr_number', $numAleatorio)
+                    ->first();
+                if ($cntr) {
+                    // Si el registro está eliminado, restaurarlo
+                    if ($cntr->trashed()) {
+                        $cntr->restore(); 
+                    }
+                } else {
+                    // Crear una nueva carga si no existe
+                    $cntr = new Cntr();
+                }
+                $cntr->cntr_number = $numAleatorio;
+                $cntr->booking = $request->input('booking');
+                $cntr->user_cntr = $request->input('user');
+                $cntr->retiro_place = $request->input('retiro_place');
+                $cntr->cntr_type = $request->input('cntr_type');
+                $cntr->company = $request->input('empresa');
+                $cntr->save();
 
-                DB::table('asign')->insert([
-                    'cntr_number' => $numAleatorio,
-                    'booking' => $request->input('booking'),
-                    'user' => $request->input('user'),
-                    'company' => $request->input('empresa'),
-                ]);
+                $asing = Asign::withTrashed()
+                ->where('cntr_number', $numAleatorio)
+                ->first();
+                if ($asing) {
+                    // Si el registro está eliminado, restaurarlo
+                    if ($asing->trashed()) {
+                        $asing->restore(); 
+                    }
+                } else {
+                    // Crear una nueva carga si no existe
+                    $asing = new Asign();
+                }
+                $asing->cntr_number = $numAleatorio;
+                $asing->booking = $request->input('booking');
+                $asing->user = $request->input('user');
+                $asing->company = $request->input('empresa');
+                $asing->save();
             }
 
             DB::commit();
 
-            // Devuelvo que se creó correctamente el código
-            return response()->json(['message' => 'Carga ingresada correctamente Booking: ' . $request->input('booking'), 'message_type' => 'success', 'carga' => $carga, 'last_id' => $carga->id], 200);
+            return response()->json([
+                'message' => 'Carga ingresada correctamente Booking: ' . $request->input('booking'),
+                'message_type' => 'success',
+                'carga' => $carga,
+                'last_id' => $carga->id
+            ], 200);
         } catch (ValidationException $e) {
             DB::rollBack();
             $errors = [];
@@ -391,7 +464,7 @@ class cargaController extends Controller
                     $errors[] = $errorMessage;
                 }
             }
-        
+
             return response()->json([
                 'message' => 'Datos ingresados incorrectamente',
                 'message_type' => 'danger',
@@ -400,10 +473,9 @@ class cargaController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             $errorMessage = $e->getMessage();
-            // Manejar otras excepciones si es necesario
             return response()->json(['error' => $errorMessage, 'message_type' => 'danger'], 500);
         }
-
     }
+
 
 }

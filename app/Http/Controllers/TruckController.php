@@ -25,7 +25,7 @@ class TruckController extends Controller
      */
     public function index($customer)
     {
-        $truck = DB::table('trucks')->where('customer_id','=',$customer)->get();
+        $truck = truck::where('customer_id','=',$customer)->get();
 
         return $truck;
     }
@@ -85,20 +85,15 @@ class TruckController extends Controller
      */
     public function show($truck)
     {
-   
-        $trucks = DB::table('trucks')->where('transport_id','=',$truck)->get(); 
-
+        $trucks = truck::where('transport_id','=',$truck)->get(); 
         return $trucks;
-
     }
 
     public function showTransport($truck)
     {
         /* Hay que recibir el id del Transporte */
-        $trucks = DB::table('trucks')->where('transport_id','=',$truck)->get(); 
-
+        $trucks = truck::where('transport_id','=',$truck)->get(); 
         return $trucks;
-
     }
 
     /**
@@ -139,8 +134,6 @@ class TruckController extends Controller
         $truck->customer_id = $cId;
         $truck->save();
 
-
-
         return $truck;
 
     }
@@ -176,9 +169,6 @@ class TruckController extends Controller
         ->select('trucks.id', 'trucks.domain', 'trucks.model','transports.razon_social')
         ->where('trucks.domain', '=', $domain)->get();
         $count = $truck->count();
-
-            // Puedes modificar esta lógica según el detalle que desees devolver en el JSON
-        ; // Esto devuelve un array con el detalle de los transportes encontrados
 
         return response()->json([
             'count' => $count,
