@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoretrailerRequest;
 use App\Http\Requests\UpdatetrailerRequest;
 use App\Models\trailer;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class TrailerController extends Controller
