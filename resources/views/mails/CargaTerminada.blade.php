@@ -378,13 +378,67 @@
                                                                             <div style="font-family: sans-serif">
                                                                                 <div class="txtTinyMce-wrapper"
                                                                                     style="font-size: 12px; font-family: Lato, Tahoma, Verdana, Segoe, sans-serif; mso-line-height-alt: 18px; color: #787878; line-height: 1.5;">
-                                                                                    <p
-                                                                                        style="margin: 2%; font-size: 14px; text-align: center; mso-line-height-alt: 27px;">
+                                                                                    <p style="margin: 2%; font-size: 14px; text-align: center; mso-line-height-alt: 27px;">
                                                                                         <span style="font-size:18px;">
-                                                                                            {{ $datos['description']}}
+                                                                                            Datos del Transporte: <br>
+                                                                                            @if(!empty($datos['transport']))
+                                                                                                <span style="color:gray;font-size:14px;">
+                                                                                                    <strong>
+                                                                                                        Transporte: {{ $datos['transport'] }}
+                                                                                                    </strong>
+                                                                                                </span>
+                                                                                                <br/>
+                                                                                            @endif
+                                                                                            @if(!empty($datos['transport_agent']))
+                                                                                                <span style="color:gray;font-size:14px;">
+                                                                                                    <strong>
+                                                                                                        ATA: {{ $datos['transport_agent'] }}
+                                                                                                    </strong>
+                                                                                                </span>
+                                                                                                <br/>
+                                                                                            @endif
+                                                                                            @if(!empty($datos['driver']))
+                                                                                                <span style="color:gray;font-size:14px;">
+                                                                                                    <strong>
+                                                                                                        Chofer:{{ $datos['driver'] }}
+                                                                                                    </strong>
+                                                                                                </span>
+                                                                                                <br/>
+                                                                                            @endif
+                                                                                            @if(!empty($datos['documento']))
+                                                                                                <span style="color:gray;font-size:14px;">
+                                                                                                    <strong>
+                                                                                                        DNI: {{ $datos['documento'] }}
+                                                                                                    </strong>
+                                                                                                </span>
+                                                                                                <br/>
+                                                                                            @endif
+                                                                                            @if(!empty($datos['truck']))
+                                                                                                <span style="color:gray;font-size:14px;">
+                                                                                                    <strong>
+                                                                                                        Camion: {{ $datos['truck'] }}
+                                                                                                    </strong>
+                                                                                                </span>
+                                                                                                <br/>
+                                                                                            @endif
+                                                                                            @if(!empty($datos['truck_semi']))
+                                                                                                <span style="color:gray;font-size:14px;">
+                                                                                                    <strong>
+                                                                                                        Semi: {{ $datos['truck_semi'] }}
+                                                                                                    </strong>
+                                                                                                </span>
+                                                                                                <br/>
+                                                                                            @endif
                                                                                         </span>
-                                                                                        <br/>
                                                                                     </p>
+                                                                                    @if(!empty($datos['description']))
+                                                                                        <p style="margin: 2%; font-size: 14px; text-align: center; mso-line-height-alt: 27px;">
+                                                                                            <span style="font-size:18px;">
+                                                                                                Descripción: {{ $datos['description'] }}
+                                                                                            </span>
+                                                                                            <br/>
+                                                                                        </p>
+                                                                                    @endif
                                                                                     <p style="margin: 2%; font-size: 14px; text-align: center; mso-line-height-alt: 27px;">
                                                                                     
                                                                                         <a href="{{env('FRONT_URL').'/satisfaccion/satisfaccion_carga.php?cntr_number='.$datos['cntr'].'&booking='.$datos['booking']}}"
