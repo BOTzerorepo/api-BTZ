@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Mail\UpdateCarga;
+use Illuminate\Support\Facades\Mail;
 
 class cargaController extends Controller
 {
@@ -274,7 +277,125 @@ class cargaController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        try {
+            // Validar los datos entrantes
+            $validatedData = $request->validate([
+                'commodity' => 'required|string',
+                'trader' => 'required|string',
+                'shipper' => 'required|string',
+                'custom_agent' => 'required|string',
+                'custom_agent_impo' => 'nullable|string',
+                'custom_place' => 'required|string',
+                'custom_place_impo' => 'nullable|string',
+                'load_place' => 'required|string',
+                'unload_place' => 'required|string',
+                'final_point' => 'required|string',
+                'oceans_line' => 'required|string',
+                'senasa' => 'nullable|string',
+                'tara' => 'nullable|string',
+                'importador' => 'nullable|string',
+                'tarifa_ref' => 'nullable|string',
+                'load_date' => 'required|string',
+                'ref_customer' => 'required|string',
+                'cut_off_fis' => 'nullable|string',
+                'vessel' => 'nullable|string',
+                'voyage' => 'nullable|string',
+                'observation_customer' => 'nullable|string',
+                'senasa_string' => 'nullable|string',
+                'tara_string' => 'nullable|string',
+                'bl_hbl' => 'nullable|string',
+                'ex_alto' => 'nullable|numeric',
+                'ex_ancho' => 'nullable|numeric',
+                'ex_largo' => 'nullable|numeric',
+                'obs_imo' => 'nullable|string',
+                'rf_tem' => 'nullable|numeric',
+                'rf_humedad' => 'nullable|numeric',
+                'rf_venti' => 'nullable|numeric',
+                'cntr_type' => 'required|string',
+                'retiro_place' => 'required|string',
+                'q_viajes' => 'nullable|integer',
+            ]);
+    
+            // Buscar la carga y actualizarla
+            $carga = Carga::findOrFail($id);
+            $cargaOriginal = $carga->getOriginal();
+            $carga->update([
+                'commodity' => $validatedData['commodity'],
+                'trader' => $validatedData['trader'],
+                'shipper' => $validatedData['shipper'],
+                'custom_agent' => $validatedData['custom_agent'],
+                'custom_agent_impo' => $validatedData['custom_agent_impo'],
+                'custom_place' => $validatedData['custom_place'],
+                'custom_place_impo' => $validatedData['custom_place_impo'],
+                'load_place' => $validatedData['load_place'],
+                'unload_place' => $validatedData['unload_place'],
+                'final_point' => $validatedData['final_point'],
+                'oceans_line' => $validatedData['oceans_line'],
+                'senasa' => $validatedData['senasa'],
+                'tara' => $validatedData['tara'],
+                'importador' => $validatedData['importador'],
+                'tarifa_ref' => $validatedData['tarifa_ref'],
+                'load_date' => $validatedData['load_date'],
+                'ref_customer' => $validatedData['ref_customer'],
+                'cut_off_fis' => $validatedData['cut_off_fis'],
+                'vessel' => $validatedData['vessel'],
+                'voyage' => $validatedData['voyage'],
+                'observation_customer' => $validatedData['observation_customer'],
+                'senasa_string' => $validatedData['senasa_string'],
+                'tara_string' => $validatedData['tara_string'],
+                'bl_hbl' => $validatedData['bl_hbl'],
+                'ex_alto' => $validatedData['ex_alto'],
+                'ex_ancho' => $validatedData['ex_ancho'],
+                'ex_largo' => $validatedData['ex_largo'],
+                'obs_imo' => $validatedData['obs_imo'],
+                'rf_tem' => $validatedData['rf_tem'],
+                'rf_humedad' => $validatedData['rf_humedad'],
+                'rf_venti' => $validatedData['rf_venti'],
+            ]);
+    
+            $changes = $carga->getChanges(); // Obtener los datos que fueron modificados
+
+            // Buscar el CNTR relacionado y actualizarlo
+            $cntr = cntr::where('booking', $carga->booking)->firstOrFail();
+            $cntrOriginal = $cntr->getOriginal();
+            $cntr->update([
+                'cntr_type' => $validatedData['cntr_type'],
+                'retiro_place' => $validatedData['retiro_place'],
+                'q_viajes' => $validatedData['q_viajes'],
+            ]);
+            $cntrChanges = $cntr->getChanges(); // Obtener los cambios del CNTR
+
+            //Captura las modificaciones
+            $modificacionesCarga = [];
+            foreach ($changes as $field => $newValue) {
+                $modificacionesCarga[$field] = [
+                    'original' => $cargaOriginal[$field],
+                    'nuevo' => $newValue
+                ];
+            }
+            $modificacionesCntr = [];
+            foreach ($cntrChanges as $field => $newValue) {
+                $modificacionesCntr[$field] = [
+                    'original' => $cntrOriginal[$field],
+                    'nuevo' => $newValue
+                ];
+            }
+
+            Mail::to('juaniolivares95@gmail.com')->send(new UpdateCarga($modificacionesCntr, $modificacionesCarga,$carga));
+            return response()->json(['message' => 'Carga actualizada exitosamente.'], 200);
+    
+        } catch (ValidationException $e) {
+            // Responder con los errores de validación
+            return response()->json(['errors' => $e->errors()], 422);
+    
+        } catch (ModelNotFoundException $e) {
+            // Manejar el caso de no encontrar la carga o el CNTR
+            return response()->json(['error' => 'Carga o CNTR no encontrado.'], 404);
+    
+        } catch (\Exception $e) {
+            // Manejar cualquier otra excepción
+            return response()->json(['error' => 'Error al actualizar la carga.'], 500);
+        }
     }
 
     /**

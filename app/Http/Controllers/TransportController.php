@@ -95,6 +95,12 @@ class TransportController extends Controller
 
         return $transport;
     }
+    public function showRazonSocial($razonSocial)
+    {
+        $transport = Transport::whereNull('deleted_at')->where('razon_social','=',$razonSocial)->first();
+
+        return $transport;
+    }
 
     /**
      * Show the form for editing the specified resource.
