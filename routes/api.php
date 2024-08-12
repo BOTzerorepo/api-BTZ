@@ -100,6 +100,7 @@ o888bood8P'    `Y8bood8P'   `Y8bood8P'  8""88888P'  8 8 8 8 8 8 8 8 8 8 8 8 8 8 
 
 Route::post('/docs/{booking}','App\Http\Controllers\DocumentController@store');
 Route::post('/ingresoFormulario', 'App\Http\Controllers\cargaController@guardarFormulario');
+Route::put('/carga/{id}', 'App\Http\Controllers\cargaController@update');
 Route::get('/docsCntr/{booking}/{user}/{cntr}','App\Http\Controllers\DocumentController@indexCntr');
 Route::get('/docsDel','App\Http\Controllers\DocumentController@destroy'); 
 
@@ -226,6 +227,7 @@ Route::delete('/driver/{id}','App\Http\Controllers\DriverController@destroy');
 Route::get('/transporteCustomer/{id}','App\Http\Controllers\TransportController@indexTransporteCustomer'); //Busca todos los transportes del customerId
 Route::get('/transportes','App\Http\Controllers\TransportController@index'); 
 Route::get('/transporte/{id}','App\Http\Controllers\TransportController@show'); 
+Route::get('/transporteRazonSocial/{razonSocial}','App\Http\Controllers\TransportController@showRazonSocial'); 
 Route::post('/transporte','App\Http\Controllers\TransportController@store'); 
 Route::post('/transporte/{id}','App\Http\Controllers\TransportController@update'); 
 Route::delete('/transporte/{id}','App\Http\Controllers\TransportController@destroy'); 
