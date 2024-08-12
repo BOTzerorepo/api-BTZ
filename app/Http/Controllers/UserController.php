@@ -47,16 +47,16 @@ class UserController extends Controller
      */
     public function show($id)
     {
-       $user = DB::table('users')->where('username','=',$id)->get();
+        $user = User::where('username', $id)->first();
         
        $user = [
-           'id'=> $user[0]->id,
-           'username'=> $user[0]->username,
-           'email'=> $user[0]->email,
-           'phone'=> $user[0]->celular,
-           'company'=> $user[0]->empresa,
-           'customer_id'=> $user[0]->customer_id,
-           'permiso'=> $user[0]->permiso
+           'id'=> $user->id,
+           'username'=> $user->username,
+           'email'=> $user->email,
+           'phone'=> $user->celular,
+           'company'=> $user->empresa,
+           'customer_id'=> $user->customer_id,
+           'permiso'=> $user->permiso
        ];
        return $user;
     }

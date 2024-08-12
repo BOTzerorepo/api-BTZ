@@ -13,10 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        /*  Schema::table('cntr', function (Blueprint $table) {
-           
-            $table->string('retiro_place')->nullable()->default('no')->change();
-            
+        /*Schema::table('carga', function (Blueprint $table) {
+            $table->softDeletes();
         });*/
     }
 
@@ -27,10 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        /*Schema::table('cntr', function (Blueprint $table) {
-
-            $table->string('retiro_place')->nullable(false)->default(null)->change();
-            //
+        /*Schema::table('carga', function (Blueprint $table) {
+            $table->dropSoftDeletes();
         });*/
     }
 };
