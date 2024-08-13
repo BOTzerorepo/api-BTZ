@@ -381,8 +381,6 @@ class cargaController extends Controller
                 ];
             }
 
-            Mail::to('juaniolivares95@gmail.com')->send(new UpdateCarga($modificacionesCntr, $modificacionesCarga,$carga));
-
             $sbx = DB::table('variables')->select('sandbox')->get();
             $inboxEmail = env('INBOX_EMAIL');
             if ($sbx[0]->sandbox == 0) {
