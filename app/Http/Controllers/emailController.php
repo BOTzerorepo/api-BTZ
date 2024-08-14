@@ -222,12 +222,13 @@ class emailController extends Controller
         $logapi->save();
         $date = Carbon::now('-03:00');
 
-
         if ($tipo == 'problema') {
 
-            $qd = DB::table('status')->select('status.id','status.status','cntr.cntr_type','carga.trader','carga.type','carga.ref_customer','cntr.confirmacion' )
+            $qd = DB::table('status')->select('status.id','status.status','cntr.cntr_type','carga.trader','carga.type','carga.ref_customer','cntr.confirmacion','asign.transport','asign.transport_agent','asign.truck','asign.truck_semi','asign.driver','drivers.documento')
             ->join('cntr','cntr.cntr_number','=','status.cntr_number')
             ->join('carga', 'carga.booking', '=', 'cntr.booking')
+            ->leftJoin('asign','asign.cntr_number','=','status.cntr_number')
+            ->leftJoin('drivers','drivers.nombre','=','asign.driver')
             ->where('status.cntr_number', '=', $cntr)->latest('id')->first();
             $description = $qd->status;
             $datos = [
@@ -242,7 +243,13 @@ class emailController extends Controller
                 'cntr_type' => $qd->cntr_type,
                 'trader' => $qd->trader,
                 'type' => $qd->type,
-                'ref_customer' => $qd->ref_customer
+                'ref_customer' => $qd->ref_customer,
+                'transport' => $qd->transport,
+                'transport_agent' => $qd->transport_agent,
+                'driver' => $qd->driver,
+                'truck' => $qd->truck,
+                'truck_semi' => $qd->truck_semi,
+                'documento' => $qd->documento,
             ];
 
 
@@ -268,9 +275,11 @@ class emailController extends Controller
             }
         } elseif ($tipo == 'stacking') {
 
-            $qd = DB::table('status')->select('status.main_status','status.id','status.status','cntr.cntr_type','carga.trader','carga.type','carga.ref_customer','cntr.confirmacion')
+            $qd = DB::table('status')->select('status.main_status','status.id','status.status','cntr.cntr_type','carga.trader','carga.type','carga.ref_customer','cntr.confirmacion','asign.transport','asign.transport_agent','asign.truck','asign.truck_semi','asign.driver','drivers.documento')
             ->join('cntr', 'cntr.cntr_number', '=', 'status.cntr_number')
             ->join('carga', 'carga.booking', '=', 'cntr.booking')
+            ->leftJoin('asign','asign.cntr_number','=','status.cntr_number')
+            ->leftJoin('drivers','drivers.nombre','=','asign.driver')
             ->where('status.cntr_number', '=', $cntr)->latest('status.id')->first();
             $description = $qd->status;
             $status = $qd->main_status;
@@ -286,7 +295,13 @@ class emailController extends Controller
                 'cntr_type' => $qd->cntr_type,
                 'trader' => $qd->trader,
                 'type' => $qd->type,
-                'ref_customer' => $qd->ref_customer
+                'ref_customer' => $qd->ref_customer,
+                'transport' => $qd->transport,
+                'transport_agent' => $qd->transport_agent,
+                'driver' => $qd->driver,
+                'truck' => $qd->truck,
+                'truck_semi' => $qd->truck_semi,
+                'documento' => $qd->documento,
             ];
 
             $qto = DB::table('carga')->select('users.email')
@@ -306,10 +321,11 @@ class emailController extends Controller
             }
         } elseif ($tipo == 'terminada') {
 
-
-            $qd = DB::table('status')->select('status.id', 'status.status', 'cntr.cntr_type', 'carga.trader', 'carga.type', 'carga.ref_customer','cntr.confirmacion')
+            $qd = DB::table('status')->select('status.id', 'status.status', 'cntr.cntr_type', 'carga.trader', 'carga.type', 'carga.ref_customer','cntr.confirmacion','asign.transport','asign.transport_agent','asign.truck','asign.truck_semi','asign.driver','drivers.documento')
                 ->join('cntr', 'cntr.cntr_number', '=', 'status.cntr_number')
                 ->join('carga', 'carga.booking', '=', 'cntr.booking')
+                ->leftJoin('asign','asign.cntr_number','=','status.cntr_number')
+                ->leftJoin('drivers','drivers.nombre','=','asign.driver')
                 ->where('status.cntr_number', '=', $cntr)->latest('id')->first();
             $description = $qd->status;
             $datos = [
@@ -322,12 +338,16 @@ class emailController extends Controller
                 'status' => 'con Problema',
                 'cntr_type' => $qd->cntr_type,
                 'confirmacion' => $qd->confirmacion,
-
                 'trader' => $qd->trader,
                 'type' => $qd->type,
-                'ref_customer' => $qd->ref_customer
+                'ref_customer' => $qd->ref_customer,
+                'transport' => $qd->transport,
+                'transport_agent' => $qd->transport_agent,
+                'driver' => $qd->driver,
+                'truck' => $qd->truck,
+                'truck_semi' => $qd->truck_semi,
+                'documento' => $qd->documento,
             ];
-
 
             $qto = DB::table('carga')->select('users.email')
                 ->join('users', 'users.username', '=', 'carga.user')
@@ -352,9 +372,11 @@ class emailController extends Controller
         } else {
 
 
-            $qd = DB::table('status')->select('status.main_status', 'status.id', 'status.status', 'cntr.cntr_type', 'carga.trader', 'carga.type', 'carga.ref_customer','cntr.confirmacion')
+            $qd = DB::table('status')->select('status.main_status', 'status.id', 'status.status', 'cntr.cntr_type', 'carga.trader', 'carga.type', 'carga.ref_customer','cntr.confirmacion','asign.transport','asign.transport_agent','asign.truck','asign.truck_semi','asign.driver','drivers.documento')
             ->join('cntr', 'cntr.cntr_number', '=', 'status.cntr_number')
             ->join('carga', 'carga.booking', '=', 'cntr.booking')
+            ->leftJoin('asign','asign.cntr_number','=','status.cntr_number')
+            ->leftJoin('drivers','drivers.nombre','=','asign.driver')
             ->where('status.cntr_number', '=', $cntr)->latest('status.id')->first();
             $description = $qd->status;
             $status = $qd->main_status;
@@ -363,7 +385,6 @@ class emailController extends Controller
                 'cntr' => $cntr,
                 'description' =>  $description,
                 'confirmacion' => $qd->confirmacion,
-
                 'user' => $user,
                 'empresa' => $empresa,
                 'booking' => $booking,
@@ -372,7 +393,13 @@ class emailController extends Controller
                 'cntr_type' => $qd->cntr_type,
                 'trader' => $qd->trader,
                 'type' => $qd->type,
-                'ref_customer' => $qd->ref_customer
+                'ref_customer' => $qd->ref_customer,
+                'transport' => $qd->transport,
+                'transport_agent' => $qd->transport_agent,
+                'driver' => $qd->driver,
+                'truck' => $qd->truck,
+                'truck_semi' => $qd->truck_semi,
+                'documento' => $qd->documento,
             ];
 
             $qto = DB::table('carga')->select('users.email')

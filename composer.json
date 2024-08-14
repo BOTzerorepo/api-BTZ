@@ -11,12 +11,14 @@
         "darkaonline/l5-swagger": "^8.3",
         "doctrine/dbal": "^4.0",
         "guzzlehttp/guzzle": "^7.5",
+        "irazasyed/larasupport": "^1.1",
         "laravel/fortify": "^1.13",
         "laravel/framework": "^9.11",
         "laravel/passport": "^10.4",
         "laravel/sanctum": "^2.14.1",
         "laravel/tinker": "^2.7",
         "maatwebsite/excel": "^3.1",
+        "owen-it/laravel-auditing": "^13.6",
         "psr/simple-cache": "^2.0"
     },
     "require-dev": {

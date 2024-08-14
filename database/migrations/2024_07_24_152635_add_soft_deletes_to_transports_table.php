@@ -13,11 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        /*  Schema::table('cntr', function (Blueprint $table) {
-           
-            $table->string('retiro_place')->nullable()->default('no')->change();
-            
-        });*/
+        Schema::table('transports', function (Blueprint $table) {
+            $table->softDeletes(); // Agrega la columna deleted_at para soft deletes
+        });
     }
 
     /**
@@ -27,10 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        /*Schema::table('cntr', function (Blueprint $table) {
-
-            $table->string('retiro_place')->nullable(false)->default(null)->change();
-            //
-        });*/
+        Schema::table('transports', function (Blueprint $table) {
+            $table->dropSoftDeletes(); // Elimina la columna deleted_at
+        });
     }
 };
