@@ -10,10 +10,12 @@ use App\Models\Carga;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 use Illuminate\Validation\ValidationException;
 use Exception;
 use App\Http\Controllers\emailController;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use App\Mail\cargaTerminada;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
@@ -87,7 +89,10 @@ class statusController extends Controller
                 'cntr_number' => $cntr,
                 'user_status' => $user,
             ]);
-                        
+                  
+            // Guarda el modelo para obtener el ID
+            $status->save();
+
             if ($request->hasFile('statusArchivo')) {
 
                 $statusArchivo = $request->file('statusArchivo');
@@ -354,41 +359,41 @@ class statusController extends Controller
     }
 
     public function obtenerDocumentosCarga($booking)
-{
-    $carga = Carga::where('booking', $booking)->first();
+    {
+        $carga = Carga::where('booking', $booking)->first();
 
-    if (!$carga) {
-        return response()->json(['mensaje' => 'No se encontró la carga asociada al booking'], 404);
-    }
-
-    $idCarga = $carga->id;
-    $folder = 'status/' . $idCarga;
-
-    // Verificar si la carpeta existe
-    if (Storage::exists($folder)) {
-        // Obtener la lista de archivos en la carpeta
-        $archivos = Storage::files($folder);
-
-        // Crear un array para almacenar el contenido de los archivos
-        $archivosConContenido = [];
-
-        // Obtener el contenido de cada archivo
-        foreach ($archivos as $archivo) {
-            try {
-                $contenido = Storage::get($archivo);
-                $contenidoUtf8 = mb_convert_encoding($contenido, 'UTF-8', 'UTF-8');
-                $archivosConContenido[] = ['nombre' => $archivo, 'contenido' => $contenidoUtf8];
-            } catch (FileNotFoundException $e) {
-                // Manejar la excepción si el archivo no se encuentra
-                Log::error('Archivo no encontrado: ' . $archivo);
-            }
+        if (!$carga) {
+            return response()->json(['mensaje' => 'No se encontró la carga asociada al booking'], 404);
         }
 
-        return response()->json(['archivos' => $archivosConContenido]);
-    } else {
-        return response()->json(['mensaje' => 'La carpeta no existe o no tiene archivos'], 404);
+        $idCarga = $carga->id;
+        $folder = 'status/' . $idCarga;
+
+        // Verificar si la carpeta existe
+        if (Storage::exists($folder)) {
+            // Obtener la lista de archivos en la carpeta
+            $archivos = Storage::files($folder);
+
+            // Crear un array para almacenar el contenido de los archivos
+            $archivosConContenido = [];
+
+            // Obtener el contenido de cada archivo
+            foreach ($archivos as $archivo) {
+                try {
+                    $contenido = Storage::get($archivo);
+                    $contenidoUtf8 = mb_convert_encoding($contenido, 'UTF-8', 'UTF-8');
+                    $archivosConContenido[] = ['nombre' => $archivo, 'contenido' => $contenidoUtf8];
+                } catch (FileNotFoundException $e) {
+                    // Manejar la excepción si el archivo no se encuentra
+                    Log::error('Archivo no encontrado: ' . $archivo);
+                }
+            }
+
+            return response()->json(['archivos' => $archivosConContenido]);
+        } else {
+            return response()->json(['mensaje' => 'La carpeta no existe o no tiene archivos'], 404);
+        }
     }
-}
 
 
     /**
