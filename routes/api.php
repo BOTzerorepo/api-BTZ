@@ -303,6 +303,15 @@ Route::post('/customerAgent','App\Http\Controllers\CustomerAgentController@store
 Route::post('/customerAgent/{id}','App\Http\Controllers\CustomerAgentController@update'); //Actualiza los datos de un Customer Shipper
 Route::delete('/customerAgent/{id}','App\Http\Controllers\CustomerAgentController@destroy'); //Elimina un Customer Shipper
 
+// Aduanas 
+
+Route::get('/aduanas', 'App\Http\Controllers\AduanasController@index');
+Route::get('/aduana/{id}', 'App\Http\Controllers\AduanasController@show'); //Busca un Customer Shipper de una compania
+Route::post('/aduana', 'App\Http\Controllers\AduanasController@store'); //Crea un nuevo Customer Shipper
+Route::post('/aduana/{id}', 'App\Http\Controllers\AduanasController@update'); //Actualiza los datos de un Customer Shipper
+
+
+
 //Customer ntfy
 Route::get('/customersNtfy','App\Http\Controllers\CustomerNtfyController@index'); //Busca todos los Customer Ntfy
 Route::get('/customerNtfyCompany/{company}','App\Http\Controllers\CustomerNtfyController@indexCompany'); //Busca todos los Customer Ntfy de una compania

@@ -156,9 +156,6 @@ class ServiceSatelital extends Controller
             ->where('trucks.alta_aker', '!=', 0)
             ->get();
 
-
-
-
         foreach ($todosMisCamiones as $camion) {
 
             $client = new Client();
@@ -234,8 +231,37 @@ class ServiceSatelital extends Controller
                 $c3 = 2 * atan2(sqrt($a3), sqrt(1 - $a3));
                 $d3 = $Radio * $c3; // in metres */
 
-                if ($d <= 200) { // lugar de Carga
 
+                 // Traer puntos de interes general 
+
+                //if 
+
+                    // /api/accionLugarDeCarga/ 
+
+                        // Opcion Mail 
+                        // Opcion Notificcion
+                        // opcion actualizacion.
+
+                // Armar formula por cada punto de interes asociado al viaje.
+                 //if 
+
+                    // /api/accionLugarDeCarga/ 
+
+                        // Opcion Mail 
+                        // Opcion Notificcion
+                        // opcion actualizacion.
+                // .....................::COTIZAR::.........................//
+               
+                // Formulario de Carga de Punto de Interés.
+                // formulario de Edición punto de Interés.
+                // Index itinerario.(puntos de interés asociados a un viaje) endpoints de Index puntos de interés.
+            
+                // endpoints de accion 
+
+                // cambiar esta logica (agregarla acá).
+
+                
+                if ($d <= 200) { // lugar de Carga
 
                     $clientCarga = new Client();
                     $requestCarga = new Psr7Request('GET', env('APP_URL') . '/api/accionLugarDeCarga/' . $IdTrip);

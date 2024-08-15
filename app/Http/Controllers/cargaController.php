@@ -29,7 +29,7 @@ class cargaController extends Controller
         $terminaSemana = Carbon::parse('next Sunday')->endOfDay();
         $empiezaSemana = Carbon::parse('last monday')->startOfDay();
 
-        if ($user->permiso == 'Traffic') {
+        if ($user->permiso == 'Traffic' || $user->permiso == 'Master') {
 
             $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
                 ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
@@ -59,7 +59,7 @@ class cargaController extends Controller
         $user = DB::table('users')->where('username', '=', $user)->first();
         $empiezaSemana = Carbon::parse('last monday')->startOfDay();
 
-        if ($user->permiso == 'Traffic') {
+        if ($user->permiso == 'Traffic'|| $user->permiso == 'Master') {
 
             $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
                 ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
@@ -88,7 +88,7 @@ class cargaController extends Controller
 
         $terminaSemana = Carbon::parse('next Sunday')->endOfDay();
 
-        if ($user->permiso == 'Traffic') {
+        if ($user->permiso == 'Traffic'|| $user->permiso == 'Master') {
 
             $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
                 ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
@@ -116,7 +116,7 @@ class cargaController extends Controller
     {
         $user = DB::table('users')->where('username', '=', $user)->first();
 
-        if ($user->permiso == 'Traffic') {
+        if ($user->permiso == 'Traffic'|| $user->permiso == 'Master') {
 
             $todasLasCargasDeEstaSemana = DB::table('carga')->join('cntr', 'cntr.booking', '=', 'carga.booking')
                 ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
@@ -153,7 +153,7 @@ class cargaController extends Controller
 
         $user = DB::table('users')->where('username', '=', $user)->first();
 
-        if ($user->permiso == 'Traffic') {
+        if ($user->permiso == 'Traffic'|| $user->permiso == 'Master') {
 
             $cargaPorId = DB::table('carga')
             ->join('cntr', 'cntr.booking', '=', 'carga.booking')
