@@ -53,4 +53,15 @@ class AduanasController extends Controller
 
         return $aduana;
     }
+    public function destroy($id)
+    {
+        Aduana::destroy($id);
+
+        $existe = Aduana::find($id);
+        if ($existe) {
+            return 'No se elimino el Lugar de Carga';
+        } else {
+            return 'Se elimino el Lugar de Carga';
+        };
+    }
 }

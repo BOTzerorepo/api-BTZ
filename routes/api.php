@@ -305,10 +305,12 @@ Route::delete('/customerAgent/{id}','App\Http\Controllers\CustomerAgentControlle
 
 // Aduanas 
 
-Route::get('/aduanas', 'App\Http\Controllers\AduanasController@index');
-Route::get('/aduana/{id}', 'App\Http\Controllers\AduanasController@show'); //Busca un Customer Shipper de una compania
-Route::post('/aduana', 'App\Http\Controllers\AduanasController@store'); //Crea un nuevo Customer Shipper
-Route::post('/aduana/{id}', 'App\Http\Controllers\AduanasController@update'); //Actualiza los datos de un Customer Shipper
+Route::get('/aduanas', 'App\Http\Controllers\AduanasController@index'); // Ver todas las Aduanas
+Route::get('/aduana/{id}', 'App\Http\Controllers\AduanasController@show'); //Busca una Aduana
+Route::post('/aduana', 'App\Http\Controllers\AduanasController@store'); //Crea un nueva Aduana
+Route::post('/aduana/{id}', 'App\Http\Controllers\AduanasController@update'); //Actualiza los datos de una Aduana
+Route::delete('/aduana/{id}', 'App\Http\Controllers\AduanasController@destroy'); //Elimina una Aduana
+
 
 
 
