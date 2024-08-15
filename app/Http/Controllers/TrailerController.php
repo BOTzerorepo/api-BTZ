@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoretrailerRequest;
 use App\Http\Requests\UpdatetrailerRequest;
 use App\Models\trailer;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class TrailerController extends Controller
@@ -16,7 +17,7 @@ class TrailerController extends Controller
      */
     public function index($customer)
     {
-        $trailer = DB::table('trailers')->where('customer_id','=',$customer)->get();
+        $trailer = trailer::where('customer_id','=',$customer)->get();
         return $trailer;
     }
 
@@ -39,7 +40,7 @@ class TrailerController extends Controller
     public function store(StoretrailerRequest $request)
     {
         
-        $customerId = DB::table('users')->select('customer_id')->where('id','=',$request['user'])->get(0); 
+        $customerId = User::select('customer_id')->where('id','=',$request['user'])->get(0); 
         $cId =  $customerId[0]->customer_id;
         
         $trailer = new trailer();
@@ -73,7 +74,7 @@ class TrailerController extends Controller
     public function showTrailer($transporte)
     {
        
-        $trailers = DB::table('trailers')->where('transport_id','=',$transporte)->get(); 
+        $trailers = trailer::where('transport_id','=',$transporte)->get(); 
         return $trailers;
 
     }
