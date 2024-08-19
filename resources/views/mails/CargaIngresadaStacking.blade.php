@@ -370,33 +370,82 @@
                                                                     style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"
                                                                     width="100%">
                                                                     <tr>
-                                                                        <td
-                                                                            style="padding-bottom:35px;padding-left:10px;padding-right:10px;">
+                                                                        <td style="padding-bottom:35px;padding-left:10px;padding-right:10px;">
                                                                             <div style="font-family: sans-serif">
                                                                                 <div class="txtTinyMce-wrapper"
                                                                                     style="font-size: 12px; font-family: Lato, Tahoma, Verdana, Segoe, sans-serif; mso-line-height-alt: 18px; color: #787878; line-height: 1.5;">
-                                                                                    <p
-                                                                                        style="margin: 2%; font-size: 14px; text-align: center; mso-line-height-alt: 27px;">
+                                                                                    <p style="margin: 2%; font-size: 14px; text-align: center; mso-line-height-alt: 27px;">
                                                                                         <span style="font-size:18px;">
-                                                                                            {{ $datos['description']}}
+                                                                                            Datos del Transporte: <br>
+                                                                                            @if(!empty($datos['transport']))
+                                                                                                <span style="color:gray;font-size:14px;">
+                                                                                                    <strong>
+                                                                                                        Transporte: {{ $datos['transport'] }}
+                                                                                                    </strong>
+                                                                                                </span>
+                                                                                                <br/>
+                                                                                            @endif
+                                                                                            @if(!empty($datos['transport_agent']))
+                                                                                                <span style="color:gray;font-size:14px;">
+                                                                                                    <strong>
+                                                                                                        ATA: {{ $datos['transport_agent'] }}
+                                                                                                    </strong>
+                                                                                                </span>
+                                                                                                <br/>
+                                                                                            @endif
+                                                                                            @if(!empty($datos['driver']))
+                                                                                                <span style="color:gray;font-size:14px;">
+                                                                                                    <strong>
+                                                                                                        Chofer:{{ $datos['driver'] }}
+                                                                                                    </strong>
+                                                                                                </span>
+                                                                                                <br/>
+                                                                                            @endif
+                                                                                            @if(!empty($datos['documento']))
+                                                                                                <span style="color:gray;font-size:14px;">
+                                                                                                    <strong>
+                                                                                                        DNI: {{ $datos['documento'] }}
+                                                                                                    </strong>
+                                                                                                </span>
+                                                                                                <br/>
+                                                                                            @endif
+                                                                                            @if(!empty($datos['truck']))
+                                                                                                <span style="color:gray;font-size:14px;">
+                                                                                                    <strong>
+                                                                                                        Camion: {{ $datos['truck'] }}
+                                                                                                    </strong>
+                                                                                                </span>
+                                                                                                <br/>
+                                                                                            @endif
+                                                                                            @if(!empty($datos['truck_semi']))
+                                                                                                <span style="color:gray;font-size:14px;">
+                                                                                                    <strong>
+                                                                                                        Semi: {{ $datos['truck_semi'] }}
+                                                                                                    </strong>
+                                                                                                </span>
+                                                                                                <br/>
+                                                                                            @endif
                                                                                         </span>
-                                                                                        <br/>
                                                                                     </p>
-                                                                                    <p
-                                                                                    style="margin: 2%; font-size: 14px; text-align: center; mso-line-height-alt: 27px;">
-                                                                                        <span
-                                                                                            style="font-size:15px;">
+                                                                                    @if(!empty($datos['description']))
+                                                                                        <p style="margin: 2%; font-size: 14px; text-align: center; mso-line-height-alt: 27px;">
+                                                                                            <span style="font-size:18px;">
+                                                                                                Descripción: {{ $datos['description'] }}
+                                                                                            </span>
+                                                                                            <br/>
+                                                                                        </p>
+                                                                                    @endif
+                                                                                    <p style="margin: 2%; font-size: 14px; text-align: center; mso-line-height-alt: 27px;">
+                                                                                        <span style="font-size:15px;">
                                                                                             Status Informado por: <br>
-                                                                                            <span
-                                                                                                style="color:#2190e3;font-size:18px;">
+                                                                                            <span style="color:#2190e3;font-size:18px;">
                                                                                                 <strong>
-                                                                                                    {{ $datos['user']}}
+                                                                                                    {{ $datos['user'] }}
                                                                                                 </strong>
                                                                                             </span>
                                                                                             <br/>
-                                                                                            <strong style="font-size:10px;">Created at: {{
-                                                                                                $datos['date']}}
-                                                                                            </strong></span>
+                                                                                            <strong style="font-size:10px;">Created at: {{ $datos['date'] }}</strong>
+                                                                                        </span>
                                                                                     </p>
                                                                                 </div>
                                                                             </div>

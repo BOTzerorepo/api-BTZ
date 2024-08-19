@@ -4,10 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
+use OwenIt\Auditing\Auditable;
 
-class Carga extends Model
+
+class Carga extends Model implements AuditableContract
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes, Auditable;
     protected $table = 'carga';
     protected $primaryKey = 'id';
     public $timestamps = true;
