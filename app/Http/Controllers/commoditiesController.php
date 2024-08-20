@@ -37,6 +37,7 @@ class commoditiesController extends Controller
      */
     public function store(Request $request)
     {
+
         $commodity = new commodity();
         $commodity->commodity = $request['commodity'];
         $commodity->user = $request['user'];
