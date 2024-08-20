@@ -313,7 +313,13 @@ Route::post('/aduana', 'App\Http\Controllers\AduanasController@store'); //Crea u
 Route::post('/aduana/{id}', 'App\Http\Controllers\AduanasController@update'); //Actualiza los datos de una Aduana
 Route::delete('/aduana/{id}', 'App\Http\Controllers\AduanasController@destroy'); //Elimina una Aduana
 
+// Commodities 
 
+Route::get('/commodities', 'App\Http\Controllers\commoditiesController@index'); // Ver todas las Commodities
+Route::get('/commodity/{id}', 'App\Http\Controllers\commoditiesController@show'); //Busca una Commodity
+Route::post('/commodity', 'App\Http\Controllers\commoditiesController@store'); //Crea un nueva Commodity
+Route::post('/commodity/{id}', 'App\Http\Controllers\commoditiesController@update'); //Actualiza los datos de una Commodity
+Route::delete('/commodity/{id}', 'App\Http\Controllers\commoditiesController@destroy'); //Elimina una Commodity
 
 
 //Customer ntfy
