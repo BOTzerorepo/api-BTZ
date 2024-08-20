@@ -355,7 +355,7 @@ class cargaController extends Controller
                 'rf_humedad' => $validatedData['rf_humedad'],
                 'rf_venti' => $validatedData['rf_venti'],
             ]);
-    
+            
             $changes = $carga->getChanges(); // Obtener los datos que fueron modificados
 
             // Buscar el CNTR relacionado y actualizarlo
@@ -396,16 +396,23 @@ class cargaController extends Controller
             return response()->json(['message' => 'Carga actualizada exitosamente.'], 200);
     
         } catch (ValidationException $e) {
-            // Responder con los errores de validación
-            return response()->json(['errors' => $e->errors()], 422);
-    
-        } catch (ModelNotFoundException $e) {
-            // Manejar el caso de no encontrar la carga o el CNTR
-            return response()->json(['error' => 'Carga o CNTR no encontrado.'], 404);
-    
+            DB::rollBack();
+            $errors = [];
+            foreach ($e->errors() as $field => $errorMessages) {
+                foreach ($errorMessages as $errorMessage) {
+                    $errors[] = $errorMessage;
+                }
+            }
+
+            return response()->json([
+                'message' => 'Datos ingresados incorrectamente',
+                'message_type' => 'danger',
+                'error' => $errors
+            ], 422);
         } catch (\Exception $e) {
-            // Manejar cualquier otra excepción
-            return response()->json(['error' => 'Error al actualizar la carga.'], 500);
+            DB::rollBack();
+            $errorMessage = $e->getMessage();
+            return response()->json(['error' => $errorMessage, 'message_type' => 'danger'], 500);
         }
     }
 
