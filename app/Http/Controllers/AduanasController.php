@@ -21,7 +21,6 @@ class AduanasController extends Controller
     }
     public function store(Request $request)
     {
-        dd($request->all());
         $validated = $request->validate([
             'description' => 'required|string',
             'address' => 'required|string',
