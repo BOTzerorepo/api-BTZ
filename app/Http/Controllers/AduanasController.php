@@ -21,16 +21,20 @@ class AduanasController extends Controller
     }
     public function store(Request $request)
     {
-        $aduana = new Aduana();
-        $aduana->description = $request->description;
-        $aduana->address = $request->address;
-        $aduana->provincia = $request->provincia;
-        $aduana->pais = $request->pais;
-        $aduana->lat = $request->lat;
-        $aduana->lon = $request->lon;
-        $aduana->link_maps = 'https://www.google.es/maps?q=' . $request['lat'] . ',' . $request['lon'];
-        $aduana->user = $request->user;
-        $aduana->company = $request->company;
+        dd($request->all());
+        $validated = $request->validate([
+            'description' => 'required|string',
+            'address' => 'required|string',
+            'provincia' => 'required|string',
+            'pais' => 'required|string',
+            'lat' => 'required|numeric',
+            'lon' => 'required|numeric',
+            'user' => 'required|string',
+            'company' => 'required|string',
+        ]);
+
+        $aduana = new Aduana($validated);
+        $aduana->link_maps = 'https://www.google.es/maps?q=' . $request->lat . ',' . $request->lon;
         $aduana->save();
 
         return $aduana;
