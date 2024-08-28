@@ -188,4 +188,22 @@ class cntrController extends Controller
         // Devuelve la respuesta en formato JSON
         return response()->json($response);
     }
+
+    public function point(Request $request)
+    {
+        $cntrId = $request->input('cntr_id');
+        $points = $request->input('points'); // Array de puntos de interés
+
+        // Primero, desvincular los puntos de interés actuales para este CNTR
+        $cntr = Cntr::find($cntrId);
+        $cntr->pointsOfInterest()->detach();
+
+        // Ahora, volver a adjuntarlos con el nuevo orden
+        foreach ($points as $order => $pointId) {
+            $cntr->pointsOfInterest()->attach($pointId, ['order' => $order + 1]);
+        }
+
+        return redirect()->route('your_route_name')->with('success', 'Puntos de interés guardados con éxito');
+    }
+
 }
