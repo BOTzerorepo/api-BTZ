@@ -47,7 +47,6 @@ class loadAsset implements FromCollection, WithHeadings, ShouldAutoSize, WithSty
 
         $asset = DB::table('cntr')->join('carga','cntr.booking', '=', 'carga.booking')->select('id_cntr',"type","ref_customer","carga.booking","cntr_number","cntr_type","shipper","commodity","retiro_place","load_place","load_date","unload_place","cut_off_fis","custom_place")
         ->where('cntr.main_status', '!=', 'NO ASIGNADA')
-        ->where('cntr.main_status', '!=', 'ON BOARD')
         ->where('cntr.main_status', '!=' ,'TERMINADAS')
         ->orderBy('carga.load_date', 'desc')->get();
         return $asset;
