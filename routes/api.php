@@ -41,7 +41,9 @@ Route::get('/cargaDomain/{domain}', 'App\Http\Controllers\cargaController@showCa
 
 // STATUS
 
-Route::post('/statusCarga', 'App\Http\Controllers\statusController@updateStatusCarga'); 
+Route::post('/statusCarga', 'App\Http\Controllers\statusController@updateStatusCarga');
+Route::get('/cargasActivas', 'App\Http\Controllers\statusController@indexActive'); 
+
 Route::get('/status','App\Http\Controllers\statusController@index');
 Route::get('/ultimoStatus/{id}','App\Http\Controllers\statusController@showLast'); 
 Route::get('/historialStatus/{cntr}','App\Http\Controllers\statusController@showHistory'); 
@@ -78,7 +80,7 @@ Route::get('/mailCargaNueva/{idCarga}/{user}','App\Http\Controllers\emailControl
 
 /* Envio de Emails */
 
-Route::get('/mailStatus/{cntr}/{empresa}/{booking}/{user}/{tipo}','App\Http\Controllers\emailController@cambiaStatus');  // Llega Correo Ok
+Route::get('/mailStatus/{cntr}/{empresa}/{booking}/{user}/{tipo}/{statusArchivoPath}','App\Http\Controllers\emailController@cambiaStatus');  // Llega Correo Ok
 Route::get('/cargaAsignada/{id}','App\Http\Controllers\emailController@cargaAsignada');  // Llega Correo Ok
 Route::get('/trasnsporteAsignado/{id}','App\Http\Controllers\emailController@transporteAsignado');  // Llega Correo Ok
 
