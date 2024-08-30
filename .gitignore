@@ -5,8 +5,10 @@
 /vendor
 /public/instructivos
 .env
-.env copy
+.env copy 2
 .env.backup
+.env. Prod
+.env. demo
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml
