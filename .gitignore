@@ -7,8 +7,8 @@
 .env
 .env copy 2
 .env.backup
-.env. Prod
-.env. demo
+.env Prod
+.env demo
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml
