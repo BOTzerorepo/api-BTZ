@@ -39,7 +39,6 @@ class ServiceSatelital extends Controller
     {
 
         $trucks = truck::all();
-
         foreach ($trucks as $truck) {
 
             $client = new Client();
@@ -66,20 +65,37 @@ class ServiceSatelital extends Controller
 
             if (isset($data['data'])) {
 
-                $datos = $data['data'];
-                $details = reset($datos);
-                // Hacer algo con el primer elemento aquí
+                if (isset($data['data'][$truck->domain]['ult_reporte']) && $data['data'][$truck->domain]['ult_reporte'] != null) {
 
-                $truck = truck::where('domain', $details['patente'])->first();
-                if ($truck) {
-                    // Si se encuentra un camión con el dominio, actualizar el estado a 1
-                    $truck->alta_aker = 1;
-                    $truck->id_satelital = $details['id'];
-                    $truck->save();
+                    $datos = $data['data'];
+                    $details = reset($datos);
+                    // Hacer algo con el primer elemento aquí
+
+                    $truck = truck::where('domain', $details['patente'])->first();
+
+                    if ($truck) {
+                        // Si se encuentra un camión con el dominio, actualizar el estado a 1
+                        $truck->alta_aker = 1;
+                        $truck->id_satelital = $details['id'];
+                        $truck->save();
+
+                    } 
                 } else {
-                    // Si no se encuentra un camión con el dominio, devolver un mensaje de error
-                    return 'No se encontró un camión con el dominio especificado';
+                    $truck = truck::where('domain', $truck->domain)->first();
+                    $truck->alta_aker = 0;
+                    $truck->id_satelital = null;
+                    $truck->save();
+
+                    
                 }
+            } else {
+
+                $truck = truck::where('domain', $truck->domain)->first();
+                $truck->alta_aker = 0;
+                $truck->id_satelital = null;
+                $truck->save();
+
+                
             }
         }
     }
@@ -110,35 +126,43 @@ class ServiceSatelital extends Controller
 
         if (isset($data['data'])) {
 
-            $datos = $data['data'];
-            $details = reset($datos);
-            // Hacer algo con el primer elemento aquí
+            if (isset($data['data'][$domain]['ult_reporte']) && $data['data'][$domain]['ult_reporte'] != null) {
 
-            $truck = truck::where('domain', $details['patente'])->first();
+                $datos = $data['data'];
+                $details = reset($datos);
+                // Hacer algo con el primer elemento aquí
 
-            if ($truck) {
-                // Si se encuentra un camión con el dominio, actualizar el estado a 1
-                $truck->alta_aker = 1;
-                $truck->id_satelital = $details['id'];
+                $truck = truck::where('domain', $details['patente'])->first();
+
+                if ($truck) {
+                    // Si se encuentra un camión con el dominio, actualizar el estado a 1
+                    $truck->alta_aker = 1;
+                    $truck->id_satelital = $details['id'];
+                    $truck->save();
+                    return $truck;
+                } else {
+                    // Si no se encuentra un camión con el dominio, devolver un mensaje de error
+                    return 'No se encontró un camión con el dominio especificado';
+                }
+
+            } else {
+                $truck = truck::where('domain', $domain)->first();
+                $truck->alta_aker = 0;
+                $truck->id_satelital = null;
                 $truck->save();
 
-                // Cargamos en la Planilla de Aker:
-
-                $akerTruck = new akerTruck();
-                $akerTruck->domain = $details['patente'];
-                $akerTruck->satelital = $details['id'];
-                $akerTruck->estado = 1;
-                $akerTruck->save();
-
-                // Devolver el camión actualizado
                 return $truck;
-            } else {
-                // Si no se encuentra un camión con el dominio, devolver un mensaje de error
-                return 'No se encontró un camión con el dominio especificado';
             }
+           
         } else {
 
-            return 'no existe';
+            $truck = truck::where('domain', $domain)->first();
+            $truck->alta_aker = 0;
+            $truck->id_satelital = null;
+            $truck->save();
+
+            return $truck;
+            
         }
     }
 
@@ -648,8 +672,6 @@ class ServiceSatelital extends Controller
         
         return $camiones;
     }
-
-
 
     public function revisarCoordenadas()
     {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoretruckRequest;
 use App\Http\Requests\UpdatetruckRequest;
 use App\Mail\nuevoTranporte;
+use App\Models\asign;
 use App\Models\truck;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -70,8 +71,6 @@ class TruckController extends Controller
 
         $resultado = $this->serviceSatelital->issetDominio($request['domain']);
 
-        return $resultado;
-
         return $truck;
         
         
@@ -116,6 +115,19 @@ class TruckController extends Controller
      */
     public function update(UpdatetruckRequest $request, truck $truck)
     {
+        
+      
+        $od = $truck->domain;
+
+        $asign = DB::table('asign')->where('truck', '=', $od)->first();
+
+        if ($asign) {
+            // Si existe, realiza el update
+            DB::table('asign')
+            ->where('truck', '=', $od)
+            ->update(['truck' =>$request['domain']]);
+        } 
+       
 
         $customerId = DB::table('users')->select('customer_id')->where('username','=',$request['user'])->get(0); 
         $cId =  $customerId[0]->customer_id;
@@ -133,6 +145,8 @@ class TruckController extends Controller
         $truck->user = $request['user'];
         $truck->customer_id = $cId;
         $truck->save();
+
+        $this->serviceSatelital->issetDominio($request['domain']);
 
         return $truck;
 
