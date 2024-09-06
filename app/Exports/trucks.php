@@ -31,14 +31,14 @@ class trucks implements FromCollection, WithHeadings, ShouldAutoSize, WithStyles
             "Dominio",
             "Año",
             "Tipo",
-            "Sendores",
             "Satelital",
+            "ID Satelital",
             "Transporte"
         ];
     } 
     public function collection()
     {
-        $trucks = DB::table('trucks')->join('transports','transports.id','=','trucks.transport_id')->select('trucks.id', 'trucks.model', 'trucks.domain', 'trucks.year','trucks.type', 'trucks.device_truck','trucks.satelital_location', 'transports.razon_social')->get();
+        $trucks = DB::table('trucks')->join('transports','transports.id','=','trucks.transport_id')->select('trucks.id', 'trucks.model', 'trucks.domain', 'trucks.year','trucks.type', 'trucks.alta_aker','trucks.id_satelital', 'transports.razon_social')->get();
         return $trucks;
     }
 }
