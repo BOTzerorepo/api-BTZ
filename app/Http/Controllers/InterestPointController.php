@@ -131,8 +131,11 @@ class InterestPointController extends Controller
 
             // Asociar el punto de interés con cada cntr
             foreach ($cntrs as $cntr) {
-                $cntr->interestPoints()->updateExistingPivot($interestPoint->id, ['order' => $point['order']]);
-            }
+                // Usar syncWithoutDetaching para actualizar o agregar el valor sin eliminar otros puntos de interés existentes
+                $cntr->interestPoints()->syncWithoutDetaching([
+                    $interestPoint->id => ['order' => $point['order']]
+                ]);
+            }            
         }
 
         // Responder con éxito
