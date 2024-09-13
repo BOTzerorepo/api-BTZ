@@ -3,6 +3,8 @@
 use App\Http\Controllers\cntrController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\FleteroController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -192,9 +194,17 @@ Route::get('/user/{user}', 'App\Http\Controllers\UserController@show');
 
 Route::resource('/cntr',cntrController::class);
 
+
+// FLETERO CONTROLLER 
+
+Route::resource('fleteros', FleteroController::class);
+Route::get('/fleteroAsociados/{id}', [FleteroController::class, 'getFleteroDetails']);
+
 // TRUCK CONTROLLLER 
 Route::post('/truck', 'App\Http\Controllers\TruckController@store'); // C
 Route::get('/trucks/{customer}', 'App\Http\Controllers\TruckController@index'); // R ALL
+Route::get('/trucksTransport/{transport}', 'App\Http\Controllers\TruckController@indexTransport'); // R ALL
+
 Route::get('/truck/{truck}', 'App\Http\Controllers\TruckController@show'); // R ONE
 Route::post('/truck/{truck}', 'App\Http\Controllers\TruckController@update'); // U 
 Route::delete('/truck/{truck}', 'App\Http\Controllers\TruckController@destroy'); // D 
@@ -203,6 +213,8 @@ Route::get('/truckTransport/{truck}', 'App\Http\Controllers\TruckController@show
 // TRAILER CONTROLLLER 
 Route::post('/trailer', 'App\Http\Controllers\TrailerController@store'); // C
 Route::get('/trailer/{customer}', 'App\Http\Controllers\TrailerController@index'); // R ALL
+Route::get('/trailerTransport/{transport}', 'App\Http\Controllers\TrailerController@indexTransport'); // R ALL
+
 Route::get('/trailer/{trailer}', 'App\Http\Controllers\TrailerController@show'); // R ONE
 Route::post('/trailer/{trailer}', 'App\Http\Controllers\TrailerController@update'); // U
 Route::delete('/trailer/{trailer}', 'App\Http\Controllers\TrailerController@destroy'); // D
@@ -218,7 +230,9 @@ Route::delete('/ata/{id}','App\Http\Controllers\AtaController@destroy'); //Elimi
 // DRIVER CONTROLLLER trailerAsign
 
 Route::get('/drivers/{transport_id}','App\Http\Controllers\DriverController@showDriver'); 
-Route::get('/drivers','App\Http\Controllers\DriverController@index'); 
+Route::get('/drivers','App\Http\Controllers\DriverController@index');
+Route::get('/driversTransport/{idTransport}', 'App\Http\Controllers\DriverController@indexTransport'); 
+
 Route::get('/driver/{id}','App\Http\Controllers\DriverController@show'); 
 Route::post('/driver','App\Http\Controllers\DriverController@store'); 
 Route::post('/driverStatus/{id}','App\Http\Controllers\DriverController@status'); 

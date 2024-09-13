@@ -13,13 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('aker_transports', function (Blueprint $table) {
-            $table->id();
-            $table->string('transport')->unique();
-            $table->bigInteger('nif')->unique();
-            $table->boolean('alta')->default(0);
-            $table->string('cliente');
-            $table->timestamps();
+        Schema::table('fleteros', function (Blueprint $table) {
+            // Cambia la columna 'satelital' de boolean a string
+            $table->string('satelital')->change();
         });
     }
 
@@ -30,6 +26,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('aker_transports');
+        Schema::table('fleteros', function (Blueprint $table) {
+            $table->boolean('satelital')->default(false)->change();
+        });
     }
 };

@@ -43,4 +43,6 @@ class User extends Authenticatable implements AuditableContract
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    
 }
