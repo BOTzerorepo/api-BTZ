@@ -50,8 +50,8 @@ class cntr extends Model implements AuditableContract
 
     public function interestPoints()
     {
-        return $this->belongsToMany(InterestPoint::class, 'cntr_interest_point')
-                    ->withPivot('order')
-                    ->orderBy('pivot_order');
+        return $this->belongsToMany(InterestPoint::class, 'cntr_interest_point', 'cntr_id_cntr', 'interest_point_id')
+                    ->withPivot('order', 'activo')
+                    ->orderBy('cntr_interest_point.order');
     }
 }

@@ -15,13 +15,25 @@ return new class extends Migration
     {
         Schema::create('interest_points', function (Blueprint $table) {
             $table->id();
+            $table->string('type');
             $table->string('description');
             $table->decimal('latitude', 10, 7);
             $table->decimal('longitude', 10, 7);
             $table->decimal('radius', 8, 2);
-            $table->enum('trigger_on', ['enter', 'exit']);
-            $table->string('status_on_trigger');
-            $table->boolean('is_general')->default(false);
+            // Acciones cuando se entra
+            $table->boolean('accion_correo_customer_entrada')->default(false);
+            $table->boolean('accion_correo_cliente_entrada')->default(false);
+            $table->boolean('accion_cambiar_status_entrada')->default(false);
+            $table->boolean('accion_notificacion_customer_entrada')->default(false);
+            $table->boolean('accion_notificacion_cliente_entrada')->default(false);
+            
+            // Acciones cuando se sale
+            $table->boolean('accion_correo_customer_salida')->default(false);
+            $table->boolean('accion_correo_cliente_salida')->default(false);
+            $table->boolean('accion_cambiar_status_salida')->default(false);
+            $table->boolean('accion_notificacion_customer_salida')->default(false);
+            $table->boolean('accion_notificacion_cliente_salida')->default(false);
+            $table->softDeletes();
             $table->timestamps();
         });
     }

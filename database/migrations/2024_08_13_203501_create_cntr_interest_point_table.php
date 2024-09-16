@@ -18,7 +18,7 @@ return new class extends Migration
             $table->integer('order')->default(0);
             $table->unsignedBigInteger('cntr_id_cntr');
             $table->unsignedBigInteger('interest_point_id');
-            
+            $table->boolean('activo')->default(false);
             
             $table->foreign('cntr_id_cntr')->references('cntr_id')->on('cntr')->onDelete('cascade');
             $table->foreign('interest_point_id')->references('id')->on('interest_points')->onDelete('cascade');
