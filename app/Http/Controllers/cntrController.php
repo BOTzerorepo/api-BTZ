@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\asign;
 use App\Models\cntr;
 use App\Models\statu;
+use App\Models\InterestPoint;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
