@@ -35,7 +35,7 @@ class cargaController extends Controller
         $empiezaSemana = Carbon::parse('last monday')->startOfDay();
 
         // Selecciona las columnas específicas para evitar ambigüedad
-        if ($user->permiso == 'Traffic') {
+        if ($user->permiso == 'Traffic' || $user->permiso == 'Master') {
             $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
                 ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
@@ -47,6 +47,7 @@ class cargaController extends Controller
                 ->where('carga.empresa', '=', $user->empresa)
                 ->orderBy('carga.load_date', 'ASC')
                 ->get();
+
         } else {
             $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
@@ -81,7 +82,7 @@ class cargaController extends Controller
         $user = User::where('username', '=', $user)->first();
         $empiezaSemana = Carbon::parse('last monday')->startOfDay();
 
-        if ($user->permiso == 'Traffic') {
+        if ($user->permiso == 'Traffic'|| $user->permiso == 'Master') {
 
             $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
@@ -116,7 +117,7 @@ class cargaController extends Controller
 
         $terminaSemana = Carbon::parse('next Sunday')->endOfDay();
 
-        if ($user->permiso == 'Traffic') {
+        if ($user->permiso == 'Traffic'|| $user->permiso == 'Master') {
 
             $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
@@ -150,7 +151,7 @@ class cargaController extends Controller
     {
         $user = User::where('username', '=', $user)->first();
 
-        if ($user->permiso == 'Traffic') {
+        if ($user->permiso == 'Traffic'|| $user->permiso == 'Master') {
 
             $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
@@ -193,7 +194,7 @@ class cargaController extends Controller
 
         $user = User::where('username', '=', $user)->first();
 
-        if ($user->permiso == 'Traffic') {
+        if ($user->permiso == 'Traffic'|| $user->permiso == 'Master') {
 
             $cargaPorId = Carga::whereNull('carga.deleted_at')
             ->join('cntr', 'cntr.booking', '=', 'carga.booking')
@@ -365,7 +366,7 @@ class cargaController extends Controller
                 'rf_humedad' => $validatedData['rf_humedad'],
                 'rf_venti' => $validatedData['rf_venti'],
             ]);
-    
+            
             $changes = $carga->getChanges(); // Obtener los datos que fueron modificados
 
             // Buscar el CNTR relacionado y actualizarlo
@@ -406,16 +407,23 @@ class cargaController extends Controller
             return response()->json(['message' => 'Carga actualizada exitosamente.'], 200);
     
         } catch (ValidationException $e) {
-            // Responder con los errores de validación
-            return response()->json(['errors' => $e->errors()], 422);
-    
-        } catch (ModelNotFoundException $e) {
-            // Manejar el caso de no encontrar la carga o el CNTR
-            return response()->json(['error' => 'Carga o CNTR no encontrado.'], 404);
-    
+            DB::rollBack();
+            $errors = [];
+            foreach ($e->errors() as $field => $errorMessages) {
+                foreach ($errorMessages as $errorMessage) {
+                    $errors[] = $errorMessage;
+                }
+            }
+
+            return response()->json([
+                'message' => 'Datos ingresados incorrectamente',
+                'message_type' => 'danger',
+                'error' => $errors
+            ], 422);
         } catch (\Exception $e) {
-            // Manejar cualquier otra excepción
-            return response()->json(['error' => 'Error al actualizar la carga.'], 500);
+            DB::rollBack();
+            $errorMessage = $e->getMessage();
+            return response()->json(['error' => $errorMessage, 'message_type' => 'danger'], 500);
         }
     }
 

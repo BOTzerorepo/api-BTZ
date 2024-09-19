@@ -6,7 +6,12 @@
 /public/instructivos
 .env
 .env copy
+.env prod
+.env demo
+.env localPachi
 .env.backup
+.env Prod
+.env demo
 .phpunit.result.cache
 Homestead.json
 Homestead.yaml
