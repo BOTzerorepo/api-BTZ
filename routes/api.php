@@ -46,7 +46,9 @@ Route::get('/cargaDomain/{domain}', 'App\Http\Controllers\cargaController@showCa
 
 // STATUS
 
-Route::post('/statusCarga', 'App\Http\Controllers\statusController@updateStatusCarga'); 
+Route::post('/statusCarga', 'App\Http\Controllers\statusController@updateStatusCarga');
+Route::get('/cargasActivas', 'App\Http\Controllers\statusController@indexActive'); 
+
 Route::get('/status','App\Http\Controllers\statusController@index');
 Route::get('/ultimoStatus/{id}','App\Http\Controllers\statusController@showLast'); 
 Route::get('/historialStatus/{cntr}','App\Http\Controllers\statusController@showHistory'); 
@@ -83,7 +85,7 @@ Route::get('/mailCargaNueva/{idCarga}/{user}','App\Http\Controllers\emailControl
 
 /* Envio de Emails */
 
-Route::get('/mailStatus/{cntr}/{empresa}/{booking}/{user}/{tipo}','App\Http\Controllers\emailController@cambiaStatus');  // Llega Correo Ok
+Route::get('/mailStatus/{cntr}/{empresa}/{booking}/{user}/{tipo}/{statusArchivoPath}','App\Http\Controllers\emailController@cambiaStatus');  // Llega Correo Ok
 Route::get('/cargaAsignada/{id}','App\Http\Controllers\emailController@cargaAsignada');  // Llega Correo Ok
 Route::get('/trasnsporteAsignado/{id}','App\Http\Controllers\emailController@transporteAsignado');  // Llega Correo Ok
 
@@ -309,6 +311,23 @@ Route::get('/customerAgent/{id}','App\Http\Controllers\CustomerAgentController@s
 Route::post('/customerAgent','App\Http\Controllers\CustomerAgentController@store'); //Crea un nuevo Customer Shipper
 Route::post('/customerAgent/{id}','App\Http\Controllers\CustomerAgentController@update'); //Actualiza los datos de un Customer Shipper
 Route::delete('/customerAgent/{id}','App\Http\Controllers\CustomerAgentController@destroy'); //Elimina un Customer Shipper
+
+// Aduanas 
+
+Route::get('/aduanas', 'App\Http\Controllers\AduanasController@index'); // Ver todas las Aduanas
+Route::get('/aduana/{id}', 'App\Http\Controllers\AduanasController@show'); //Busca una Aduana
+Route::post('/aduana', 'App\Http\Controllers\AduanasController@store'); //Crea un nueva Aduana
+Route::post('/aduana/{id}', 'App\Http\Controllers\AduanasController@update'); //Actualiza los datos de una Aduana
+Route::delete('/aduana/{id}', 'App\Http\Controllers\AduanasController@destroy'); //Elimina una Aduana
+
+// Commodities 
+
+Route::get('/commodities', 'App\Http\Controllers\commoditiesController@index'); // Ver todas las Commodities
+Route::get('/commodity/{id}', 'App\Http\Controllers\commoditiesController@show'); //Busca una Commodity
+Route::post('/commodity', 'App\Http\Controllers\commoditiesController@store'); //Crea un nueva Commodity
+Route::post('/commodity/{id}', 'App\Http\Controllers\commoditiesController@update'); //Actualiza los datos de una Commodity
+Route::delete('/commodity/{id}', 'App\Http\Controllers\commoditiesController@destroy'); //Elimina una Commodity
+
 
 //Customer ntfy
 Route::get('/customersNtfy','App\Http\Controllers\CustomerNtfyController@index'); //Busca todos los Customer Ntfy
