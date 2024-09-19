@@ -371,6 +371,17 @@ Route::post('/finalPoints','App\Http\Controllers\finalPointController@store'); /
 Route::post('/finalPoints/{id}','App\Http\Controllers\finalPointController@update'); //Actualiza los datos de un final Points
 Route::delete('/finalPoints/{id}','App\Http\Controllers\finalPointController@destroy'); //Elimina un final Points
 
+Route::get('razonSocialTransport/{transport}', 'App\Http\Controllers\RazonSocialController@indexTransport');
+Route::get('razonesSociales', 'App\Http\Controllers\RazonSocialController@index');
+Route::get('razonSocial/{razonSocial}', 'App\Http\Controllers\RazonSocialController@show');
+Route::post('razonSocialTransport', 'App\Http\Controllers\RazonSocialController@store');
+Route::post('razonSocialTransport/{transport}', 'App\Http\Controllers\RazonSocialController@update');
+Route::delete('razonSocialTransport/{transport}', 'App\Http\Controllers\RazonSocialController@destroy');
+
+
+
+
+
 /*                                                                
 oooooooooooo ooooooo  ooooo   .oooooo.   oooooooooooo ooooo             8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 
 `888'     `8  `8888    d8'   d8P'  `Y8b  `888'     `8 `888'             8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 
