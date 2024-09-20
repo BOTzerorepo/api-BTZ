@@ -44,7 +44,9 @@ Route::get('/cargaDomain/{domain}', 'App\Http\Controllers\cargaController@showCa
 // STATUS
 
 Route::post('/statusCarga', 'App\Http\Controllers\statusController@updateStatusCarga');
-Route::get('/cargasActivas', 'App\Http\Controllers\statusController@indexActive'); 
+Route::get('/cargasActivas', 'App\Http\Controllers\statusController@indexActive');
+Route::get('/cargasActivasTransport/{transport}', 'App\Http\Controllers\statusController@indexTransportActive'); 
+
 
 Route::get('/status','App\Http\Controllers\statusController@index');
 Route::get('/ultimoStatus/{id}','App\Http\Controllers\statusController@showLast'); 
