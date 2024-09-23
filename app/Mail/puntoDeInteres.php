@@ -12,27 +12,18 @@ use Illuminate\Queue\SerializesModels;
 class puntoDeInteres extends Mailable
 {
     use Queueable, SerializesModels;
-    public $subject;
-    public $datos;
-
+    public $contenedor;
+    public $puntoDeInteres;
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($datos)
+    public function __construct($contenedor, $puntoDeInteres )
     {
-        $datosnum = json_decode(json_encode($datos), true); // Convertimos $datos a array y lo guardamos en $datosnum
-
-        if ($datosnum['confirmacion'] != 0) { // Accedemos a $datosnum como si fuera un array
-            $subject = 'Carga a ' . $datosnum['rango'] . ' metros del Punto de Interés: ' . $datosnum['descripcion'] . ' | ' . $datosnum['ref_customer'] . ' - ' . $datosnum['booking'] . ' - ' . $datosnum['cntr'];
-        } else {
-            $subject = 'Carga a ' . $datosnum['rango'] . ' metros del Punto de Interés: ' . $datosnum['descripcion'] . ' | ' . $datosnum['ref_customer'] . ' - ' . $datosnum['booking'] . ' - Contenedor SIN CONFIRMAR';
-        }
-
-        $this->subject($subject);
-        $this->datos = $datosnum;
-
+        
+        $this->contenedor = $contenedor;
+        $this->puntoDeInteres = $puntoDeInteres;
 
 
     }

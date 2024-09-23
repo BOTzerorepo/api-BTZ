@@ -678,7 +678,12 @@ class ServiceSatelital extends Controller
         $detalleComparaciones = [];
 
         // Obtener todas las asignaciones activas desde la tabla asign
-        $asignaciones = DB::table('asign')->get(); // Asegúrate de que esta tabla contenga los identificadores correctos
+     
+        $asignaciones = asign::whereNull('deleted_at')
+            ->where('status_punto_interes', '!=', 'TERMINADA')
+            ->whereNotNull('truck')
+            ->get();
+
 
         foreach ($asignaciones as $asignacion) {
             // Obtener los datos del truck y el contenedor a partir de la asignación
@@ -687,7 +692,7 @@ class ServiceSatelital extends Controller
 
             // Obtener los datos del contenedor desde la tabla cntr
             $contenedor = DB::table('cntr')->where('cntr_number', $cntrNumber)->first();
-
+    
             if (!$contenedor || !$truckDomain) {
                 continue; // Si no se encuentra el contenedor o el dominio del truck, se omite esta asignación
             }
@@ -706,10 +711,11 @@ class ServiceSatelital extends Controller
                 "phone" => "2612128105"
             ]);
 
-            /*$request = new Psr7Request('GET', 'https://app.akercontrol.com/ws/v2/servicios', $headers, $body);
+           /* $request = new Psr7Request('GET', 'https://app.akercontrol.com/ws/v2/servicios', $headers, $body);
             $res = $client->sendAsync($request)->wait();
             $respuesta = $res->getBody();
             $r = json_decode($respuesta, true);*/
+
             $r = [
                 'data' => [
                     $truckDomain => [
@@ -718,8 +724,10 @@ class ServiceSatelital extends Controller
                     ]
                 ]
             ];
+            
             // Verificar si la solicitud fue exitosa y si hay coordenadas disponibles
             if (isset($r['data'])) {
+               
                 $datos = $r['data'][$truckDomain];  // Obtener las coordenadas del truck
                 $latitud = $datos['ult_latitud'];
                 $longitud = $datos['ult_longitud'];
@@ -733,6 +741,7 @@ class ServiceSatelital extends Controller
                         'interest_points.latitude',
                         'interest_points.longitude',
                         'interest_points.radius',
+                        'interest_points.description',
                         // Acciones al entrar
                         'interest_points.accion_correo_customer_entrada',
                         'interest_points.accion_correo_cliente_entrada',
@@ -769,7 +778,7 @@ class ServiceSatelital extends Controller
                         if ($distanciaSiguiente <= $siguientePunto->radius) {
                             // 1. Realizar las acciones de salida del punto de interés activo
                             
-                            //$this->ejecutarAccionesSalida($puntoActivo, $contenedor);
+                            //$this->ejecutarAccion($puntoActivo->id, $contenedor->id_cntr);
 
                             // 2. Marcar el punto de interés activo como inactivo
                             DB::table('cntr_interest_point')
@@ -783,7 +792,9 @@ class ServiceSatelital extends Controller
                             DB::table('cntr_interest_point')
                                 ->where('id', $siguientePunto->id)
                                 ->update(['activo' => true]);
-
+                                
+                            $asignacion->status_punto_interes= $siguientePunto->description;
+                            $asignacion->save();
                             // Guardar el detalle de la acción ejecutada
                             $detalleComparacion = [
                                 'cntr_id' => $contenedor->id_cntr,
@@ -815,25 +826,58 @@ class ServiceSatelital extends Controller
         return $distanciaEnKilometros * 1000; // Convertir a metros
     }
 
-    public function ejecutarAccion($puntoDeInteres, $cntr_id)
+    public function ejecutarAccion($puntoActivoId, $contenedorId)
     {
         // Obtener datos del contenedor desde la tabla 'cntr'
-        $contenedor = DB::table('cntr')->where('id_cntr', $cntr_id)->first();
-
-        if ($puntoDeInteres->accion_correo_cliente_entrada) {
+        $contenedor = DB::table('cntr')->where('id_cntr', $contenedorId)->first();
+        $puntoActivo = DB::table('interest_points')->where('id', $puntoActivoId)->first();
+        if ($puntoActivo->accion_correo_cliente_entrada) {
+            // Enviar correo al cliente
+            Mail::to("juaniolivares95@gmail.com")->send(new MailPuntoDeInteres($contenedor, $puntoActivo ));
+        }
+        if ($puntoActivo->accion_cambiar_status_entrada) {
+            // Cambiar estado del contenedor automáticamente
+            DB::table('cntr')
+                ->where('id_cntr', $contenedor)
+                ->update([
+                    'status_cntr' =>  $puntoActivo->description,
+                ]);
+        }
+        /*if ($puntoDeInteres->accion_correo_customer_entrada) {
+            // Enviar correo al cliente
+            Mail::to("juaniolivares95@gmail.com")->send(new MailPuntoDeInteres($contenedor, $puntoDeInteres));
+        }
+        
+        if ($puntoDeInteres->accion_notificacion_customer_entrada) {
+            // Enviar correo al cliente
+            Mail::to("juaniolivares95@gmail.com")->send(new MailPuntoDeInteres($contenedor, $puntoDeInteres));
+        }
+        if ($puntoDeInteres->accion_notificacion_cliente_entrada) {
             // Enviar correo al cliente
             Mail::to("juaniolivares95@gmail.com")->send(new MailPuntoDeInteres($contenedor, $puntoDeInteres));
         }
 
-        if ($puntoDeInteres->accion_cambiar_status_entrada) {
-            // Cambiar estado del contenedor automáticamente
-            DB::table('cntr')
-                ->where('id_cntr', $cntr_id)
-                ->update([
-                    'status' => 'modificado por punto de interés: ' . $puntoDeInteres->description,
-                ]);
-        }
 
-        // Otras acciones según lo definido en la lógica del punto de interés
+        if ($puntoDeInteres->accion_correo_customer_salida) {
+            // Enviar correo al cliente
+            Mail::to("juaniolivares95@gmail.com")->send(new MailPuntoDeInteres($contenedor, $puntoDeInteres));
+        }
+        if ($puntoDeInteres->accion_correo_cliente_salida) {
+            // Enviar correo al cliente
+            Mail::to("juaniolivares95@gmail.com")->send(new MailPuntoDeInteres($contenedor, $puntoDeInteres));
+        }
+        if ($puntoDeInteres->accion_cambiar_status_salida) {
+            // Enviar correo al cliente
+            Mail::to("juaniolivares95@gmail.com")->send(new MailPuntoDeInteres($contenedor, $puntoDeInteres));
+        }
+        if ($puntoDeInteres->accion_notificacion_customer_salida) {
+            // Enviar correo al cliente
+            Mail::to("juaniolivares95@gmail.com")->send(new MailPuntoDeInteres($contenedor, $puntoDeInteres));
+        }
+        if ($puntoDeInteres->accion_notificacion_cliente_salida) {
+            // Enviar correo al cliente
+            Mail::to("juaniolivares95@gmail.com")->send(new MailPuntoDeInteres($contenedor, $puntoDeInteres));
+        }*/
+        
     }
 }
