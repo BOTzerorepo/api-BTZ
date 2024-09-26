@@ -40,6 +40,9 @@ Route::get('/allCargoFinished/{user}','App\Http\Controllers\cargaController@load
 Route::get('/carga/{id}/{user}','App\Http\Controllers\cargaController@show');
 Route::get('/cargaDomain/{domain}', 'App\Http\Controllers\cargaController@showCargaDomain');
 
+Route::get('/loadFinishedTransport/{transport}', 'App\Http\Controllers\cargaController@loadFinishedTransport');
+
+
 
 // STATUS
 
@@ -54,8 +57,12 @@ Route::get('/historialStatus/{cntr}','App\Http\Controllers\statusController@show
 
 // INSTRUCTIVOS
 
-Route::get('/instructivos/{userTraffic}','App\Http\Controllers\instructivosController@index'); 
+Route::get('/instructivos/{userTraffic}','App\Http\Controllers\instructivosController@index');
 Route::get('/instructivosdelete/{userTraffic}/{id}','App\Http\Controllers\instructivosController@destroy');
+
+Route::get('/instructivosTransport/{transport}', 'App\Http\Controllers\instructivosController@indexTransport'); 
+
+
 
 // ASIGNACIONES
 Route::get('/truckAsign/{id}', 'App\Http\Controllers\TruckController@trailerAsign'); // Show for Transport no existe.
@@ -63,11 +70,6 @@ Route::get('/truckAsign/{id}', 'App\Http\Controllers\TruckController@trailerAsig
 // SEGUROS
 
 Route::post('/seguro', 'App\Http\Controllers\seguroController@store');
-
-
-
-
-
 
 /* 
 oooooooooooo ooo        ooooo       .o.       ooooo ooooo         .oooooo..o      8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8
@@ -142,6 +144,10 @@ Route::get('/servicioSatelital','App\Http\Controllers\ServiceSatelital@serviceSa
 Route::get('/pruebaSatelital','App\Http\Controllers\ServiceSatelital@servicePrueba');
 Route::get('/flota','App\Http\Controllers\ServiceSatelital@flota');
 Route::get('/flotaId/{id}', 'App\Http\Controllers\ServiceSatelital@flotaID');
+
+Route::get('/flotaTransport/{transport}', 'App\Http\Controllers\ServiceSatelital@flotaTransport');
+
+
 
 Route::get('/dominioAker/{dominio}', 'App\Http\Controllers\ServiceSatelital@issetDominio');
 Route::get('/revierDomain', 'App\Http\Controllers\ServiceSatelital@reviewDomains');
