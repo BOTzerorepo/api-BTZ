@@ -30,12 +30,10 @@ class InterestPointController extends Controller
                 // Añade validaciones para los checkboxes (booleanos)
                 'accion_correo_customer_entrada' => 'boolean',
                 'accion_correo_cliente_entrada' => 'boolean',
-                'accion_cambiar_status_entrada' => 'boolean',
                 'accion_notificacion_customer_entrada' => 'boolean',
                 'accion_notificacion_cliente_entrada' => 'boolean',
                 'accion_correo_customer_salida' => 'boolean',
                 'accion_correo_cliente_salida' => 'boolean',
-                'accion_cambiar_status_salida' => 'boolean',
                 'accion_notificacion_customer_salida' => 'boolean',
                 'accion_notificacion_cliente_salida' => 'boolean',
             ]);
@@ -55,14 +53,12 @@ class InterestPointController extends Controller
                 // Acciones cuando se entra
                 'accion_correo_customer_entrada' => $request->accion_correo_customer_entrada,
                 'accion_correo_cliente_entrada' => $request->accion_correo_cliente_entrada,
-                'accion_cambiar_status_entrada' => $request->accion_cambiar_status_entrada,
                 'accion_notificacion_customer_entrada' => $request->accion_notificacion_customer_entrada,
                 'accion_notificacion_cliente_entrada' => $request->accion_notificacion_cliente_entrada,
                 
                 // Acciones cuando se sale
                 'accion_correo_customer_salida' => $request->accion_correo_customer_salida,
                 'accion_correo_cliente_salida' => $request->accion_correo_cliente_salida,
-                'accion_cambiar_status_salida' => $request->accion_cambiar_status_salida,
                 'accion_notificacion_customer_salida' => $request->accion_notificacion_customer_salida,
                 'accion_notificacion_cliente_salida' => $request->accion_notificacion_cliente_salida,
             ]);
@@ -89,12 +85,10 @@ class InterestPointController extends Controller
                 // Añade validaciones para los checkboxes (booleanos)
                 'accion_correo_customer_entrada' => 'boolean',
                 'accion_correo_cliente_entrada' => 'boolean',
-                'accion_cambiar_status_entrada' => 'boolean',
                 'accion_notificacion_customer_entrada' => 'boolean',
                 'accion_notificacion_cliente_entrada' => 'boolean',
                 'accion_correo_customer_salida' => 'boolean',
                 'accion_correo_cliente_salida' => 'boolean',
-                'accion_cambiar_status_salida' => 'boolean',
                 'accion_notificacion_customer_salida' => 'boolean',
                 'accion_notificacion_cliente_salida' => 'boolean',
             ]);
@@ -115,14 +109,12 @@ class InterestPointController extends Controller
             // Acciones cuando se entra
             $interestPoint->accion_correo_customer_entrada = $request->accion_correo_customer_entrada ?? 0;
             $interestPoint->accion_correo_cliente_entrada = $request->accion_correo_cliente_entrada ?? 0;
-            $interestPoint->accion_cambiar_status_entrada = $request->accion_cambiar_status_entrada ?? 0;
             $interestPoint->accion_notificacion_customer_entrada = $request->accion_notificacion_customer_entrada ?? 0;
             $interestPoint->accion_notificacion_cliente_entrada = $request->accion_notificacion_cliente_entrada ?? 0;
 
             // Acciones cuando se sale
             $interestPoint->accion_correo_customer_salida = $request->accion_correo_customer_salida ?? 0;
             $interestPoint->accion_correo_cliente_salida = $request->accion_correo_cliente_salida ?? 0;
-            $interestPoint->accion_cambiar_status_salida = $request->accion_cambiar_status_salida ?? 0;
             $interestPoint->accion_notificacion_customer_salida = $request->accion_notificacion_customer_salida ?? 0;
             $interestPoint->accion_notificacion_cliente_salida = $request->accion_notificacion_cliente_salida ?? 0;
 
