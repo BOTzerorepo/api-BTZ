@@ -23,14 +23,12 @@ return new class extends Migration
             // Acciones cuando se entra
             $table->boolean('accion_correo_customer_entrada')->default(false);
             $table->boolean('accion_correo_cliente_entrada')->default(false);
-            $table->boolean('accion_cambiar_status_entrada')->default(false);
             $table->boolean('accion_notificacion_customer_entrada')->default(false);
             $table->boolean('accion_notificacion_cliente_entrada')->default(false);
             
             // Acciones cuando se sale
             $table->boolean('accion_correo_customer_salida')->default(false);
             $table->boolean('accion_correo_cliente_salida')->default(false);
-            $table->boolean('accion_cambiar_status_salida')->default(false);
             $table->boolean('accion_notificacion_customer_salida')->default(false);
             $table->boolean('accion_notificacion_cliente_salida')->default(false);
             $table->softDeletes();

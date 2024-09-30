@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\puntoDeInteres as MailPuntoDeInteres;
 use App\Models\akerTruck;
 use App\Models\asign;
+use App\Models\Carga;
 use App\Models\cntr;
 use App\Models\itinerario;
 use App\Models\logapi;
@@ -680,10 +681,12 @@ class ServiceSatelital extends Controller
         // Obtener todas las asignaciones activas desde la tabla asign
      
         $asignaciones = asign::whereNull('deleted_at')
-            ->where('status_punto_interes', '!=', 'TERMINADA')
-            ->whereNotNull('truck')
-            ->get();
-
+        ->where('status_punto_interes', '!=', 'TERMINADA')
+        ->whereNotNull('truck')
+        ->whereIn('booking', Carga::where('status', '!=', 'TERMINADA')->pluck('booking'))
+        ->get();
+        
+        return $asignaciones;
 
         foreach ($asignaciones as $asignacion) {
             // Obtener los datos del truck y el contenedor a partir de la asignación
