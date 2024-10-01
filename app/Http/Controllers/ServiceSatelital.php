@@ -12,6 +12,7 @@ use App\Models\position;
 use App\Models\pruebasModel;
 use App\Models\PuntoDeInteres;
 use App\Models\statu;
+use App\Models\Transport;
 use App\Models\truck;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request as Psr7Request;
@@ -437,6 +438,175 @@ class ServiceSatelital extends Controller
                         'transports.*'
                     )
                     ->where('trucks.domain', '=', $dato->patente)
+                    ->get();
+
+
+                if ($trucks->isNotEmpty()) { // Verificar si se encontraron camiones
+                    $camion = $trucks->first();
+
+                    $truck['model'] = $camion->model;
+                    $truck['domain'] = $camion->domain;
+                    $truck['year'] = $camion->year;
+                    $truck['vto_poliza'] = $camion->vto_poliza;
+                    $truck['razon_social'] = $camion->razon_social;
+                    $truck['logo'] = $camion->logo;
+                    $truck['vto_permiso'] = $camion->vto_permiso;
+                    $truck['titulo'] = $dato->nombre;
+                    $truck['ult_latitud'] = $dato->ult_latitud;
+                    $truck['ult_longitud'] = $dato->ult_longitud;
+                    $truck['ult_velocidad'] = $dato->ult_velocidad;
+                    $truck['ult_fecha'] = $dato->ult_fecha;
+                    $truck['ult_reporte'] = $dato->ult_reporte;
+                    $truck['ult_direccion'] = $dato->ult_direccion;
+                    $truck['direccion'] = $dato->ult_direccion;
+
+                    // Detalles del contenedor
+                    $truck['cntr'] = array(
+                        'contenedor' => $camion->contenedor,
+                        'type' => $camion->tipoContenedor,
+                        'main_status' => $camion->main_status,
+                        'status_detail' => $camion->status_cntr,
+                    );
+
+                    // Detalles generales
+                    $truck['general'] = array(
+                        'booking' => $camion->booking,
+                        'type' => $camion->cargaType,
+                        'retiro_place' => $camion->retiro_place,
+                        'commodity' => $camion->commodity,
+                        'ref_customer' => $camion->ref_customer,
+                        'agent_port' => $camion->agent_port,
+                        'id_carga' => $camion->cargaId,
+                        'url_carga' => env('FRONT_URL') . '/includes/view_carga_user.php?id=' . $camion->cargaId,
+
+                    );
+
+                    // Detalles de origen
+                    $truck['origen'] = array(
+                        'description' => $camion->load_place,
+                        'lat' => $camion->LoadPlaceLat,
+                        'lng' => $camion->LoadPlaceLng,
+                        'load_date' => $camion->load_date,
+                    );
+
+                    // Detalles de destino
+                    $truck['destino'] = array(
+                        'description' => $camion->unload_place,
+                        'lat' => $camion->UnloadPlaceLat,
+                        'lng' => $camion->UnloadPlaceLng,
+                        'load_date' => $camion->unload_date,
+                    );
+
+                    // Detalles de aduana
+                    $truck['aduana'] = array(
+                        'description' => $camion->custom_place,
+                        'lat' => $camion->aduanaLat,
+                        'lng' => $camion->aduanaLng,
+                        'load_date' => $camion->load_date,
+                    );
+
+                    // Detalles del conductor
+                    $truck['driver'] = array(
+                        'nombre' => $camion->driver,
+                        'documento' => $camion->documento,
+                        'carnet' => $camion->vto_carnet,
+                        'whatsapp' => $camion->WhatsApp,
+                    );
+
+                    array_push($camiones, $truck);
+                }
+            }
+        }
+        return $camiones;
+    }
+    public function flotaTransport($transport)
+    {
+        $transport = Transport::find($transport);
+        $curl = curl_init();
+
+        // TEST: E6HW19 - PRODUCCION: C2QC20
+        if (env('APP_ENV') === 'production') {
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => 'https://app.akercontrol.com/ws/flota/2612128105/E6HW19',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'GET',
+            ));
+        } else {
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => 'https://app.akercontrol.com/ws/flota/2612128105/E6HW19',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'GET',
+            ));
+        }
+
+        $response = curl_exec($curl);
+        $json = json_decode($response);
+        $datos = $json->data;
+
+        $camiones = [];
+
+        foreach ($datos as $dato) {
+
+            if (!empty($dato->patente)) { // Verificar si 'patente' no es nulo
+                /*   $todosMisCamiones = DB::table('trucks')
+                    ->join('transports', 'trucks.transport_id', '=', 'transports.id')
+                    ->where('trucks.domain', '=', $dato->patente)
+                    ->get(); */
+
+                $trucks = DB::table('trucks')
+                ->leftJoin('asign', function ($join) {
+                    $join->on('trucks.domain', '=', 'asign.truck');
+                })
+                    ->leftJoin('transports', 'trucks.transport_id', '=', 'transports.id')
+                    ->leftJoin('drivers', 'asign.driver', '=', 'drivers.nombre')
+                    ->leftJoin('cntr', 'asign.cntr_number', '=', 'cntr.cntr_number')
+                    ->leftJoin('carga', 'cntr.booking', '=', 'carga.booking')
+                    ->leftJoin('customer_load_places', 'carga.load_place', '=', 'customer_load_places.description')
+                    ->leftJoin('customer_unload_places', 'carga.unload_place', '=', 'customer_unload_places.description')
+                    ->leftJoin('aduanas', 'carga.custom_place', '=', 'aduanas.description')
+                    ->select(
+                        'cntr.cntr_number as contenedor',
+                        'cntr.cntr_type as tipoContenedor',
+                        'cntr.retiro_place',
+                        'cntr.main_status',
+                        'cntr.status_cntr',
+                        'carga.id as cargaId',
+                        'carga.booking',
+                        'carga.commodity',
+                        'carga.load_place',
+                        'customer_load_places.latitud as LoadPlaceLat',
+                        'customer_load_places.longitud as LoadPlaceLng',
+                        'carga.load_date',
+                        'carga.unload_place',
+                        'customer_unload_places.latitud as UnloadPlaceLat',
+                        'customer_unload_places.longitud as UnloadPlaceLng',
+                        'carga.custom_place',
+                        'aduanas.lat as aduanaLat',
+                        'aduanas.lon as aduanaLng',
+                        'carga.ref_customer',
+                        'carga.type as cargaType',
+                        'carga.cut_off_fis as unload_date',
+                        'asign.driver',
+                        'drivers.documento',
+                        'drivers.vto_carnet',
+                        'drivers.WhatsApp',
+                        'asign.agent_port',
+                        'trucks.*',
+                        'asign.truck_semi',
+                        'transports.*'
+                    )
+                    ->where('trucks.domain', '=', $dato->patente)
+                    ->where('asign.transport', '=', $transport->razon_social)
                     ->get();
 
 

@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Mail\UpdateCarga;
 use Illuminate\Support\Facades\Mail;
+use App\Models\Transport;
+
 
 class cargaController extends Controller
 {
@@ -47,6 +49,20 @@ class cargaController extends Controller
                 ->where('carga.empresa', '=', $user->empresa)
                 ->orderBy('carga.load_date', 'ASC')
                 ->get();
+
+        } elseif ($user->permiso == 'Transport') {
+       
+            $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
+            ->join('cntr', 'cntr.booking', '=', 'carga.booking')
+            ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+            ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
+            ->whereNull('cntr.deleted_at')
+            ->whereNull('asign.deleted_at')
+            ->whereBetween('carga.load_date', [$empiezaSemana, $terminaSemana])
+            ->where('carga.status', '!=', 'TERMINADA')
+            ->where('carga.empresa', '=', $user->empresa)
+            ->orderBy('carga.load_date', 'ASC')
+            ->get();   
 
         } else {
             $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
@@ -94,7 +110,20 @@ class cargaController extends Controller
                 ->whereNull('cntr.deleted_at')
                 ->whereNull('asign.deleted_at')
                 ->orderBy('carga.load_date', 'ASC')->get();
-        } else {
+        } elseif ($user->permiso == 'Transport') {
+
+            $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
+                ->join('cntr', 'cntr.booking', '=', 'carga.booking')
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+                ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
+                ->whereNull('cntr.deleted_at')
+                ->whereNull('asign.deleted_at')
+                ->where('carga.load_date', "<", $empiezaSemana)
+                ->where('carga.status', '!=', 'TERMINADA')
+                ->where('carga.empresa', '=', $user->empresa)
+                ->orderBy('carga.load_date', 'ASC')
+                ->get();
+        }else {
 
             $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
@@ -129,7 +158,20 @@ class cargaController extends Controller
                 ->whereNull('cntr.deleted_at')
                 ->whereNull('asign.deleted_at')
                 ->orderBy('carga.load_date', 'ASC')->get();
-        } else {
+        }  elseif ($user->permiso == 'Transport') {
+
+            $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
+                ->join('cntr', 'cntr.booking', '=', 'carga.booking')
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+                ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
+                ->whereNull('cntr.deleted_at')
+                ->whereNull('asign.deleted_at')
+                ->where('carga.load_date', ">", $terminaSemana)
+                ->where('carga.status', '!=', 'TERMINADA')
+                ->where('carga.empresa', '=', $user->empresa)
+                ->orderBy('carga.load_date', 'ASC')
+                ->get();
+        }else {
 
             $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
@@ -176,6 +218,25 @@ class cargaController extends Controller
                 ->whereNull('asign.deleted_at')
                 ->orderBy('carga.load_date', 'ASC')->get();
         }
+
+        return $todasLasCargasDeEstaSemana;
+    }
+    public function loadFinishedTransport($transport)
+    {
+
+        $transport = Transport::find($transport);
+
+
+            $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
+            ->join('cntr', 'cntr.booking', '=', 'carga.booking')
+            ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+            ->select('carga.ref_customer', 'carga.booking', 'carga.shipper','carga.commodity', 'carga.type', 'carga.load_place', 'carga.unload_place', 'carga.load_date', 'carga.cut_off_fis', 'carga.custom_place',  'carga.custom_agent','carga.custom_place_impo', 'carga.custom_agent_impo', 'cntr.cntr_number', 'cntr.cntr_type', 'cntr.main_status','cntr.out_usd', 'cntr.observation_out', 'asign.driver', 'asign.transport', 'asign.truck', 'asign.truck_semi')
+            ->where('cntr.main_status', '=', 'TERMINADA')
+            ->where('asign.transport', '=', $transport->razon_social)
+            ->whereNull('cntr.deleted_at')
+            ->whereNull('asign.deleted_at')
+            ->orderBy('carga.load_date', 'ASC')->get();
+       
 
         return $todasLasCargasDeEstaSemana;
     }

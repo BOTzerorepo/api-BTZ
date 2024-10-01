@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\transports;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Driver;
+use App\Models\Transport;
 
 class DriverController extends Controller
 {
@@ -15,20 +17,16 @@ class DriverController extends Controller
      */
     public function index()
     {
-        $drivers = DB::table('drivers')->get();       
+        $drivers = Driver::all();       
+        return $drivers;
+    }
+    public function indexTransport($idTranport)
+    {
+        $drivers = Driver::where('transport_id','=', $idTranport)->get();
         return $drivers;
     }
     
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -38,6 +36,25 @@ class DriverController extends Controller
      */
     public function store(Request $request)
     {
+        if($request['transporte'] != null){
+            $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
+            $idTranport = $transport->id;
+            $transport = $request['transporte'];
+
+        } elseif (isset($request['transporte'])) {
+
+            $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
+            $idTranport = $transport->id;
+            $transport = $request['transporte'];
+
+        }else{
+
+            $qtr = Transport::where('id', '=', $request['id_transport'])->first();
+            $transport = $qtr->razon_social;
+            $idTranport = $request['id_transport'];
+        }
+        
+
         $driver = new Driver();
         $driver->nombre = $request['nombre'];
         $driver->foto= $request['foto'];
@@ -47,7 +64,9 @@ class DriverController extends Controller
         $driver->mail = $request['mail'];
         $driver->user = $request['user'];
         $driver->empresa = $request['empresa'];
-        $driver->transporte = $request['transporte'];
+        $driver->transporte = $transport;
+        $driver->fletero_id = $request['id_fletero'];
+        $driver->transport_id = $idTranport;
         $driver->Observaciones = $request['Observaciones'];
         $driver->save();
 
@@ -97,6 +116,23 @@ class DriverController extends Controller
      */
     public function update(Request $request, $id)
     {
+
+        if ($request['transporte'] != null) {
+            $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
+            $idTranport = $transport->id;
+            $transport = $request['transporte'];
+        } elseif (isset($request['transporte'])) {
+
+            $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
+            $idTranport = $transport->id;
+            $transport = $request['transporte'];
+        } else {
+
+            $qtr = Transport::where('id', '=', $request['id_transport'])->first();
+            $transport = $qtr->razon_social;
+            $idTranport = $request['id_transport'];
+        }
+
         $driver = Driver::findOrFail($id);
         $driver->nombre = $request['nombre'];
         $driver->foto= $request['foto'];
@@ -106,7 +142,9 @@ class DriverController extends Controller
         $driver->mail = $request['mail'];
         $driver->user = $request['user'];
         $driver->empresa = $request['empresa'];
-        $driver->transporte = $request['transporte'];
+        $driver->transporte = $transport;
+        $driver->fletero_id = $request['id_fletero'];
+        $driver->transport_id = $idTranport;
         $driver->Observaciones = $request['Observaciones'];
         $driver->save();
 
@@ -133,14 +171,14 @@ class DriverController extends Controller
      */
     public function destroy($id)
     {
-        Driver::destroy($id);
 
-        $existe = Driver::find($id);
-        if($existe){
-            return 'No se elimino el Chofer';
-        }else{
-            return 'Se elimino el Chofer';
-        };
+        $driver = Driver::findOrFail($id);
+        $driver->delete();  // Esto marcará el registro como eliminado (soft delete)
+
+        return response()->json([
+            'message' => 'Driver marcado como eliminado exitosamente.'
+        ], 200);
+       
     }
     
     public function issetDriver(Request $request)
