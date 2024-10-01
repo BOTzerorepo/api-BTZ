@@ -228,8 +228,8 @@
                                                                                 </strong>
                                                                                 <span
                                                                                     style="font-size:15px; color:white;">Carga
-                                                                                    a {{ $datos['rango'] }} metros de
-                                                                                    {{ $datos['descripcion'] }}.</span>
+                                                                                    a  metros de
+                                                                                    .</span>
                                                                             </span>
                                                                         </p>
                                                                     </div>

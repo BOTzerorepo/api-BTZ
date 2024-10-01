@@ -57,24 +57,16 @@ class DocumentController extends Controller
      */
     public function storeAta(StoredocumetRequest $request,$booking)
     {
-       
         $nameArchivo = $request->file('file')->getClientOriginalName();
         $folder ='documents/'. $booking;
-           
         if(!file_exists($folder)){
-
             mkdir('documents/'. $booking, 0777, true);
             $path = $request->file('file')->storeAs('public/'.$folder,$nameArchivo);
             $extension = $request->file('file')->getClientOriginalExtension();
-
-
         }else{
-
             $path = $request->file('file')->storeAs('public/'.$folder,$nameArchivo);
             $extension = $request->file('file')->getClientOriginalExtension();
-
         }
-        
         
         $user= $request['user'];
         $documet = new documet();
@@ -97,27 +89,17 @@ class DocumentController extends Controller
     public function store(StoredocumetRequest $request, $booking)
     {
        // http://rail.com.ar/storage/instructivos/{booking}]/{cntr}/{nameArchivo}
-       
        $user= $request['user'];
        $nameArchivo = $request->file('file')->getClientOriginalName();
-
        if($request['cntr'] != '0' ) {
-
            $folder ='documents/'. $booking. '/' . $request['cntr'];
-          
            if(!file_exists($folder)){
-
                mkdir('documents/'. $booking. '/' . $request['cntr'], 0777, true);
-               
                $path = $request->file('file')->storeAs('public/'.$folder,$nameArchivo);
                $extension = $request->file('file')->getClientOriginalExtension();
-
-
            }else{
-
                $path = $request->file('file')->storeAs('public/'.$folder,$nameArchivo);
                $extension = $request->file('file')->getClientOriginalExtension();
-
            }
 
            $documet = new documet();
@@ -130,32 +112,17 @@ class DocumentController extends Controller
            $documet->save();
 
            return response()->json(['success'=>$nameArchivo]);
-
-
        } else {
-
            $folder ='documents/'. $booking;
            if(!file_exists($folder)){
-              
-               
                mkdir('documents/'. $booking, 0777, true);
                $path = $request->file('file')->storeAs('public/'.$folder,$nameArchivo);
                $extension = $request->file('file')->getClientOriginalExtension();
-
-               
-
            }else{
-
                $path = $request->file('file')->storeAs('public/'.$folder,$nameArchivo);
                $extension = $request->file('file')->getClientOriginalExtension();
-
            }
-          
            
-
-           $path = $request->file('file')->storeAs('public/'.$folder,$nameArchivo);
-           $extension = $request->file('file')->getClientOriginalExtension();
-
            $documet = new documet();
            $documet->name = $nameArchivo;
            $documet->doc = $nameArchivo;
