@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoretrailerRequest;
 use App\Http\Requests\UpdatetrailerRequest;
 use App\Models\trailer;
+use App\Models\Transport;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -18,6 +19,11 @@ class TrailerController extends Controller
     public function index($customer)
     {
         $trailer = trailer::where('customer_id','=',$customer)->get();
+        return $trailer;
+    }
+    public function indexTransport($transport)
+    {
+        $trailer = trailer::where('transport_id', '=', $transport)->get();
         return $trailer;
     }
 
@@ -39,6 +45,22 @@ class TrailerController extends Controller
      */
     public function store(StoretrailerRequest $request)
     {
+
+        if ($request['transporte'] != null) {
+            $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
+            $idTranport = $transport->id;
+            $transport = $request['transporte'];
+        } elseif (isset($request['transporte'])) {
+
+            $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
+            $idTranport = $transport->id;
+            $transport = $request['transporte'];
+        } else {
+
+            $qtr = Transport::where('id', '=', $request['id_transport'])->first();
+            $transport = $qtr->razon_social;
+            $idTranport = $request['id_transport'];
+        }
         
         $customerId = User::select('customer_id')->where('id','=',$request['user'])->get(0); 
         $cId =  $customerId[0]->customer_id;
@@ -51,7 +73,8 @@ class TrailerController extends Controller
         $trailer->domain = $request['domain'];
         $trailer->year = $request['year'];
         $trailer->user_id = $request['user'];
-        $trailer->transport_id = $request['transport_id'];
+        $trailer->fletero_id = $request['id_fletero'];
+        $trailer->transport_id = $idTranport;
         $trailer->customer_id = $cId;
         $trailer->save();
 
@@ -98,8 +121,23 @@ class TrailerController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(UpdatetrailerRequest $request, trailer $trailer)
-    {   
-       
+    {
+        if ($request['transporte'] != null) {
+            $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
+            $idTranport = $transport->id;
+            $transport = $request['transporte'];
+        } elseif (isset($request['transporte'])) {
+
+            $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
+            $idTranport = $transport->id;
+            $transport = $request['transporte'];
+        } else {
+
+            $qtr = Transport::where('id', '=', $request['id_transport'])->first();
+            $transport = $qtr->razon_social;
+            $idTranport = $request['id_transport'];
+        }
+
         $trailer->type = $request['type'];
         $trailer->domain = $request['domain'];
         $trailer->chasis = $request['chasis'];
@@ -107,7 +145,8 @@ class TrailerController extends Controller
         $trailer->vto_poliza = $request['vto_poliza'];
         $trailer->year = $request['year'];
         $trailer->user_id = $request['user_id'];
-        $trailer->transport_id = $request['transport_id'];
+        $trailer->transport_id = $idTranport;
+        $trailer->fletero_id = $request['id_fletero'];
         $trailer->save();
 
         return $trailer;
