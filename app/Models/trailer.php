@@ -10,4 +10,14 @@ use OwenIt\Auditing\Auditable;
 class trailer extends Model implements AuditableContract
 {
     use HasFactory, Auditable;
+
+    public function fletero()
+    {
+        return $this->belongsTo(Fletero::class);
+    }
+
+    public function transporte()
+    {
+        return $this->belongsTo(Transport::class);
+    }
 }
