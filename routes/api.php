@@ -3,6 +3,8 @@
 use App\Http\Controllers\cntrController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\FleteroController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -44,11 +46,16 @@ Route::get('/allCargoFinished/{user}','App\Http\Controllers\cargaController@load
 Route::get('/carga/{id}/{user}','App\Http\Controllers\cargaController@show');
 Route::get('/cargaDomain/{domain}', 'App\Http\Controllers\cargaController@showCargaDomain');
 
+Route::get('/loadFinishedTransport/{transport}', 'App\Http\Controllers\cargaController@loadFinishedTransport');
+
+
 
 // STATUS
 
 Route::post('/statusCarga', 'App\Http\Controllers\statusController@updateStatusCarga');
-Route::get('/cargasActivas', 'App\Http\Controllers\statusController@indexActive'); 
+Route::get('/cargasActivas', 'App\Http\Controllers\statusController@indexActive');
+Route::get('/cargasActivasTransport/{transport}', 'App\Http\Controllers\statusController@indexTransportActive'); 
+
 
 Route::get('/status','App\Http\Controllers\statusController@index');
 Route::get('/ultimoStatus/{id}','App\Http\Controllers\statusController@showLast'); 
@@ -56,8 +63,12 @@ Route::get('/historialStatus/{cntr}','App\Http\Controllers\statusController@show
 
 // INSTRUCTIVOS
 
-Route::get('/instructivos/{userTraffic}','App\Http\Controllers\instructivosController@index'); 
+Route::get('/instructivos/{userTraffic}','App\Http\Controllers\instructivosController@index');
 Route::get('/instructivosdelete/{userTraffic}/{id}','App\Http\Controllers\instructivosController@destroy');
+
+Route::get('/instructivosTransport/{transport}', 'App\Http\Controllers\instructivosController@indexTransport'); 
+
+
 
 // ASIGNACIONES
 Route::get('/truckAsign/{id}', 'App\Http\Controllers\TruckController@trailerAsign'); // Show for Transport no existe.
@@ -65,11 +76,6 @@ Route::get('/truckAsign/{id}', 'App\Http\Controllers\TruckController@trailerAsig
 // SEGUROS
 
 Route::post('/seguro', 'App\Http\Controllers\seguroController@store');
-
-
-
-
-
 
 /* 
 oooooooooooo ooo        ooooo       .o.       ooooo ooooo         .oooooo..o      8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8
@@ -145,6 +151,10 @@ Route::get('/pruebaSatelital','App\Http\Controllers\ServiceSatelital@servicePrue
 Route::get('/flota','App\Http\Controllers\ServiceSatelital@flota');
 Route::get('/flotaId/{id}', 'App\Http\Controllers\ServiceSatelital@flotaID');
 
+Route::get('/flotaTransport/{transport}', 'App\Http\Controllers\ServiceSatelital@flotaTransport');
+
+
+
 Route::get('/dominioAker/{dominio}', 'App\Http\Controllers\ServiceSatelital@issetDominio');
 Route::get('/revierDomain', 'App\Http\Controllers\ServiceSatelital@reviewDomains');
 
@@ -198,9 +208,17 @@ Route::get('/user/{user}', 'App\Http\Controllers\UserController@show');
 
 Route::resource('/cntr',cntrController::class);
 
+
+// FLETERO CONTROLLER 
+
+Route::resource('fleteros', FleteroController::class);
+Route::get('/fleteroAsociados/{id}', [FleteroController::class, 'getFleteroDetails']);
+
 // TRUCK CONTROLLLER 
 Route::post('/truck', 'App\Http\Controllers\TruckController@store'); // C
 Route::get('/trucks/{customer}', 'App\Http\Controllers\TruckController@index'); // R ALL
+Route::get('/trucksTransport/{transport}', 'App\Http\Controllers\TruckController@indexTransport'); // R ALL
+
 Route::get('/truck/{truck}', 'App\Http\Controllers\TruckController@show'); // R ONE
 Route::post('/truck/{truck}', 'App\Http\Controllers\TruckController@update'); // U 
 Route::delete('/truck/{truck}', 'App\Http\Controllers\TruckController@destroy'); // D 
@@ -209,6 +227,8 @@ Route::get('/truckTransport/{truck}', 'App\Http\Controllers\TruckController@show
 // TRAILER CONTROLLLER 
 Route::post('/trailer', 'App\Http\Controllers\TrailerController@store'); // C
 Route::get('/trailer/{customer}', 'App\Http\Controllers\TrailerController@index'); // R ALL
+Route::get('/trailerTransport/{transport}', 'App\Http\Controllers\TrailerController@indexTransport'); // R ALL
+
 Route::get('/trailer/{trailer}', 'App\Http\Controllers\TrailerController@show'); // R ONE
 Route::post('/trailer/{trailer}', 'App\Http\Controllers\TrailerController@update'); // U
 Route::delete('/trailer/{trailer}', 'App\Http\Controllers\TrailerController@destroy'); // D
@@ -224,7 +244,9 @@ Route::delete('/ata/{id}','App\Http\Controllers\AtaController@destroy'); //Elimi
 // DRIVER CONTROLLLER trailerAsign
 
 Route::get('/drivers/{transport_id}','App\Http\Controllers\DriverController@showDriver'); 
-Route::get('/drivers','App\Http\Controllers\DriverController@index'); 
+Route::get('/drivers','App\Http\Controllers\DriverController@index');
+Route::get('/driversTransport/{idTransport}', 'App\Http\Controllers\DriverController@indexTransport'); 
+
 Route::get('/driver/{id}','App\Http\Controllers\DriverController@show'); 
 Route::post('/driver','App\Http\Controllers\DriverController@store'); 
 Route::post('/driverStatus/{id}','App\Http\Controllers\DriverController@status'); 
@@ -362,6 +384,17 @@ Route::get('/finalPoints/{id}','App\Http\Controllers\finalPointController@show')
 Route::post('/finalPoints','App\Http\Controllers\finalPointController@store'); //Crea un nuevo final Points
 Route::post('/finalPoints/{id}','App\Http\Controllers\finalPointController@update'); //Actualiza los datos de un final Points
 Route::delete('/finalPoints/{id}','App\Http\Controllers\finalPointController@destroy'); //Elimina un final Points
+
+Route::get('razonSocialTransport/{transport}', 'App\Http\Controllers\RazonSocialController@indexTransport');
+Route::get('razonesSociales', 'App\Http\Controllers\RazonSocialController@index');
+Route::get('razonSocial/{razonSocial}', 'App\Http\Controllers\RazonSocialController@show');
+Route::post('razonSocialTransport', 'App\Http\Controllers\RazonSocialController@store');
+Route::post('razonSocialTransport/{transport}', 'App\Http\Controllers\RazonSocialController@update');
+Route::delete('razonSocialTransport/{transport}', 'App\Http\Controllers\RazonSocialController@destroy');
+
+
+
+
 
 /*                                                                
 oooooooooooo ooooooo  ooooo   .oooooo.   oooooooooooo ooooo             8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 
