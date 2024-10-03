@@ -17,7 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('razon_social');
             $table->string('logo')->nullable();
-            $table->boolean('satelital')->default(false);
+            $table->string('satelital');
             $table->boolean('alta_aker')->default(false);
             $table->string('CUIT', 11);
             $table->string('direccion');
