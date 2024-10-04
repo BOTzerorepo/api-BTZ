@@ -20,6 +20,8 @@ return new class extends Migration
             $table->decimal('latitude', 10, 7);
             $table->decimal('longitude', 10, 7);
             $table->decimal('radius', 8, 2);
+            $table->string('status_transition');
+            
             // Acciones cuando se entra
             $table->boolean('accion_correo_customer_entrada')->default(false);
             $table->boolean('accion_correo_cliente_entrada')->default(false);
