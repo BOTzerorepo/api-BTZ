@@ -9,7 +9,7 @@
         "ext-gd": "*",
         "barryvdh/laravel-dompdf": "^1.0",
         "darkaonline/l5-swagger": "^8.3",
-        "doctrine/dbal": "^4.0",
+        "doctrine/dbal": "^4.1",
         "guzzlehttp/guzzle": "^7.5",
         "irazasyed/larasupport": "^1.1",
         "laravel/fortify": "^1.13",

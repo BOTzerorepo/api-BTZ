@@ -21,6 +21,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::get('/ejecutar/{puntoActivoId}/{contenedorId}','App\Http\Controllers\ServiceSatelital@ejecutarAccionEntrada');
 Route::get('/points_of_interest','App\Http\Controllers\InterestPointController@index');
 Route::post('/points_of_interest','App\Http\Controllers\InterestPointController@store');
 Route::put('/points_of_interest/{id}','App\Http\Controllers\InterestPointController@update');
