@@ -17,6 +17,7 @@ class InterestPoint extends Model implements AuditableContract
         'latitude',
         'longitude',
         'radius',
+        'status_transition',
         'accion_correo_customer_entrada',
         'accion_correo_cliente_entrada',
         'accion_cambiar_status_entrada',
