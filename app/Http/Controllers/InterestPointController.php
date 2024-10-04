@@ -26,7 +26,7 @@ class InterestPointController extends Controller
                 'description' => 'required|string|max:255',
                 'latitude' => 'required|numeric|between:-90,90',
                 'longitude' => 'required|numeric|between:-180,180',
-                'radius' => 'required|numeric|min:0',
+                //'radius' => 'required|numeric|min:0',
                 'status_transition' => 'required|string|max:255',
                 // Añade validaciones para los checkboxes (booleanos)
                 'accion_correo_customer_entrada' => 'boolean',
@@ -43,13 +43,18 @@ class InterestPointController extends Controller
                 return response()->json(['message' => $validator->errors()], 400);
             }
 
+            if($request->type === 'punto'){
+                $radius = 1000;
+            }else{
+                $radius = 5000;
+            }
             // Creación del punto de interés
             $interestPoint = new InterestPoint([
                 'type' => $request->type,
                 'description' => $request->description,
                 'latitude' => $request->latitude,
                 'longitude' => $request->longitude,
-                'radius' => $request->radius,
+                'radius' => $radius,
                 'status_transition' => $request->status_transition,
                 
                 // Acciones cuando se entra
@@ -99,6 +104,11 @@ class InterestPointController extends Controller
             if ($validator->fails()) {
                 return response()->json(['message' => $validator->errors()], 400);
             }
+            if($request->type === 'punto'){
+                $radius = 1000;
+            }else{
+                $radius = 5000;
+            }
 
             // Buscar el punto de interés por ID
             $interestPoint = InterestPoint::findOrFail($id);
@@ -107,7 +117,7 @@ class InterestPointController extends Controller
             $interestPoint->description = $request->description;
             $interestPoint->latitude = $request->latitude;
             $interestPoint->longitude = $request->longitude;
-            $interestPoint->radius = $request->radius;
+            $interestPoint->radius =  $radius;
             $interestPoint->status_transition = $request->status_transition;
 
             // Acciones cuando se entra
