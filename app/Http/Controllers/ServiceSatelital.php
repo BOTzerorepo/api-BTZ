@@ -938,7 +938,7 @@ class ServiceSatelital extends Controller
                 
                 if (!$puntoActivo) {
                     $puntoInteresInicial = $puntosDeInteres->firstWhere('order', 1);
-
+                    
                     if ($puntoInteresInicial) {
                         // Calcular la distancia con el punto de interés inicial
                         $distancia = $this->calcularDistancia($latitud, $longitud, $puntoInteresInicial->latitude, $puntoInteresInicial->longitude);
@@ -952,6 +952,14 @@ class ServiceSatelital extends Controller
                                 ->where('id', $puntoInteresInicial->cntr_interest_point_id)
                                 ->update(['activo' => true]);
 
+                                $detalleComparacion = [
+                                    'cntr_id' => $contenedor->id_cntr,
+                                    'truck_domain' => $truckDomain,
+                                    'punto_de_interes_id' => $puntoInteresInicial->description,
+                                    'distancia' => $distancia,
+                                    'accion' => 'entrada'
+                                ];
+                                $detalleComparaciones[] = $detalleComparacion;
                             // Guardar el punto como activo
                             $puntoActivo = $puntoInteresInicial;
                         }
@@ -960,6 +968,7 @@ class ServiceSatelital extends Controller
 
                 // Si hay un punto de interés activo, analizarlo y buscar el siguiente punto en orden
                 if ($puntoActivo) {
+
                     $indicePuntoActivo = $puntosDeInteres->search(function ($punto) use ($puntoActivo) {
                         return $punto->cntr_interest_point_id === $puntoActivo->cntr_interest_point_id;
                     });
