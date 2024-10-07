@@ -13,10 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('fleteros', function (Blueprint $table) {
+        /*Schema::table('fleteros', function (Blueprint $table) {
             // Cambia la columna 'satelital' de boolean a string
             $table->string('satelital')->change();
-        });
+        });*/
     }
 
     /**
@@ -26,8 +26,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('fleteros', function (Blueprint $table) {
+       /* Schema::table('fleteros', function (Blueprint $table) {
             $table->boolean('satelital')->default(false)->change();
-        });
+        });*/
     }
 };
