@@ -137,51 +137,35 @@
                         <tbody>
                             <tr>
                                 <td>
-                                    <table align="center" border="0" cellpadding="0" cellspacing="0"
-                                        class="row-content"
+                                    <table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content"
                                         role="presentation"
-                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;  color: #333; width: 650px;"
+                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #333; width: 650px;"
                                         width="650">
                                         <tbody>
                                             <tr>
-                                                <td>
-                                                    <table align="center" border="0" cellpadding="0" cellspacing="0"
-                                                        class="row-content"
-                                                        role="presentation"
-                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #333; width: 650px;"
-                                                        width="650">
-                                                        <tbody>
-                                                            <tr>
+                                                
+                                                <td class="column column-1"
+                                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top; padding-left: 25px; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"
+                                                    width="50%">
+                                                    <table border="0" cellpadding="0" cellspacing="0"
+                                                        class="image_block" role="presentation"
+                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
+                                                        width="100%">
+                                                        <tr>
+                                                            <td
+                                                                > 
+                                                                <div style="line-height:10px"><img alt="Image"
+                                                                        class="fullMobileWidth big"
+                                                                      
+                                                                        src="{{asset('image/CorreoAutomaticoTrans.png')}}"
 
-                                                                <td class="column column-1"
-                                                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top; padding-left: 25px; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"
-                                                                    width="50%">
-                                                                    <table border="0" cellpadding="0"
-                                                                        cellspacing="0"
-                                                                        class="image_block" role="presentation"
-                                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-                                                                        width="100%">
-                                                                        <tr>
-                                                                            <td>
-                                                                                <div style="line-height:10px"><img
-                                                                                        alt="Image"
-                                                                                        class="fullMobileWidth big"
-
-                                                                                        src="{{ asset('image/CorreoAutomaticoTrans.png') }}"
-
-                                                                                        style="display: block; height: auto; border: 0; ; max-width: 100%;margin: auto;"
-                                                                                        title="Image" width="495" />
-                                                                                </div>
-
-                                                                            </td>
-                                                                        </tr>
-                                                                    </table>
-                                                                </td>
-
-                                                            </tr>
-                                                        </tbody>
+                                                                        style="display: block; height: auto; border: 0; ; max-width: 100%;margin: auto;"
+                                                                        title="Image" width="495" /></div>
+                                                            </td>
+                                                        </tr>
                                                     </table>
                                                 </td>
+                                                
                                             </tr>
                                         </tbody>
                                     </table>
@@ -189,55 +173,61 @@
                             </tr>
                         </tbody>
                     </table>
-
                     <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-3"
-                        role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;margin-top: 20px;"
-                        width="100%">
+                        role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
                         <tbody>
                             <tr>
                                 <td>
                                     <table align="center" border="0" cellpadding="0" cellspacing="0"
                                         class="row-content stack" role="presentation"
-                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #d6d9f0; background-image:url('{{ asset('image/AlertasMails/status.png') }}'); background-position: top center; background-repeat: no-repeat; color: #000000; width: 650px;"
-                                        width="650">
-
+                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #d6f0dc; background-image: url('{{asset('image/AlertasMails/info.png')}}'); background-position:center; background-repeat: no-repeat; color: #000000; width: 650px;"
+                                        width="650" height="280">
                                         <tbody>
                                             <tr>
                                                 <td class="column column-1"
                                                     style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top; padding-top: 55px; padding-bottom: 60px; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"
                                                     width="100%">
-                                                    <table border="0" cellpadding="0" cellspacing="0"
-                                                        class="text_block"
+                                                    <table border="0" cellpadding="0" cellspacing="0" class="text_block"
                                                         role="presentation"
-                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;margin-top: 20px;"
+                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"
                                                         width="100%">
                                                         <tr>
                                                             <td
-                                                                style="padding-bottom:5px;padding-left:15px;padding-right
-                                                                :10px;padding-top:20px;">
+                                                                style="padding-bottom:5px;padding-left:15px;padding-right:10px;padding-top:20px;">
                                                                 <div style="font-family: sans-serif">
                                                                     <div class="txtTinyMce-wrapper"
                                                                         style="font-size: 12px; font-family: Lato, Tahoma, Verdana, Segoe, sans-serif; mso-line-height-alt: 14.399999999999999px; color: #052d3d; line-height: 1.2;">
                                                                         <p
                                                                             style="margin: 0; font-size: 14px; text-align: center;">
-                                                                            <span style="font-size:25px;">
-                                                                                <strong>
-                                                                                    <span
-                                                                                        style="font-size:28px; color:white;">PUNTO
-                                                                                        DE INTERÉS</span> <br>
-                                                                                </strong>
-                                                                                <span
-                                                                                    style="font-size:15px; color:white;">Carga
-                                                                                    a  metros de
-                                                                                    .</span>
-                                                                            </span>
+                                                                            <span style="font-size:38px;"><strong><span
+                                                                                        style="font-size:38px; color:black">Nuevo Punto de Interés</strong></span>
                                                                         </p>
                                                                     </div>
                                                                 </div>
                                                             </td>
                                                         </tr>
-                                                    </table>
-
+                                                    </table>   
+                                                    <table border="0" cellpadding="0" cellspacing="0" class="text_block"
+                                                        role="presentation"
+                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word; margin-top: 2rem;"
+                                                        width="100%">
+                                                        <tr>
+                                                            <td
+                                                                style="padding-bottom:10px;padding-left:10px;padding-right:10px;">
+                                                                <div style="font-family: sans-serif">
+                                                                    <div class="txtTinyMce-wrapper"
+                                                                        style="font-size: 12px; font-family: Lato, Tahoma, Verdana, Segoe, sans-serif; mso-line-height-alt: 14.399999999999999px; color: #052D3D; line-height: 1.2;">
+                                                                        <p
+                                                                            style="margin: 0; font-size: 14px; text-align: center;">
+                                                                            <span style="font-size:22px;"><strong><span
+                                                                                        style="font-size:22px; color: black;" >{{ $puntoDeInteres->description }}
+                                                                                    </span></strong></span>
+                                                                        </p>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    </table>                                                 
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -320,42 +310,6 @@
                                                                     style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"
                                                                     width="100%">
                                                                     <tr>
-                                                                        <td
-                                                                            style="padding-bottom:10px;padding-left:15px;padding-right:15px;padding-top:30px;">
-                                                                            <div style="font-family: sans-serif">
-                                                                                <div class="txtTinyMce-wrapper"
-                                                                                    style="font-size: 12px; font-family: Lato, Tahoma, Verdana, Segoe, sans-serif; mso-line-height-alt: 14.399999999999999px; color: #052d3d; line-height: 1.2;">
-                                                                                    <p
-                                                                                        style="margin: 0; font-size: 12px; text-align: center;">
-                                                                                        <span style="font-size:34px;">
-                                                                                            <span
-                                                                                                style="color:#4caf50;font-size:34px;">
-                                                                                                <strong>
-                                                                                                    <span
-                                                                                                        style="font-size:34px;">
-                                                                                                        {{ $datos['ref_customer'] }}
-                                                                                                    </span>
-                                                                                                </strong>
-                                                                                            </span>
-                                                                                    </p>
-                                                                                    <p
-                                                                                        style="margin: 0; font-size: 12px; text-align: center;">
-                                                                                        <span
-                                                                                            style="font-size:20px; color: gray; text-align: center;">
-                                                                                            {{ $datos['booking'] }} -
-                                                                                            @if ($datos['confirmacion'] != 0)
-                                                                                                {{ $datos['cntr_number'] }}
-                                                                                            @else
-                                                                                                SIN CONFIRMAR [
-                                                                                                {{ $datos['cntr_type'] }}
-                                                                                                ]
-                                                                                            @endif
-                                                                                        </span>
-                                                                                        </span>
-                                                                                    </p>
-                                                                                </div>
-                                                                            </div>
-                                                                        </td>
                                                                     </tr>
                                                                 </table>
                                                                 <table border="0" cellpadding="0" cellspacing="0"
@@ -369,30 +323,58 @@
                                                                                 <div class="txtTinyMce-wrapper"
                                                                                     style="font-size: 12px; font-family: Lato, Tahoma, Verdana, Segoe, sans-serif; mso-line-height-alt: 18px; color: #787878; line-height: 1.5;">
                                                                                     <p
-                                                                                        style="margin: 2%; font-size: 14px; text-align: center; mso-line-height-alt: 27px;">
-                                                                                        <span style="font-size:18px;">
-                                                                                            {{ $datos['descripcion'] }}
+                                                                                        style="margin-top: 4%; font-size: 14px; text-align: left; mso-line-height-alt: 27px;">
+                                                                                        <span >
+                                                                                            Equipo, muy buenos días, <br>
+                                                                                            El camión se encuentra entrando al punto de interés {{ $puntoDeInteres->description }} . A continuación se detallan los datos relevantes:
                                                                                         </span>
-                                                                                        <br />
+                                                                                        <br/>
                                                                                     </p>
+                                                                                    <table style="width: 100%;">
+                                                                                        <tr style="background: white;">
+                                                                                            <td style="width: 30%;">Número de Contenedor:</td>
+                                                                                            <td>{{$contenedor->cntr_number}}</td>
+                                                                                        </tr>
+                                                                                        <tr>
+                                                                                            <td>Transportista:</td>
+                                                                                            <td>{{$contenedor->driver}}</td>
+                                                                                        </tr>
+                                                                                        <tr style="background: white;">
+                                                                                            <td>Camión:</td>
+                                                                                            <td>{{$contenedor->truck}}</td>
+                                                                                        </tr>
+                                                                                        <tr>
+                                                                                            <td>Tipo de Contenedor:</td>
+                                                                                            <td>{{$contenedor->cntr_type}}</td>
+                                                                                        </tr>
+                                                                                        <tr style="background: white;">
+                                                                                            <td>Lugar de Carga:</td>
+                                                                                            <td>{{$contenedor->load_place}}</td>
+                                                                                        </tr>
+                                                                                        <tr style="background: white;">
+                                                                                            <td>Mercadería:</td>
+                                                                                            <td>{{$contenedor->commodity}}</td>
+                                                                                        </tr>
+                                                                                        <tr>
+                                                                                            <td>Observaciones:</td>
+                                                                                            <td>{{$contenedor->observation_customer}}</td>
+                                                                                        </tr>
+                                                                                    </table>
                                                                                     <p
-                                                                                        style="margin: 2%; font-size: 14px; text-align: center; mso-line-height-alt: 27px;">
+                                                                                    style="margin: 2%; font-size: 14px; text-align: center; mso-line-height-alt: 27px;">
                                                                                         <span
                                                                                             style="font-size:15px;">
                                                                                             Status Informado por: <br>
                                                                                             <span
                                                                                                 style="color:#2190e3;font-size:18px;">
                                                                                                 <strong>
-                                                                                                    AUTOMATICO
+                                                                                                    {{ $contenedor->user }}    
                                                                                                 </strong>
                                                                                             </span>
-                                                                                            <br />
-                                                                                            @php
-    $fechaHora = \Carbon\Carbon::now('America/Argentina/Buenos_Aires')->format('Y-m-d H:i:s');
-@endphp
-
-<strong style="font-size:10px;">Created at: {{ $fechaHora }}</strong>
-</span>
+                                                                                            <br/>
+                                                                                            <strong style="font-size:10px;">Created at: {{
+                                                                                                $contenedor->created_at}}
+                                                                                            </strong></span>
                                                                                     </p>
                                                                                 </div>
                                                                             </div>
@@ -492,39 +474,21 @@
                                                                             style="vertical-align: middle; text-align: center;">
                                                                             <!--[if vml]><table align="left" cellpadding="0" cellspacing="0" role="presentation" style="display:inline-block;padding-left:0px;padding-right:0px;mso-table-lspace: 0pt;mso-table-rspace: 0pt;"><![endif]-->
                                                                             <!--[if !vml]><!-->
-                                                                            <table cellpadding="0"
-                                                                                cellspacing="0"
-                                                                                role="presentation"
-                                                                                style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-                                                                                width="100%">
+                                                                            <table cellpadding="0" cellspacing="0"
+                                                                                class="icons-inner" role="presentation"
+                                                                                style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; display: inline-block; margin-right: -4px; padding-left: 0px; padding-right: 0px;">
+                                                                                <!--<![endif]-->
                                                                                 <tr>
+
                                                                                     <td
-                                                                                        style="vertical-align: middle; text-align: center;">
-                                                                                        <!--[if vml]><table align="left" cellpadding="0" cellspacing="0" role="presentation" style="display:inline-block;padding-left:0px;padding-right:0px;mso-table-lspace: 0pt;mso-table-rspace: 0pt;"><![endif]-->
-                                                                                        <!--[if !vml]><!-->
-                                                                                        <table
-                                                                                            cellpadding="0"
-                                                                                            cellspacing="0"
-                                                                                            class="icons-inner"
-                                                                                            role="presentation"
-                                                                                            style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; display: inline-block; margin-right: -4px; padding-left: 0px; padding-right: 0px;">
-                                                                                            <!--<![endif]-->
-                                                                                            <tr>
-                                                                                                <td
-                                                                                                    style="vertical-align: middle; text-align: center; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 6px;">
-                                                                                                    <a href="https://botzero.tech"
-                                                                                                        style="text-decoration: none;"
-                                                                                                        target="_blank"><img
-                                                                                                            align="center"
-                                                                                                            alt="Designed with BEE"
-                                                                                                            class="icon"
-                                                                                                            src="{{ asset('image/joinLogisticsRevolution.gif') }}"
-                                                                                                            style="display: block; height: auto; margin: 0 auto; border: 0;" /></a>
-
-                                                                                                </td>
-
-                                                                                            </tr>
-                                                                                        </table>
+                                                                                        style="font-family: Lato, Tahoma, Verdana, Segoe, sans-serif; font-size: 15px; color: #9d9d9d; vertical-align: middle; letter-spacing: undefined; text-align: center;">
+                                                                                        <a href="https://botzero.tech"
+                                                                                            style="color: #9d9d9d; text-decoration: none;"
+                                                                                            target="_blank">Tecnología
+                                                                                            programada por <strong>
+                                                                                                RailCode </strong> para
+                                                                                            <strong> BOTZero </strong>::
+                                                                                            Software de Logística.</a>
                                                                                     </td>
                                                                                 </tr>
                                                                             </table>
@@ -572,52 +536,24 @@
                                                                             style="vertical-align: middle; text-align: center;">
                                                                             <!--[if vml]><table align="left" cellpadding="0" cellspacing="0" role="presentation" style="display:inline-block;padding-left:0px;padding-right:0px;mso-table-lspace: 0pt;mso-table-rspace: 0pt;"><![endif]-->
                                                                             <!--[if !vml]><!-->
-                                                                            <table border="0" cellpadding="0"
-                                                                                cellspacing="0"
-                                                                                class="icons_block"
-                                                                                role="presentation"
-                                                                                style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-                                                                                width="100%">
+                                                                            <table cellpadding="0" cellspacing="0"
+                                                                                class="icons-inner" role="presentation"
+                                                                                style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; display: inline-block; margin-right: -4px; padding-left: 0px; padding-right: 0px;">
+                                                                                <!--<![endif]-->
                                                                                 <tr>
                                                                                     <td
-                                                                                        style="vertical-align: middle; color: #9d9d9d; font-family: inherit; font-size: 15px; padding-bottom: 5px; padding-top: 5px; text-align: center;">
-                                                                                        <table cellpadding="0"
-                                                                                            cellspacing="0"
-                                                                                            role="presentation"
-                                                                                            style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-                                                                                            width="100%">
-                                                                                            <tr>
-                                                                                                <td
-                                                                                                    style="vertical-align: middle; text-align: center;">
-                                                                                                    <!--[if vml]><table align="left" cellpadding="0" cellspacing="0" role="presentation" style="display:inline-block;padding-left:0px;padding-right:0px;mso-table-lspace: 0pt;mso-table-rspace: 0pt;"><![endif]-->
-                                                                                                    <!--[if !vml]><!-->
-                                                                                                    <table
-                                                                                                        cellpadding="0"
-                                                                                                        cellspacing="0"
-                                                                                                        class="icons-inner"
-                                                                                                        role="presentation"
-                                                                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; display: inline-block; margin-right: -4px; padding-left: 0px; padding-right: 0px;">
-                                                                                                        <!--<![endif]-->
-                                                                                                        <tr>
-                                                                                                            <td
-                                                                                                                style="vertical-align: middle; text-align: center; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 6px;">
-                                                                                                                <a href="https://botzero.tech"
-                                                                                                                    style="text-decoration: none;"
-                                                                                                                    target="_blank"><img
-                                                                                                                        align="center"
-                                                                                                                        alt="Designed with BEE"
-                                                                                                                        class="icon"
-                                                                                                                        src="{{ asset('image/joinLogisticsRevolution.gif') }}"
-                                                                                                                        style="display: block; height: auto; margin: 0 auto; border: 0;" /></a>
-
-                                                                                                            </td>
-
-                                                                                                        </tr>
-                                                                                                    </table>
-                                                                                                </td>
-                                                                                            </tr>
-                                                                                        </table>
+                                                                                        style="vertical-align: middle; text-align: center; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 6px;">
+                                                                                        <a href="https://botzero.tech"
+                                                                                            style="text-decoration: none;"
+                                                                                            target="_blank"><img
+                                                                                                align="center"
+                                                                                                alt="Designed with BEE"
+                                                                                                class="icon"
+                                                                                                src="{{asset('image/joinLogisticsRevolution.gif')}}"
+                                                                                                style="display: block; height: auto; margin: 0 auto; border: 0;"
+                                                                                                 /></a>
                                                                                     </td>
+                                                                                    
                                                                                 </tr>
                                                                             </table>
                                                                         </td>
