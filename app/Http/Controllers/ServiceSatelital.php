@@ -950,7 +950,7 @@ class ServiceSatelital extends Controller
                             
                             DB::table('cntr_interest_point')
                                 ->where('id', $puntoInteresInicial->cntr_interest_point_id)
-                                ->update(['activo' => true]);
+                                ->update(['activo' => 1]);
 
                                 $detalleComparacion = [
                                     'cntr_id' => $contenedor->id_cntr,
