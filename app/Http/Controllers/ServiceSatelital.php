@@ -2,17 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\puntoDeInteres as MailPuntoDeInteres;
+
 use App\Models\akerTruck;
 use App\Models\asign;
+use App\Models\Carga;
 use App\Models\cntr;
 use App\Models\itinerario;
 use App\Models\logapi;
 use App\Models\position;
 use App\Models\pruebasModel;
-use App\Models\PuntoDeInteres;
 use App\Models\statu;
+use App\Models\Transport;
 use App\Models\truck;
+use App\Mail\PuntoInteresEntrada;
+use App\Mail\PuntoInteresSalida;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request as Psr7Request;
 use Illuminate\Http\Client\Request as ClientRequest;
@@ -518,6 +521,175 @@ class ServiceSatelital extends Controller
         }
         return $camiones;
     }
+    public function flotaTransport($transport)
+    {
+        $transport = Transport::find($transport);
+        $curl = curl_init();
+
+        // TEST: E6HW19 - PRODUCCION: C2QC20
+        if (env('APP_ENV') === 'production') {
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => 'https://app.akercontrol.com/ws/flota/2612128105/E6HW19',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'GET',
+            ));
+        } else {
+            curl_setopt_array($curl, array(
+                CURLOPT_URL => 'https://app.akercontrol.com/ws/flota/2612128105/E6HW19',
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING => '',
+                CURLOPT_MAXREDIRS => 10,
+                CURLOPT_TIMEOUT => 0,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => 'GET',
+            ));
+        }
+
+        $response = curl_exec($curl);
+        $json = json_decode($response);
+        $datos = $json->data;
+
+        $camiones = [];
+
+        foreach ($datos as $dato) {
+
+            if (!empty($dato->patente)) { // Verificar si 'patente' no es nulo
+                /*   $todosMisCamiones = DB::table('trucks')
+                    ->join('transports', 'trucks.transport_id', '=', 'transports.id')
+                    ->where('trucks.domain', '=', $dato->patente)
+                    ->get(); */
+
+                $trucks = DB::table('trucks')
+                ->leftJoin('asign', function ($join) {
+                    $join->on('trucks.domain', '=', 'asign.truck');
+                })
+                    ->leftJoin('transports', 'trucks.transport_id', '=', 'transports.id')
+                    ->leftJoin('drivers', 'asign.driver', '=', 'drivers.nombre')
+                    ->leftJoin('cntr', 'asign.cntr_number', '=', 'cntr.cntr_number')
+                    ->leftJoin('carga', 'cntr.booking', '=', 'carga.booking')
+                    ->leftJoin('customer_load_places', 'carga.load_place', '=', 'customer_load_places.description')
+                    ->leftJoin('customer_unload_places', 'carga.unload_place', '=', 'customer_unload_places.description')
+                    ->leftJoin('aduanas', 'carga.custom_place', '=', 'aduanas.description')
+                    ->select(
+                        'cntr.cntr_number as contenedor',
+                        'cntr.cntr_type as tipoContenedor',
+                        'cntr.retiro_place',
+                        'cntr.main_status',
+                        'cntr.status_cntr',
+                        'carga.id as cargaId',
+                        'carga.booking',
+                        'carga.commodity',
+                        'carga.load_place',
+                        'customer_load_places.latitud as LoadPlaceLat',
+                        'customer_load_places.longitud as LoadPlaceLng',
+                        'carga.load_date',
+                        'carga.unload_place',
+                        'customer_unload_places.latitud as UnloadPlaceLat',
+                        'customer_unload_places.longitud as UnloadPlaceLng',
+                        'carga.custom_place',
+                        'aduanas.lat as aduanaLat',
+                        'aduanas.lon as aduanaLng',
+                        'carga.ref_customer',
+                        'carga.type as cargaType',
+                        'carga.cut_off_fis as unload_date',
+                        'asign.driver',
+                        'drivers.documento',
+                        'drivers.vto_carnet',
+                        'drivers.WhatsApp',
+                        'asign.agent_port',
+                        'trucks.*',
+                        'asign.truck_semi',
+                        'transports.*'
+                    )
+                    ->where('trucks.domain', '=', $dato->patente)
+                    ->where('asign.transport', '=', $transport->razon_social)
+                    ->get();
+
+
+                if ($trucks->isNotEmpty()) { // Verificar si se encontraron camiones
+                    $camion = $trucks->first();
+
+                    $truck['model'] = $camion->model;
+                    $truck['domain'] = $camion->domain;
+                    $truck['year'] = $camion->year;
+                    $truck['vto_poliza'] = $camion->vto_poliza;
+                    $truck['razon_social'] = $camion->razon_social;
+                    $truck['logo'] = $camion->logo;
+                    $truck['vto_permiso'] = $camion->vto_permiso;
+                    $truck['titulo'] = $dato->nombre;
+                    $truck['ult_latitud'] = $dato->ult_latitud;
+                    $truck['ult_longitud'] = $dato->ult_longitud;
+                    $truck['ult_velocidad'] = $dato->ult_velocidad;
+                    $truck['ult_fecha'] = $dato->ult_fecha;
+                    $truck['ult_reporte'] = $dato->ult_reporte;
+                    $truck['ult_direccion'] = $dato->ult_direccion;
+                    $truck['direccion'] = $dato->ult_direccion;
+
+                    // Detalles del contenedor
+                    $truck['cntr'] = array(
+                        'contenedor' => $camion->contenedor,
+                        'type' => $camion->tipoContenedor,
+                        'main_status' => $camion->main_status,
+                        'status_detail' => $camion->status_cntr,
+                    );
+
+                    // Detalles generales
+                    $truck['general'] = array(
+                        'booking' => $camion->booking,
+                        'type' => $camion->cargaType,
+                        'retiro_place' => $camion->retiro_place,
+                        'commodity' => $camion->commodity,
+                        'ref_customer' => $camion->ref_customer,
+                        'agent_port' => $camion->agent_port,
+                        'id_carga' => $camion->cargaId,
+                        'url_carga' => env('FRONT_URL') . '/includes/view_carga_user.php?id=' . $camion->cargaId,
+
+                    );
+
+                    // Detalles de origen
+                    $truck['origen'] = array(
+                        'description' => $camion->load_place,
+                        'lat' => $camion->LoadPlaceLat,
+                        'lng' => $camion->LoadPlaceLng,
+                        'load_date' => $camion->load_date,
+                    );
+
+                    // Detalles de destino
+                    $truck['destino'] = array(
+                        'description' => $camion->unload_place,
+                        'lat' => $camion->UnloadPlaceLat,
+                        'lng' => $camion->UnloadPlaceLng,
+                        'load_date' => $camion->unload_date,
+                    );
+
+                    // Detalles de aduana
+                    $truck['aduana'] = array(
+                        'description' => $camion->custom_place,
+                        'lat' => $camion->aduanaLat,
+                        'lng' => $camion->aduanaLng,
+                        'load_date' => $camion->load_date,
+                    );
+
+                    // Detalles del conductor
+                    $truck['driver'] = array(
+                        'nombre' => $camion->driver,
+                        'documento' => $camion->documento,
+                        'carnet' => $camion->vto_carnet,
+                        'whatsapp' => $camion->WhatsApp,
+                    );
+
+                    array_push($camiones, $truck);
+                }
+            }
+        }
+        return $camiones;
+    }
 
     public function flotaId($domain)
     {
@@ -680,10 +852,9 @@ class ServiceSatelital extends Controller
         // Obtener todas las asignaciones activas desde la tabla asign
      
         $asignaciones = asign::whereNull('deleted_at')
-            ->where('status_punto_interes', '!=', 'TERMINADA')
-            ->whereNotNull('truck')
-            ->get();
-
+        ->whereNotNull('truck')
+        ->whereIn('booking', Carga::where('status', '!=', 'TERMINADA')->pluck('booking'))
+        ->get();
 
         foreach ($asignaciones as $asignacion) {
             // Obtener los datos del truck y el contenedor a partir de la asignación
@@ -737,7 +908,13 @@ class ServiceSatelital extends Controller
                     ->join('interest_points', 'cntr_interest_point.interest_point_id', '=', 'interest_points.id')
                     ->where('cntr_interest_point.cntr_id_cntr', $contenedor->id_cntr)
                     ->select(
-                        'cntr_interest_point.*',
+                        
+                        'cntr_interest_point.order',
+                        'cntr_interest_point.cntr_id_cntr',
+                        'cntr_interest_point.interest_point_id',
+                        'cntr_interest_point.activo',
+                        'cntr_interest_point.id as cntr_interest_point_id',
+                        'interest_points.id as interest_point_id',
                         'interest_points.latitude',
                         'interest_points.longitude',
                         'interest_points.radius',
@@ -745,13 +922,11 @@ class ServiceSatelital extends Controller
                         // Acciones al entrar
                         'interest_points.accion_correo_customer_entrada',
                         'interest_points.accion_correo_cliente_entrada',
-                        'interest_points.accion_cambiar_status_entrada',
                         'interest_points.accion_notificacion_customer_entrada',
                         'interest_points.accion_notificacion_cliente_entrada',
                         // Acciones al salir
                         'interest_points.accion_correo_customer_salida',
                         'interest_points.accion_correo_cliente_salida',
-                        'interest_points.accion_cambiar_status_salida',
                         'interest_points.accion_notificacion_customer_salida',
                         'interest_points.accion_notificacion_cliente_salida'
                     )
@@ -760,11 +935,42 @@ class ServiceSatelital extends Controller
 
                 // Identificar el punto de interés activo
                 $puntoActivo = $puntosDeInteres->firstWhere('activo', true);
+                
+                if (!$puntoActivo) {
+                    $puntoInteresInicial = $puntosDeInteres->firstWhere('order', 1);
+                    
+                    if ($puntoInteresInicial) {
+                        // Calcular la distancia con el punto de interés inicial
+                        $distancia = $this->calcularDistancia($latitud, $longitud, $puntoInteresInicial->latitude, $puntoInteresInicial->longitude);
+
+                        // Si el camión está dentro del radio del punto de interés inicial, marcarlo como activo
+                        if ($distancia <= $puntoInteresInicial->radius) {
+                           
+                            $this->ejecutarAccionEntrada($puntoInteresInicial->interest_point_id, $contenedor->id_cntr);
+                            
+                            DB::table('cntr_interest_point')
+                                ->where('id', $puntoInteresInicial->cntr_interest_point_id)
+                                ->update(['activo' => 1]);
+
+                                $detalleComparacion = [
+                                    'cntr_id' => $contenedor->id_cntr,
+                                    'truck_domain' => $truckDomain,
+                                    'punto_de_interes_id' => $puntoInteresInicial->description,
+                                    'distancia' => $distancia,
+                                    'accion' => 'entrada'
+                                ];
+                                $detalleComparaciones[] = $detalleComparacion;
+                            // Guardar el punto como activo
+                            $puntoActivo = $puntoInteresInicial;
+                        }
+                    }
+                }
 
                 // Si hay un punto de interés activo, analizarlo y buscar el siguiente punto en orden
                 if ($puntoActivo) {
+
                     $indicePuntoActivo = $puntosDeInteres->search(function ($punto) use ($puntoActivo) {
-                        return $punto->id === $puntoActivo->id;
+                        return $punto->cntr_interest_point_id === $puntoActivo->cntr_interest_point_id;
                     });
                    
                     // Obtener el siguiente punto de interés si existe
@@ -778,28 +984,26 @@ class ServiceSatelital extends Controller
                         if ($distanciaSiguiente <= $siguientePunto->radius) {
                             // 1. Realizar las acciones de salida del punto de interés activo
                             
-                            //$this->ejecutarAccion($puntoActivo->id, $contenedor->id_cntr);
+                            $this->ejecutarAccionEntrada($puntoActivo->interest_point_id, $contenedor->id_cntr);
 
                             // 2. Marcar el punto de interés activo como inactivo
                             DB::table('cntr_interest_point')
-                                ->where('id', $puntoActivo->id)
+                                ->where('id', $puntoActivo->cntr_interest_point_id)
                                 ->update(['activo' => false]);
 
                             // 3. Realizar las acciones de entrada del siguiente punto de interés
-                            //$this->ejecutarAccionesEntrada($siguientePunto, $contenedor);
+                            $this->ejecutarAccionSalida($siguientePunto->interest_point_id, $contenedor->id_cntr);
 
                             // 4. Marcar el siguiente punto de interés como activo
                             DB::table('cntr_interest_point')
-                                ->where('id', $siguientePunto->id)
+                                ->where('id', $siguientePunto->cntr_interest_point_id)
                                 ->update(['activo' => true]);
                                 
-                            $asignacion->status_punto_interes= $siguientePunto->description;
-                            $asignacion->save();
                             // Guardar el detalle de la acción ejecutada
                             $detalleComparacion = [
                                 'cntr_id' => $contenedor->id_cntr,
                                 'truck_domain' => $truckDomain,
-                                'punto_de_interes_id' => $siguientePunto->id,
+                                'punto_de_interes_id' => $siguientePunto->description,
                                 'distancia' => $distanciaSiguiente,
                                 'accion' => 'entrada'
                             ];
@@ -809,7 +1013,6 @@ class ServiceSatelital extends Controller
                 }
             }
         }
-
         return response()->json(['detalle_comparaciones' => $detalleComparaciones]);
     }
     public function calcularDistancia($latitud1, $longitud1, $latitud2, $longitud2)
@@ -826,58 +1029,102 @@ class ServiceSatelital extends Controller
         return $distanciaEnKilometros * 1000; // Convertir a metros
     }
 
-    public function ejecutarAccion($puntoActivoId, $contenedorId)
-    {
+    public function ejecutarAccionEntrada($puntoActivoId, $contenedorId)
+    { 
         // Obtener datos del contenedor desde la tabla 'cntr'
-        $contenedor = DB::table('cntr')->where('id_cntr', $contenedorId)->first();
-        $puntoActivo = DB::table('interest_points')->where('id', $puntoActivoId)->first();
-        if ($puntoActivo->accion_correo_cliente_entrada) {
-            // Enviar correo al cliente
-            Mail::to("juaniolivares95@gmail.com")->send(new MailPuntoDeInteres($contenedor, $puntoActivo ));
+        
+        $contenedor = DB::table('cntr')
+        ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+        ->join('carga', 'cntr.booking', '=', 'carga.booking')
+        ->where('cntr.id_cntr', $contenedorId)
+        ->select('cntr.*', 'asign.*' , 'carga.*')
+        ->first();
+        $punto = DB::table('interest_points')->where('id',$puntoActivoId)->first();
+        
+        $sbx = DB::table('variables')->select('sandbox')->get();
+        $inboxEmail = env('INBOX_EMAIL');
+        $mailsTrafico = DB::table('particular_soft_configurations')->first();
+        $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
+        $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
+
+        if ($sbx[0]->sandbox == 1) {
+            Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new PuntoInteresEntrada($contenedor, $punto));
+        } else {
+            Mail::to(['equipoDemo1@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo3@botzero.com.ar'])
+                ->cc(['equipodemo2@botzero.com.ar', 'copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])
+                ->bcc($inboxEmail)->send(new PuntoInteresEntrada($contenedor, $punto));
         }
-        if ($puntoActivo->accion_cambiar_status_entrada) {
-            // Cambiar estado del contenedor automáticamente
-            DB::table('cntr')
-                ->where('id_cntr', $contenedor)
-                ->update([
-                    'status_cntr' =>  $puntoActivo->description,
-                ]);
+        //ENTRADA
+        if ($punto->accion_correo_customer_entrada) {
+            if ($sbx[0]->sandbox == 0) {
+                $customer = DB::table('users')->where('username', $contenedor->user)->first();
+                Mail::to($customer->email)->send(new PuntoInteresEntrada($contenedor, $punto));
+            }
         }
-        /*if ($puntoDeInteres->accion_correo_customer_entrada) {
-            // Enviar correo al cliente
-            Mail::to("juaniolivares95@gmail.com")->send(new MailPuntoDeInteres($contenedor, $puntoDeInteres));
+        if ($punto->accion_correo_cliente_entrada) {
+            /* Enviar correo al cliente
+            $customer = DB::table('users')->where('username', $contenedor->user_cntr)->first();
+            Mail::to( $customer)->send(new MailPuntoDeInteres($contenedor, $punto ));*/
+        }
+        if ($punto->accion_notificacion_customer_entrada) {
+            /* Enviar correo al cliente
+            $customer = DB::table('users')->where('username', $contenedor->user_cntr)->first();
+            Mail::to( $customer)->send(new MailPuntoDeInteres($contenedor, $punto ));*/
+        }
+        if ($punto->accion_notificacion_customer_entrada) {
+            /* Enviar correo al cliente
+            $customer = DB::table('users')->where('username', $contenedor->user_cntr)->first();
+            Mail::to( $customer)->send(new MailPuntoDeInteres($contenedor, $punto ));*/
         }
         
-        if ($puntoDeInteres->accion_notificacion_customer_entrada) {
-            // Enviar correo al cliente
-            Mail::to("juaniolivares95@gmail.com")->send(new MailPuntoDeInteres($contenedor, $puntoDeInteres));
-        }
-        if ($puntoDeInteres->accion_notificacion_cliente_entrada) {
-            // Enviar correo al cliente
-            Mail::to("juaniolivares95@gmail.com")->send(new MailPuntoDeInteres($contenedor, $puntoDeInteres));
-        }
+    }
+    public function ejecutarAccionSalida($puntoActivoId, $contenedorId)
+    {
+         
+       // Obtener datos del contenedor desde la tabla 'cntr'
+        
+       $contenedor = DB::table('cntr')
+       ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+       ->join('carga', 'cntr.booking', '=', 'carga.booking')
+       ->where('cntr.id_cntr', $contenedorId)
+       ->select('cntr.*', 'asign.*' , 'carga.*')
+       ->first();
+       $punto = DB::table('interest_points')->where('id',$puntoActivoId)->first();
+       
+       $sbx = DB::table('variables')->select('sandbox')->get();
+       $inboxEmail = env('INBOX_EMAIL');
+       $mailsTrafico = DB::table('particular_soft_configurations')->first();
+       $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
+       $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
 
-
-        if ($puntoDeInteres->accion_correo_customer_salida) {
+       if ($sbx[0]->sandbox == 1) {
+           Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new PuntoInteresSalida($contenedor, $punto));
+       } else {
+           Mail::to(['equipoDemo1@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo3@botzero.com.ar'])
+               ->cc(['equipodemo2@botzero.com.ar', 'copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])
+               ->bcc($inboxEmail)->send(new PuntoInteresSalida($contenedor, $punto));
+       }
+        //SALIDA
+        if ($punto->accion_correo_customer_salida) {
             // Enviar correo al cliente
-            Mail::to("juaniolivares95@gmail.com")->send(new MailPuntoDeInteres($contenedor, $puntoDeInteres));
+            $customer = DB::table('users')->where('username', $contenedor->user_cntr)->first();
+            Mail::to( $customer)->send(new PuntoInteresSalida($contenedor, $punto ));
         }
-        if ($puntoDeInteres->accion_correo_cliente_salida) {
-            // Enviar correo al cliente
-            Mail::to("juaniolivares95@gmail.com")->send(new MailPuntoDeInteres($contenedor, $puntoDeInteres));
+        if ($punto->accion_correo_cliente_salida) {
+            /* Enviar correo al cliente
+            $customer = DB::table('users')->where('username', $contenedor->user_cntr)->first();
+            Mail::to( $customer)->send(new MailPuntoDeInteres($contenedor, $punto ));*/
         }
-        if ($puntoDeInteres->accion_cambiar_status_salida) {
-            // Enviar correo al cliente
-            Mail::to("juaniolivares95@gmail.com")->send(new MailPuntoDeInteres($contenedor, $puntoDeInteres));
+        if ($punto->accion_notificacion_customer_salida) {
+            /* Enviar correo al cliente
+            $customer = DB::table('users')->where('username', $contenedor->user_cntr)->first();
+            Mail::to( $customer)->send(new MailPuntoDeInteres($contenedor, $punto ));*/
         }
-        if ($puntoDeInteres->accion_notificacion_customer_salida) {
-            // Enviar correo al cliente
-            Mail::to("juaniolivares95@gmail.com")->send(new MailPuntoDeInteres($contenedor, $puntoDeInteres));
-        }
-        if ($puntoDeInteres->accion_notificacion_cliente_salida) {
-            // Enviar correo al cliente
-            Mail::to("juaniolivares95@gmail.com")->send(new MailPuntoDeInteres($contenedor, $puntoDeInteres));
-        }*/
+        if ($punto->accion_notificacion_cliente_salida) {
+            /* Enviar correo al cliente
+            $customer = DB::table('users')->where('username', $contenedor->user_cntr)->first();
+            Mail::to( $customer)->send(new MailPuntoDeInteres($contenedor, $punto ));*/
+        }   
         
     }
 }

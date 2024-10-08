@@ -13,8 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('asign', function (Blueprint $table) {
-            $table->string('status_punto_interes')->nullable()->default('0');
+        Schema::table('users', function (Blueprint $table) {
+            $table->string('transport_id')->nullable()->after('permiso');
         });
     }
 
@@ -25,8 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('asign', function (Blueprint $table) {
-            $table->dropColumn('status_punto_interes');
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('transport_id');
         });
     }
 };

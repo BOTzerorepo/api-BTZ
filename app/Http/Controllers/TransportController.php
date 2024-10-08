@@ -200,4 +200,21 @@ class TransportController extends Controller
             'detail' => $transport
         ]);
     }
+    public function addFletero(Request $request, $transportId)
+    {
+        $validated = $request->validate([
+            'fletero_id' => 'required|exists:fleteros,id', // Verifica que el fletero exista
+        ]);
+
+        $transport = Transport::findOrFail($transportId);
+        $fleteroId = $validated['fletero_id'];
+
+        // Agrega el fletero al transporte
+        $transport->fleteros()->attach($fleteroId);
+
+        return response()->json([
+            'message' => 'Fletero asociado al transporte exitosamente.',
+            'data' => $transport->load('fleteros') // Carga los fleteros asociados
+        ], 200);
+    }
 }
