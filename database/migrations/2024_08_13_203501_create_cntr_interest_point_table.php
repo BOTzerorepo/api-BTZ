@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('cntr_interest_point', function (Blueprint $table) {
+        /*Schema::create('cntr_interest_point', function (Blueprint $table) {
             $table->id();
             $table->integer('order')->default(0);
             $table->unsignedBigInteger('cntr_id_cntr');
@@ -23,7 +23,7 @@ return new class extends Migration
             $table->foreign('cntr_id_cntr')->references('cntr_id')->on('cntr')->onDelete('cascade');
             $table->foreign('interest_point_id')->references('id')->on('interest_points')->onDelete('cascade');
             
-        });
+        });*/
     }
 
     /**
@@ -33,6 +33,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('cntr_interest_point');
+        //Schema::dropIfExists('cntr_interest_point');
     }
 };
