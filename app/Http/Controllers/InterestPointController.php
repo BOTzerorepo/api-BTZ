@@ -26,16 +26,15 @@ class InterestPointController extends Controller
                 'description' => 'required|string|max:255',
                 'latitude' => 'required|numeric|between:-90,90',
                 'longitude' => 'required|numeric|between:-180,180',
-                'radius' => 'required|numeric|min:0',
+                //'radius' => 'required|numeric|min:0',
+                'status_transition' => 'required|string|max:255',
                 // Añade validaciones para los checkboxes (booleanos)
                 'accion_correo_customer_entrada' => 'boolean',
                 'accion_correo_cliente_entrada' => 'boolean',
-                'accion_cambiar_status_entrada' => 'boolean',
                 'accion_notificacion_customer_entrada' => 'boolean',
                 'accion_notificacion_cliente_entrada' => 'boolean',
                 'accion_correo_customer_salida' => 'boolean',
                 'accion_correo_cliente_salida' => 'boolean',
-                'accion_cambiar_status_salida' => 'boolean',
                 'accion_notificacion_customer_salida' => 'boolean',
                 'accion_notificacion_cliente_salida' => 'boolean',
             ]);
@@ -44,25 +43,29 @@ class InterestPointController extends Controller
                 return response()->json(['message' => $validator->errors()], 400);
             }
 
+            if($request->type === 'punto'){
+                $radius = 1000;
+            }else{
+                $radius = 5000;
+            }
             // Creación del punto de interés
             $interestPoint = new InterestPoint([
                 'type' => $request->type,
                 'description' => $request->description,
                 'latitude' => $request->latitude,
                 'longitude' => $request->longitude,
-                'radius' => $request->radius,
+                'radius' => $radius,
+                'status_transition' => $request->status_transition,
                 
                 // Acciones cuando se entra
                 'accion_correo_customer_entrada' => $request->accion_correo_customer_entrada,
                 'accion_correo_cliente_entrada' => $request->accion_correo_cliente_entrada,
-                'accion_cambiar_status_entrada' => $request->accion_cambiar_status_entrada,
                 'accion_notificacion_customer_entrada' => $request->accion_notificacion_customer_entrada,
                 'accion_notificacion_cliente_entrada' => $request->accion_notificacion_cliente_entrada,
                 
                 // Acciones cuando se sale
                 'accion_correo_customer_salida' => $request->accion_correo_customer_salida,
                 'accion_correo_cliente_salida' => $request->accion_correo_cliente_salida,
-                'accion_cambiar_status_salida' => $request->accion_cambiar_status_salida,
                 'accion_notificacion_customer_salida' => $request->accion_notificacion_customer_salida,
                 'accion_notificacion_cliente_salida' => $request->accion_notificacion_cliente_salida,
             ]);
@@ -86,21 +89,25 @@ class InterestPointController extends Controller
                 'latitude' => 'required|numeric|between:-90,90',
                 'longitude' => 'required|numeric|between:-180,180',
                 'radius' => 'required|numeric|min:0',
+                'status_transition' => 'required|string|max:255',
                 // Añade validaciones para los checkboxes (booleanos)
                 'accion_correo_customer_entrada' => 'boolean',
                 'accion_correo_cliente_entrada' => 'boolean',
-                'accion_cambiar_status_entrada' => 'boolean',
                 'accion_notificacion_customer_entrada' => 'boolean',
                 'accion_notificacion_cliente_entrada' => 'boolean',
                 'accion_correo_customer_salida' => 'boolean',
                 'accion_correo_cliente_salida' => 'boolean',
-                'accion_cambiar_status_salida' => 'boolean',
                 'accion_notificacion_customer_salida' => 'boolean',
                 'accion_notificacion_cliente_salida' => 'boolean',
             ]);
 
             if ($validator->fails()) {
                 return response()->json(['message' => $validator->errors()], 400);
+            }
+            if($request->type === 'punto'){
+                $radius = 1000;
+            }else{
+                $radius = 5000;
             }
 
             // Buscar el punto de interés por ID
@@ -110,19 +117,18 @@ class InterestPointController extends Controller
             $interestPoint->description = $request->description;
             $interestPoint->latitude = $request->latitude;
             $interestPoint->longitude = $request->longitude;
-            $interestPoint->radius = $request->radius;
+            $interestPoint->radius =  $radius;
+            $interestPoint->status_transition = $request->status_transition;
 
             // Acciones cuando se entra
             $interestPoint->accion_correo_customer_entrada = $request->accion_correo_customer_entrada ?? 0;
             $interestPoint->accion_correo_cliente_entrada = $request->accion_correo_cliente_entrada ?? 0;
-            $interestPoint->accion_cambiar_status_entrada = $request->accion_cambiar_status_entrada ?? 0;
             $interestPoint->accion_notificacion_customer_entrada = $request->accion_notificacion_customer_entrada ?? 0;
             $interestPoint->accion_notificacion_cliente_entrada = $request->accion_notificacion_cliente_entrada ?? 0;
 
             // Acciones cuando se sale
             $interestPoint->accion_correo_customer_salida = $request->accion_correo_customer_salida ?? 0;
             $interestPoint->accion_correo_cliente_salida = $request->accion_correo_cliente_salida ?? 0;
-            $interestPoint->accion_cambiar_status_salida = $request->accion_cambiar_status_salida ?? 0;
             $interestPoint->accion_notificacion_customer_salida = $request->accion_notificacion_customer_salida ?? 0;
             $interestPoint->accion_notificacion_cliente_salida = $request->accion_notificacion_cliente_salida ?? 0;
 

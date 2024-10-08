@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\Log;
 use App\Mail\cargaTerminada;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
+use App\Models\Transport;
+
 
 use function GuzzleHttp\json_encode;
 
@@ -40,7 +42,6 @@ class statusController extends Controller
         ->join('asign', 'asign.cntr_number', '=', 'cntr.cntr_number')
         ->join('status', 'status.cntr_number', '=', 'cntr.cntr_number')
         ->leftjoin('trucks', 'trucks.domain', '=', 'asign.truck')
-        
         ->select(
             'cntr.id_cntr',
             'carga.ref_customer',
@@ -79,6 +80,60 @@ class statusController extends Controller
 
         return $cargasActivas;
 
+    }
+    public function indexTransportActive($id)
+    {
+
+        $transporte = Transport::findOrFail($id);
+        $rzTransporte = $transporte->razon_social;
+
+        $cargasActivas = DB::table('cntr')
+        ->join('carga', 'cntr.booking', '=', 'carga.booking')
+        ->leftjoin('asign', 'asign.cntr_number', '=', 'cntr.cntr_number')
+        ->leftjoin('status', 'status.cntr_number', '=', 'cntr.cntr_number')
+        ->leftjoin('trucks', 'trucks.domain', '=', 'asign.truck')
+        ->where('asign.transport','=',$rzTransporte)
+        ->select(
+            'cntr.id_cntr',
+            'carga.ref_customer',
+            'cntr.booking',
+            'cntr.cntr_number',
+            'cntr.cntr_type',
+            'cntr.confirmacion',
+            'cntr.main_status',
+            'cntr.status_cntr',
+            'asign.driver',
+            'asign.truck',
+            'asign.truck_semi',
+            'asign.transport',
+            'asign.file_instruction',
+
+            'trucks.alta_aker',
+
+            DB::raw('MAX(status.id) as latest_status_id') // Selecciona el último status basado en el id
+        )
+            ->where('cntr.main_status', '!=', 'TERMINADA')
+            ->groupBy(
+                'cntr.id_cntr',
+                'carga.ref_customer',
+                'cntr.booking',
+                'cntr.cntr_number',
+                'cntr.cntr_type',
+                'cntr.confirmacion',
+                'cntr.main_status',
+                'cntr.status_cntr',
+                'asign.driver',
+                'asign.truck',
+                'asign.truck_semi',
+                'asign.transport',
+                'trucks.alta_aker',
+                'asign.file_instruction',
+
+
+            )
+            ->get();
+
+        return $cargasActivas;
     }
 
     /**
