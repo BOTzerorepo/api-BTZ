@@ -882,19 +882,19 @@ class ServiceSatelital extends Controller
                 "phone" => "2612128105"
             ]);
 
-           /* $request = new Psr7Request('GET', 'https://app.akercontrol.com/ws/v2/servicios', $headers, $body);
+            $request = new Psr7Request('GET', 'https://app.akercontrol.com/ws/v2/servicios', $headers, $body);
             $res = $client->sendAsync($request)->wait();
             $respuesta = $res->getBody();
-            $r = json_decode($respuesta, true);*/
+            $r = json_decode($respuesta, true);
 
-            $r = [
+            /* $r = [
                 'data' => [
                     $truckDomain => [
                         'ult_latitud' => -34.603684,  // Simular latitud (Buenos Aires)
                         'ult_longitud' => -58.381559  // Simular longitud (Buenos Aires)
                     ]
                 ]
-            ];
+            ];*/
             
             // Verificar si la solicitud fue exitosa y si hay coordenadas disponibles
             if (isset($r['data'])) {
@@ -950,7 +950,7 @@ class ServiceSatelital extends Controller
                             
                             DB::table('cntr_interest_point')
                                 ->where('id', $puntoInteresInicial->cntr_interest_point_id)
-                                ->update(['activo' => true]);
+                                ->update(['activo' => 1]);
 
                                 $detalleComparacion = [
                                     'cntr_id' => $contenedor->id_cntr,

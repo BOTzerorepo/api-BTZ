@@ -26,7 +26,9 @@ Route::get('/points_of_interest','App\Http\Controllers\InterestPointController@i
 Route::post('/points_of_interest','App\Http\Controllers\InterestPointController@store');
 Route::put('/points_of_interest/{id}','App\Http\Controllers\InterestPointController@update');
 Route::delete('/points_of_interest/{id}','App\Http\Controllers\InterestPointController@destroy');
-Route::post('/points_of_interest_carga/{id}','App\Http\Controllers\InterestPointController@puntoInteresCarga');
+//CARGA--PUNTO INTERES
+Route::post('/points_of_interest_carga/{id}','App\Http\Controllers\InterestPointController@agregarPuntoInteresCarga');
+Route::get('/points_of_interest_cntr/{id}','App\Http\Controllers\InterestPointController@puntoInteresCntr');
 /* 
 ooooo   ooooo   .oooooo.   ooo        ooooo oooooooooooo      ooooo ooooo      ooo oooooooooooo   .oooooo.        8 8 8 8 8 8 8 8 8 8 8 8 8 8
 `888'   `888'  d8P'  `Y8b  `88.       .888' `888'     `8      `888' `888b.     `8' `888'     `8  d8P'  `Y8b       8 8 8 8 8 8 8 8 8 8 8 8 8 8
