@@ -7,6 +7,7 @@ use App\Models\InterestPoint;
 use Illuminate\Support\Facades\Validator;
 use App\Models\cntr;
 use App\Models\Carga;
+use Illuminate\Support\Facades\DB;
 
 class InterestPointController extends Controller
 {
@@ -156,7 +157,7 @@ class InterestPointController extends Controller
         }
     }
 
-    public function puntoInteresCarga(Request $request, $id)
+    public function agregarPuntoInteresCarga(Request $request, $id)
     {
         // Obtener los datos de 'points' en lugar de 'points_data'
         $pointsData = $request->input('points');
@@ -197,5 +198,21 @@ class InterestPointController extends Controller
         return response()->json(['message' => 'Puntos de interés actualizados exitosamente']);
     }
 
+    public function puntoInteresCntr($id)
+    {
+        $cntr = cntr::whereNull('deleted_at')->where('id_cntr', '=', $id)->first();
+        
+        if (!$cntr) {
+            return response()->json(['error' => 'CNTR no encontrado'], 404); // Retorna un error si no se encuentra el CNTR
+        }
+
+        $puntosInteres = DB::table('cntr_interest_point')
+            ->join('interest_points', 'cntr_interest_point.interest_point_id', '=', 'interest_points.id')
+            ->where('cntr_interest_point.cntr_id_cntr', '=', $cntr->id_cntr)
+            ->select('interest_points.*', 'cntr_interest_point.order', 'cntr_interest_point.activo')
+            ->get();
+
+        return response()->json($puntosInteres);
+    }
 
 }
