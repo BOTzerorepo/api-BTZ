@@ -17,9 +17,9 @@ return new class extends Migration
             $table->id();
             $table->string('type');
             $table->string('description');
-            $table->decimal('latitude', 10, 7);
-            $table->decimal('longitude', 10, 7);
-            $table->decimal('radius', 8, 2);
+            $table->decimal('latitude', 19, 16);
+            $table->decimal('longitude', 19, 16);
+            $table->decimal('radius', 8, 3);
             $table->string('status_transition');
             
             // Acciones cuando se entra
