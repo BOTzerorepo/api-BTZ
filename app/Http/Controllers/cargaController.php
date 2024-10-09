@@ -137,6 +137,16 @@ class cargaController extends Controller
                 ->whereNull('asign.deleted_at')
                 ->orderBy('carga.load_date', 'ASC')->get();
         }
+        // Obtener los cntr y sus puntos de interés
+        $cntrs = Cntr::whereIn('cntr_number', $todasLasCargasDeEstaSemana->pluck('cntr_number'))
+        ->with('interestPoints')
+        ->get()
+            ->keyBy('cntr_number');
+
+        // Mapear las cargas con sus puntos de interés
+        $todasLasCargasDeEstaSemana->each(function ($carga) use ($cntrs) {
+            $carga->cntrs = $cntrs->get($carga->cntr_number); // Agregar los puntos de interés a cada carga
+        });
 
         return $todasLasCargasDeEstaSemana;
     }
@@ -185,6 +195,17 @@ class cargaController extends Controller
                 ->whereNull('asign.deleted_at')
                 ->orderBy('carga.load_date', 'ASC')->get();
         }
+
+        // Obtener los cntr y sus puntos de interés
+        $cntrs = Cntr::whereIn('cntr_number', $todasLasCargasDeEstaSemana->pluck('cntr_number'))
+        ->with('interestPoints')
+        ->get()
+            ->keyBy('cntr_number');
+
+        // Mapear las cargas con sus puntos de interés
+        $todasLasCargasDeEstaSemana->each(function ($carga) use ($cntrs) {
+            $carga->cntrs = $cntrs->get($carga->cntr_number); // Agregar los puntos de interés a cada carga
+        });
 
         return $todasLasCargasDeEstaSemana;
     }
