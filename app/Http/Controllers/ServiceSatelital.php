@@ -984,7 +984,7 @@ class ServiceSatelital extends Controller
                         if ($distanciaSiguiente <= $siguientePunto->radius) {
                             // 1. Realizar las acciones de salida del punto de interés activo
                             
-                            $this->ejecutarAccionEntrada($puntoActivo->interest_point_id, $contenedor->id_cntr);
+                            $this->ejecutarAccionSalida($puntoActivo->interest_point_id, $contenedor->id_cntr);
 
                             // 2. Marcar el punto de interés activo como inactivo
                             DB::table('cntr_interest_point')
@@ -992,7 +992,7 @@ class ServiceSatelital extends Controller
                                 ->update(['activo' => false]);
 
                             // 3. Realizar las acciones de entrada del siguiente punto de interés
-                            $this->ejecutarAccionSalida($siguientePunto->interest_point_id, $contenedor->id_cntr);
+                            $this->ejecutarAccionEntrada($siguientePunto->interest_point_id, $contenedor->id_cntr);
 
                             // 4. Marcar el siguiente punto de interés como activo
                             DB::table('cntr_interest_point')

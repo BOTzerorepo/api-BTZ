@@ -200,19 +200,83 @@ class InterestPointController extends Controller
 
     public function puntoInteresCntr($id)
     {
+        try {
+            // Buscar el CNTR
+            $cntr = cntr::whereNull('deleted_at')->where('id_cntr', '=', $id)->first();
+            
+            if (!$cntr) {
+                return response()->json(['error' => 'CNTR no encontrado'], 404);
+            }
+
+            // Obtener los puntos de interés relacionados al CNTR
+            $puntosDeInteres = DB::table('cntr_interest_point')
+                ->join('interest_points', 'cntr_interest_point.interest_point_id', '=', 'interest_points.id')
+                ->where('cntr_interest_point.cntr_id_cntr', '=', $cntr->id_cntr)
+                ->select('interest_points.*', 'cntr_interest_point.order', 'cntr_interest_point.activo')
+                ->get();
+
+            return response()->json($puntosDeInteres);
+
+        } catch (\Exception $e) {
+            // Manejo de errores o excepciones
+            return response()->json(['error' => 'Error al obtener los puntos de interés', 'message' => $e->getMessage()], 500);
+        }
+    }
+    
+    public function ModificarPuntoInteresCntr($id)
+    {
+        try {
+            // Buscar el CNTR
+            $cntr = cntr::whereNull('deleted_at')->where('id_cntr', '=', $id)->first();
+            
+            if (!$cntr) {
+                return response()->json(['error' => 'CNTR no encontrado'], 404);
+            }
+
+            // Obtener los puntos de interés relacionados al CNTR
+            $puntosDeInteres = DB::table('cntr_interest_point')
+                ->join('interest_points', 'cntr_interest_point.interest_point_id', '=', 'interest_points.id')
+                ->where('cntr_interest_point.cntr_id_cntr', '=', $cntr->id_cntr)
+                ->select('interest_points.*', 'cntr_interest_point.order', 'cntr_interest_point.activo')
+                ->get();
+
+            return response()->json($puntosDeInteres);
+
+        } catch (\Exception $e) {
+            // Manejo de errores o excepciones
+            return response()->json(['error' => 'Error al obtener los puntos de interés', 'message' => $e->getMessage()], 500);
+        }
+    }
+    public function actualizarPuntosInteresCntr(Request $request, $id)
+    {
+        // Obtener el CNTR a partir del ID
         $cntr = cntr::whereNull('deleted_at')->where('id_cntr', '=', $id)->first();
-        
+
         if (!$cntr) {
             return response()->json(['error' => 'CNTR no encontrado'], 404); // Retorna un error si no se encuentra el CNTR
         }
 
-        $puntosInteres = DB::table('cntr_interest_point')
-            ->join('interest_points', 'cntr_interest_point.interest_point_id', '=', 'interest_points.id')
-            ->where('cntr_interest_point.cntr_id_cntr', '=', $cntr->id_cntr)
-            ->select('interest_points.*', 'cntr_interest_point.order', 'cntr_interest_point.activo')
-            ->get();
+        // Verificar que haya puntos en el request
+        $pointsData = $request->input('points');
+        if (!is_array($pointsData) || empty($pointsData)) {
+            return response()->json(['message' => 'Datos de puntos de interés no válidos o vacíos'], 400);
+        }
 
-        return response()->json($puntosInteres);
+        // Eliminar todos los puntos de interés actuales de este CNTR
+        DB::table('cntr_interest_point')->where('cntr_id_cntr', '=', $cntr->id_cntr)->delete();
+
+        // Agregar los nuevos puntos de interés
+        foreach ($pointsData as $point) {
+            // Verificar que el punto de interés exista
+            $interestPoint = InterestPoint::find($point['point_id']);
+            if (!$interestPoint) {
+                return response()->json(['message' => 'Punto de interés no encontrado con ID ' . $point['point_id']], 404);
+            }
+
+            // Insertar el nuevo punto de interés con su orden en la tabla intermedia
+            $cntr->interestPoints()->attach($interestPoint->id, ['order' => $point['order']]);
+        }
+
+        return response()->json(['message' => 'Puntos de interés actualizados correctamente'], 200);
     }
-
 }
