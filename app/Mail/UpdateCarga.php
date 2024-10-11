@@ -26,7 +26,7 @@ class UpdateCarga extends Mailable
         $this->modificacionesCntr = $modificacionesCntr;
         $this->modificacionesCarga = $modificacionesCarga;
         $this->carga = $carga;
-        $this->subject = 'Se modifico la carga// '.$carga['ref_customer'] .' // BKG: '. $carga['booking'];
+        $this->subject = 'MODIFICACION DE CARGA// '.$carga['ref_customer'] .' // BKG: '. $carga['booking'];
     }
 
     /**
