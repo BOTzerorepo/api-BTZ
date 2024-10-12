@@ -153,7 +153,6 @@ Route::get('/servicioSatelital','App\Http\Controllers\ServiceSatelital@serviceSa
 Route::get('/pruebaSatelital','App\Http\Controllers\ServiceSatelital@servicePrueba');
 Route::get('/flota','App\Http\Controllers\ServiceSatelital@flota');
 Route::get('/flotaId/{id}', 'App\Http\Controllers\ServiceSatelital@flotaID');
-
 Route::get('/flotaTransport/{transport}', 'App\Http\Controllers\ServiceSatelital@flotaTransport');
 
 
