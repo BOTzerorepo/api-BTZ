@@ -97,7 +97,9 @@ Route::get('/mailCargaNueva/{idCarga}/{user}','App\Http\Controllers\emailControl
 
 Route::get('/mailStatus/{cntr}/{empresa}/{booking}/{user}/{tipo}/{statusArchivoPath}','App\Http\Controllers\emailController@cambiaStatus');  // Llega Correo Ok
 Route::get('/cargaAsignada/{id}','App\Http\Controllers\emailController@cargaAsignada');  // Llega Correo Ok
-Route::get('/trasnsporteAsignado/{id}','App\Http\Controllers\emailController@transporteAsignado');  // Llega Correo Ok
+
+//REMPLAZAR  CON LA ASIGNACION DEL TRANSPORTE Y ENVIAR MAIL
+Route::post('/transporteAsignado/{id}','App\Http\Controllers\TransportController@transporteAsignado');  // Llega Correo Ok
 
 // Route::post('/imprimir/create','App\Http\Controllers\crearpdfControllerPDF@store')mostrar todos
 // Route::get('/imprimirIns','App\Http\Controllers\imprimirPDF@store'); //mostrar todos
@@ -153,7 +155,6 @@ Route::get('/servicioSatelital','App\Http\Controllers\ServiceSatelital@serviceSa
 Route::get('/pruebaSatelital','App\Http\Controllers\ServiceSatelital@servicePrueba');
 Route::get('/flota','App\Http\Controllers\ServiceSatelital@flota');
 Route::get('/flotaId/{id}', 'App\Http\Controllers\ServiceSatelital@flotaID');
-
 Route::get('/flotaTransport/{transport}', 'App\Http\Controllers\ServiceSatelital@flotaTransport');
 
 
