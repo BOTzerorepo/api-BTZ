@@ -971,7 +971,7 @@ class ServiceSatelital extends Controller
                         $distancia = $this->calcularDistancia($latitud, $longitud, $puntoInteresInicial->latitude, $puntoInteresInicial->longitude);
     
                         // Si está dentro del radio del primer punto, marcarlo como activo
-                        if ($distancia <= $puntoInteresInicial->radius) {
+                        if ($distancia <= $puntoInteresInicial->radius && $contenedor->main_status == $puntoInteresInicial->status_transition ) {
                             // 1. Verificar si el estado es 0 (no se ha enviado ningún correo)
                             if ($puntoInteresInicial->activo === 0) {
                                 // 2. Realizar las acciones de entrada del punto inicial
@@ -1014,7 +1014,7 @@ class ServiceSatelital extends Controller
                         $distanciaSiguiente = $this->calcularDistancia($latitud, $longitud, $siguientePunto->latitude, $siguientePunto->longitude);
                     
                         // Si está dentro del radio del siguiente punto
-                        if ($distanciaSiguiente <= $siguientePunto->radius) {
+                        if ($distanciaSiguiente <= $siguientePunto->radius ) {
                             // Si el punto activo NO tiene el estado 2, se ejecuta la acción de salida
                             if ($puntoActivo->activo !== 2) {
                                 // 1. Realizar las acciones de salida del punto activo
@@ -1037,7 +1037,7 @@ class ServiceSatelital extends Controller
                             }
                     
                             // Verificar el estado del siguiente punto (debe ser 0 para enviar correo de entrada)
-                            if ($siguientePunto->activo === 0) {
+                            if ($siguientePunto->activo === 0 && $contenedor->main_status == $siguientePunto->status_transition) {
                                 // 4. Realizar las acciones de entrada en el siguiente punto
                                 $this->ejecutarAccionEntrada($siguientePunto->interest_point_id, $contenedor->id_cntr);
                     
