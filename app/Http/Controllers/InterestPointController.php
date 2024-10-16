@@ -119,6 +119,8 @@ class InterestPointController extends Controller
             $interestPoint->latitude = $request->latitude;
             $interestPoint->longitude = $request->longitude;
             $interestPoint->radius =  $radius;
+            $interestPoint->type =  $request->type;
+
             $interestPoint->status_transition = $request->status_transition;
 
             // Acciones cuando se entra
