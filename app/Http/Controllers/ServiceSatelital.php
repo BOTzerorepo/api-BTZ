@@ -874,19 +874,19 @@ class ServiceSatelital extends Controller
                 "phone" => "2612128105"
             ]);
     
-            $request = new Psr7Request('GET', 'https://app.akercontrol.com/ws/v2/servicios', $headers, $body);
+            /*$request = new Psr7Request('GET', 'https://app.akercontrol.com/ws/v2/servicios', $headers, $body);
             $res = $client->sendAsync($request)->wait();
             $respuesta = $res->getBody();
-            $r = json_decode($respuesta, true);
+            $r = json_decode($respuesta, true);*/
     
-            /*$r = [
+            $r = [
                 'data' => [ 
                     $truckDomain => [
-                        'ult_latitud' => -32.87725730777664,  // Simular latitud (Buenos Aires)
-                        'ult_longitud' => -70.21853991559027  // Simular longitud (Buenos Aires)
-                    ]
+                        'ult_latitud' => -32.650807171311,
+                        'ult_longitud' => -69.5114860671367
+                    ]    
                 ]
-            ];*/
+            ];
     
             // Verificar si la solicitud fue exitosa y si hay coordenadas disponibles
             if (isset($r['data'])) {
@@ -906,6 +906,8 @@ class ServiceSatelital extends Controller
                         'cntr_interest_point.id as cntr_interest_point_id',
                         'interest_points.id as interest_point_id',
                         'interest_points.latitude',
+                        'interest_points.type',
+                        'interest_points.status_transition',
                         'interest_points.longitude',
                         'interest_points.radius',
                         'interest_points.description',
@@ -937,12 +939,13 @@ class ServiceSatelital extends Controller
                     $distanciaPuntoActivo = $this->calcularDistancia($latitud, $longitud, $puntoActivo->latitude, $puntoActivo->longitude);
     
                     // Si la distancia es mayor al radio, significa que el camión ha salido
-                    if ($distanciaPuntoActivo > $puntoActivo->radius) {
+                    if ($distanciaPuntoActivo > $puntoActivo->radius && $contenedor->main_status === $puntoActivo->status_transition ) {
                         // 1. Verificar si el estado es 1 (ya se envió el correo de entrada)
                         if ($puntoActivo->activo === 1) {
                             // 2. Realizar las acciones de salida del punto de interés activo
-                            $this->ejecutarAccionSalida($puntoActivo->interest_point_id, $contenedor->id_cntr);
-    
+                            if ($puntoActivo->type != "proceso") {
+                                $this->ejecutarAccionSalida($puntoActivo->interest_point_id, $contenedor->id_cntr);
+                            }
                             // 3. Marcar el punto de interés activo como 2 (se envió correo de salida)
                             DB::table('cntr_interest_point')
                                 ->where('id', $puntoActivo->cntr_interest_point_id)
@@ -971,7 +974,7 @@ class ServiceSatelital extends Controller
                         $distancia = $this->calcularDistancia($latitud, $longitud, $puntoInteresInicial->latitude, $puntoInteresInicial->longitude);
     
                         // Si está dentro del radio del primer punto, marcarlo como activo
-                        if ($distancia <= $puntoInteresInicial->radius && $contenedor->main_status == $puntoInteresInicial->status_transition ) {
+                        if ($distancia <= $puntoInteresInicial->radius && $contenedor->main_status === $puntoInteresInicial->status_transition ) {
                             // 1. Verificar si el estado es 0 (no se ha enviado ningún correo)
                             if ($puntoInteresInicial->activo === 0) {
                                 // 2. Realizar las acciones de entrada del punto inicial
@@ -1014,12 +1017,13 @@ class ServiceSatelital extends Controller
                         $distanciaSiguiente = $this->calcularDistancia($latitud, $longitud, $siguientePunto->latitude, $siguientePunto->longitude);
                     
                         // Si está dentro del radio del siguiente punto
-                        if ($distanciaSiguiente <= $siguientePunto->radius ) {
+                        if ($distanciaSiguiente <= $siguientePunto->radius && $contenedor->main_status === $siguientePunto->status_transition ) {
                             // Si el punto activo NO tiene el estado 2, se ejecuta la acción de salida
                             if ($puntoActivo->activo !== 2) {
                                 // 1. Realizar las acciones de salida del punto activo
-                                $this->ejecutarAccionSalida($puntoActivo->interest_point_id, $contenedor->id_cntr);
-                    
+                                if ($puntoActivo->type != "proceso") {
+                                    $this->ejecutarAccionSalida($puntoActivo->interest_point_id, $contenedor->id_cntr);
+                                }
                                 // 2. Marcar el punto activo como 2 (se envió correo de salida)
                                 DB::table('cntr_interest_point')
                                     ->where('id', $puntoActivo->cntr_interest_point_id)
