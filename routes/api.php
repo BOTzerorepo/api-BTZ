@@ -151,6 +151,9 @@ Route::get('/lugarDeCarga/{patente}','App\Http\Controllers\CustomerLoadPlaceCont
 Route::get('/accionLugarDeCarga/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionLugarDeCarga'); // LLEGO OK EMAIL
 Route::get('/accionLugarAduana/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionLugarAduana');// LLEGO OK EMAIL
 Route::get('/accionLugarDescarga/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionLugarDescarga');// LLEGO OK EMAIL
+Route::get('/accionFueraLugarDeCarga/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionFueraLugarDeCarga'); // LLEGO OK EMAIL
+Route::get('/accionFueraLugarAduana/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionFueraLugarAduana');// LLEGO OK EMAIL
+Route::get('/accionFueraLugarDescarga/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionFueraLugarDescarga');// LLEGO OK EMAIL
 Route::get('/servicioSatelital','App\Http\Controllers\ServiceSatelital@serviceSatelital');
 Route::get('/pruebaSatelital','App\Http\Controllers\ServiceSatelital@servicePrueba');
 Route::get('/flota','App\Http\Controllers\ServiceSatelital@flota');
