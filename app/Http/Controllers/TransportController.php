@@ -280,9 +280,19 @@ class TransportController extends Controller
                 'type' => $asignMail->type,
                 'trader' => $asignMail->trader,
             ];
-
-            if ($sbx[0]->sandbox == 1) {
+            $transporteMail= DB::table('asign')
+            ->select('users.email')
+            ->join('transports', 'asign.transport', '=', 'transports.razon_social')
+            ->join('users', 'transports.id', '=', 'users.transport_id')
+            ->where('asign.id', '=', $asign->id)
+            ->first();
+            if ($sbx[0]->sandbox == 0) {
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new transporteAsignado($datos, $date));
+                // Enviar solo al correo del transporte
+                if ($transporteMail) {
+                    Mail::to($transporteMail->email)
+                        ->send(new transporteAsignado($datos, $date));
+                }
             } else {
                 Mail::to(['equipoDemo1@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo3@botzero.com.ar'])
                     ->cc(['equipodemo2@botzero.com.ar', 'copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])
@@ -310,16 +320,18 @@ class TransportController extends Controller
                     $errors[] = $errorMessage;
                 }
             }
-
+            $carga = Carga::whereNull('deleted_at')->where('booking', '=', $asign->booking)->first();
             return response()->json([
                 'message' => 'Datos ingresados incorrectamente',
                 'message_type' => 'danger',
-                'error' => $errors
+                'error' => $errors,
+                'cargaId' => $carga->id
             ], 422);
         } catch (\Exception $e) {
             DB::rollBack();
             $errorMessage = $e->getMessage();
-            return response()->json(['error' => $errorMessage, 'message_type' => 'danger'], 500);
+            $carga = Carga::whereNull('deleted_at')->where('booking', '=', $asign->booking)->first();
+            return response()->json(['error' => $errorMessage, 'message_type' => 'danger', 'cargaId' => $carga->id], 500);
         }
     }
 }

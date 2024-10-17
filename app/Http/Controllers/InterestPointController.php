@@ -90,7 +90,7 @@ class InterestPointController extends Controller
                 'latitude' => 'required|numeric|between:-90,90',
                 'longitude' => 'required|numeric|between:-180,180',
                 'radius' => 'required|numeric|min:0',
-                //'status_transition' => 'required|string|max:255',
+                'status_transition' => 'required|string|max:255',
                 // Añade validaciones para los checkboxes (booleanos)
                 'accion_correo_customer_entrada' => 'boolean',
                 'accion_correo_cliente_entrada' => 'boolean',
@@ -119,7 +119,9 @@ class InterestPointController extends Controller
             $interestPoint->latitude = $request->latitude;
             $interestPoint->longitude = $request->longitude;
             $interestPoint->radius =  $radius;
-            //$interestPoint->status_transition = $request->status_transition;
+            $interestPoint->type =  $request->type;
+
+            $interestPoint->status_transition = $request->status_transition;
 
             // Acciones cuando se entra
             $interestPoint->accion_correo_customer_entrada = $request->accion_correo_customer_entrada ?? 0;
@@ -258,8 +260,9 @@ class InterestPointController extends Controller
 
         // Verificar que haya puntos en el request
         $pointsData = $request->input('points');
-        if (!is_array($pointsData) || empty($pointsData)) {
-            return response()->json(['message' => 'Datos de puntos de interés no válidos o vacíos'], 400);
+        if ( empty($pointsData)) {
+            DB::table('cntr_interest_point')->where('cntr_id_cntr', '=', $cntr->id_cntr)->delete();
+            return response()->json(['message' => 'Todos los puntos de interés eliminados porque no se enviaron puntos nuevos'], 200);
         }
 
         // Eliminar todos los puntos de interés actuales de este CNTR
