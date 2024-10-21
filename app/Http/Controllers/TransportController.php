@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\nuevoTranporte;
 use App\Mail\transporteAsignado;
+use App\Mail\asignarUnidadTransporte;
 use App\Models\Transport;
 use App\Models\cntr;
 use App\Models\User;
@@ -224,6 +225,7 @@ class TransportController extends Controller
             'data' => $transport->load('fleteros') // Carga los fleteros asociados
         ], 200);
     }
+
     public function transporteAsignado(Request $request, $cntrId)
     {
 
@@ -335,6 +337,118 @@ class TransportController extends Controller
         }
     }
 
+    public function asignarUnidadTransporte(Request $request, $cntrId)
+    {
+        DB::beginTransaction();
+        try {
+            // Validación de datos
+            $request->validate([
+                'driver' => 'required',
+                'truck' => 'required',
+                'truck_semi' => 'required',
+                'user' => 'required',
+                'empresa' => 'required',
+                'crt' => 'nullable',
+                'fletero_razon_social' => 'nullable',
+                'fletero_cuit' => 'nullable',
+                'fletero_domicilio' => 'nullable',
+                'fletero_paut' => 'nullable',
+                'fletero_permiso' => 'nullable',
+                'fletero_vto_permiso' => 'nullable',
+                'crt' => 'nullable',
+            ]);
+            //Obtener el cntr
+            $cntr = cntr::whereNull('deleted_at')->where('id_cntr', '=', $cntrId)->first();
+
+            //Obtener el asign
+            $asign = asign::whereNull('deleted_at')->where('cntr_number', '=', $cntr->cntr_number)->first();
+
+            //Actualizar el asign
+            $asign->driver = $request->input('driver');
+            $asign->truck = $request->input('truck');
+            $asign->truck_semi = $request->input('truck_semi');
+            $asign->crt = $request->input('crt');
+            $asign->fletero_razon_social = $request->input('fletero_razon_social');
+            $asign->fletero_cuit = $request->input('fletero_cuit');
+            $asign->fletero_domicilio = $request->input('fletero_domicilio');
+            $asign->fletero_paut = $request->input('fletero_paut');
+            $asign->fletero_permiso = $request->input('fletero_permiso');
+            $asign->fletero_vto_permiso = $request->input('fletero_vto_permiso');
+            $asign->user = $request->input('user');
+            $asign->company = $request->input('empresa');
+            $asign->save();
+
+            //Enviar mail
+            $sbx = DB::table('variables')->select('sandbox')->get();
+            $inboxEmail = env('INBOX_EMAIL');
+            $mailsTrafico = DB::table('particular_soft_configurations')->first();
+            $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
+            $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
+
+            //DATOS PARA ENVIAR MAIL
+            $date = Carbon::now('-03:00');
+            $asignMail = DB::table('asign')
+                ->select('asign.id', 'carga.*', 'cntr.cntr_type', 'carga.user as userC', 'asign.cntr_number', 'asign.booking', 'asign.transport', 'asign.transport_agent', 'asign.user', 'asign.company', 'atas.tax_id', 'transports.pais', 'cntr.confirmacion')
+                ->join('transports', 'asign.transport', '=', 'transports.razon_social')
+                ->leftJoin('atas', 'asign.transport_agent', '=', 'atas.razon_social')
+                ->join('carga', 'asign.booking', '=', 'carga.booking')
+                ->join('cntr', 'asign.cntr_number', '=', 'cntr.cntr_number')
+                ->where('asign.id', '=', $asign->id)
+                ->first();
+            $datos = [
+                'cntr_number' => $asignMail->cntr_number,
+                'cntr_type' => $asignMail->cntr_type,
+                'booking' => $asignMail->booking,
+                'confirmacion' => $asignMail->confirmacion,
+                'transport' => $asignMail->transport,
+                'transport_agent' => $asignMail->transport_agent,
+                'user' => $asignMail->user,
+                'company' => $asignMail->company,
+                'transport_bandera' => $asignMail->pais,
+                'cuit_ata' => $asignMail->tax_id,
+                'ref_customer' => $asignMail->ref_customer,
+                'type' => $asignMail->type,
+                'trader' => $asignMail->trader,
+            ];
+            
+            if ($sbx[0]->sandbox == 0) {
+                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new asignarUnidadTransporte($datos, $date));
+                
+            } else {
+                Mail::to(['equipoDemo1@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo3@botzero.com.ar'])
+                    ->cc(['equipodemo2@botzero.com.ar', 'copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])
+                    ->bcc($inboxEmail)->send(new asignarUnidadTransporte($datos, $date));
+            }
+
+            DB::commit();
+            $carga = Carga::whereNull('deleted_at')->where('booking', '=', $asign->booking)->first();
+            return response()->json([
+                'message' => 'Unidad asignada correctamente al contenedor: ' .  $cntr->cntr_number,
+                'message_type' => 'success',
+                'cargaId' => $carga->id
+            ], 200);
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            $errors = [];
+            foreach ($e->errors() as $field => $errorMessages) {
+                foreach ($errorMessages as $errorMessage) {
+                    $errors[] = $errorMessage;
+                }
+            }
+            $carga = Carga::whereNull('deleted_at')->where('booking', '=', $asign->booking)->first();
+            return response()->json([
+                'message' => 'Datos ingresados incorrectamente',
+                'message_type' => 'danger',
+                'error' => $errors,
+                'cargaId' => $carga->id
+            ], 422);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $errorMessage = $e->getMessage();
+            $carga = Carga::whereNull('deleted_at')->where('booking', '=', $asign->booking)->first();
+            return response()->json(['error' => $errorMessage, 'message_type' => 'danger', 'cargaId' => $carga->id], 500);
+        }
+    }
 
     public function transportesUsuario($id)
     {

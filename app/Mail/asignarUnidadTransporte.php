@@ -5,9 +5,11 @@ namespace App\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class transporteAsignado extends Mailable
+class asignarUnidadTransporte extends Mailable
 {
     use Queueable, SerializesModels;
     public $subject;
@@ -23,7 +25,7 @@ class transporteAsignado extends Mailable
     {
         $this->datos = $datos;
         $this->date  = $date;
-        $this->subject = 'ASIGNACION DE TRANSPORTE // ' . $datos['ref_customer'] . ' - ' . $datos['type'] . ' - ' . $datos['trader'] . ' – 1x ' . $datos['cntr_type'] . ' // BKG:' . $datos['booking'] . ' .';
+        $this->subject = 'ASIGNACION DE UNIDAD PROVISORIA// ' . $datos['ref_customer'] . ' - ' . $datos['type'] . ' - ' . $datos['trader'] . ' – 1x ' . $datos['cntr_type'] . ' // BKG:' . $datos['booking'] . ' .';
     }
 
     /**
@@ -33,6 +35,6 @@ class transporteAsignado extends Mailable
      */
     public function build()
     {
-        return $this->view('mails.transporteAsignado');
+        return $this->view('mails.asignarUnidadTransporte');
     }
 }
