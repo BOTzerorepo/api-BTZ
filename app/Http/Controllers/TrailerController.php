@@ -57,9 +57,9 @@ class TrailerController extends Controller
             $transport = $request['transporte'];
         } else {
 
-            $qtr = Transport::where('id', '=', $request['id_transport'])->first();
+            $qtr = Transport::where('id', '=', $request['transport_id'])->first();
             $transport = $qtr->razon_social;
-            $idTranport = $request['id_transport'];
+            $idTranport = $request['transport_id'];
         }
         
         $customerId = User::select('customer_id')->where('id','=',$request['user'])->get(0); 
@@ -133,9 +133,9 @@ class TrailerController extends Controller
             $transport = $request['transporte'];
         } else {
 
-            $qtr = Transport::where('id', '=', $request['id_transport'])->first();
+            $qtr = Transport::where('id', '=', $request['transport_id'])->first();
             $transport = $qtr->razon_social;
-            $idTranport = $request['id_transport'];
+            $idTranport = $request['transport_id'];
         }
 
         $trailer->type = $request['type'];

@@ -208,102 +208,78 @@ class ServiceSatelital extends Controller
             $r = json_decode($respuesta, true);
             $keys = array($r);
 
+            /*$r = [ 
+                'data' => [ 
+                    $camion->domain => [
+                        'ult_latitud' =>  -32.865946127108366,
+                        'ult_longitud' => -70.14974261078306
+                    ]       
+                ] 
+            ];*/
+            
+
             if (array_key_exists('data', $r)) {
 
                 $datos = $keys[0]['data'][$camion->domain];
                 $posicionLat = $datos['ult_latitud'];
                 $posicionLon = $datos['ult_longitud'];
-
+            
                 $positionDB = new position();
                 $positionDB->dominio = $camion->domain;
                 $positionDB->lat = $posicionLat;
                 $positionDB->lng = $posicionLon;
                 $positionDB->asigned = 1;
-
+            
                 $positionDB->save();
-
+            
                 $IdTrip = $camion->IdTrip;
-
-                $Radio = 6371e3; // metres
-                $φ1 = $posicionLat * pi() / 180; // φ, λ in radians
-                $φ2 = $camion->CargaLat * pi() / 180;
-                $φ3 = $camion->aduanaLat * pi() / 180;
-                $φ4 = $camion->descargaLat * pi() / 180;
-
-                $Δφ = ($posicionLat - $camion->CargaLat) * pi() / 180;
-                $Δφ2 = ($posicionLat - $camion->aduanaLat) * pi() / 180;
-                $Δφ3 = ($posicionLat - $camion->descargaLat) * pi() / 180;
-
-                $Δλ = ($posicionLon - $camion->CargaLng) * pi() / 180;
-                $Δλ2 = ($posicionLon - $camion->aduanaLon) * pi() / 180;
-                $Δλ3 = ($posicionLon - $camion->descargaLon) * pi() / 180;
-
-                $a = sin($Δφ / 2) * sin($Δφ / 2) + cos($φ1) * cos($φ2) * sin($Δλ / 2) * sin($Δλ / 2);
-                $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
-                $d = $Radio * $c; // in metres
-
-                $a2 = sin($Δφ2 / 2) * sin($Δφ2 / 2) + cos($φ1) * cos($φ3) * sin($Δλ2 / 2) * sin($Δλ2 / 2);
-                $c2 = 2 * atan2(sqrt($a2), sqrt(1 - $a2));
-                $d2 = $Radio * $c2; // in metres
-
-                $a3 = sin($Δφ3 / 2) * sin($Δφ3 / 2) + cos($φ1) * cos($φ4) * sin($Δλ3 / 2) * sin($Δλ3 / 2);
-                $c3 = 2 * atan2(sqrt($a3), sqrt(1 - $a3));
-                $d3 = $Radio * $c3; // in metres */
-
-
-                // Traer puntos de interes general 
-
-                //if 
-
-                // /api/accionLugarDeCarga/ 
-
-                // Opcion Mail 
-                // Opcion Notificcion
-                // opcion actualizacion.
-
-                // Armar formula por cada punto de interes asociado al viaje.
-                //if 
-
-                // /api/accionLugarDeCarga/ 
-
-                // Opcion Mail 
-                // Opcion Notificcion
-                // opcion actualizacion.
-                // .....................::COTIZAR::.........................//
-
-                // Formulario de Carga de Punto de Interés.
-                // formulario de Edición punto de Interés.
-                // Index itinerario.(puntos de interés asociados a un viaje) endpoints de Index puntos de interés.
-
-                // endpoints de accion 
-
-                // cambiar esta logica (agregarla acá).
-
-
-                if ($d <= 200) { // lugar de Carga
-
+                //return [$posicionLat, $posicionLon, $camion->CargaLat, $camion->CargaLng];
+                // Calcular distancias usando la función reutilizable
+                $d = $this->calcularDistancia($posicionLat, $posicionLon, $camion->CargaLat, $camion->CargaLng); // Distancia al lugar de Carga
+                $d2 = $this->calcularDistancia($posicionLat, $posicionLon, $camion->aduanaLat, $camion->aduanaLon); // Distancia al lugar de Aduana
+                $d3 = $this->calcularDistancia($posicionLat, $posicionLon, $camion->descargaLat, $camion->descargaLon); // Distancia al lugar de Descarga
+                //return [$d, $d2, $d3];
+                // Si está dentro del rango de 200 metros, realizar las acciones actuales
+                if ($d <= 200) { // Dentro del rango de Carga
                     $clientCarga = new Client();
                     $requestCarga = new Psr7Request('GET', env('APP_URL') . '/api/accionLugarDeCarga/' . $IdTrip);
                     $resCarga = $clientCarga->sendAsync($requestCarga)->wait();
                 }
-
-                if ($d2 <= 200) { // lugar de aduana
-
+            
+                if ($d2 <= 200) { // Dentro del rango de Aduana
                     $clientAduana = new Client();
                     $requestAduana = new Psr7Request('GET', env('APP_URL') . '/api/accionLugarAduana/' . $IdTrip);
                     $resAduana = $clientAduana->sendAsync($requestAduana)->wait();
                 }
-                if ($d3 <= 200) { // lugar de descarga
-
+            
+                if ($d3 <= 200) { // Dentro del rango de Descarga
                     $clientDescarga = new Client();
                     $requestDescarga = new Psr7Request('GET', env('APP_URL') . '/api/accionLugarDescarga/' . $IdTrip);
                     $resDescarga = $clientDescarga->sendAsync($requestDescarga)->wait();
                 }
 
+                $qc = DB::table('cntr')->select('cntr_number', 'booking', 'confirmacion')->where('id_cntr', '=', $IdTrip)->get();
+                $cntr = $qc[0];
 
+                // cual es el ultimo status.
+                $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
+                $description = $qd->main_status;
 
-                // Agregar punntos Criticos Globales.
+                // Si está fuera del rango de 1000 metros, realizar una acción
+                if ($d > 200 && $description === "CARGANDO") { // Fuera del rango de Carga
+                    $clientCarga = new Client();
+                    $requestCarga = new Psr7Request('GET', env('APP_URL') . '/api/accionFueraLugarDeCarga/' . $IdTrip);
+                    $resCarga = $clientCarga->sendAsync($requestCarga)->wait();
+                }
+            
+                if ($d2 > 200 && $description === "EN ADUANA") { // Fuera del rango de Aduana
+                    $clientAduana = new Client();
+                    $requestAduana = new Psr7Request('GET', env('APP_URL') . '/api/accionFueraLugarAduana/' . $IdTrip);
+                    $resAduana = $clientAduana->sendAsync($requestAduana)->wait();
+                }
+            
             }
+            
         }
 
         $truckPosition = DB::table('trucks')->where('alta_aker', "!=", 0)->get();
@@ -874,19 +850,19 @@ class ServiceSatelital extends Controller
                 "phone" => "2612128105"
             ]);
     
-            /*$request = new Psr7Request('GET', 'https://app.akercontrol.com/ws/v2/servicios', $headers, $body);
+            $request = new Psr7Request('GET', 'https://app.akercontrol.com/ws/v2/servicios', $headers, $body);
             $res = $client->sendAsync($request)->wait();
             $respuesta = $res->getBody();
-            $r = json_decode($respuesta, true);*/
+            $r = json_decode($respuesta, true);
     
-            $r = [
+            /*$r = [
                 'data' => [ 
                     $truckDomain => [
-                        'ult_latitud' => -32.650807171311,
-                        'ult_longitud' => -69.5114860671367
-                    ]    
-                ]
-            ];
+                        'ult_latitud' => -32.843325941231974,
+                        'ult_longitud' => -70.12031486495702
+                    ]       
+                ] 
+            ];*/
     
             // Verificar si la solicitud fue exitosa y si hay coordenadas disponibles
             if (isset($r['data'])) {
@@ -1099,10 +1075,10 @@ class ServiceSatelital extends Controller
         $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
         $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
 
-        if ($sbx[0]->sandbox == 1) {
+        if ($sbx[0]->sandbox == 0) {
             Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new PuntoInteresEntrada($contenedor, $punto));
         } else {
-            Mail::to(['equipoDemo1@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo3@botzero.com.ar'])
+            Mail::to(['pablorio@botzero.tech', 'equipodemo2@botzero.com.ar', 'equipodemo3@botzero.com.ar'])
                 ->cc(['equipodemo2@botzero.com.ar', 'copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])
                 ->bcc($inboxEmail)->send(new PuntoInteresEntrada($contenedor, $punto));
         }
@@ -1148,10 +1124,10 @@ class ServiceSatelital extends Controller
         $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
         $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
 
-        if ($sbx[0]->sandbox == 1) {
+        if ($sbx[0]->sandbox == 0) {
             Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new PuntoInteresSalida($contenedor, $punto));
         } else {
-            Mail::to(['equipoDemo1@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo3@botzero.com.ar'])
+            Mail::to(['pablorio@botzero.tech', 'equipodemo2@botzero.com.ar', 'equipodemo3@botzero.com.ar'])
                 ->cc(['equipodemo2@botzero.com.ar', 'copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])
                 ->bcc($inboxEmail)->send(new PuntoInteresSalida($contenedor, $punto));
         }
