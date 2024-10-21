@@ -15,7 +15,7 @@ use App\Http\Controllers\FleteroController;
 | routes are loaded by the RouteServiceProvider within a group which
 | is assigned the "api" middleware group. Enjoy building your API!
 |
-*/
+*/ 
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
@@ -267,7 +267,8 @@ Route::get('/transporteRazonSocial/{razonSocial}','App\Http\Controllers\Transpor
 Route::post('/transporte','App\Http\Controllers\TransportController@store'); 
 Route::post('/transporte/{id}','App\Http\Controllers\TransportController@update'); 
 Route::delete('/transporte/{id}','App\Http\Controllers\TransportController@destroy'); 
-
+Route::get('/transportesUsuario/{id}','App\Http\Controllers\TransportController@transportesUsuario'); 
+Route::post('/transportesAsignEditar/{id}','App\Http\Controllers\TransportController@transportesAsignEditar'); 
 //Agencia
 Route::get('/agencias','App\Http\Controllers\AgencyController@index'); //Busca todas las agencias
 Route::get('/agencia/{id}','App\Http\Controllers\AgencyController@show'); //Busca una sola agencia

@@ -6,6 +6,7 @@ use App\Mail\nuevoTranporte;
 use App\Mail\transporteAsignado;
 use App\Models\Transport;
 use App\Models\cntr;
+use App\Models\User;
 use App\Models\asign;
 use App\Models\Carga;
 use Illuminate\Http\Request;
@@ -29,7 +30,7 @@ class TransportController extends Controller
     }
     public function indexTransporteCustomer($id_customer)
     {
-        $transportes = Transport::whereNull('deleted_at')->where('customer_id','=',$id_customer)->get();
+        $transportes = Transport::whereNull('deleted_at')->where('customer_id', '=', $id_customer)->get();
 
         return $transportes;
     }
@@ -53,9 +54,9 @@ class TransportController extends Controller
     public function store(Request $request)
     {
         $transporte = Transport::withTrashed()
-                          ->where('cuit', $request['cuit'])
-                          ->orWhere('razon_social', $request['razon_social'])
-                          ->first();
+            ->where('cuit', $request['cuit'])
+            ->orWhere('razon_social', $request['razon_social'])
+            ->first();
 
         if ($transporte) {
             // Si el registro está eliminado, lo restauramos
@@ -97,13 +98,13 @@ class TransportController extends Controller
      */
     public function show($id)
     {
-        $transport = Transport::whereNull('deleted_at')->where('id','=',$id)->get();
+        $transport = Transport::whereNull('deleted_at')->where('id', '=', $id)->get();
 
         return $transport;
     }
     public function showRazonSocial($razonSocial)
     {
-        $transport = Transport::whereNull('deleted_at')->where('razon_social','=',$razonSocial)->first();
+        $transport = Transport::whereNull('deleted_at')->where('razon_social', '=', $razonSocial)->first();
 
         return $transport;
     }
@@ -149,7 +150,7 @@ class TransportController extends Controller
         $transporte->satelital = $request['satelital'];
         $transporte->observation = $request['observation'];
         $transporte->save();
-       
+
 
         return $transporte;
     }
@@ -162,7 +163,7 @@ class TransportController extends Controller
      */
     public function destroy($id)
     {
-       // Buscar el registro del transporte por su ID
+        // Buscar el registro del transporte por su ID
         $transport = Transport::find($id);
 
         // Verificar si el transporte existe
@@ -225,7 +226,7 @@ class TransportController extends Controller
     }
     public function transporteAsignado(Request $request, $cntrId)
     {
-       
+
         DB::beginTransaction();
         try {
             // Validación de datos
@@ -237,34 +238,34 @@ class TransportController extends Controller
             ]);
             //Obtener el cntr
             $cntr = cntr::whereNull('deleted_at')->where('id_cntr', '=', $cntrId)->first();
-                   
+
             //Obtener el asign
             $asign = asign::whereNull('deleted_at')->where('cntr_number', '=', $cntr->cntr_number)->first();
-          
+
             //Actualizar el asign
             $asign->transport = $request->input('transport');
             $asign->transport_agent = $request->input('transport_agent');
             $asign->user = $request->input('user');
             $asign->company = $request->input('company');
             $asign->save();
- 
+
             //Enviar mail
             $sbx = DB::table('variables')->select('sandbox')->get();
             $inboxEmail = env('INBOX_EMAIL');
             $mailsTrafico = DB::table('particular_soft_configurations')->first();
             $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
             $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
-    
+
             //DATOS PARA ENVIAR MAIL
             $date = Carbon::now('-03:00');
             $asignMail = DB::table('asign')
-            ->select('asign.id', 'carga.*', 'cntr.cntr_type', 'carga.user as userC', 'asign.cntr_number', 'asign.booking', 'asign.transport', 'asign.transport_agent', 'asign.user', 'asign.company', 'atas.tax_id', 'transports.pais','cntr.confirmacion')
-            ->join('transports', 'asign.transport', '=', 'transports.razon_social')
-            ->leftJoin('atas', 'asign.transport_agent', '=', 'atas.razon_social')
-            ->join('carga', 'asign.booking', '=', 'carga.booking')
-            ->join('cntr', 'asign.cntr_number', '=', 'cntr.cntr_number')
-            ->where('asign.id', '=', $asign->id)
-            ->first();
+                ->select('asign.id', 'carga.*', 'cntr.cntr_type', 'carga.user as userC', 'asign.cntr_number', 'asign.booking', 'asign.transport', 'asign.transport_agent', 'asign.user', 'asign.company', 'atas.tax_id', 'transports.pais', 'cntr.confirmacion')
+                ->join('transports', 'asign.transport', '=', 'transports.razon_social')
+                ->leftJoin('atas', 'asign.transport_agent', '=', 'atas.razon_social')
+                ->join('carga', 'asign.booking', '=', 'carga.booking')
+                ->join('cntr', 'asign.cntr_number', '=', 'cntr.cntr_number')
+                ->where('asign.id', '=', $asign->id)
+                ->first();
             $datos = [
                 'cntr_number' => $asignMail->cntr_number,
                 'cntr_type' => $asignMail->cntr_type,
@@ -280,12 +281,12 @@ class TransportController extends Controller
                 'type' => $asignMail->type,
                 'trader' => $asignMail->trader,
             ];
-            $transporteMail= DB::table('asign')
-            ->select('users.email')
-            ->join('transports', 'asign.transport', '=', 'transports.razon_social')
-            ->join('users', 'transports.id', '=', 'users.transport_id')
-            ->where('asign.id', '=', $asign->id)
-            ->first();
+            $transporteMail = DB::table('asign')
+                ->select('users.email')
+                ->join('transports', 'asign.transport', '=', 'transports.razon_social')
+                ->join('users', 'transports.id', '=', 'users.transport_id')
+                ->where('asign.id', '=', $asign->id)
+                ->first();
             if ($sbx[0]->sandbox == 0) {
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new transporteAsignado($datos, $date));
                 // Enviar solo al correo del transporte
@@ -298,12 +299,12 @@ class TransportController extends Controller
                     ->cc(['equipodemo2@botzero.com.ar', 'copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])
                     ->bcc($inboxEmail)->send(new transporteAsignado($datos, $date));
             }
-    
+
             //Actualizar status cntr ASIGNADA
             $cntr->main_status = 'ASIGNADA';
             $cntr->status_cntr = 'ASIGNADA';
             $cntr->save();
-        
+
             DB::commit();
             $carga = Carga::whereNull('deleted_at')->where('booking', '=', $asign->booking)->first();
             return response()->json([
@@ -311,7 +312,6 @@ class TransportController extends Controller
                 'message_type' => 'success',
                 'cargaId' => $carga->id
             ], 200);
-
         } catch (ValidationException $e) {
             DB::rollBack();
             $errors = [];
@@ -332,6 +332,76 @@ class TransportController extends Controller
             $errorMessage = $e->getMessage();
             $carga = Carga::whereNull('deleted_at')->where('booking', '=', $asign->booking)->first();
             return response()->json(['error' => $errorMessage, 'message_type' => 'danger', 'cargaId' => $carga->id], 500);
+        }
+    }
+
+
+    public function transportesUsuario($id)
+    {
+        // Obtener el usuario por nombre de usuario
+        $user = User::where('username', $id)->first();
+
+        // Verificar si el usuario tiene transportes asociados
+        if ($user && $user->transport_id) {
+            // Convertir los IDs en un array
+            $transportIds = explode(',', $user->transport_id);
+            
+            // Buscar todos los transportes que coinciden con los IDs
+            $transportes = Transport::whereIn('id', $transportIds)->get();
+            
+            return $transportes;
+        }
+
+        // Retornar un array vacío si no hay transportes asociados
+        return [];
+    }
+
+
+    public function transportesAsignEditar(Request $request, $cntrId)
+    {
+        DB::beginTransaction();
+        try {
+            // Validación de datos
+            $request->validate([
+                'transporte_id' => 'required',
+            ]);
+            //Obtener el cntr
+            $cntr = cntr::whereNull('deleted_at')->where('id_cntr', '=', $cntrId)->first();
+
+            //Obtener el asign
+            $asign = asign::whereNull('deleted_at')->where('cntr_number', '=', $cntr->cntr_number)->first();
+
+            // Buscar todos los transportes que coinciden con los IDs
+            $transport = Transport::whereNull('deleted_at')->where('id', '=', $request->input('transporte_id'))->first();
+            //Actualizar el asign
+            $asign->transport = $transport->razon_social;
+            $asign->user = $request->input('user');
+            $asign->company = $request->input('empresa');
+            $asign->save();
+
+            DB::commit();
+            return response()->json([
+                'message' => 'Transporte modificado correctamente al contenedor: ' .  $cntr->cntr_number,
+                'message_type' => 'success',
+            ], 200);
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            $errors = [];
+            foreach ($e->errors() as $field => $errorMessages) {
+                foreach ($errorMessages as $errorMessage) {
+                    $errors[] = $errorMessage;
+                }
+            }
+        
+            return response()->json([
+                'message' => 'Datos ingresados incorrectamente',
+                'message_type' => 'danger',
+                'error' => $errors
+            ], 422);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $errorMessage = $e->getMessage();
+            return response()->json(['error' => $errorMessage, 'message_type' => 'danger'], 500);
         }
     }
 }
