@@ -220,7 +220,7 @@
                                                                             style="margin: 0; font-size: 14px; text-align: center;">
                                                                             <span style="font-size:25px;"><strong><span
                                                                                         style="font-size:28px; color:white;">ASIGNACIÓN
-                                                                                        DE UNIDAD</strong></span>
+                                                                                        DE UNIDAD PROVISORIA </strong></span>
                                                                         </p>
                                                                     </div>
                                                                 </div>
@@ -345,7 +345,7 @@
                                                                                     style="font-size: 12px; font-family: Lato, Tahoma, Verdana, Segoe, sans-serif; mso-line-height-alt: 14.399999999999999px; color: #052d3d; line-height: 1.2;">
                                                                                     <p style="margin: 0; font-size: 12px; text-align: center;">
                                                                                         <span style="font-size:20px; color: gray; text-align: center;">
-                                                                                            <h3>Datos para CRT</h3>
+                                                                                            <h3>Datos Provisorios</h3>
                                                                                             <hr>
                                                                                             <p>Transporte:
                                                                                                 {{ $datos['transport'] }}
@@ -366,7 +366,7 @@
                                                                                                     style="font-size: larger; padding: 5px ; background: #aad4f5;">
                                                                                                     CRT:{{ $datos['crt'] }}</strong>
                                                                                             </p>
-                                                                                            <h3>Datos para MIC</h3>
+                                                                                            <h3>Datos para MIC Provisorios</h3>
                                                                                             <hr>
                                                                                             <p>
                                                                                                 Transporte:
@@ -405,7 +405,6 @@
                                                                                                 <br>Vto póliza semi:
                                                                                                 {{ $datos['truck_semi_vto_poliza'] }}
                                                                                             </p>
-
                                                                                         </span>
                                                                                         </span>
                                                                                     </p>

@@ -20,9 +20,14 @@ class DriverController extends Controller
         $drivers = Driver::all();       
         return $drivers;
     }
-    public function indexTransport($idTranport)
+    public function indexTransport($idTransport)
     {
-        $drivers = Driver::where('transport_id','=', $idTranport)->get();
+        // Convertir $idTransport en un array si no lo es
+        $idArray = explode(',', $idTransport);
+
+        // Buscar los drivers cuyos transport_id coincidan con cualquiera de los IDs en el array
+        $drivers = Driver::whereIn('transport_id', $idArray)->get();
+
         return $drivers;
     }
     

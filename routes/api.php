@@ -99,7 +99,8 @@ Route::get('/mailStatus/{cntr}/{empresa}/{booking}/{user}/{tipo}/{statusArchivoP
 Route::get('/cargaAsignada/{id}','App\Http\Controllers\emailController@cargaAsignada');  // Llega Correo Ok
 
 //REMPLAZAR  CON LA ASIGNACION DEL TRANSPORTE Y ENVIAR MAIL
-Route::post('/transporteAsignado/{id}','App\Http\Controllers\TransportController@transporteAsignado');  // Llega Correo Ok
+Route::post('/transporteAsignado/{id}','App\Http\Controllers\TransportController@transporteAsignado'); 
+Route::post('/asignarUnidadTransporte/{id}','App\Http\Controllers\TransportController@asignarUnidadTransporte'); 
 
 // Route::post('/imprimir/create','App\Http\Controllers\crearpdfControllerPDF@store')mostrar todos
 // Route::get('/imprimirIns','App\Http\Controllers\imprimirPDF@store'); //mostrar todos
