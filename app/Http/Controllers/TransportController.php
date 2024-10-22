@@ -388,32 +388,56 @@ class TransportController extends Controller
             //DATOS PARA ENVIAR MAIL
             $date = Carbon::now('-03:00');
             $asignMail = DB::table('asign')
-                ->select('asign.id', 'carga.*', 'cntr.cntr_type', 'carga.user as userC', 'asign.cntr_number', 'asign.booking', 'asign.transport', 'asign.transport_agent', 'asign.user', 'asign.company', 'atas.tax_id', 'transports.pais', 'cntr.confirmacion')
+                ->select('asign.*', 'cntr.cntr_type', 'carga.trader', 'carga.ref_customer', 'carga.type', 'carga.user as userC', 'transports.Direccion', 'transports.paut', 'transports.CUIT', 'transports.permiso', 'transports.vto_permiso', 'drivers.documento', 'trucks.model', 'trucks.model', 'trucks.year', 'trucks.chasis', 'trucks.poliza', 'trucks.vto_poliza', 'trailers.domain as semi_domain', 'trailers.poliza as semi_poliza', 'trailers.vto_poliza as semi_vto_poliza', 'cntr.confirmacion')
                 ->join('transports', 'asign.transport', '=', 'transports.razon_social')
-                ->leftJoin('atas', 'asign.transport_agent', '=', 'atas.razon_social')
+                ->join('drivers', 'drivers.nombre', '=', 'asign.driver')
+                ->join('trucks', 'trucks.domain', '=', 'asign.truck')
                 ->join('carga', 'asign.booking', '=', 'carga.booking')
-                ->join('cntr', 'asign.cntr_number', '=', 'cntr.cntr_number')
+                ->join('trailers', 'trailers.domain', '=', 'asign.truck_semi')
+                ->join('cntr', 'cntr.cntr_number', '=', 'asign.cntr_number')
                 ->where('asign.id', '=', $asign->id)
                 ->first();
             $datos = [
-                'cntr_number' => $asignMail->cntr_number,
-                'cntr_type' => $asignMail->cntr_type,
-                'booking' => $asignMail->booking,
-                'confirmacion' => $asignMail->confirmacion,
+                // Datos CRT
                 'transport' => $asignMail->transport,
-                'transport_agent' => $asignMail->transport_agent,
+                'direccion' => $asignMail->Direccion,
+                'paut' => $asignMail->paut,
+                'cuit' => $asignMail->CUIT,
+                'permiso_int' => $asignMail->permiso,
+                'vto_permiso_int' => $asignMail->vto_permiso,
+                'crt' => $asignMail->crt,
+                // Datos para MIC
+                'fletero_razon_social' => $asignMail->fletero_razon_social,
+                'fletero_domicilio' => $asignMail->fletero_domicilio,
+                'fletero_cuit' => $asignMail->fletero_cuit,
+                'fletero_paut' => $asignMail->fletero_paut,
+                'fletero_permiso' => $asignMail->fletero_permiso,
+                'fletero_vto_permiso' => $asignMail->fletero_vto_permiso,
+                'confirmacion' => $asignMail->confirmacion,
+                'driver' => $asignMail->driver,
+                'documento' => $asignMail->documento,
+                'truck' => $asignMail->truck,
+                'truck_modelo' => $asignMail->model,
+                'truck_year' => $asignMail->year,
+                'truck_chasis' => $asignMail->chasis,
+                'truck_poliza' => $asignMail->poliza,
+                'truck_vto_poliza' => $asignMail->vto_poliza,
+                'truck_semi' => $asignMail->truck_semi,
+                'truck_semi_poliza' => $asignMail->semi_poliza,
+                'truck_semi_vto_poliza' => $asignMail->semi_vto_poliza,
+                'cntr_number' => $asignMail->cntr_number,
+                'booking' => $asignMail->booking,
                 'user' => $asignMail->user,
                 'company' => $asignMail->company,
-                'transport_bandera' => $asignMail->pais,
-                'cuit_ata' => $asignMail->tax_id,
                 'ref_customer' => $asignMail->ref_customer,
                 'type' => $asignMail->type,
                 'trader' => $asignMail->trader,
+                'cntr_type' => $asignMail->cntr_type,
+                'booking' => $asignMail->booking,
             ];
-            
+
             if ($sbx[0]->sandbox == 0) {
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new asignarUnidadTransporte($datos, $date));
-                
             } else {
                 Mail::to(['equipoDemo1@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo3@botzero.com.ar'])
                     ->cc(['equipodemo2@botzero.com.ar', 'copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])
@@ -459,10 +483,10 @@ class TransportController extends Controller
         if ($user && $user->transport_id) {
             // Convertir los IDs en un array
             $transportIds = explode(',', $user->transport_id);
-            
+
             // Buscar todos los transportes que coinciden con los IDs
             $transportes = Transport::whereIn('id', $transportIds)->get();
-            
+
             return $transportes;
         }
 
@@ -506,7 +530,7 @@ class TransportController extends Controller
                     $errors[] = $errorMessage;
                 }
             }
-        
+
             return response()->json([
                 'message' => 'Datos ingresados incorrectamente',
                 'message_type' => 'danger',
