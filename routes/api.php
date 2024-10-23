@@ -239,7 +239,7 @@ Route::get('/trailerTransport/{transport}', 'App\Http\Controllers\TrailerControl
 Route::get('/trailer/{trailer}', 'App\Http\Controllers\TrailerController@show'); // R ONE
 Route::post('/trailer/{trailer}', 'App\Http\Controllers\TrailerController@update'); // U
 Route::delete('/trailer/{trailer}', 'App\Http\Controllers\TrailerController@destroy'); // D
-Route::get('/trailerTransport/{transport_id}', 'App\Http\Controllers\TrailerController@showTrailer'); // Show for Transport
+//Route::get('/trailerTransport/{transport_id}', 'App\Http\Controllers\TrailerController@showTrailer'); // Show for Transport
 
 //Ata
 Route::get('/atas','App\Http\Controllers\AtaController@index'); //Busca todos los Agente de transporte

@@ -18,13 +18,18 @@ class TrailerController extends Controller
      */
     public function index($customer)
     {
-        $trailer = trailer::where('customer_id','=',$customer)->get();
+        $trailer = trailer::where('customer_id', '=', $customer)->get();
         return $trailer;
     }
     public function indexTransport($transport)
     {
-        $trailer = trailer::where('transport_id', '=', $transport)->get();
-        return $trailer;
+        // Convertir $transport en un array si contiene varios IDs separados por comas
+        $idArray = explode(',', $transport);
+
+        // Buscar los trailers cuyos transport_id coincidan con cualquiera de los IDs en el array
+        $trailers = Trailer::whereIn('transport_id', $idArray)->get();
+
+        return $trailers;
     }
 
     /**
@@ -61,10 +66,10 @@ class TrailerController extends Controller
             $transport = $qtr->razon_social;
             $idTranport = $request['transport_id'];
         }
-        
-        $customerId = User::select('customer_id')->where('id','=',$request['user'])->get(0); 
+
+        $customerId = User::select('customer_id')->where('id', '=', $request['user'])->get(0);
         $cId =  $customerId[0]->customer_id;
-        
+
         $trailer = new trailer();
         $trailer->type = $request['type'];
         $trailer->chasis = $request['chasis'];
@@ -79,7 +84,6 @@ class TrailerController extends Controller
         $trailer->save();
 
         return $trailer;
-
     }
 
     /**
@@ -96,10 +100,9 @@ class TrailerController extends Controller
 
     public function showTrailer($transporte)
     {
-       
-        $trailers = trailer::where('transport_id','=',$transporte)->get(); 
-        return $trailers;
 
+        $trailers = trailer::where('transport_id', '=', $transporte)->get();
+        return $trailers;
     }
 
     /**
@@ -164,10 +167,10 @@ class TrailerController extends Controller
         trailer::destroy($id);
 
         $existe = trailer::find($id);
-        
-        if($existe){
+
+        if ($existe) {
             return 'No se elimino el Trailer';
-        }else{
+        } else {
             return 'Se elimino el Trailer';
         };
     }
