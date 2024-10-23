@@ -101,7 +101,7 @@ Route::get('/cargaAsignada/{id}','App\Http\Controllers\emailController@cargaAsig
 //REMPLAZAR  CON LA ASIGNACION DEL TRANSPORTE Y ENVIAR MAIL
 Route::post('/transporteAsignado/{id}','App\Http\Controllers\TransportController@transporteAsignado'); 
 Route::post('/asignarUnidadTransporte/{id}','App\Http\Controllers\TransportController@asignarUnidadTransporte'); 
-
+Route::post('/confirmarUnidad/{id}','App\Http\Controllers\TransportController@confirmarUnidad'); 
 // Route::post('/imprimir/create','App\Http\Controllers\crearpdfControllerPDF@store')mostrar todos
 // Route::get('/imprimirIns','App\Http\Controllers\imprimirPDF@store'); //mostrar todos
 // Route::put('/imprimir/{id}','App\Http\Controllers\imprimirPDF@update');//actualizar
@@ -214,7 +214,7 @@ Route::get('/user/{user}', 'App\Http\Controllers\UserController@show');
 // CNTR
 
 Route::resource('/cntr',cntrController::class);
-
+Route::get('/datosConfirmar/{cntrId}', 'App\Http\Controllers\cntrController@datosConfirmar');
 
 // FLETERO CONTROLLER 
 
