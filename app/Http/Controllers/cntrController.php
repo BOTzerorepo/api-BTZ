@@ -6,8 +6,11 @@ use App\Models\asign;
 use App\Models\cntr;
 use App\Models\statu;
 use App\Models\InterestPoint;
+use App\Models\Transport;
+use App\Models\Carga;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+
 
 class cntrController extends Controller
 {
@@ -46,11 +49,9 @@ class cntrController extends Controller
         if ($request['cntr_number']) {
 
             $cntr_number = $request['cntr_number'];
-
         } else {
-            
-            $cntr_number = $booking . $numero;
 
+            $cntr_number = $booking . $numero;
         }
 
         $cntr = new cntr();
@@ -122,7 +123,6 @@ class cntrController extends Controller
 
         if ($cntr) {
             $cntrOld = $cntr->cntr_number;
-
         }
 
         $cntr->cntr_number = $request['cntr_number'];
@@ -154,8 +154,9 @@ class cntrController extends Controller
     {
         //
     }
-    public function issetCntr($cntr) {
-        $cntrCount = cntr::where('cntr_number',$cntr)->get();
+    public function issetCntr($cntr)
+    {
+        $cntrCount = cntr::where('cntr_number', $cntr)->get();
         $asignCount = asign::where('cntr_number', $cntr)->get();
 
         $count = $cntrCount->count() + $asignCount->count();
@@ -172,11 +173,11 @@ class cntrController extends Controller
     public function issetAsign($dominio)
     {
 
-        $asign = cntr::where('cntr.main_status','!=','TERMINADA')
-        ->where('asign.truck',$dominio)
-        ->join('asign','asign.cntr_number','=','cntr.cntr_number')
-        ->join('trucks','asign.truck', '=', 'trucks.domain')
-        ->get();
+        $asign = cntr::where('cntr.main_status', '!=', 'TERMINADA')
+            ->where('asign.truck', $dominio)
+            ->join('asign', 'asign.cntr_number', '=', 'cntr.cntr_number')
+            ->join('trucks', 'asign.truck', '=', 'trucks.domain')
+            ->get();
 
         $count = $asign->count();
 
@@ -207,4 +208,42 @@ class cntrController extends Controller
         return redirect()->route('your_route_name')->with('success', 'Puntos de interés guardados con éxito');
     }
 
+    public function datosConfirmar($cntrId)
+    {
+        try {
+            // Obtener el CNTR
+            $cntr = cntr::whereNull('deleted_at')->findOrFail($cntrId);
+
+            // Obtener el asign asociado al CNTR
+            $asign = asign::whereNull('deleted_at')
+                ->where('cntr_number', $cntr->cntr_number)
+                ->firstOrFail();
+
+            // Obtener el transporte asociado a la asignación
+            $transport = Transport::whereNull('deleted_at')
+                ->where('razon_social', $asign->transport)
+                ->firstOrFail();
+
+            // Obtener la carga asociada al CNTR
+            $carga = Carga::whereNull('deleted_at')
+                ->where('booking', $cntr->booking)
+                ->firstOrFail();
+
+            // Preparar la respuesta en formato JSON
+            $response = [
+                'cntr' => $cntr,
+                'asign' => $asign,
+                'transport' => $transport,
+                'carga' => $carga
+            ];
+
+            // Devolver la respuesta en formato JSON
+            return response()->json($response);
+        } catch (\Exception $e) {
+            // Manejar cualquier error que ocurra
+            return response()->json([
+                'error' => 'Error al obtener los datos: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
