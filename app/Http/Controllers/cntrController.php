@@ -7,6 +7,7 @@ use App\Models\cntr;
 use App\Models\statu;
 use App\Models\InterestPoint;
 use App\Models\Transport;
+use App\Models\truck;
 use App\Models\Carga;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -224,7 +225,10 @@ class cntrController extends Controller
                 ->where('razon_social', $asign->transport)
                 ->firstOrFail();
 
+            $truck = truck::where('domain', $asign->truck)
+                ->first();
             // Obtener la carga asociada al CNTR
+
             $carga = Carga::whereNull('deleted_at')
                 ->where('booking', $cntr->booking)
                 ->firstOrFail();
@@ -234,7 +238,8 @@ class cntrController extends Controller
                 'cntr' => $cntr,
                 'asign' => $asign,
                 'transport' => $transport,
-                'carga' => $carga
+                'carga' => $carga,
+                'truck' => $truck
             ];
 
             // Devolver la respuesta en formato JSON

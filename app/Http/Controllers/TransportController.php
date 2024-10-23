@@ -307,7 +307,7 @@ class TransportController extends Controller
                     ->bcc($inboxEmail)->send(new transporteAsignado($datos, $date));
             }
 
-            
+
             DB::commit();
             $carga = Carga::whereNull('deleted_at')->where('booking', '=', $asign->booking)->first();
             return response()->json([
@@ -483,6 +483,9 @@ class TransportController extends Controller
         try {
             // Validación de datos
             $request->validate([
+                'transport' => 'required',
+                'transport_agent' => 'required',
+                'transportCRT' => 'required',
                 'driver' => 'required',
                 'truck' => 'required',
                 'truck_semi' => 'required',
@@ -495,7 +498,6 @@ class TransportController extends Controller
                 'fletero_paut' => 'nullable',
                 'fletero_permiso' => 'nullable',
                 'fletero_vto_permiso' => 'nullable',
-                'crt' => 'nullable',
             ]);
 
             //Obtener el cntr
@@ -504,7 +506,13 @@ class TransportController extends Controller
             //Obtener el asign
             $asign = asign::whereNull('deleted_at')->where('cntr_number', '=', $cntr->cntr_number)->first();
 
+            $transportDeAsign = Transport::whereNull('deleted_at')
+                    ->where('id', $request->input('transport'))
+                    ->firstOrFail();
+
             //Actualizar el asign
+            $asign->transport = $transportDeAsign->razon_social;
+            $asign->transport_agent = $request->input('transport_agent');
             $asign->driver = $request->input('driver');
             $asign->truck = $request->input('truck');
             $asign->truck_semi = $request->input('truck_semi');
@@ -529,7 +537,29 @@ class TransportController extends Controller
             //DATOS PARA ENVIAR MAIL
             $date = Carbon::now('-03:00');
             $asignMail = DB::table('asign')
-                ->select('asign.*', 'cntr.cntr_type', 'carga.trader', 'carga.ref_customer', 'carga.type', 'carga.user as userC', 'transports.Direccion', 'transports.paut', 'transports.CUIT', 'transports.permiso', 'transports.vto_permiso', 'drivers.documento', 'trucks.model', 'trucks.model', 'trucks.year', 'trucks.chasis', 'trucks.poliza', 'trucks.vto_poliza', 'trailers.domain as semi_domain', 'trailers.poliza as semi_poliza', 'trailers.vto_poliza as semi_vto_poliza', 'cntr.confirmacion')
+                ->select(
+                    'asign.*',
+                    'cntr.cntr_type',
+                    'carga.trader',
+                    'carga.ref_customer',
+                    'carga.type',
+                    'carga.user as userC',
+                    'transports.Direccion',
+                    'transports.paut',
+                    'transports.CUIT',
+                    'transports.permiso',
+                    'transports.vto_permiso',
+                    'drivers.documento',
+                    'trucks.model',
+                    'trucks.year',
+                    'trucks.chasis',
+                    'trucks.poliza',
+                    'trucks.vto_poliza',
+                    'trailers.domain as semi_domain',
+                    'trailers.poliza as semi_poliza',
+                    'trailers.vto_poliza as semi_vto_poliza',
+                    'cntr.confirmacion'
+                )
                 ->join('transports', 'asign.transport', '=', 'transports.razon_social')
                 ->join('drivers', 'drivers.nombre', '=', 'asign.driver')
                 ->join('trucks', 'trucks.domain', '=', 'asign.truck')
@@ -537,15 +567,29 @@ class TransportController extends Controller
                 ->join('trailers', 'trailers.domain', '=', 'asign.truck_semi')
                 ->join('cntr', 'cntr.cntr_number', '=', 'asign.cntr_number')
                 ->where('asign.id', '=', $asign->id)
-                ->first();
+                ->first(); // Obtenemos el primer resultado
+
+            // Verificamos si el transporte actual coincide con el del request
+            if ($request->input('transport') == $request->input('transportCRT')) {
+                // Si coincide, buscamos el transporte asociado a la asignación
+                $transport = Transport::whereNull('deleted_at')
+                    ->where('razon_social', $asign->transport)
+                    ->firstOrFail();
+            } else {
+                // Si no coincide, obtenemos el transporte que se pasó en la solicitud (CRT)
+                $transport = Transport::whereNull('deleted_at')
+                    ->where('id', $request->input('transportCRT'))
+                    ->firstOrFail();
+            }
+
             $datos = [
                 // Datos CRT
-                'transport' => $asignMail->transport,
-                'direccion' => $asignMail->Direccion,
-                'paut' => $asignMail->paut,
-                'cuit' => $asignMail->CUIT,
-                'permiso_int' => $asignMail->permiso,
-                'vto_permiso_int' => $asignMail->vto_permiso,
+                'transport' => $transport->razon_social, // Cambiado a la propiedad correcta
+                'direccion' => $transport->Direccion,
+                'paut' => $transport->paut,
+                'cuit' => $transport->CUIT,
+                'permiso_int' => $transport->permiso,
+                'vto_permiso_int' => $transport->vto_permiso,
                 'crt' => $asignMail->crt,
                 // Datos para MIC
                 'fletero_razon_social' => $asignMail->fletero_razon_social,
@@ -595,19 +639,19 @@ class TransportController extends Controller
                 Mail::to(['equipoDemo1@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo3@botzero.com.ar'])
                     ->cc(['equipodemo2@botzero.com.ar', 'copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])
                     ->bcc($inboxEmail)->send(new cargaAsignada($datos, $date));
-                
-                    $logapi = new logapi();
-                    $logapi->user = $asignMail->user;
-                    $logapi->detalle = '+ Sandbox + to: ' . implode(',', $toEmails) . ' AsignaUnidadCarga-User:' . $asignMail->user . ' |Transporte:' . $asignMail->transport . '|Chofer:' . $asignMail->driver . '|Tractor:' . $asignMail->truck . '|Semi:' . $asignMail->truck_semi;
-                    $logapi->save();
-                    
-                    $status = new statu();
-                    $status->status = 'Asignado Chofer:' . $asignMail->driver . '|Tractor:' . $asignMail->truck . '|Semi:' . $asignMail->truck_semi;
-                    $status->avisado = 1;
-                    $status->main_status = 'ASIGNADA';
-                    $status->cntr_number = $asignMail->cntr_number;
-                    $status->user_status = $asignMail->user;
-                    $status->save();
+
+                $logapi = new logapi();
+                $logapi->user = $asignMail->user;
+                $logapi->detalle = '+ Sandbox + to: ' . implode(',', $toEmails) . ' AsignaUnidadCarga-User:' . $asignMail->user . ' |Transporte:' . $asignMail->transport . '|Chofer:' . $asignMail->driver . '|Tractor:' . $asignMail->truck . '|Semi:' . $asignMail->truck_semi;
+                $logapi->save();
+
+                $status = new statu();
+                $status->status = 'Asignado Chofer:' . $asignMail->driver . '|Tractor:' . $asignMail->truck . '|Semi:' . $asignMail->truck_semi;
+                $status->avisado = 1;
+                $status->main_status = 'ASIGNADA';
+                $status->cntr_number = $asignMail->cntr_number;
+                $status->user_status = $asignMail->user;
+                $status->save();
             }
 
             $carga = Carga::whereNull('deleted_at')->where('booking', '=', $asign->booking)->first();
@@ -619,8 +663,8 @@ class TransportController extends Controller
             $driver->save();
 
             //ACTUALIZO STATUS CNTR
-            $cntr->main_status= 'ASIGNADA';
-            $cntr->status_cntr= 'ASIGNADA';
+            $cntr->main_status = 'ASIGNADA';
+            $cntr->status_cntr = 'ASIGNADA';
             $cntr->save();
 
             //CREO UNA NOTIFIACION
