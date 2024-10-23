@@ -307,11 +307,7 @@ class TransportController extends Controller
                     ->bcc($inboxEmail)->send(new transporteAsignado($datos, $date));
             }
 
-            //Actualizar status cntr ASIGNADA
-            $cntr->main_status = 'ASIGNADA';
-            $cntr->status_cntr = 'ASIGNADA';
-            $cntr->save();
-
+            
             DB::commit();
             $carga = Carga::whereNull('deleted_at')->where('booking', '=', $asign->booking)->first();
             return response()->json([
