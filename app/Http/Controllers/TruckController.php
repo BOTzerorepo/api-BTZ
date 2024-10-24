@@ -72,34 +72,43 @@ class TruckController extends Controller
      */
     public function store(StoreTruckRequest $request)
     {
-        //  $customerId = DB::table('users')->where('username', $request->user)->value('customer_id');
+        // Obtener el `customer_id` (simulación en este caso)
         $customerId = 2;
 
+        // Crear el camión
+        try {
+            $truck = Truck::create([
+                'model' => $request->model,
+                'chasis' => $request->chasis,
+                'poliza' => $request->poliza,
+                'vto_poliza' => $request->vto_poliza,
+                'type' => $request->type,
+                'domain' => $request->domain,
+                'year' => $request->year,
+                'device_truck' => $request->device_truck,
+                'satelital_location' => $request->satelital_location,
+                'transport_id' => $request->transport_ids,
+                'user' => $request->user,
+                'customer_id' => $customerId,
+                'fletero_id' => $request->fletero_id
+            ]);
 
-        $truck = Truck::create([
-            'model' => $request->model,
-            'chasis' => $request->chasis,
-            'poliza' => $request->poliza,
-            'vto_poliza' => $request->vto_poliza,
-            'type' => $request->type,
-            'domain' => $request->domain,
-            'year' => $request->year,
-            'device_truck' => $request->device_truck,
-            'satelital_location' => $request->satelital_location,
-            'transport_id' => $request->transport_id,
-            'user' => $request->user,
-            'customer_id' => $customerId,
-            'fletero_id' => $request->fletero_id
-        ]);
+            // Llamada a servicio satelital (ejemplo)
+            $resultado = $this->serviceSatelital->issetDominio($request->domain);
 
-        $resultado = $this->serviceSatelital->issetDominio($request->domain);
-
-        return response()->json([
-            'message' => 'Truck created successfully.',
-            'data' => $truck,
-            'resultado' => $resultado,
-        ], 201);
+            return response()->json([
+                'message' => 'Camion creado exitosamente.',
+                'data' => $truck,
+                'resultado' => $resultado,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al crear el camión.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
+
 
     /**
      * Display the specified resource.
@@ -151,7 +160,7 @@ class TruckController extends Controller
             'year' => $request->year,
             'device_truck' => $request->device_truck,
             'satelital_location' => $request->satelital_location,
-            'transport_id' => $request->transport_id,
+            'transport_id' => $request->transport_ids,
             'user' => $request->user,
             'customer_id' => $customerId,
             'fletero_id' => $request->fletero_id // Asociar con Fletero
@@ -160,7 +169,7 @@ class TruckController extends Controller
         $this->serviceSatelital->issetDominio($request->domain);
 
         return response()->json([
-            'message' => 'Truck updated successfully.',
+            'message' => 'Camión actualizado exitosamente.',
             'data' => $truck,
         ], 200);
     }
