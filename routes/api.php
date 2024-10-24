@@ -21,6 +21,13 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::get('/notificationMobile/{token}/{title}/{body}/{plataforma}', 'App\Http\Controllers\FcmTokenController@sendNotification');
+Route::put('/registerToken', 'App\Http\Controllers\FcmTokenController@registerToken');
+Route::get('/notifyUsers', 'App\Http\Controllers\FcmTokenController@notifyUsers');
+Route::get('/takeUser', 'App\Http\Controllers\FcmTokenController@takeUser');
+
+
+
 Route::get('/ejecutar/{puntoActivoId}/{contenedorId}','App\Http\Controllers\ServiceSatelital@ejecutarAccionEntrada');
 Route::get('/points_of_interest','App\Http\Controllers\InterestPointController@index');
 Route::post('/points_of_interest','App\Http\Controllers\InterestPointController@store');
