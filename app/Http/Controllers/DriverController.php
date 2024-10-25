@@ -41,39 +41,48 @@ class DriverController extends Controller
      */
     public function store(Request $request)
     {
-        if ($request['transporte'] != null) {
-            $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
-            $idTranport = $transport->id;
-            $transport = $request['transporte'];
-        } elseif (isset($request['transporte'])) {
+        try {
+            // Verificación y asignación de transporte
+            if ($request['transporte'] != null) {
+                $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
+                $idTransport = $transport->id;
+                $transport = $request['transporte'];
+            } elseif (isset($request['transporte'])) {
+                $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
+                $idTransport = $transport->id;
+                $transport = $request['transporte'];
+            } else {
+                $qtr = Transport::where('id', '=', $request['id_transport'])->first();
+                $transport = $qtr->razon_social;
+                $idTransport = $request['id_transport'];
+            }
 
-            $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
-            $idTranport = $transport->id;
-            $transport = $request['transporte'];
-        } else {
+            // Creación del conductor
+            $driver = Driver::create([
+                'nombre' => $request['nombre'],
+                'foto' => $request['foto'],
+                'documento' => $request['documento'],
+                'vto_carnet' => $request['vto_carnet'],
+                'WhatsApp' => $request['WhatsApp'],
+                'mail' => $request['mail'],
+                'user' => $request['user'],
+                'empresa' => $request['empresa'],
+                'transporte' => $transport,
+                'fletero_id' => $request['id_fletero'],
+                'transport_id' => $idTransport,
+                'Observaciones' => $request['Observaciones']
+            ]);
 
-            $qtr = Transport::where('id', '=', $request['id_transport'])->first();
-            $transport = $qtr->razon_social;
-            $idTranport = $request['id_transport'];
+            return response()->json([
+                'message' => 'Se cargó correctamente el Chofer ' . $request['nombre'],
+                'data' => $driver,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al crear el conductor.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-
-        $driver = new Driver();
-        $driver->nombre = $request['nombre'];
-        $driver->foto = $request['foto'];
-        $driver->documento = $request['documento'];
-        $driver->vto_carnet = $request['vto_carnet'];
-        $driver->WhatsApp = $request['WhatsApp'];
-        $driver->mail = $request['mail'];
-        $driver->user = $request['user'];
-        $driver->empresa = $request['empresa'];
-        $driver->transporte = $transport;
-        $driver->fletero_id = $request['id_fletero'];
-        $driver->transport_id = $idTranport;
-        $driver->Observaciones = $request['Observaciones'];
-        $driver->save();
-
-        return $driver;
     }
 
     /**
@@ -118,39 +127,49 @@ class DriverController extends Controller
      */
     public function update(Request $request, $id)
     {
+        try {
+            // Verificación y asignación de transporte
+            if ($request['transporte'] != null) {
+                $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
+                $idTransport = $transport->id;
+                $transport = $request['transporte'];
+            } elseif (isset($request['transporte'])) {
+                $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
+                $idTransport = $transport->id;
+                $transport = $request['transporte'];
+            } else {
+                $qtr = Transport::where('id', '=', $request['id_transport'])->first();
+                $transport = $qtr->razon_social;
+                $idTransport = $request['id_transport'];
+            }
 
-        if ($request['transporte'] != null) {
-            $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
-            $idTranport = $transport->id;
-            $transport = $request['transporte'];
-        } elseif (isset($request['transporte'])) {
+            // Encontrar y actualizar el conductor
+            $driver = Driver::findOrFail($id);
+            $driver->update([
+                'nombre' => $request['nombre'],
+                'foto' => $request['foto'],
+                'documento' => $request['documento'],
+                'vto_carnet' => $request['vto_carnet'],
+                'WhatsApp' => $request['WhatsApp'],
+                'mail' => $request['mail'],
+                'user' => $request['user'],
+                'empresa' => $request['empresa'],
+                'transporte' => $transport,
+                'fletero_id' => $request['id_fletero'],
+                'transport_id' => $idTransport,
+                'Observaciones' => $request['Observaciones']
+            ]);
 
-            $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
-            $idTranport = $transport->id;
-            $transport = $request['transporte'];
-        } else {
-
-            $qtr = Transport::where('id', '=', $request['id_transport'])->first();
-            $transport = $qtr->razon_social;
-            $idTranport = $request['id_transport'];
+            return response()->json([
+                'message' => 'Conductor actualizado exitosamente.',
+                'data' => $driver,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al actualizar el conductor.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        $driver = Driver::findOrFail($id);
-        $driver->nombre = $request['nombre'];
-        $driver->foto = $request['foto'];
-        $driver->documento = $request['documento'];
-        $driver->vto_carnet = $request['vto_carnet'];
-        $driver->WhatsApp = $request['WhatsApp'];
-        $driver->mail = $request['mail'];
-        $driver->user = $request['user'];
-        $driver->empresa = $request['empresa'];
-        $driver->transporte = $transport;
-        $driver->fletero_id = $request['id_fletero'];
-        $driver->transport_id = $idTranport;
-        $driver->Observaciones = $request['Observaciones'];
-        $driver->save();
-
-        return $driver;
     }
 
     public function status(Request $request, $id)

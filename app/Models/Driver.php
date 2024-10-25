@@ -11,6 +11,20 @@ class Driver extends Model
     use HasFactory;
     use SoftDeletes;
     protected $table = 'drivers';
+    protected $fillable = [
+        'nombre',
+        'foto',
+        'documento',
+        'vto_carnet',
+        'WhatsApp',
+        'mail',
+        'user',
+        'empresa',
+        'transporte',
+        'fletero_id',
+        'transport_id',
+        'Observaciones',
+    ];
 
     public function fletero()
     {
