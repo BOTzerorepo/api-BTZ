@@ -4,8 +4,19 @@ use App\Http\Controllers\cntrController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FleteroController;
+use App\Http\Controllers\AuthController;
 
 
+Route::post('register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login'])->name('login');
+
+
+Route::group(['middleware' => 'auth:api'], function () {
+  Route::post('logout', [AuthController::class, 'logout']);
+  Route::get('user', [AuthController::class, 'getAuthenticatedUser']);
+  Route::get('takeUser', 'App\Http\Controllers\FcmTokenController@takeUser');
+
+});
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -20,6 +31,15 @@ use App\Http\Controllers\FleteroController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::get('/notificationMobile/{token}/{title}/{body}/{plataforma}', 'App\Http\Controllers\FcmTokenController@sendNotification');
+Route::put('/registerToken', 'App\Http\Controllers\FcmTokenController@registerToken');
+Route::put('/updatToken', 'App\Http\Controllers\FcmTokenController@updateToken');
+
+Route::get('/notifyUsers', 'App\Http\Controllers\FcmTokenController@notifyUsers');
+Route::get('/takeUser', 'App\Http\Controllers\FcmTokenController@takeUser');
+
+
 
 Route::get('/ejecutar/{puntoActivoId}/{contenedorId}','App\Http\Controllers\ServiceSatelital@ejecutarAccionEntrada');
 Route::get('/points_of_interest','App\Http\Controllers\InterestPointController@index');
@@ -97,7 +117,9 @@ Route::get('/mailCargaNueva/{idCarga}/{user}','App\Http\Controllers\emailControl
 
 Route::get('/mailStatus/{cntr}/{empresa}/{booking}/{user}/{tipo}/{statusArchivoPath}','App\Http\Controllers\emailController@cambiaStatus');  // Llega Correo Ok
 Route::get('/cargaAsignada/{id}','App\Http\Controllers\emailController@cargaAsignada');  // Llega Correo Ok
-Route::get('/trasnsporteAsignado/{id}','App\Http\Controllers\emailController@transporteAsignado');  // Llega Correo Ok
+
+//REMPLAZAR  CON LA ASIGNACION DEL TRANSPORTE Y ENVIAR MAIL
+Route::post('/transporteAsignado/{id}','App\Http\Controllers\TransportController@transporteAsignado');  // Llega Correo Ok
 
 // Route::post('/imprimir/create','App\Http\Controllers\crearpdfControllerPDF@store')mostrar todos
 // Route::get('/imprimirIns','App\Http\Controllers\imprimirPDF@store'); //mostrar todos
