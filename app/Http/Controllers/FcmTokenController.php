@@ -23,6 +23,22 @@ class FcmTokenController extends Controller
 
         return response()->json(['message' => 'Token registrado correctamente.']);
     }
+    public function updateToken(Request $request)
+    {
+        $expiredToken = $request->input('expired_token');
+        $refreshedToken = $request->input('refreshed_token');
+
+        // Buscar el token expirado en la base de datos
+        $fcmToken = FcmToken::where('token', $expiredToken)->first();
+
+        if ($fcmToken) {
+            $fcmToken->token = $refreshedToken;
+            $fcmToken->save();
+            return response()->json(['message' => 'Token actualizado exitosamente'], 200);
+        }
+
+        return response()->json(['error' => 'Token no encontrado'], 404);
+    }
 
 
     public function sendNotification($token, $title, $body)
@@ -62,6 +78,6 @@ class FcmTokenController extends Controller
     }
     public function takeUser($user){
 
-        DB:
+        
     }
 }
