@@ -4,8 +4,19 @@ use App\Http\Controllers\cntrController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FleteroController;
+use App\Http\Controllers\AuthController;
 
 
+Route::post('register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login'])->name('login');
+
+
+Route::group(['middleware' => 'auth:api'], function () {
+  Route::post('logout', [AuthController::class, 'logout']);
+  Route::get('user', [AuthController::class, 'getAuthenticatedUser']);
+  Route::get('takeUser', 'App\Http\Controllers\FcmTokenController@takeUser');
+
+});
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -23,6 +34,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::get('/notificationMobile/{token}/{title}/{body}/{plataforma}', 'App\Http\Controllers\FcmTokenController@sendNotification');
 Route::put('/registerToken', 'App\Http\Controllers\FcmTokenController@registerToken');
+Route::put('/updatToken', 'App\Http\Controllers\FcmTokenController@updateToken');
+
 Route::get('/notifyUsers', 'App\Http\Controllers\FcmTokenController@notifyUsers');
 Route::get('/takeUser', 'App\Http\Controllers\FcmTokenController@takeUser');
 
