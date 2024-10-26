@@ -50,40 +50,46 @@ class TrailerController extends Controller
      */
     public function store(StoretrailerRequest $request)
     {
+        try {
+            if ($request['transporte'] != null) {
+                $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
+                $idTranport = $transport->id;
+                $transport = $request['transporte'];
+            } elseif (isset($request['transporte'])) {
+                $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
+                $idTranport = $transport->id;
+                $transport = $request['transporte'];
+            } else {
+                $qtr = Transport::where('id', '=', $request['transport_id'])->first();
+                $transport = $qtr->razon_social;
+                $idTranport = $request['transport_id'];
+            }
 
-        if ($request['transporte'] != null) {
-            $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
-            $idTranport = $transport->id;
-            $transport = $request['transporte'];
-        } elseif (isset($request['transporte'])) {
+            $customerId = User::where('username', '=', $request['user'])->first();
+        
+            $trailer = trailer::create([
+                'type' => $request['type'],
+                'chasis' => $request['chasis'],
+                'poliza' => $request['poliza'],
+                'vto_poliza' => $request['vto_poliza'],
+                'domain' => $request['domain'],
+                'year' => $request['year'],
+                'user_id' => $customerId->id,
+                'fletero_id' => $request['id_fletero'],
+                'transport_id' => $idTranport,
+                'customer_id' => $customerId->customer_id
+            ]);
 
-            $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
-            $idTranport = $transport->id;
-            $transport = $request['transporte'];
-        } else {
-
-            $qtr = Transport::where('id', '=', $request['transport_id'])->first();
-            $transport = $qtr->razon_social;
-            $idTranport = $request['transport_id'];
+            return response()->json([
+                'message' => 'Trailer editado correctamente ' . $request['domain'],
+                'data' => $trailer,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al crear el Trailer.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        $customerId = User::select('customer_id')->where('id', '=', $request['user'])->get(0);
-        $cId =  $customerId[0]->customer_id;
-
-        $trailer = new trailer();
-        $trailer->type = $request['type'];
-        $trailer->chasis = $request['chasis'];
-        $trailer->poliza = $request['poliza'];
-        $trailer->vto_poliza = $request['vto_poliza'];
-        $trailer->domain = $request['domain'];
-        $trailer->year = $request['year'];
-        $trailer->user_id = $request['user'];
-        $trailer->fletero_id = $request['id_fletero'];
-        $trailer->transport_id = $idTranport;
-        $trailer->customer_id = $cId;
-        $trailer->save();
-
-        return $trailer;
     }
 
     /**
@@ -125,34 +131,43 @@ class TrailerController extends Controller
      */
     public function update(UpdatetrailerRequest $request, trailer $trailer)
     {
-        if ($request['transporte'] != null) {
-            $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
-            $idTranport = $transport->id;
-            $transport = $request['transporte'];
-        } elseif (isset($request['transporte'])) {
+        try {
+            // Verificación y asignación de transporte
+            if ($request['transporte'] != null) {
+                $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
+                $idTranport = $transport->id;
+                $transport = $request['transporte'];
+            } elseif (isset($request['transporte'])) {
+                $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
+                $idTranport = $transport->id;
+                $transport = $request['transporte'];
+            } else {
+                $qtr = Transport::where('id', '=', $request['transport_id'])->first();
+                $transport = $qtr->razon_social;
+                $idTranport = $request['transport_id'];
+            }
+            $trailer->update([
+                'type' => $request['type'],
+                'domain' => $request['domain'],
+                'chasis' => $request['chasis'],
+                'poliza' => $request['poliza'],
+                'vto_poliza' => $request['vto_poliza'],
+                'year' => $request['year'],
+                'user_id' => $request['user_id'],
+                'transport_id' => $idTranport,
+                'fletero_id' => $request['id_fletero'],
+            ]);
 
-            $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
-            $idTranport = $transport->id;
-            $transport = $request['transporte'];
-        } else {
-
-            $qtr = Transport::where('id', '=', $request['transport_id'])->first();
-            $transport = $qtr->razon_social;
-            $idTranport = $request['transport_id'];
+            return response()->json([
+                'message' => 'Trailer editado correctamente ' . $request['domain'],
+                'data' => $trailer,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al crear el Trailer.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        $trailer->type = $request['type'];
-        $trailer->domain = $request['domain'];
-        $trailer->chasis = $request['chasis'];
-        $trailer->poliza = $request['poliza'];
-        $trailer->vto_poliza = $request['vto_poliza'];
-        $trailer->year = $request['year'];
-        $trailer->user_id = $request['user_id'];
-        $trailer->transport_id = $idTranport;
-        $trailer->fletero_id = $request['id_fletero'];
-        $trailer->save();
-
-        return $trailer;
     }
 
     /**
