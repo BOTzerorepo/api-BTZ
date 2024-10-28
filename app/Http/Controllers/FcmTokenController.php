@@ -47,17 +47,13 @@ class FcmTokenController extends Controller
     {
 
         $file = new Filesystem();
-        $archivoPath = storage_path('/app/botzero-test-firebase-adminsdk-l750d-5108c493e1.json');
+        $archivoPath = storage_path('app/botzero-test-firebase-adminsdk-l750d-5108c493e1.json');
         
 
         if ($file->exists($archivoPath)) {
             $archivo = $file->get($archivoPath);
-          
-
             $config = json_decode($archivo, true);
            
-
-
             if ($config !== null) {
                 // Inicializa el cliente de Google para usar la cuenta de servicio
                 $googleClient = new GoogleClient();
