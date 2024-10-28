@@ -10,6 +10,7 @@
         "barryvdh/laravel-dompdf": "^1.0",
         "darkaonline/l5-swagger": "^8.3",
         "doctrine/dbal": "^4.1",
+        "google/apiclient": "^2.18",
         "guzzlehttp/guzzle": "^7.5",
         "irazasyed/larasupport": "^1.1",
         "laravel/framework": "^9.11",

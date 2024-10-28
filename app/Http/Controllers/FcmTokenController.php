@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\fcmToken;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
+use Google\Client as GoogleClient;
+use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Storage;
 
 class FcmTokenController extends Controller
 {
@@ -40,13 +43,28 @@ class FcmTokenController extends Controller
         return response()->json(['error' => 'Token no encontrado'], 404);
     }
 
-
     public function sendNotification($token, $title, $body)
     {
+        
+        $file = new Filesystem();
+        $archivo = $file->get(storage_path('/app/botzero-test-firebase-adminsdk-l750d-5108c493e1.json'));
+      
+        // Inicializa el cliente de Google para usar la cuenta de servicio
+        $googleClient = new GoogleClient();
+        $googleClient->setAuthConfig(json_decode($archivo, true));
+        //$googleClient->setAuthConfig($archivo);
+        $googleClient->addScope('https://www.googleapis.com/auth/firebase.messaging');
+
+        // Obtiene el token de acceso
+        $accessToken = $googleClient->fetchAccessTokenWithAssertion()['access_token'];
+
+        // Configura el cliente HTTP con Guzzle y el token de acceso en los headers
         $client = new Client();
+
+        // Realiza la solicitud de envío de notificación
         $response = $client->post('https://fcm.googleapis.com/v1/projects/botzero-test/messages:send', [
             'headers' => [
-                'Authorization' => 'Bearer ya29.a0AcM612z0_vd_slfXIAeBusrOj_ltMX-Rw7pwqmDEMUIL_gT4jlHcb7-VepC8iZ2Wm3ma0qv0zWIPyzXB9Zy1ysvq_O5tcWJQpIEKET6xJPw4qjzAfkVktucBxCofhvIqe3BJTu2qY0gCXWL7dxS21kX889ig76_oEIqH1cn7aCgYKAbkSARMSFQHGX2Mik375ypZ87ny5vA3w7dBnsQ0175',
+                'Authorization' => 'Bearer ' . $accessToken,
                 'Content-Type' => 'application/json'
             ],
             'json' => [
@@ -55,7 +73,6 @@ class FcmTokenController extends Controller
                     "notification" => [
                         "title" => $title,
                         "body" => $body,
-                        "icon" => "ic_notification"
                     ]
                 ]
             ]
