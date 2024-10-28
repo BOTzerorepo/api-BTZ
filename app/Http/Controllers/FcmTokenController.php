@@ -48,14 +48,14 @@ class FcmTokenController extends Controller
 
         $file = new Filesystem();
         $archivoPath = storage_path('/app/botzero-test-firebase-adminsdk-l750d-5108c493e1.json');
-        $archivoPath2 = storage_path('app/botzero-test-firebase-adminsdk-l750d-5108c493e1.json');
+        
 
         if ($file->exists($archivoPath)) {
             $archivo = $file->get($archivoPath);
-            $archivo2 = $file->get($archivoPath2);
+          
 
             $config = json_decode($archivo, true);
-            $config2 = json_decode($archivo2, true);
+           
 
 
             if ($config !== null) {
@@ -65,6 +65,10 @@ class FcmTokenController extends Controller
                 $googleClient->addScope('https://www.googleapis.com/auth/firebase.messaging');
 
             } else {
+                $archivoPath2 = storage_path('app/botzero-test-firebase-adminsdk-l750d-5108c493e1.json');
+                $archivo2 = $file->get($archivoPath2);
+                $config2 = json_decode($archivo2, true);
+                return $config2;
 
                 $googleClient = new GoogleClient();
                 $googleClient->setAuthConfig($config2);
