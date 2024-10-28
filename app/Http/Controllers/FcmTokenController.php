@@ -47,30 +47,36 @@ class FcmTokenController extends Controller
     {
 
         $file = new Filesystem();
-        $archivoPath = storage_path('app/botzero-test-firebase-adminsdk-l750d-5108c493e1.json');
-        
+        $archivoPath = storage_path('/app/botzero-test-firebase-adminsdk-l750d-5108c493e1.json');
 
         if ($file->exists($archivoPath)) {
             $archivo = $file->get($archivoPath);
             $config = json_decode($archivo, true);
-           
+
             if ($config !== null) {
                 // Inicializa el cliente de Google para usar la cuenta de servicio
                 $googleClient = new GoogleClient();
                 $googleClient->setAuthConfig($config);
-                $googleClient->addScope('https://www.googleapis.com/auth/firebase.messaging');
-
+                $googleClient->addScope('(link unavailable)');
             } else {
                 $archivoPath = base_path('storage/app/botzero-test-firebase-adminsdk-l750d-5108c493e1.json');
-                $archivo = $file->get($archivoPath);
-                $config = json_decode($archivo, true);
 
-                $googleClient = new GoogleClient();
-                $googleClient->setAuthConfig($config);
-                $googleClient->addScope('https://www.googleapis.com/auth/firebase.messaging');
+                if ($file->exists($archivoPath)) {
+                    $archivo = $file->get($archivoPath);
+                    $config = json_decode($archivo, true);
 
-                // Manejar error de JSON inválido
-                return "Error: JSON inválido";
+                    if ($config !== null) {
+                        $googleClient = new GoogleClient();
+                        $googleClient->setAuthConfig($config);
+                        $googleClient->addScope('(link unavailable)');
+                    } else {
+                        // Manejar error de JSON inválido
+                        return "Error: JSON inválido";
+                    }
+                } else {
+                    // Manejar error de archivo no encontrado
+                    return "Error: Archivo no encontrado";
+                }
             }
         } else {
             // Manejar error de archivo no encontrado
