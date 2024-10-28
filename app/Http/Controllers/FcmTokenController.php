@@ -45,7 +45,29 @@ class FcmTokenController extends Controller
 
     public function sendNotification($token, $title, $body)
     {
-        
+
+        $file = new Filesystem();
+        $archivoPath = storage_path('/app/botzero-test-firebase-adminsdk-l750d-5108c493e1.json');
+
+        if ($file->exists($archivoPath)) {
+            $archivo = $file->get($archivoPath);
+            $config = json_decode($archivo, true);
+
+            if ($config !== null) {
+                // Inicializa el cliente de Google para usar la cuenta de servicio
+                $googleClient = new GoogleClient();
+                $googleClient->setAuthConfig($config);
+                $googleClient->addScope('https://www.googleapis.com/auth/firebase.messaging');
+            } else {
+                // Manejar error de JSON inválido
+                echo "Error: JSON inválido";
+            }
+        } else {
+            // Manejar error de archivo no encontrado
+            echo "Error: Archivo no encontrado";
+        }
+
+/* 
         $file = new Filesystem();
         $archivo = $file->get(storage_path('/app/botzero-test-firebase-adminsdk-l750d-5108c493e1.json'));
       
@@ -53,8 +75,8 @@ class FcmTokenController extends Controller
         $googleClient = new GoogleClient();
         $googleClient->setAuthConfig(json_decode($archivo, true));
         //$googleClient->setAuthConfig($archivo);
-        $googleClient->addScope('https://www.googleapis.com/auth/firebase.messaging');
-
+        
+ */
         // Obtiene el token de acceso
         $accessToken = $googleClient->fetchAccessTokenWithAssertion()['access_token'];
 
