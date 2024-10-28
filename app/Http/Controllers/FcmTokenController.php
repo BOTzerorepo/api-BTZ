@@ -58,13 +58,14 @@ class FcmTokenController extends Controller
                 $googleClient = new GoogleClient();
                 $googleClient->setAuthConfig($config);
                 $googleClient->addScope('https://www.googleapis.com/auth/firebase.messaging');
+
             } else {
                 // Manejar error de JSON inválido
-                echo "Error: JSON inválido";
+                return "Error: JSON inválido";
             }
         } else {
             // Manejar error de archivo no encontrado
-            echo "Error: Archivo no encontrado";
+            return "Error: Archivo no encontrado";
         }
 
 /* 
