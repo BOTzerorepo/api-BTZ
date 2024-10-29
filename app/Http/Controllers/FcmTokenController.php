@@ -54,10 +54,13 @@ class FcmTokenController extends Controller
 
             
             $archivo = $file->get($archivoPath);
-            return $archivo;
             $config = json_decode($archivo, true);
+
            
             if ($config !== null) {
+                
+                return $config;
+
                 // Inicializa el cliente de Google para usar la cuenta de servicio
                 $googleClient = new GoogleClient();
                 $googleClient->setAuthConfig($config);
