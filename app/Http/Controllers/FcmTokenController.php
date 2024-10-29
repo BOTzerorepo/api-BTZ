@@ -56,6 +56,8 @@ class FcmTokenController extends Controller
             $archivo = $file->get($archivoPath);
             $config = json_decode($archivo, true);
 
+            return $config;
+
            
             if ($config !== null) {
 
