@@ -50,36 +50,20 @@ class FcmTokenController extends Controller
         $archivoPath = storage_path('app/botzero-test-firebase-adminsdk-l750d-5108c493e1.json');
 
         if ($file->exists($archivoPath)) {
-
-            
             $archivo = $file->get($archivoPath);
             $config = json_decode($archivo, true);
 
-           
             if ($config !== null) {
-
-                // Inicializa el cliente de Google para usar la cuenta de servicio
+                // Inicializa el cliente de Google usando la cuenta de servicio
                 $googleClient = new GoogleClient();
                 $googleClient->setAuthConfig($config);
                 $googleClient->addScope('https://www.googleapis.com/auth/firebase.messaging');
-                
-
             } else {
-
-
-                /* $archivoPath = storage_path('app/botzero-test-firebase-adminsdk-l750d-5108c493e1.json');
-                $archivo = $file->get($archivoPath);
-                $config = json_decode($archivo, true); */
-
-                $googleClient = new GoogleClient();
-                $googleClient->setAuthConfig($archivo);
-                $googleClient->addScope('https://www.googleapis.com/auth/firebase.messaging');
-
-                // Manejar error de JSON inválido
+                // Manejo de error si el JSON es inválido
+                throw new \Exception("El archivo JSON es inválido o está corrupto.");
             }
         } else {
-            // Manejar error de archivo no encontrado
-            return "Error: Archivo no encontrado";
+            throw new \Exception("El archivo de configuración no existe en la ruta especificada: $archivoPath");
         }
 
 /* 
