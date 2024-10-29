@@ -58,7 +58,7 @@ class FcmTokenController extends Controller
 
            
             if ($config !== null) {
-                
+
                 return $config;
 
                 // Inicializa el cliente de Google para usar la cuenta de servicio
@@ -69,12 +69,12 @@ class FcmTokenController extends Controller
 
             } else {
 
-                $archivoPath = storage_path('app/botzero-test-firebase-adminsdk-l750d-5108c493e1.json');
+                /* $archivoPath = storage_path('app/botzero-test-firebase-adminsdk-l750d-5108c493e1.json');
                 $archivo = $file->get($archivoPath);
-                $config = json_decode($archivo, true);
+                $config = json_decode($archivo, true); */
 
                 $googleClient = new GoogleClient();
-                $googleClient->setAuthConfig($config);
+                $googleClient->setAuthConfig($$archivo);
                 $googleClient->addScope('https://www.googleapis.com/auth/firebase.messaging');
 
                 // Manejar error de JSON inválido
