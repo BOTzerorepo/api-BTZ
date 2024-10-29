@@ -47,16 +47,9 @@ class FcmTokenController extends Controller
     {
 
         $file = new Filesystem();
-<<<<<<< HEAD
-<<<<<<< HEAD
-        $archivoPath = storage_path('/app/botzero-test-firebase-adminsdk-l750d-5108c493e1.json');
-=======
-        $archivoPath = asset('/storage/botzero-test-firebase-adminsdk-l750d-5108c493e1.json');
-        return $archivoPath;
->>>>>>> 0a4248ea93e76df75cf6892b8871b77b3fc2e95e
-=======
-        $archivoPath = storage_path('/app/botzero-test-firebase-adminsdk-l750d-5108c493e1.json');
->>>>>>> 91330b77f3fd0d3b797c87aedf3af4416bd0dcaf
+        $archivoPath = storage_path('app/botzero-test-firebase-adminsdk-l750d-5108c493e1.json');
+
+
         
         return $archivoPath;
         if ($file->exists($archivoPath)) {
