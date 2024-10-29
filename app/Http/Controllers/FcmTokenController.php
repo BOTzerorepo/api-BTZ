@@ -59,8 +59,7 @@ class FcmTokenController extends Controller
            
             if ($config !== null) {
 
-                return $config;
-
+             
                 // Inicializa el cliente de Google para usar la cuenta de servicio
                 $googleClient = new GoogleClient();
                 $googleClient->setAuthConfig($config);
