@@ -47,10 +47,9 @@ class FcmTokenController extends Controller
     {
 
         $file = new Filesystem();
-        $archivoPath = asset('/storage/botzero-test-firebase-adminsdk-l750d-5108c493e1.json');
-        return $archivoPath;
+        $archivoPath = storage_path('/app/botzero-test-firebase-adminsdk-l750d-5108c493e1.json');
         
-
+        return $archivoPath;
         if ($file->exists($archivoPath)) {
             $archivo = $file->get($archivoPath);
             $config = json_decode($archivo, true);
@@ -73,6 +72,7 @@ class FcmTokenController extends Controller
                 $googleClient->addScope('https://www.googleapis.com/auth/firebase.messaging');
 
                 // Manejar error de JSON inválido
+
             }
         } else {
             // Manejar error de archivo no encontrado
