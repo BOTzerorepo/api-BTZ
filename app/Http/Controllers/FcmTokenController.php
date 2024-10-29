@@ -74,7 +74,7 @@ class FcmTokenController extends Controller
                 $config = json_decode($archivo, true); */
 
                 $googleClient = new GoogleClient();
-                $googleClient->setAuthConfig($$archivo);
+                $googleClient->setAuthConfig($archivo);
                 $googleClient->addScope('https://www.googleapis.com/auth/firebase.messaging');
 
                 // Manejar error de JSON inválido
