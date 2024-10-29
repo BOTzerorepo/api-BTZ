@@ -50,6 +50,7 @@ class FcmTokenController extends Controller
         $archivoPath = storage_path('app/botzero-test-firebase-adminsdk-l750d-5108c493e1.json');
         
         $json = env('GOOGLE_PRIVATED_KEY');
+        return $json;
 
         if ($file->exists($archivoPath)) {
 
