@@ -17,53 +17,84 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:255',
+            'username' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'pass' => 'required|string|min:6|confirmed',
+            'name' => 'nullable|string',
+            'last_name' => 'nullable|string',
+            'celular' => 'nullable|numeric',
+            'empresa' => 'nullable|string'
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors()->toJson(), 400);
         }
 
-        $user = User::create([
-            'username' => $request->get('name'),
-            'email' => $request->get('email'),
-            'pass' => bcrypt($request->get('pass')),
-        ]);
+        try {
+            $user = User::create([
+                    'username' => $request->get('name'),
+                    'email' => $request->get('email'),
+                    'pass' => bcrypt($request->get('pass')),  
+                    'name' => $request->get('name'),
+                    'last_name' => $request->get('last_name'),
+                    'celular' => $request->get('celular'),
+                    'empresa' => $request->get('empresa')
+                ]);
 
-        $token = JWTAuth::fromUser($user);
+            // Generar el token JWT
+            $token = JWTAuth::fromUser($user);
 
-        return response()->json(compact('user', 'token'), 201);
+            return response()->json([
+                'message' => 'Usuario creado exitosamente.',
+                'user' => $user,
+                'token' => $token
+            ], 201);
+        } catch (\Exception $e) {
+          
+            return response()->json([
+                'message' => 'Hubo un error al crear el usuario.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function login(Request $request)
     {
-        // Validar las credenciales
         $this->validate($request, [
-            'email' => 'required|email',
+            'email' => 'nullable|email',
+            'username' => 'nullable|string',
             'pass' => 'required',
         ]);
 
-        $credentials = $request->only('email', 'pass');
+        $credentials = $request->only('email', 'username', 'pass');
 
-        // Encontrar el usuario
-        $user = User::where('email', $credentials['email'])->first();
+        // Encontrar el usuario por email o por username
+        $user = null;
 
-        if ($user && Hash::check($credentials['pass'], $user->pass)) {
+        if (!empty($credentials['email'])) {
+            $user = User::where('email', $credentials['email'])->first();
+        } elseif (!empty($credentials['username'])) {
+            $user = User::where('username', $credentials['username'])->first();
+        }
+
+        if ($user && Hash::check($credentials['pass'], $user->pass)
+        ) {
             // Generar el token
             $token = JWTAuth::fromUser($user);
 
-            // Devolver el token y el id del usuario
+            // Devolver el token y la información del usuario
             return response()->json([
                 'token' => $token,
                 'user_id' => $user->id,
-                'username' => $user->username
-            ]);
+                'username' => $user->username,
+                'email' => $user->email,
+                'company' => $user->empresa,
+                'permiso' => $user->permiso,
+                'transport_id' => $user->transport_id,
+            ], 201);
+        } else {
+            return response()->json(['error' => 'Usuario o contraseña incorrecto.'], 400);
         }
-
-        // En caso de credenciales inválidas
-        return response()->json(['error' => 'invalid_credentials'], 401);
     }
 
 
