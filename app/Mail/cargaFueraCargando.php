@@ -5,34 +5,33 @@ namespace App\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Content;
+use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class transporteAsignado extends Mailable
+class cargaFueraCargando extends Mailable
 {
     use Queueable, SerializesModels;
     public $subject;
     public $datos;
-    public $date;
-
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($datos, $date)
+    public function __construct($datos)
     {
         $this->datos = $datos;
-        $this->date  = $date;
-        $this->subject = 'ASIGNACION DE TRANSPORTE // ' . $datos['ref_customer'] . ' - ' . $datos['type'] . ' - ' . $datos['trader'] . ' – 1x ' . $datos['cntr_type'] . ' // BKG:' . $datos['booking'] . ' .';
+        $this->subject = '[ AUTOMATICO ] Carga fuera de Zona de Carga. Viaje: '.$datos['cntr'];
     }
 
     /**
-     * Build the message.
+     * Build the message
      *
      * @return $this
      */
     public function build()
     {
-        return $this->view('mails.transporteAsignado');
+        return $this->view('mails.CargaFueraCargando');
     }
 }

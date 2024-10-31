@@ -636,7 +636,6 @@ class cargaController extends Controller
             $carga->type = $request->input('type');
             $carga->save();
 
-          
 
             for ($i = 1; $i <= $request->input('qviajes'); $i++) {
                 $numAleatorio = $request->input('booking') . $i;
