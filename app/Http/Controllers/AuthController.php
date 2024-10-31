@@ -22,7 +22,7 @@ class AuthController extends Controller
             'pass' => 'required|string|min:6|confirmed',
             'name' => 'nullable|string|max:20',
             'last_name' => 'nullable|string|max:29',
-            'celular' => 'nullable|numeric|max:20',
+            'celular' => 'nullable|numeric',
             'empresa' => 'nullable|string'
         ]);
 
