@@ -32,7 +32,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/notificationMobile/{token}/{title}/{body}/{plataforma}', 'App\Http\Controllers\FcmTokenController@sendNotification');
+Route::get('/notificationMobile/{token}/{title}/{body}', 'App\Http\Controllers\FcmTokenController@sendNotification');
 Route::put('/registerToken', 'App\Http\Controllers\FcmTokenController@registerToken');
 Route::put('/updatToken', 'App\Http\Controllers\FcmTokenController@updateToken');
 

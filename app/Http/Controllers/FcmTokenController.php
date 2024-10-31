@@ -67,16 +67,6 @@ class FcmTokenController extends Controller
             throw new \Exception("El archivo de configuración no existe en la ruta especificada: $archivoPath");
         }
 
-/* 
-        $file = new Filesystem();
-        $archivo = $file->get(storage_path('/app/botzero-test-firebase-adminsdk-l750d-5108c493e1.json'));
-      
-        // Inicializa el cliente de Google para usar la cuenta de servicio
-        $googleClient = new GoogleClient();
-        $googleClient->setAuthConfig(json_decode($archivo, true));
-        //$googleClient->setAuthConfig($archivo);
-        
- */
         // Obtiene el token de acceso
         $accessToken = $googleClient->fetchAccessTokenWithAssertion()['access_token'];
 
