@@ -258,16 +258,15 @@ class cargaController extends Controller
     }
     public function loadFinishedTransport($transport)
     {
+        $transportIds = explode(',', $transport);
+        $razonSocialList = Transport::whereIn('id', $transportIds)->pluck('razon_social');
 
-        $transport = Transport::find($transport);
-
-
-            $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
+        $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
             ->join('cntr', 'cntr.booking', '=', 'carga.booking')
             ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
             ->select('carga.ref_customer', 'carga.booking', 'carga.shipper','carga.commodity', 'carga.type', 'carga.load_place', 'carga.unload_place', 'carga.load_date', 'carga.cut_off_fis', 'carga.custom_place',  'carga.custom_agent','carga.custom_place_impo', 'carga.custom_agent_impo', 'cntr.cntr_number', 'cntr.cntr_type', 'cntr.main_status','cntr.out_usd', 'cntr.observation_out', 'asign.driver', 'asign.transport', 'asign.truck', 'asign.truck_semi')
             ->where('cntr.main_status', '=', 'TERMINADA')
-            ->where('asign.transport', '=', $transport->razon_social)
+            ->whereIn('asign.transport', $razonSocialList)
             ->whereNull('cntr.deleted_at')
             ->whereNull('asign.deleted_at')
             ->orderBy('carga.load_date', 'ASC')->get();
