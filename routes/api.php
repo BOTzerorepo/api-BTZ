@@ -17,6 +17,7 @@ Route::group(['middleware' => 'auth:api'], function () {
   Route::get('takeUser', 'App\Http\Controllers\FcmTokenController@takeUser');
 
 });
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -31,6 +32,8 @@ Route::group(['middleware' => 'auth:api'], function () {
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::get('/getUsersToken', 'App\Http\Controllers\FcmTokenController@getUsersWithTokens');
 
 Route::get('/notificationMobile/{token}/{title}/{body}', 'App\Http\Controllers\FcmTokenController@sendNotification');
 Route::put('/registerToken', 'App\Http\Controllers\FcmTokenController@registerToken');
