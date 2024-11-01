@@ -11,6 +11,19 @@ class trailer extends Model implements AuditableContract
 {
     use HasFactory, Auditable;
 
+    protected $fillable = [
+        'type',
+        'domain',
+        'chasis',
+        'poliza',
+        'vto_poliza',
+        'year',
+        'user_id',
+        'transport_id',
+        'fletero_id',
+        'customer_id',
+    ];
+
     public function fletero()
     {
         return $this->belongsTo(Fletero::class);

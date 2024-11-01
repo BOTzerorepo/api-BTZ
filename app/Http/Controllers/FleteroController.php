@@ -36,21 +36,21 @@ class FleteroController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    
+
     public function store(Request $request)
     {
         Log::info('Llego la solicitud:', $request->all());
-        
+
         // Validación de los datos del fletero
         $validated = $request->validate([
             'razon_social' => 'required|string|max:255',
             'satelital' => 'nullable|string',
             'alta_aker' => 'nullable|boolean',
             'CUIT' => ['required', function ($attribute, $value, $fail) {
-        if (!is_string($value) && !is_numeric($value)) {
-            $fail('El campo CUIT debe ser un número o una cadena.');
-        }
-    }],
+                if (!is_string($value) && !is_numeric($value)) {
+                    $fail('El campo CUIT debe ser un número o una cadena.');
+                }
+            }],
             'direccion' => 'required|string|max:255',
             'provincia' => 'required|string|max:255',
             'pais' => 'required|string|max:255',
@@ -61,14 +61,14 @@ class FleteroController extends Controller
             'transport_ids' => 'nullable|array', // Acepta un array de IDs de transporte
             'transport_ids.*' => 'exists:transports,id' // Cada ID de transporte debe existir
         ]);
-        Log::info('Asi está Validate:', $validated);
-        
+
+        Log::info('Así está Validate:', $validated);
 
         // Crear el fletero
         $fletero = Fletero::create($validated);
 
         // Asociar transportes al fletero
-        if (isset($validated['transport_ids'])) {
+        if (!empty($validated['transport_ids'])) {
             $fletero->transports()->sync($validated['transport_ids']); // Asocia múltiples transportes
         }
 
@@ -77,7 +77,8 @@ class FleteroController extends Controller
             'data' => $fletero->load('transports') // Carga los transportes asociados para mostrar en la respuesta
         ], 201);
     }
-    
+
+
 
     /**
      * Display the specified resource.
@@ -96,7 +97,7 @@ class FleteroController extends Controller
     public function getFleteroDetails($transporteId)
     {
         // Encuentra el transporte con los fleteros asociados
-        $transporte = Transport::with('fleteros')->find($transporteId);
+        $transporte = Transport::with('fleteros.transports')->find($transporteId);
 
         // Verifica si el transporte existe
         if (!$transporte) {
@@ -105,10 +106,19 @@ class FleteroController extends Controller
             ], 404);
         }
 
-        // Devuelve los fleteros asociados al transporte
+        // Estructura los datos para devolver los fleteros junto con sus transportes asociados
+        $data = [];
+        foreach ($transporte->fleteros as $fletero) {
+            $data[] = [
+                'fletero' => $fletero,
+                //'transports' => $fletero->transports // Aquí obtienes todos los transportes del fletero
+            ];
+        }
+
+        // Devuelve los fleteros y sus transportes asociados
         return response()->json([
             'message' => 'Detalles de los fleteros asociados al transporte.',
-            'data' => $transporte->fleteros // Devuelve la colección de fleteros
+            'data' => $data
         ], 200);
     }
 
@@ -135,11 +145,14 @@ class FleteroController extends Controller
     {
         $validated = $request->validate([
             'razon_social' => 'required|string|max:255',
-            'CUIT' => 'required|string|max:11',
+            'CUIT' => ['required', function ($attribute, $value, $fail) {
+                if (!is_string($value) && !is_numeric($value)) {
+                    $fail('El campo CUIT debe ser un número o una cadena.');
+                }
+            }],
             'logo' => 'nullable|string|max:255',
             'satelital' => 'nullable|string',
             'alta_aker' => 'nullable|boolean',
-            'CUIT' => 'required|string|size:11',
             'direccion' => 'required|string|max:255',
             'provincia' => 'required|string|max:255',
             'pais' => 'required|string|max:255',
@@ -147,17 +160,28 @@ class FleteroController extends Controller
             'permiso' => 'nullable|string|max:255',
             'vto_permiso' => 'nullable|date',
             'observation' => 'nullable|string',
-            // Agrega las validaciones necesarias para otros campos
+            'transport_ids' => 'nullable|array', // Acepta un array de IDs de transporte
+            'transport_ids.*' => 'exists:transports,id' // Cada ID de transporte debe existir
         ]);
 
         $fletero = Fletero::findOrFail($id);
+
+        // Actualiza los campos del fletero
         $fletero->update($validated);
 
+        // Asociar transportes al fletero
+        if (isset($validated['transport_ids'])) {
+            $fletero->transports()->sync($validated['transport_ids']); // Sincroniza los transportes
+        } else {
+            $fletero->transports()->sync([]); // Desasocia todos los transportes si no se envía ninguno
+        }
+
         return response()->json([
-            'message' => 'Fletero actualizado exitosamente.',
-            'data' => $fletero
+            'message' => 'Fletero actualizado y transportes asociados exitosamente.',
+            'data' => $fletero->load('transports') // Carga los transportes asociados para mostrar en la respuesta
         ], 200);
     }
+
 
     /**
      * Remove the specified resource from storage.
