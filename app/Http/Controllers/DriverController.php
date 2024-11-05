@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\transports;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Driver;
+use App\Models\Transport;
 
 class DriverController extends Controller
 {
@@ -15,20 +17,21 @@ class DriverController extends Controller
      */
     public function index()
     {
-        $drivers = DB::table('drivers')->get();       
+        $drivers = Driver::all();
         return $drivers;
     }
-    
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+    public function indexTransport($idTransport)
     {
-        //
+        // Convertir $idTransport en un array si no lo es (separado por comas)
+        $idArray = explode(',', $idTransport);
+
+        // Buscar los drivers cuyos transport_id coincidan con cualquiera de los IDs en el array
+        $drivers = Driver::whereIn('transport_id', $idArray)->get();
+
+        return $drivers;
     }
+
+
 
     /**
      * Store a newly created resource in storage.
@@ -38,20 +41,48 @@ class DriverController extends Controller
      */
     public function store(Request $request)
     {
-        $driver = new Driver();
-        $driver->nombre = $request['nombre'];
-        $driver->foto= $request['foto'];
-        $driver->documento = $request['documento'];
-        $driver->vto_carnet = $request['vto_carnet'];
-        $driver->WhatsApp = $request['WhatsApp'];
-        $driver->mail = $request['mail'];
-        $driver->user = $request['user'];
-        $driver->empresa = $request['empresa'];
-        $driver->transporte = $request['transporte'];
-        $driver->Observaciones = $request['Observaciones'];
-        $driver->save();
+        try {
+            // Verificación y asignación de transporte
+            if ($request['transporte'] != null) {
+                $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
+                $idTransport = $transport->id;
+                $transport = $request['transporte'];
+            } elseif (isset($request['transporte'])) {
+                $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
+                $idTransport = $transport->id;
+                $transport = $request['transporte'];
+            } else {
+                $qtr = Transport::where('id', '=', $request['id_transport'])->first();
+                $transport = $qtr->razon_social;
+                $idTransport = $request['id_transport'];
+            }
 
-        return $driver;
+            // Creación del conductor
+            $driver = Driver::create([
+                'nombre' => $request['nombre'],
+                'foto' => $request['foto'],
+                'documento' => $request['documento'],
+                'vto_carnet' => $request['vto_carnet'],
+                'WhatsApp' => $request['WhatsApp'],
+                'mail' => $request['mail'],
+                'user' => $request['user'],
+                'empresa' => $request['empresa'],
+                'transporte' => $transport,
+                'fletero_id' => $request['id_fletero'],
+                'transport_id' => $idTransport,
+                'Observaciones' => $request['Observaciones']
+            ]);
+
+            return response()->json([
+                'message' => 'Se cargó correctamente el Chofer ' . $request['nombre'],
+                'data' => $driver,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al crear el conductor.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
@@ -62,19 +93,18 @@ class DriverController extends Controller
      */
     public function show($id)
     {
-        $driver = DB::table('drivers')->where('id','=',$id)->get();
+        $driver = DB::table('drivers')->where('id', '=', $id)->get();
         return $driver;
     }
 
     public function showDriver($transporte)
     {
-        $idTranport = DB::table('transports')->where('id','=',$transporte)->get('razon_social');
+        $idTranport = DB::table('transports')->where('id', '=', $transporte)->get('razon_social');
         $id = $idTranport[0]->razon_social;
 
         /* Hay que recibir el id del Transporte */
-        $drivers = DB::table('drivers')->where('transporte','=',$id)->get(); 
+        $drivers = DB::table('drivers')->where('transporte', '=', $id)->get();
         return $drivers;
-
     }
 
     /**
@@ -97,27 +127,56 @@ class DriverController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $driver = Driver::findOrFail($id);
-        $driver->nombre = $request['nombre'];
-        $driver->foto= $request['foto'];
-        $driver->documento = $request['documento'];
-        $driver->vto_carnet = $request['vto_carnet'];
-        $driver->WhatsApp = $request['WhatsApp'];
-        $driver->mail = $request['mail'];
-        $driver->user = $request['user'];
-        $driver->empresa = $request['empresa'];
-        $driver->transporte = $request['transporte'];
-        $driver->Observaciones = $request['Observaciones'];
-        $driver->save();
+        try {
+            // Verificación y asignación de transporte
+            if ($request['transporte'] != null) {
+                $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
+                $idTransport = $transport->id;
+                $transport = $request['transporte'];
+            } elseif (isset($request['transporte'])) {
+                $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
+                $idTransport = $transport->id;
+                $transport = $request['transporte'];
+            } else {
+                $qtr = Transport::where('id', '=', $request['id_transport'])->first();
+                $transport = $qtr->razon_social;
+                $idTransport = $request['id_transport'];
+            }
 
-        return $driver;
+            // Encontrar y actualizar el conductor
+            $driver = Driver::findOrFail($id);
+            $driver->update([
+                'nombre' => $request['nombre'],
+                'foto' => $request['foto'],
+                'documento' => $request['documento'],
+                'vto_carnet' => $request['vto_carnet'],
+                'WhatsApp' => $request['WhatsApp'],
+                'mail' => $request['mail'],
+                'user' => $request['user'],
+                'empresa' => $request['empresa'],
+                'transporte' => $transport,
+                'fletero_id' => $request['id_fletero'],
+                'transport_id' => $idTransport,
+                'Observaciones' => $request['Observaciones']
+            ]);
+
+            return response()->json([
+                'message' => 'Conductor actualizado exitosamente.',
+                'data' => $driver,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al actualizar el conductor.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function status(Request $request, $id)
     {
         $driver = Driver::findOrFail($id);
         $driver->status_chofer = $request['status_chofer'];
-        $driver->place= $request['place'];
+        $driver->place = $request['place'];
         $driver->user = $request['user'];
         $driver->empresa = $request['empresa'];
         $driver->save();
@@ -133,16 +192,15 @@ class DriverController extends Controller
      */
     public function destroy($id)
     {
-        Driver::destroy($id);
 
-        $existe = Driver::find($id);
-        if($existe){
-            return 'No se elimino el Chofer';
-        }else{
-            return 'Se elimino el Chofer';
-        };
+        $driver = Driver::findOrFail($id);
+        $driver->delete();  // Esto marcará el registro como eliminado (soft delete)
+
+        return response()->json([
+            'message' => 'Driver marcado como eliminado exitosamente.'
+        ], 200);
     }
-    
+
     public function issetDriver(Request $request)
     {
         $nombre = $request->query('nombre');

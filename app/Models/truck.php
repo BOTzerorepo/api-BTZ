@@ -10,4 +10,30 @@ use OwenIt\Auditing\Auditable;
 class truck extends Model implements AuditableContract
 {
     use HasFactory, Auditable;
+
+    protected $fillable = [
+        'model',
+        'chasis',
+        'poliza',
+        'vto_poliza',
+        'type',
+        'domain',
+        'year',
+        'device_truck',
+        'satelital_location',
+        'transport_id',
+        'user',
+        'customer_id',
+        'fletero_id' // Añadido fletero_id
+    ];
+
+    public function transport()
+    {
+        return $this->belongsTo(Transport::class);
+    }
+
+    public function fletero()
+    {
+        return $this->belongsTo(Fletero::class);
+    }
 }

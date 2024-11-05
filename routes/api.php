@@ -3,6 +3,20 @@
 use App\Http\Controllers\cntrController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\FleteroController;
+use App\Http\Controllers\AuthController;
+
+
+Route::post('register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login'])->name('login');
+
+
+Route::group(['middleware' => 'auth:api'], function () {
+  Route::post('logout', [AuthController::class, 'logout']);
+  Route::get('user', [AuthController::class, 'getAuthenticatedUser']);
+  Route::get('takeUser', 'App\Http\Controllers\FcmTokenController@takeUser');
+
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -13,12 +27,32 @@ use Illuminate\Support\Facades\Route;
 | routes are loaded by the RouteServiceProvider within a group which
 | is assigned the "api" middleware group. Enjoy building your API!
 |
-*/
+*/ 
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::get('/getUsersToken', 'App\Http\Controllers\FcmTokenController@getUsersWithTokens');
+
+Route::get('/notificationMobile/{token}/{title}/{body}', 'App\Http\Controllers\FcmTokenController@sendNotification');
+Route::put('/registerToken', 'App\Http\Controllers\FcmTokenController@registerToken');
+Route::put('/updatToken', 'App\Http\Controllers\FcmTokenController@updateToken');
+
+Route::get('/notifyUsers', 'App\Http\Controllers\FcmTokenController@notifyUsers');
+Route::get('/takeUser', 'App\Http\Controllers\FcmTokenController@takeUser');
+
+
+
+Route::get('/ejecutar/{puntoActivoId}/{contenedorId}','App\Http\Controllers\ServiceSatelital@ejecutarAccionEntrada');
+Route::get('/points_of_interest','App\Http\Controllers\InterestPointController@index');
+Route::post('/points_of_interest','App\Http\Controllers\InterestPointController@store');
+Route::put('/points_of_interest/{id}','App\Http\Controllers\InterestPointController@update');
+Route::delete('/points_of_interest/{id}','App\Http\Controllers\InterestPointController@destroy');
+//CARGA--PUNTO INTERES
+Route::post('/points_of_interest_carga/{id}','App\Http\Controllers\InterestPointController@agregarPuntoInteresCarga');
+Route::get('/points_of_interest_cntr/{id}','App\Http\Controllers\InterestPointController@puntoInteresCntr');
+Route::post('/actualizar_points_of_interest_cntr/{id}','App\Http\Controllers\InterestPointController@actualizarPuntosInteresCntr');
 /* 
 ooooo   ooooo   .oooooo.   ooo        ooooo oooooooooooo      ooooo ooooo      ooo oooooooooooo   .oooooo.        8 8 8 8 8 8 8 8 8 8 8 8 8 8
 `888'   `888'  d8P'  `Y8b  `88.       .888' `888'     `8      `888' `888b.     `8' `888'     `8  d8P'  `Y8b       8 8 8 8 8 8 8 8 8 8 8 8 8 8
@@ -38,18 +72,29 @@ Route::get('/allCargoFinished/{user}','App\Http\Controllers\cargaController@load
 Route::get('/carga/{id}/{user}','App\Http\Controllers\cargaController@show');
 Route::get('/cargaDomain/{domain}', 'App\Http\Controllers\cargaController@showCargaDomain');
 
+Route::get('/loadFinishedTransport/{transport}', 'App\Http\Controllers\cargaController@loadFinishedTransport');
+
+
 
 // STATUS
 
-Route::post('/statusCarga', 'App\Http\Controllers\statusController@updateStatusCarga'); 
+Route::post('/statusCarga', 'App\Http\Controllers\statusController@updateStatusCarga');
+Route::get('/cargasActivas', 'App\Http\Controllers\statusController@indexActive');
+Route::get('/cargasActivasTransport/{transport}', 'App\Http\Controllers\statusController@indexTransportActive'); 
+
+
 Route::get('/status','App\Http\Controllers\statusController@index');
 Route::get('/ultimoStatus/{id}','App\Http\Controllers\statusController@showLast'); 
 Route::get('/historialStatus/{cntr}','App\Http\Controllers\statusController@showHistory'); 
 
 // INSTRUCTIVOS
 
-Route::get('/instructivos/{userTraffic}','App\Http\Controllers\instructivosController@index'); 
+Route::get('/instructivos/{userTraffic}','App\Http\Controllers\instructivosController@index');
 Route::get('/instructivosdelete/{userTraffic}/{id}','App\Http\Controllers\instructivosController@destroy');
+
+Route::get('/instructivosTransport/{transport}', 'App\Http\Controllers\instructivosController@indexTransport'); 
+
+
 
 // ASIGNACIONES
 Route::get('/truckAsign/{id}', 'App\Http\Controllers\TruckController@trailerAsign'); // Show for Transport no existe.
@@ -57,11 +102,6 @@ Route::get('/truckAsign/{id}', 'App\Http\Controllers\TruckController@trailerAsig
 // SEGUROS
 
 Route::post('/seguro', 'App\Http\Controllers\seguroController@store');
-
-
-
-
-
 
 /* 
 oooooooooooo ooo        ooooo       .o.       ooooo ooooo         .oooooo..o      8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8
@@ -78,10 +118,13 @@ Route::get('/mailCargaNueva/{idCarga}/{user}','App\Http\Controllers\emailControl
 
 /* Envio de Emails */
 
-Route::get('/mailStatus/{cntr}/{empresa}/{booking}/{user}/{tipo}','App\Http\Controllers\emailController@cambiaStatus');  // Llega Correo Ok
+Route::get('/mailStatus/{cntr}/{empresa}/{booking}/{user}/{tipo}/{statusArchivoPath}','App\Http\Controllers\emailController@cambiaStatus');  // Llega Correo Ok
 Route::get('/cargaAsignada/{id}','App\Http\Controllers\emailController@cargaAsignada');  // Llega Correo Ok
-Route::get('/trasnsporteAsignado/{id}','App\Http\Controllers\emailController@transporteAsignado');  // Llega Correo Ok
 
+//REMPLAZAR  CON LA ASIGNACION DEL TRANSPORTE Y ENVIAR MAIL
+Route::post('/transporteAsignado/{id}','App\Http\Controllers\TransportController@transporteAsignado'); 
+Route::post('/asignarUnidadTransporte/{id}','App\Http\Controllers\TransportController@asignarUnidadTransporte'); 
+Route::post('/confirmarUnidad/{id}','App\Http\Controllers\TransportController@confirmarUnidad'); 
 // Route::post('/imprimir/create','App\Http\Controllers\crearpdfControllerPDF@store')mostrar todos
 // Route::get('/imprimirIns','App\Http\Controllers\imprimirPDF@store'); //mostrar todos
 // Route::put('/imprimir/{id}','App\Http\Controllers\imprimirPDF@update');//actualizar
@@ -132,10 +175,15 @@ Route::get('/lugarDeCarga/{patente}','App\Http\Controllers\CustomerLoadPlaceCont
 Route::get('/accionLugarDeCarga/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionLugarDeCarga'); // LLEGO OK EMAIL
 Route::get('/accionLugarAduana/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionLugarAduana');// LLEGO OK EMAIL
 Route::get('/accionLugarDescarga/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionLugarDescarga');// LLEGO OK EMAIL
+Route::get('/accionFueraLugarDeCarga/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionFueraLugarDeCarga'); // LLEGO OK EMAIL
+Route::get('/accionFueraLugarAduana/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionFueraLugarAduana');// LLEGO OK EMAIL
 Route::get('/servicioSatelital','App\Http\Controllers\ServiceSatelital@serviceSatelital');
 Route::get('/pruebaSatelital','App\Http\Controllers\ServiceSatelital@servicePrueba');
 Route::get('/flota','App\Http\Controllers\ServiceSatelital@flota');
 Route::get('/flotaId/{id}', 'App\Http\Controllers\ServiceSatelital@flotaID');
+Route::get('/flotaTransport/{transport}', 'App\Http\Controllers\ServiceSatelital@flotaTransport');
+
+
 
 Route::get('/dominioAker/{dominio}', 'App\Http\Controllers\ServiceSatelital@issetDominio');
 Route::get('/revierDomain', 'App\Http\Controllers\ServiceSatelital@reviewDomains');
@@ -189,10 +237,18 @@ Route::get('/user/{user}', 'App\Http\Controllers\UserController@show');
 // CNTR
 
 Route::resource('/cntr',cntrController::class);
+Route::get('/datosConfirmar/{cntrId}', 'App\Http\Controllers\cntrController@datosConfirmar');
+
+// FLETERO CONTROLLER 
+
+Route::resource('fleteros', FleteroController::class);
+Route::get('/fleteroAsociados/{id}', [FleteroController::class, 'getFleteroDetails']);
 
 // TRUCK CONTROLLLER 
 Route::post('/truck', 'App\Http\Controllers\TruckController@store'); // C
 Route::get('/trucks/{customer}', 'App\Http\Controllers\TruckController@index'); // R ALL
+Route::get('/trucksTransport/{transport}', 'App\Http\Controllers\TruckController@indexTransport'); // R ALL
+
 Route::get('/truck/{truck}', 'App\Http\Controllers\TruckController@show'); // R ONE
 Route::post('/truck/{truck}', 'App\Http\Controllers\TruckController@update'); // U 
 Route::delete('/truck/{truck}', 'App\Http\Controllers\TruckController@destroy'); // D 
@@ -201,10 +257,12 @@ Route::get('/truckTransport/{truck}', 'App\Http\Controllers\TruckController@show
 // TRAILER CONTROLLLER 
 Route::post('/trailer', 'App\Http\Controllers\TrailerController@store'); // C
 Route::get('/trailer/{customer}', 'App\Http\Controllers\TrailerController@index'); // R ALL
+Route::get('/trailerTransport/{transport}', 'App\Http\Controllers\TrailerController@indexTransport'); // R ALL
+
 Route::get('/trailer/{trailer}', 'App\Http\Controllers\TrailerController@show'); // R ONE
 Route::post('/trailer/{trailer}', 'App\Http\Controllers\TrailerController@update'); // U
 Route::delete('/trailer/{trailer}', 'App\Http\Controllers\TrailerController@destroy'); // D
-Route::get('/trailerTransport/{transport_id}', 'App\Http\Controllers\TrailerController@showTrailer'); // Show for Transport
+//Route::get('/trailerTransport/{transport_id}', 'App\Http\Controllers\TrailerController@showTrailer'); // Show for Transport
 
 //Ata
 Route::get('/atas','App\Http\Controllers\AtaController@index'); //Busca todos los Agente de transporte
@@ -216,7 +274,9 @@ Route::delete('/ata/{id}','App\Http\Controllers\AtaController@destroy'); //Elimi
 // DRIVER CONTROLLLER trailerAsign
 
 Route::get('/drivers/{transport_id}','App\Http\Controllers\DriverController@showDriver'); 
-Route::get('/drivers','App\Http\Controllers\DriverController@index'); 
+Route::get('/drivers','App\Http\Controllers\DriverController@index');
+Route::get('/driversTransport/{idTransport}', 'App\Http\Controllers\DriverController@indexTransport'); 
+
 Route::get('/driver/{id}','App\Http\Controllers\DriverController@show'); 
 Route::post('/driver','App\Http\Controllers\DriverController@store'); 
 Route::post('/driverStatus/{id}','App\Http\Controllers\DriverController@status'); 
@@ -231,7 +291,8 @@ Route::get('/transporteRazonSocial/{razonSocial}','App\Http\Controllers\Transpor
 Route::post('/transporte','App\Http\Controllers\TransportController@store'); 
 Route::post('/transporte/{id}','App\Http\Controllers\TransportController@update'); 
 Route::delete('/transporte/{id}','App\Http\Controllers\TransportController@destroy'); 
-
+Route::get('/transportesUsuario/{id}','App\Http\Controllers\TransportController@transportesUsuario'); 
+Route::post('/transportesAsignEditar/{id}','App\Http\Controllers\TransportController@transportesAsignEditar'); 
 //Agencia
 Route::get('/agencias','App\Http\Controllers\AgencyController@index'); //Busca todas las agencias
 Route::get('/agencia/{id}','App\Http\Controllers\AgencyController@show'); //Busca una sola agencia
@@ -354,6 +415,17 @@ Route::get('/finalPoints/{id}','App\Http\Controllers\finalPointController@show')
 Route::post('/finalPoints','App\Http\Controllers\finalPointController@store'); //Crea un nuevo final Points
 Route::post('/finalPoints/{id}','App\Http\Controllers\finalPointController@update'); //Actualiza los datos de un final Points
 Route::delete('/finalPoints/{id}','App\Http\Controllers\finalPointController@destroy'); //Elimina un final Points
+
+Route::get('razonSocialTransport/{transport}', 'App\Http\Controllers\RazonSocialController@indexTransport');
+Route::get('razonesSociales', 'App\Http\Controllers\RazonSocialController@index');
+Route::get('razonSocial/{razonSocial}', 'App\Http\Controllers\RazonSocialController@show');
+Route::post('razonSocialTransport', 'App\Http\Controllers\RazonSocialController@store');
+Route::post('razonSocialTransport/{transport}', 'App\Http\Controllers\RazonSocialController@update');
+Route::delete('razonSocialTransport/{transport}', 'App\Http\Controllers\RazonSocialController@destroy');
+
+
+
+
 
 /*                                                                
 oooooooooooo ooooooo  ooooo   .oooooo.   oooooooooooo ooooo             8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 8 

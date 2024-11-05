@@ -5,7 +5,10 @@
 /vendor
 /public/instructivos
 .env
-.env copy 2
+.env copy
+.env prod
+.env demo
+.env localPachi
 .env.backup
 .env Prod
 .env demo
