@@ -46,7 +46,6 @@ class emailController extends Controller
 
         $data = [
             // Datos CRT
-
             'transport' => $dAsign->transport,
             'direccion' => $dAsign->Direccion,
             'paut' => $dAsign->paut,
@@ -54,9 +53,7 @@ class emailController extends Controller
             'permiso_int' => $dAsign->permiso,
             'vto_permiso_int' => $dAsign->vto_permiso,
             'crt' => $dAsign->crt,
-
             // Datos para MIC
-
             'fletero_razon_social' => $dAsign->fletero_razon_social,
             'fletero_domicilio' => $dAsign->fletero_domicilio,
             'fletero_cuit' => $dAsign->fletero_cuit,
@@ -64,24 +61,19 @@ class emailController extends Controller
             'fletero_permiso' => $dAsign->fletero_permiso,
             'fletero_vto_permiso' => $dAsign->fletero_vto_permiso,
             'confirmacion' => $dAsign->confirmacion,
-
             'driver' => $dAsign->driver,
             'documento' => $dAsign->documento,
-
             'truck' => $dAsign->truck,
             'truck_modelo' => $dAsign->model,
             'truck_year' => $dAsign->year,
             'truck_chasis' => $dAsign->chasis,
             'truck_poliza' => $dAsign->poliza,
             'truck_vto_poliza' => $dAsign->vto_poliza,
-
             'truck_semi' => $dAsign->truck_semi,
             'truck_semi_poliza' => $dAsign->semi_poliza,
             'truck_semi_vto_poliza' => $dAsign->semi_vto_poliza,
-
             'cntr_number' => $dAsign->cntr_number,
             'booking' => $dAsign->booking,
-
             'user' => $dAsign->user,
             'company' => $dAsign->company,
             'ref_customer' => $dAsign->ref_customer,

@@ -47,4 +47,11 @@ class cntr extends Model implements AuditableContract
         'calificacion_carga',
         'feedback_customer',
     ];
+
+    public function interestPoints()
+    {
+        return $this->belongsToMany(InterestPoint::class, 'cntr_interest_point', 'cntr_id_cntr', 'interest_point_id')
+                    ->withPivot('order', 'activo')
+                    ->orderBy('cntr_interest_point.order');
+    }
 }

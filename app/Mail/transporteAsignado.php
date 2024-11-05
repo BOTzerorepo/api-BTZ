@@ -23,7 +23,7 @@ class transporteAsignado extends Mailable
     {
         $this->datos = $datos;
         $this->date  = $date;
-        $this->subject = 'ASIGNACION DE UNIDAD // ' . $datos['ref_customer'] . ' - ' . $datos['type'] . ' - ' . $datos['trader'] . ' – 1x ' . $datos['cntr_type'] . ' // BKG:' . $datos['booking'] . ' .';
+        $this->subject = 'ASIGNACION DE TRANSPORTE // ' . $datos['ref_customer'] . ' - ' . $datos['type'] . ' - ' . $datos['trader'] . ' – 1x ' . $datos['cntr_type'] . ' // BKG:' . $datos['booking'] . ' .';
     }
 
     /**

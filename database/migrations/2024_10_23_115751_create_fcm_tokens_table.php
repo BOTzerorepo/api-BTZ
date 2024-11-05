@@ -13,13 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('aker_trucks', function (Blueprint $table) {
+        Schema::create('fcm_tokens', function (Blueprint $table) {
             $table->id();
-            $table->string('domain')->unique();
-            $table->string('transport');
-            $table->string('satelital');
-            $table->integer('estado')->default(0); // 0 - No Alta 1 - Alta 2 - Con Problema. 
-            $table->text('observacion');
+            $table->string('token');
+            $table->unsignedBigInteger('user_id')->nullable(); // Si los tokens están asociados a usuarios
             $table->timestamps();
         });
     }
@@ -31,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('aker_trucks');
+        Schema::dropIfExists('fcm_tokens');
     }
 };

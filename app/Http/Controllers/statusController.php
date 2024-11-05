@@ -19,6 +19,8 @@ use Illuminate\Support\Facades\Log;
 use App\Mail\cargaTerminada;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
+use App\Models\Transport;
+
 
 use function GuzzleHttp\json_encode;
 
@@ -40,7 +42,6 @@ class statusController extends Controller
         ->join('asign', 'asign.cntr_number', '=', 'cntr.cntr_number')
         ->join('status', 'status.cntr_number', '=', 'cntr.cntr_number')
         ->leftjoin('trucks', 'trucks.domain', '=', 'asign.truck')
-        
         ->select(
             'cntr.id_cntr',
             'carga.ref_customer',
@@ -80,6 +81,62 @@ class statusController extends Controller
         return $cargasActivas;
 
     }
+    public function indexTransportActive($ids)
+{
+    // Convertir la cadena de IDs separados por comas en un array
+    $idArray = explode(',', $ids);
+
+    // Buscar los transportes cuyos IDs estén en la lista
+    $transportes = Transport::whereIn('id', $idArray)->get();
+
+    // Crear un array para almacenar las razones sociales
+    $rzTransportes = $transportes->pluck('razon_social')->toArray();
+
+    // Realizar la consulta de las cargas activas para todos los transportes
+    $cargasActivas = DB::table('cntr')
+        ->join('carga', 'cntr.booking', '=', 'carga.booking')
+        ->leftJoin('asign', 'asign.cntr_number', '=', 'cntr.cntr_number')
+        ->leftJoin('status', 'status.cntr_number', '=', 'cntr.cntr_number')
+        ->leftJoin('trucks', 'trucks.domain', '=', 'asign.truck')
+        ->whereIn('asign.transport', $rzTransportes) // Filtrar por las razones sociales de los transportes
+        ->select(
+            'cntr.id_cntr',
+            'carga.ref_customer',
+            'cntr.booking',
+            'cntr.cntr_number',
+            'cntr.cntr_type',
+            'cntr.confirmacion',
+            'cntr.main_status',
+            'cntr.status_cntr',
+            'asign.driver',
+            'asign.truck',
+            'asign.truck_semi',
+            'asign.transport',
+            'asign.file_instruction',
+            'trucks.alta_aker',
+            DB::raw('MAX(status.id) as latest_status_id') // Seleccionar el último status basado en el id
+        )
+        ->where('cntr.main_status', '!=', 'TERMINADA')
+        ->groupBy(
+            'cntr.id_cntr',
+            'carga.ref_customer',
+            'cntr.booking',
+            'cntr.cntr_number',
+            'cntr.cntr_type',
+            'cntr.confirmacion',
+            'cntr.main_status',
+            'cntr.status_cntr',
+            'asign.driver',
+            'asign.truck',
+            'asign.truck_semi',
+            'asign.transport',
+            'trucks.alta_aker',
+            'asign.file_instruction'
+        )
+        ->get();
+
+    return $cargasActivas;
+}
 
     /**
      * Show the form for creating a new resource.

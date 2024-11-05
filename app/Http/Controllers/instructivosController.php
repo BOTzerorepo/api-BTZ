@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Transport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -31,6 +32,16 @@ class instructivosController extends Controller
         
         }
 
+    }
+    public function indexTransport($transport)
+    {
+
+        $transportIds = explode(',', $transport);
+        $razonSocialList = Transport::whereIn('id', $transportIds)->pluck('razon_social');
+
+        $instructivos = DB::table('asign')->where('file_instruction', '!=', null)->select('asign.*', 'cntr.confirmacion')->join('cntr', 'cntr.cntr_number', 'asign.cntr_number')->whereIn('asign.transport', $razonSocialList)->orderBy('asign.created_at', 'desc')->get();
+        return $instructivos;
+        
     }
 
     /**

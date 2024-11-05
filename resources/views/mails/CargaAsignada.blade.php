@@ -343,11 +343,8 @@
                                                                             <div style="font-family: sans-serif">
                                                                                 <div class="txtTinyMce-wrapper"
                                                                                     style="font-size: 12px; font-family: Lato, Tahoma, Verdana, Segoe, sans-serif; mso-line-height-alt: 14.399999999999999px; color: #052d3d; line-height: 1.2;">
-
-                                                                                    <p
-                                                                                        style="margin: 0; font-size: 12px; text-align: center;">
-                                                                                        <span
-                                                                                            style="font-size:20px; color: gray; text-align: center;">
+                                                                                    <p style="margin: 0; font-size: 12px; text-align: center;">
+                                                                                        <span style="font-size:20px; color: gray; text-align: center;">
                                                                                             <h3>Datos para CRT</h3>
                                                                                             <hr>
                                                                                             <p>Transporte:
