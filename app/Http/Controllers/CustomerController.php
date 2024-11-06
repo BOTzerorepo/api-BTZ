@@ -37,19 +37,26 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
-       
-            $customer = new customer();
-            $customer->registered_name = $request['registered_name'];
-            $customer->tax_id = $request['tax_id'];
-            $customer->contact_name = $request['contact_name'];
-            $customer->contact_phone = $request['contact_phone'];
-            $customer->contact_mail = $request['contact_mail'];
-            $customer->save();
+        // Validación de los datos de entrada
+        $validated = $request->validate([
+            'registered_name' => 'required|string|max:255',           
+            'tax_id' => 'required|numeric|digits_between:8,12',         
+            'contact_name' => 'required|string|max:255',               
+            'contact_phone' => 'required|numeric|digits_between:7,12',            
+            'contact_mail' => 'required|email|max:255',                
+        ]);
 
-            return $customer;
+        // Si la validación pasa, los datos se guardan
+        $customer = new customer();
+        $customer->registered_name = $request['registered_name'];
+        $customer->tax_id = $request['tax_id'];
+        $customer->contact_name = $request['contact_name'];
+        $customer->contact_phone = $request['contact_phone'];
+        $customer->contact_mail = $request['contact_mail'];
+        $customer->save();
 
-        
-        
+        // Retorna el cliente recién guardado
+        return response()->json($customer);
     }
 
     /**

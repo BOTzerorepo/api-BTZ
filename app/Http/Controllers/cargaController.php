@@ -553,7 +553,6 @@ class cargaController extends Controller
             // Validación de datos
             $request->validate([
                 'ref_customer' => 'required',
-                'tarifa_ref' => 'required',
                 'trader' => 'required',
                 'booking' => 'required',
                 'qviajes' => 'required',
