@@ -125,7 +125,7 @@ class CustomerLoadPlaceController extends Controller
                 $logApi->save();
             } else {
 
-                Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaCargando($datos));
+                Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaCargando($datos));
 
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
@@ -200,7 +200,7 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->detalle = "envio email cargaCargando to:" . $mail;
                     $logApi->save();
                 } else {
-                    Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaCargando($datos));
+                    Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaCargando($datos));
 
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
@@ -281,13 +281,13 @@ class CustomerLoadPlaceController extends Controller
                 Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new cargaAduana($datos));
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
-                $logApi->detalle = "envio email cargaAduana to: 'pablorio@botzero.tech'";
+                $logApi->detalle = "envio email cargaAduana to: 'copia@botzero.com.ar'";
                 $logApi->save();
             } else {
-                Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaAduana($datos));
+                Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaAduana($datos));
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
-                $logApi->detalle = "envio email cargaAduana to: 'pablorio@botzero.tech'";
+                $logApi->detalle = "envio email cargaAduana to: 'copia@botzero.com.ar'";
                 $logApi->save();
             }
 
@@ -353,14 +353,14 @@ class CustomerLoadPlaceController extends Controller
                     Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new cargaAduana($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
-                    $logApi->detalle = "envio email cargaAduana to: 'pablorio@botzero.tech'";
+                    $logApi->detalle = "envio email cargaAduana to: 'copia@botzero.com.ar'";
                     $logApi->save();
                 } else {
 
-                    Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaAduana($datos));
+                    Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaAduana($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
-                    $logApi->detalle = "envio email cargaAduana to: 'pablorio@botzero.tech'";
+                    $logApi->detalle = "envio email cargaAduana to: 'copia@botzero.com.ar'";
                     $logApi->save();
                 }
                 $actualizarAvisado = statu::find($qd->id);
@@ -435,14 +435,14 @@ class CustomerLoadPlaceController extends Controller
                 Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new cargaDescarga($datos));
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
-                $logApi->detalle = "envio email Instructivo to: 'pablorio@botzero.tech'";
+                $logApi->detalle = "envio email Instructivo to: 'copia@botzero.com.ar'";
                 $logApi->save();
             } else {
 
-                Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaDescarga($datos));
+                Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaDescarga($datos));
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
-                $logApi->detalle = "envio email Instructivo to: 'pablorio@botzero.tech'";
+                $logApi->detalle = "envio email Instructivo to: 'copia@botzero.com.ar'";
                 $logApi->save();
             }
             $actualizarAvisado = statu::find($qd->id);
@@ -501,14 +501,14 @@ class CustomerLoadPlaceController extends Controller
                     Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new cargaDescarga($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
-                    $logApi->detalle = "envio email Instructivo to: 'pablorio@botzero.tech'";
+                    $logApi->detalle = "envio email Instructivo to: 'copia@botzero.com.ar'";
                     $logApi->save();
                 } else {
 
-                    Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaDescarga($datos));
+                    Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaDescarga($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
-                    $logApi->detalle = "envio email Instructivo to: 'pablorio@botzero.tech'";
+                    $logApi->detalle = "envio email Instructivo to: 'copia@botzero.com.ar'";
                     $logApi->save();
                 }
                 $actualizarAvisado = statu::find($qd->id);
@@ -587,7 +587,7 @@ class CustomerLoadPlaceController extends Controller
                 $logApi->save();
             } else {
 
-                Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaFueraCargando($datos));
+                Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaFueraCargando($datos));
 
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
@@ -662,7 +662,7 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->detalle = "envio email cargaCargando to:" . $mail;
                     $logApi->save();
                 } else {
-                    Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaFueraCargando($datos));
+                    Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaFueraCargando($datos));
 
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
@@ -743,13 +743,13 @@ class CustomerLoadPlaceController extends Controller
                 Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new cargaFueraAduana($datos));
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
-                $logApi->detalle = "envio email cargaAduana to: 'pablorio@botzero.tech'";
+                $logApi->detalle = "envio email cargaAduana to: 'copia@botzero.com.ar'";
                 $logApi->save();
             } else {
-                Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaFueraAduana($datos));
+                Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaFueraAduana($datos));
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
-                $logApi->detalle = "envio email cargaAduana to: 'pablorio@botzero.tech'";
+                $logApi->detalle = "envio email cargaAduana to: 'copia@botzero.com.ar'";
                 $logApi->save();
             }
 
@@ -813,14 +813,14 @@ class CustomerLoadPlaceController extends Controller
                     Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new cargaFueraAduana($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
-                    $logApi->detalle = "envio email cargaAduana to: 'pablorio@botzero.tech'";
+                    $logApi->detalle = "envio email cargaAduana to: 'copia@botzero.com.ar'";
                     $logApi->save();
                 } else {
 
-                    Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaFueraAduana($datos));
+                    Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaFueraAduana($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
-                    $logApi->detalle = "envio email cargaAduana to: 'pablorio@botzero.tech'";
+                    $logApi->detalle = "envio email cargaAduana to: 'copia@botzero.com.ar'";
                     $logApi->save();
                 }
                 $actualizarAvisado = statu::find($qd->id);

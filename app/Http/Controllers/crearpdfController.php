@@ -902,17 +902,17 @@ class crearpdfController extends Controller
 
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
-                $logApi->detalle = "envio email Instructivo to: pablorio@botzero.tech";
+                $logApi->detalle = "envio email Instructivo to: copia@botzero.com.ar";
                 $logApi->save();
                 return 'ok';
 
             } else{
 
-                Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new envioInstructivo($data));
+                Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new envioInstructivo($data));
 
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
-                $logApi->detalle = "envio email Instructivo to: pablorio@botzero.tech";
+                $logApi->detalle = "envio email Instructivo to: copia@botzero.com.ar";
                 $logApi->save();
                 return 'ok';
             }
