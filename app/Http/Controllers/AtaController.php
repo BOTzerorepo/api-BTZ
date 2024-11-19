@@ -16,7 +16,7 @@ class AtaController extends Controller
      */
     public function index()
     {
-        $atas = DB::table('atas')->get();       
+        $atas = DB::table('atas')->get();
         return $atas;
     }
 
@@ -72,7 +72,7 @@ class AtaController extends Controller
      */
     public function show($id)
     {
-        $ata = DB::table('atas')->where('id','=',$id)->get();
+        $ata = DB::table('atas')->where('id', '=', $id)->get();
         return $ata;
     }
 
@@ -96,18 +96,30 @@ class AtaController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $ata = Ata::findOrFail($id);
-        $ata->razon_social = $request['razon_social'];
-        $ata->tax_id= $request['tax_id'];
-        $ata->provincia = $request['provincia'];
-        $ata->phone = $request['phone'];
-        $ata->pais = $request['pais'];
-        $ata->mail = $request['mail'];
-        $ata->user = $request['user'];
-        $ata->empresa = $request['empresa'];
-        $ata->save();
+        try {
+            $validated = $request->validate([
+                'razon_social' => 'required|string|max:255',
+                'tax_id' => 'required|numeric|digits_between:8,12',
+                'provincia' => 'nullable|string|max:255',
+                'phone' => 'nullable|numeric|digits_between:7,12',
+                'pais' => 'nullable|string',
+                'mail' => 'nullable|email|max:255',
+                'user' => 'nullable|string|max:255',
+                'empresa' => 'nullable|string|max:255',
+            ]);
+            $ata = Ata::findOrFail($id);
+            $ata->update($validated);
 
-        return $ata;
+            return response()->json([
+                'message' => 'Ata actualizado con éxito',
+                'data' => $ata
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'No se pudo actualizar el ata',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -121,9 +133,9 @@ class AtaController extends Controller
         Ata::destroy($id);
 
         $existe = Ata::find($id);
-        if($existe){
+        if ($existe) {
             return 'No se elimino el Agente de Transporte';
-        }else{
+        } else {
             return 'Se elimino el Agente de Transporte';
         };
     }
