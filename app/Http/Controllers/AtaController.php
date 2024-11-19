@@ -38,18 +38,30 @@ class AtaController extends Controller
      */
     public function store(Request $request)
     {
-        $ata = new Ata();
-        $ata->razon_social = $request['razon_social'];
-        $ata->tax_id= $request['tax_id'];
-        $ata->provincia = $request['provincia'];
-        $ata->phone = $request['phone'];
-        $ata->pais = $request['pais'];
-        $ata->mail = $request['mail'];
-        $ata->user = $request['user'];
-        $ata->empresa = $request['empresa'];
-        $ata->save();
+        try {
+            $validated = $request->validate([
+                'razon_social' => 'required|string|max:255',
+                'tax_id' => 'required|numeric|digits_between:8,12',
+                'provincia' => 'nullable|string|max:255',
+                'phone' => 'nullable|numeric|digits_between:7,12',
+                'pais' => 'nullable|string',
+                'mail' => 'nullable|email|max:255',
+                'user' => 'nullable|string|max:255',
+                'empresa' => 'nullable|string|max:255',
+            ]);
 
-        return $ata;
+            $ata = Ata::create($validated);
+            return response()->json([
+                'message' => 'Lugar de descarga creada con éxito',
+                'data' => $ata
+            ], 201);
+        } catch (\Exception $e) {
+            // Manejo de errores si algo falla
+            return response()->json([
+                'message' => 'No se pudo crear el Lugar de descarga',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
