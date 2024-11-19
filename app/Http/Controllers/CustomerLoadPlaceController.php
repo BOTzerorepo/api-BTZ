@@ -876,21 +876,34 @@ class CustomerLoadPlaceController extends Controller
      */
     public function store(Request $request)
     {
-        $customerLoadPlace = new CustomerLoadPlace();
-        $customerLoadPlace->description = $request['description'];
-        $customerLoadPlace->address = $request['address'];
-        $customerLoadPlace->city = $request['city'];
-        $customerLoadPlace->country = $request['country'];
-        $customerLoadPlace->km_from_town = $request['km_from_town'];
-        $customerLoadPlace->remarks = $request['remarks'];
-        $customerLoadPlace->latitud = $request['latitud'];
-        $customerLoadPlace->longitud = $request['longitud'];
-        $customerLoadPlace->link_maps = $request['link_maps'];
-        $customerLoadPlace->user = $request['user'];
-        $customerLoadPlace->company = $request['company'];
-        $customerLoadPlace->save();
+        try {
+            $validated = $request->validate([
+                'description' => 'required|string|max:255',
+                'address' => 'nullable|string|max:255',
+                'city' => 'nullable|string|max:255',
+                'country' => 'nullable|string|max:255',
+                'km_from_town' => 'nullable|string',
+                'remarks' => 'nullable|string|max:255',
+                'latitud' => 'nullable|regex:/^-?\d{1,3}\.\d+$/',
+                'longitud' => 'nullable|regex:/^-?\d{1,3}\.\d+$/',
+                'link_maps' => 'nullable|string|max:255',
+                'user' => 'nullable|string|max:255',
+                'company' => 'nullable|string|max:255',
+            ]);
 
-        return $customerLoadPlace;
+            $customerLoadPlace = CustomerLoadPlace::create($validated);
+
+            return response()->json([
+                'message' => 'Lugar de carga creada con éxito',
+                'data' => $customerLoadPlace
+            ], 201);
+        } catch (\Exception $e) {
+            // Manejo de errores si algo falla
+            return response()->json([
+                'message' => 'No se pudo crear el Lugar de carga',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -925,21 +938,33 @@ class CustomerLoadPlaceController extends Controller
      */
     public function update(Request $request,  $id)
     {
-        $customerLoadPlace = CustomerLoadPlace::findOrFail($id);
-        $customerLoadPlace->description = $request['description'];
-        $customerLoadPlace->address = $request['address'];
-        $customerLoadPlace->city = $request['city'];
-        $customerLoadPlace->country = $request['country'];
-        $customerLoadPlace->km_from_town = $request['km_from_town'];
-        $customerLoadPlace->remarks = $request['remarks'];
-        $customerLoadPlace->latitud = $request['latitud'];
-        $customerLoadPlace->longitud = $request['longitud'];
-        $customerLoadPlace->link_maps = $request['link_maps'];
-        $customerLoadPlace->user = $request['user'];
-        $customerLoadPlace->company = $request['company'];
-        $customerLoadPlace->save();
+        try {
+            $validated = $request->validate([
+                'description' => 'required|string|max:255',
+                'address' => 'nullable|string|max:255',
+                'city' => 'nullable|string|max:255',
+                'country' => 'nullable|string|max:255',
+                'km_from_town' => 'nullable|string',
+                'remarks' => 'nullable|string|max:255',
+                'latitud' => 'nullable|regex:/^-?\d{1,3}\.\d+$/',
+                'longitud' => 'nullable|regex:/^-?\d{1,3}\.\d+$/',
+                'link_maps' => 'nullable|string|max:255',
+                'user' => 'nullable|string|max:255',
+                'company' => 'nullable|string|max:255',
+            ]);
+            $customerLoadPlace = CustomerLoadPlace::findOrFail($id);
+            $customerLoadPlace->update($validated);
 
-        return $customerLoadPlace;
+            return response()->json([
+                'message' => 'Lugar de carga actualizado con éxito',
+                'data' => $customerLoadPlace
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'No se pudo actualizar el Lugar de carga',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

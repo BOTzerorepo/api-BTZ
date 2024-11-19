@@ -37,21 +37,34 @@ class CustomerUnloadPlaceController extends Controller
      */
     public function store(Request $request)
     {
-        $customerUnloadPlace = new CustomerUnloadPlace();
-        $customerUnloadPlace->description = $request['description'];
-        $customerUnloadPlace->address= $request['address'];
-        $customerUnloadPlace->city = $request['city'];
-        $customerUnloadPlace->country = $request['country'];
-        $customerUnloadPlace->km_from_town = $request['km_from_town'];
-        $customerUnloadPlace->remarks = $request['remarks'];
-        $customerUnloadPlace->latitud = $request['latitud'];
-        $customerUnloadPlace->longitud = $request['longitud'];
-        $customerUnloadPlace->link_maps = $request['link_maps'];
-        $customerUnloadPlace->user = $request['user'];
-        $customerUnloadPlace->company = $request['company'];
-        $customerUnloadPlace->save();
+        try {
+            $validated = $request->validate([
+                'description' => 'required|string|max:255',
+                'address' => 'nullable|string|max:255',
+                'city' => 'nullable|string|max:255',
+                'country' => 'nullable|string|max:255',
+                'km_from_town' => 'nullable|string',
+                'remarks' => 'nullable|string|max:255',
+                'latitud' => 'nullable|regex:/^-?\d{1,3}\.\d+$/',
+                'longitud' => 'nullable|regex:/^-?\d{1,3}\.\d+$/',
+                'link_maps' => 'nullable|string|max:255',
+                'user' => 'nullable|string|max:255',
+                'company' => 'nullable|string|max:255',
+            ]);
 
-        return $customerUnloadPlace;
+            $customerUnloadPlace = CustomerUnloadPlace::create($validated);
+
+            return response()->json([
+                'message' => 'Lugar de descarga creada con éxito',
+                'data' => $customerUnloadPlace
+            ], 201);
+        } catch (\Exception $e) {
+            // Manejo de errores si algo falla
+            return response()->json([
+                'message' => 'No se pudo crear el Lugar de descarga',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -86,22 +99,35 @@ class CustomerUnloadPlaceController extends Controller
      */
     public function update(Request $request,  $id)
     {
-        $customerUnloadPlace = CustomerUnloadPlace::findOrFail($id);
-        $customerUnloadPlace->description = $request['description'];
-        $customerUnloadPlace->address= $request['address'];
-        $customerUnloadPlace->city = $request['city'];
-        $customerUnloadPlace->country = $request['country'];
-        $customerUnloadPlace->km_from_town = $request['km_from_town'];
-        $customerUnloadPlace->remarks = $request['remarks'];
-        $customerUnloadPlace->latitud = $request['latitud'];
-        $customerUnloadPlace->longitud = $request['longitud'];
-        $customerUnloadPlace->link_maps = $request['link_maps'];
-        $customerUnloadPlace->user = $request['user'];
-        $customerUnloadPlace->company = $request['company'];
-        $customerUnloadPlace->save();
+        try {
+            $validated = $request->validate([
+                'description' => 'required|string|max:255',
+                'address' => 'nullable|string|max:255',
+                'city' => 'nullable|string|max:255',
+                'country' => 'nullable|string|max:255',
+                'km_from_town' => 'nullable|string',
+                'remarks' => 'nullable|string|max:255',
+                'latitud' => 'nullable|regex:/^-?\d{1,3}\.\d+$/',
+                'longitud' => 'nullable|regex:/^-?\d{1,3}\.\d+$/',
+                'link_maps' => 'nullable|string|max:255',
+                'user' => 'nullable|string|max:255',
+                'company' => 'nullable|string|max:255',
+            ]);
+            $customerUnloadPlace = CustomerUnloadPlace::findOrFail($id);
+            $customerUnloadPlace->update($validated);
 
-        return $customerUnloadPlace;
+            return response()->json([
+                'message' => 'Lugar de descarga actualizado con éxito',
+                'data' => $customerUnloadPlace
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'No se pudo actualizar el Lugar de descarga',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
+    
 
     /**
      * Remove the specified resource from storage.
