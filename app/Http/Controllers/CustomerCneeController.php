@@ -37,7 +37,6 @@ class CustomerCneeController extends Controller
      */
     public function store(Request $request)
     {
-
         try {
             $validated = $request->validate([
                 'razon_social' => 'required|string|max:255',
