@@ -130,13 +130,23 @@ class AtaController extends Controller
      */
     public function destroy($id)
     {
-        Ata::destroy($id);
-
-        $existe = Ata::find($id);
-        if ($existe) {
-            return 'No se elimino el Agente de Transporte';
-        } else {
-            return 'Se elimino el Agente de Transporte';
-        };
+        try {
+            Ata::destroy($id);
+            $existe = Ata::find($id);
+            if ($existe) {
+                return response()->json([
+                    'message' => 'No se eliminó el Ata. Inténtalo de nuevo.',
+                ], 400);
+            } else {
+                return response()->json([
+                    'message' => 'Ata eliminado con éxito.',
+                ], 200);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Ocurrió un error al intentar eliminar el Ata.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

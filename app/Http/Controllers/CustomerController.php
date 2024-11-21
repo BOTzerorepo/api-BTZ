@@ -130,13 +130,23 @@ class CustomerController extends Controller
      */
     public function destroy($id)
     {
-        customer::destroy($id);
-
-        $existe = Customer::find($id);
-        if ($existe) {
-            return 'No se elimino el Trader';
-        } else {
-            return 'Se elimino el Trader';
-        };
+        try {
+            customer::destroy($id);
+            $existe = customer::find($id);
+            if ($existe) {
+                return response()->json([
+                    'message' => 'No se eliminó el Trader. Inténtalo de nuevo.',
+                ], 400);
+            } else {
+                return response()->json([
+                    'message' => 'Trader eliminado con éxito.',
+                ], 200);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Ocurrió un error al intentar eliminar el Trader.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

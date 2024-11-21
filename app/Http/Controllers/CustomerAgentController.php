@@ -136,13 +136,23 @@ class CustomerAgentController extends Controller
      */
     public function destroy($id)
     {
-        CustomerAgent::destroy($id);
-
-        $existe = CustomerAgent::find($id);
-        if ($existe) {
-            return 'No se elimino el Customer Agent';
-        } else {
-            return 'Se elimino el Customer Agent';
-        };
+        try {
+            CustomerAgent::destroy($id);
+            $existe = CustomerAgent::find($id);
+            if ($existe) {
+                return response()->json([
+                    'message' => 'No se eliminó el Despachante. Inténtalo de nuevo.',
+                ], 400);
+            } else {
+                return response()->json([
+                    'message' => 'Despachante eliminado con éxito.',
+                ], 200);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Ocurrió un error al intentar eliminar el Despachante.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

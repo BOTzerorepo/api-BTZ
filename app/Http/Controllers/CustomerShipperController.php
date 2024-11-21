@@ -138,13 +138,23 @@ class CustomerShipperController extends Controller
      */
     public function destroy($id)
     {
-        CustomerShipper::destroy($id);
-
-        $existe = CustomerShipper::find($id);
-        if ($existe) {
-            return 'No se elimino el Customer Ntfy';
-        } else {
-            return 'Se elimino el Customer Ntfy';
-        };
+        try {
+            CustomerShipper::destroy($id);
+            $existe = CustomerShipper::find($id);
+            if ($existe) {
+                return response()->json([
+                    'message' => 'No se eliminó el Shipper. Inténtalo de nuevo.',
+                ], 400);
+            } else {
+                return response()->json([
+                    'message' => 'Shipper eliminado con éxito.',
+                ], 200);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Ocurrió un error al intentar eliminar el Shipper.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

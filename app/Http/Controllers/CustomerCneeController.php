@@ -131,13 +131,23 @@ class CustomerCneeController extends Controller
      */
     public function destroy($id)
     {
-        CustomerCnee::destroy($id);
-
-        $existe = CustomerCnee::find($id);
-        if ($existe) {
-            return 'No se elimino la Customer Cnee';
-        } else {
-            return 'Se elimino la Customer Cnee';
-        };
+        try {
+            CustomerCnee::destroy($id);
+            $existe = CustomerCnee::find($id);
+            if ($existe) {
+                return response()->json([
+                    'message' => 'No se eliminó el Consignee. Inténtalo de nuevo.',
+                ], 400);
+            } else {
+                return response()->json([
+                    'message' => 'Consignee eliminado con éxito.',
+                ], 200);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Ocurrió un error al intentar eliminar el Consignee.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

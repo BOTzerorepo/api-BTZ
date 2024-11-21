@@ -15,7 +15,7 @@ class CustomerUnloadPlaceController extends Controller
      */
     public function index()
     {
-        $customerUnloadPlaces = DB::table('customer_unload_places')->get();       
+        $customerUnloadPlaces = DB::table('customer_unload_places')->get();
         return $customerUnloadPlaces;
     }
 
@@ -73,9 +73,9 @@ class CustomerUnloadPlaceController extends Controller
      * @param  \App\Models\CustomerUnloadPlace  $customerUnloadPlace
      * @return \Illuminate\Http\Response
      */
-    public function show( $id)
+    public function show($id)
     {
-        $customerUnloadPlace = DB::table('customer_unload_places')->where('id','=',$id)->get();       
+        $customerUnloadPlace = DB::table('customer_unload_places')->where('id', '=', $id)->get();
         return $customerUnloadPlace;
     }
 
@@ -127,7 +127,7 @@ class CustomerUnloadPlaceController extends Controller
             ], 500);
         }
     }
-    
+
 
     /**
      * Remove the specified resource from storage.
@@ -135,15 +135,26 @@ class CustomerUnloadPlaceController extends Controller
      * @param  \App\Models\CustomerUnloadPlace  $customerUnloadPlace
      * @return \Illuminate\Http\Response
      */
-    public function destroy( $id)
+    public function destroy($id)
     {
-        CustomerUnloadPlace::destroy($id);
+        try {
+            CustomerUnloadPlace::destroy($id);
 
-        $existe = CustomerUnloadPlace::find($id);
-        if($existe){
-            return 'No se elimino el Lugar de Descarga';
-        }else{
-            return 'Se elimino el Lugar de Descarga';
-        };
+            $existe = CustomerUnloadPlace::find($id);
+            if ($existe) {
+                return response()->json([
+                    'message' => 'No se eliminó el Lugar de Descarga. Inténtalo de nuevo.',
+                ], 400); 
+            } else {
+                return response()->json([
+                    'message' => 'Lugar de Descarga eliminado con éxito.',
+                ], 200); 
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Ocurrió un error al intentar eliminar el Lugar de Descarga.',
+                'error' => $e->getMessage(),
+            ], 500); 
+        }
     }
 }

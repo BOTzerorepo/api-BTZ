@@ -228,7 +228,7 @@ class cargaController extends Controller
                 
         } else {
 
-            $todasLasCargasDeEstaSemana =  Carga::whereNull('carga.deleted_at')
+            $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
                 ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                 ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')

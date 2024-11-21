@@ -975,13 +975,24 @@ class CustomerLoadPlaceController extends Controller
      */
     public function destroy($id)
     {
-        CustomerLoadPlace::destroy($id);
+        try {
+            CustomerLoadPlace::destroy($id);
 
-        $existe = CustomerLoadPlace::find($id);
-        if ($existe) {
-            return 'No se elimino el Lugar de Carga';
-        } else {
-            return 'Se elimino el Lugar de Carga';
-        };
+            $existe = CustomerLoadPlace::find($id);
+            if ($existe) {
+                return response()->json([
+                    'message' => 'No se eliminó el Lugar de Carga. Inténtalo de nuevo.',
+                ], 400);
+            } else {
+                return response()->json([
+                    'message' => 'Lugar de Carga eliminado con éxito.',
+                ], 200);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Ocurrió un error al intentar eliminar el Lugar de Carga.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }
