@@ -49,13 +49,13 @@ class CustomerController extends Controller
             $customer = customer::create($validated);
 
             return response()->json([
-                'message' => 'Customer creada con éxito',
+                'message' => 'Trader creada con éxito',
                 'data' => $customer
             ], 201);
         } catch (\Exception $e) {
             // Manejo de errores si algo falla
             return response()->json([
-                'message' => 'No se pudo crear customer',
+                'message' => 'No se pudo crear Trader',
                 'error' => $e->getMessage()
             ], 500);
         }
