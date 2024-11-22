@@ -81,7 +81,7 @@ class TrailerController extends Controller
             ]);
 
             return response()->json([
-                'message' => 'Trailer editado correctamente ' . $request['domain'],
+                'message' => 'Trailer creado correctamente ' . $request['domain'],
                 'data' => $trailer,
             ], 200);
         } catch (\Exception $e) {

@@ -8,4 +8,17 @@ use Illuminate\Database\Eloquent\Model;
 class CustomerLoadPlace extends Model
 {
     use HasFactory;
+    protected $fillable = [
+        'description',
+        'address',
+        'city',
+        'country',
+        'km_from_town',
+        'remarks',
+        'latitud',
+        'longitud',
+        'link_maps',
+        'user',
+        'company'
+    ];
 }

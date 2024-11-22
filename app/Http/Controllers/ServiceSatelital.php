@@ -1078,7 +1078,7 @@ class ServiceSatelital extends Controller
         if ($sbx[0]->sandbox == 0) {
             Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new PuntoInteresEntrada($contenedor, $punto));
         } else {
-            Mail::to(['pablorio@botzero.tech', 'equipodemo2@botzero.com.ar', 'equipodemo3@botzero.com.ar'])
+            Mail::to(['copia@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo3@botzero.com.ar'])
                 ->cc(['equipodemo2@botzero.com.ar', 'copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])
                 ->bcc($inboxEmail)->send(new PuntoInteresEntrada($contenedor, $punto));
         }
@@ -1127,7 +1127,7 @@ class ServiceSatelital extends Controller
         if ($sbx[0]->sandbox == 0) {
             Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new PuntoInteresSalida($contenedor, $punto));
         } else {
-            Mail::to(['pablorio@botzero.tech', 'equipodemo2@botzero.com.ar', 'equipodemo3@botzero.com.ar'])
+            Mail::to(['copia@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo3@botzero.com.ar'])
                 ->cc(['equipodemo2@botzero.com.ar', 'copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])
                 ->bcc($inboxEmail)->send(new PuntoInteresSalida($contenedor, $punto));
         }

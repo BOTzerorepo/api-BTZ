@@ -239,7 +239,7 @@ class TransportController extends Controller
             // Validación de datos
             $request->validate([
                 'transport' => 'required',
-                'transport_agent' => 'required',
+                'transport_agent' => 'nullable',
                 'user' => 'required',
                 'company' => 'required',
             ]);

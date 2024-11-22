@@ -18,8 +18,8 @@ return new class extends Migration
             $table->string('name');
             $table->string('logo')->default('avatar.png');
             $table->string('imgLogin')->default('avatarLog.png');
-            $table->string('to_mail_trafico_Team')->default('pablorio@botzero.tech');
-            $table->string('cc_mail_trafico_Team')->default('pablorio@botzero.tech');
+            $table->string('to_mail_trafico_Team')->default('copia@botzero.com.ar');
+            $table->string('cc_mail_trafico_Team')->default('copia@botzero.com.ar');
             $table->timestamps();
         });
     }

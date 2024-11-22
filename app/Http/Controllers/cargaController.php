@@ -228,7 +228,7 @@ class cargaController extends Controller
                 
         } else {
 
-            $todasLasCargasDeEstaSemana =  Carga::whereNull('carga.deleted_at')
+            $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
                 ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                 ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
@@ -553,7 +553,6 @@ class cargaController extends Controller
             // Validación de datos
             $request->validate([
                 'ref_customer' => 'required',
-                'tarifa_ref' => 'required',
                 'trader' => 'required',
                 'booking' => 'required',
                 'qviajes' => 'required',

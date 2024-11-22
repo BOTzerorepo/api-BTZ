@@ -15,7 +15,7 @@ class CustomerCneeController extends Controller
      */
     public function index()
     {
-        $customerCnees = DB::table('customer_cnees')->get();         
+        $customerCnees = DB::table('customer_cnees')->get();
         return $customerCnees;
     }
 
@@ -37,19 +37,32 @@ class CustomerCneeController extends Controller
      */
     public function store(Request $request)
     {
-        $customerCnee = new CustomerCnee();
-        $customerCnee->razon_social = $request['razon_social'];
-        $customerCnee->tax_id = $request['tax_id'];
-        $customerCnee->address = $request['address'];
-        $customerCnee->city = $request['city'];
-        $customerCnee->country = $request['country'];
-        $customerCnee->postal_code = $request['postal_code'];
-        $customerCnee->create_user = $request['create_user'];
-        $customerCnee->company = $request['company'];
-        $customerCnee->remarks = $request['remarks'];
-        $customerCnee->save();
+        try {
+            $validated = $request->validate([
+                'razon_social' => 'required|string|max:255',
+                'tax_id' => 'required|numeric|digits_between:8,12',
+                'address' => 'nullable|string|max:255',
+                'city' => 'nullable|string|max:255',
+                'country' => 'nullable|string|max:255',
+                'postal_code' => 'nullable|numeric|digits_between:2,6',
+                'create_user' => 'nullable|string|max:255',
+                'company' => 'nullable|string|max:255',
+                'remarks' => 'nullable|string|max:255',
+            ]);
 
-        return $customerCnee;
+            $customerCnee = CustomerCnee::create($validated);
+
+            return response()->json([
+                'message' => 'Consignee creada con éxito',
+                'data' => $customerCnee
+            ], 201);
+        } catch (\Exception $e) {
+            // Manejo de errores si algo falla
+            return response()->json([
+                'message' => 'No se pudo crear el Consignee',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -83,19 +96,31 @@ class CustomerCneeController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $customerCnee = CustomerCnee::findOrFail($id);
-        $customerCnee->razon_social = $request['razon_social'];
-        $customerCnee->tax_id = $request['tax_id'];
-        $customerCnee->address = $request['address'];
-        $customerCnee->city = $request['city'];
-        $customerCnee->country = $request['country'];
-        $customerCnee->postal_code = $request['postal_code'];
-        $customerCnee->create_user = $request['create_user'];
-        $customerCnee->company = $request['company'];
-        $customerCnee->remarks = $request['remarks'];
-        $customerCnee->save();
+        try {
+            $validated = $request->validate([
+                'razon_social' => 'required|string|max:255',
+                'tax_id' => 'required|numeric|digits_between:8,12',
+                'address' => 'nullable|string|max:255',
+                'city' => 'nullable|string|max:255',
+                'country' => 'nullable|string|max:255',
+                'postal_code' => 'nullable|numeric|digits_between:2,6',
+                'create_user' => 'nullable|string|max:255',
+                'company' => 'nullable|string|max:255',
+                'remarks' => 'nullable|string|max:255',
+            ]);
+            $customerCnee = CustomerCnee::findOrFail($id);
+            $customerCnee->update($validated);
 
-        return $customerCnee;
+            return response()->json([
+                'message' => 'Consignee actualizado con éxito',
+                'data' => $customerCnee
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'No se pudo actualizar el Consignee',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -104,15 +129,25 @@ class CustomerCneeController extends Controller
      * @param  \App\Models\CustomerCnee  $customerCnee
      * @return \Illuminate\Http\Response
      */
-    public function destroy( $id)
+    public function destroy($id)
     {
-        CustomerCnee::destroy($id);
-
-        $existe = CustomerCnee::find($id);
-        if($existe){
-            return 'No se elimino la Customer Cnee';
-        }else{
-            return 'Se elimino la Customer Cnee';
-        };
+        try {
+            CustomerCnee::destroy($id);
+            $existe = CustomerCnee::find($id);
+            if ($existe) {
+                return response()->json([
+                    'message' => 'No se eliminó el Consignee. Inténtalo de nuevo.',
+                ], 400);
+            } else {
+                return response()->json([
+                    'message' => 'Consignee eliminado con éxito.',
+                ], 200);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Ocurrió un error al intentar eliminar el Consignee.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

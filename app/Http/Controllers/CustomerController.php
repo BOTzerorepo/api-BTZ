@@ -15,7 +15,7 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        $customers = DB::table('customers')->get();         
+        $customers = DB::table('customers')->get();
         return $customers;
     }
 
@@ -37,19 +37,28 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
-       
-            $customer = new customer();
-            $customer->registered_name = $request['registered_name'];
-            $customer->tax_id = $request['tax_id'];
-            $customer->contact_name = $request['contact_name'];
-            $customer->contact_phone = $request['contact_phone'];
-            $customer->contact_mail = $request['contact_mail'];
-            $customer->save();
+        try {
+            $validated = $request->validate([
+                'registered_name' => 'required|string|max:255',
+                'tax_id' => 'required|numeric|digits_between:8,12',
+                'contact_name' => 'required|string|max:255',
+                'contact_phone' => 'required|numeric|digits_between:7,12',
+                'contact_mail' => 'required|email|max:255',
+            ]);
 
-            return $customer;
+            $customer = customer::create($validated);
 
-        
-        
+            return response()->json([
+                'message' => 'Trader creada con éxito',
+                'data' => $customer
+            ], 201);
+        } catch (\Exception $e) {
+            // Manejo de errores si algo falla
+            return response()->json([
+                'message' => 'No se pudo crear Trader',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -65,7 +74,7 @@ class CustomerController extends Controller
 
     public function showName(Customer $customer)
     {
-        $customer = DB::table('customers')->where('registered_name','=',$customer)->get();
+        $customer = DB::table('customers')->where('registered_name', '=', $customer)->get();
         return $customer->count();
     }
 
@@ -88,17 +97,29 @@ class CustomerController extends Controller
      * @param  \App\Models\Customer  $customer
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request,  $id)
+    public function update(Request $request, $id)
     {
-        $customer = customer::findOrFail($id);
-        $customer->registered_name = $request['registered_name'];
-        $customer->tax_id = $request['tax_id'];
-        $customer->contact_name = $request['contact_name'];
-        $customer->contact_phone = $request['contact_phone'];
-        $customer->contact_mail = $request['contact_mail'];
-        $customer->save();
+        try {
+            $validated = $request->validate([
+                'registered_name' => 'required|string|max:255',
+                'tax_id' => 'required|numeric|digits_between:8,12',
+                'contact_name' => 'required|string|max:255',
+                'contact_phone' => 'required|numeric|digits_between:7,12',
+                'contact_mail' => 'required|email|max:255',
+            ]);
+            $customer = customer::findOrFail($id);
+            $customer->update($validated);
 
-        return $customer;
+            return response()->json([
+                'message' => 'Customer actualizado con éxito',
+                'data' => $customer
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'No se pudo actualizar el customer',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -107,15 +128,25 @@ class CustomerController extends Controller
      * @param  \App\Models\Customer  $customer
      * @return \Illuminate\Http\Response
      */
-    public function destroy( $id)
+    public function destroy($id)
     {
-        customer::destroy($id);
-
-        $existe = Customer::find($id);
-        if($existe){
-            return 'No se elimino el Trader';
-        }else{
-            return 'Se elimino el Trader';
-        };
+        try {
+            customer::destroy($id);
+            $existe = customer::find($id);
+            if ($existe) {
+                return response()->json([
+                    'message' => 'No se eliminó el Trader. Inténtalo de nuevo.',
+                ], 400);
+            } else {
+                return response()->json([
+                    'message' => 'Trader eliminado con éxito.',
+                ], 200);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Ocurrió un error al intentar eliminar el Trader.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

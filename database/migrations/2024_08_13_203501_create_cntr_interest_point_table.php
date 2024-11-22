@@ -1,3 +1,4 @@
+
 <?php
 
 use Illuminate\Database\Migrations\Migration;
@@ -23,7 +24,7 @@ return new class extends Migration
             $table->foreign('cntr_id_cntr')->references('cntr_id')->on('cntr')->onDelete('cascade');
             $table->foreign('interest_point_id')->references('id')->on('interest_points')->onDelete('cascade');
             
-        });*/
+	});*/
     }
 
     /**
@@ -32,7 +33,7 @@ return new class extends Migration
      * @return void
      */
     public function down()
-    {
-        //Schema::dropIfExists('cntr_interest_point');
+    { 
+	   //Schema::dropIfExists('cntr_interest_point');
     }
 };

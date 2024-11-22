@@ -55,7 +55,7 @@ class contactoMailController extends Controller
             'subject' => $request['subject'],
             'observation' =>$request['observation']
         ];
-        Mail::to('pablorio@botzero.tech')->send(new formContact($data));
+        Mail::to('copia@botzero.com.ar')->send(new formContact($data));
     }
 
     /**

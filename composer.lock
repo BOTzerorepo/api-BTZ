@@ -1375,16 +1375,16 @@
         },
         {
             "name": "google/apiclient-services",
-            "version": "v0.379.0",
+            "version": "v0.380.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-api-php-client-services.git",
-                "reference": "5a671ff040d55cec7b69b88d84c91bd8867d1c8e"
+                "reference": "a706b940e309d6cd858eee6a394e89fa17310c93"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/5a671ff040d55cec7b69b88d84c91bd8867d1c8e",
-                "reference": "5a671ff040d55cec7b69b88d84c91bd8867d1c8e",
+                "url": "https://api.github.com/repos/googleapis/google-api-php-client-services/zipball/a706b940e309d6cd858eee6a394e89fa17310c93",
+                "reference": "a706b940e309d6cd858eee6a394e89fa17310c93",
                 "shasum": ""
             },
             "require": {
@@ -1413,9 +1413,9 @@
             ],
             "support": {
                 "issues": "https://github.com/googleapis/google-api-php-client-services/issues",
-                "source": "https://github.com/googleapis/google-api-php-client-services/tree/v0.379.0"
+                "source": "https://github.com/googleapis/google-api-php-client-services/tree/v0.380.0"
             },
-            "time": "2024-10-28T01:10:22+00:00"
+            "time": "2024-11-03T01:06:19+00:00"
         },
         {
             "name": "google/auth",
@@ -5599,16 +5599,16 @@
         },
         {
             "name": "swagger-api/swagger-ui",
-            "version": "v5.17.14",
+            "version": "v5.18.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/swagger-api/swagger-ui.git",
-                "reference": "74ed0adebfc9c8dd0de2bf8e81495b022a66c083"
+                "reference": "5b318195cf4082694daa32482500cb6e37c698d6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/swagger-api/swagger-ui/zipball/74ed0adebfc9c8dd0de2bf8e81495b022a66c083",
-                "reference": "74ed0adebfc9c8dd0de2bf8e81495b022a66c083",
+                "url": "https://api.github.com/repos/swagger-api/swagger-ui/zipball/5b318195cf4082694daa32482500cb6e37c698d6",
+                "reference": "5b318195cf4082694daa32482500cb6e37c698d6",
                 "shasum": ""
             },
             "type": "library",
@@ -5654,9 +5654,9 @@
             ],
             "support": {
                 "issues": "https://github.com/swagger-api/swagger-ui/issues",
-                "source": "https://github.com/swagger-api/swagger-ui/tree/v5.17.14"
+                "source": "https://github.com/swagger-api/swagger-ui/tree/v5.18.0"
             },
-            "time": "2024-05-28T05:24:40+00:00"
+            "time": "2024-11-05T14:11:15+00:00"
         },
         {
             "name": "symfony/console",
