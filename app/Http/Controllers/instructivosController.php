@@ -110,40 +110,37 @@ class instructivosController extends Controller
         $user = DB::table('users')->where('username', $username)->first();
 
         if (!$user) {
-            return response()->json(['message' => 'Usuario no encontrado.'], 404);
+            return response()->json(['status' => 'error', 'message' => 'Usuario no encontrado.'], 404);
         }
         if ($user->permiso !== 'Traffic') {
-            return response()->json(['message' => 'Se requieren permisos de Tráfico.'], 403);
+            return response()->json(['status' => 'error', 'message' => 'Se requieren permisos de Tráfico.'], 403);
         }
         $asign = DB::table('asign')->where('cntr_number', $id)->first();
         if (!$asign) {
-            return response()->json(['message' => 'Registro no encontrado.'], 404);
+            return response()->json(['status' => 'error', 'message' => 'Registro no encontrado.'], 404);
         }
         if (!$asign->file_instruction) {
-            return response()->json(['message' => 'El instructivo ya no existe en el registro.'], 404);
+            return response()->json(['status' => 'error', 'message' => 'El instructivo ya no existe en el registro.'], 404);
         }
 
-        $booking = $asign->booking; 
-        $cntr_number = $asign->cntr_number;
-        $filePath = base_path('public/instructivos/' . $booking . '/' . $cntr_number . '/' . $asign->file_instruction);
+        $filePath = base_path('public/instructivos/' . $asign->booking . '/' . $asign->cntr_number . '/' . $asign->file_instruction);
 
         if (file_exists($filePath)) {
             try {
                 unlink($filePath);
-                
             } catch (\Exception $e) {
-                return response()->json(['message' => 'Error al eliminar el archivo físico.', 'error' => $e->getMessage()], 500);
+                return response()->json(['status' => 'error', 'message' => 'Error al eliminar el archivo físico.', 'error' => $e->getMessage()], 500);
             }
         } else {
-            return response()->json(['message' => 'El archivo no existe.'], 404);
+            return response()->json(['status' => 'error', 'message' => 'El archivo no existe en el sistema.'], 404);
         }
 
         $updated = DB::table('asign')->where('cntr_number', $id)->update(['file_instruction' => null]);
 
         if ($updated) {
-            return response()->json(['message' => 'Instructivo eliminado correctamente.'], 200);
+            return response()->json(['status' => 'success', 'message' => 'Instructivo eliminado correctamente.'], 200);
         } else {
-            return response()->json(['message' => 'Error al actualizar el registro.'], 500);
+            return response()->json(['status' => 'error', 'message' => 'Error al actualizar el registro.'], 500);
         }
     }
 }
