@@ -141,7 +141,7 @@ class instructivosController extends Controller
         $updated = DB::table('asign')->where('cntr_number', $id)->update(['file_instruction' => null]);
 
         if ($updated) {
-            return response()->json(['message' => 'Instructivo eliminado correctamente.']);
+            return response()->json(['message' => 'Instructivo eliminado correctamente.'], 200);
         } else {
             return response()->json(['message' => 'Error al actualizar el registro.'], 500);
         }
