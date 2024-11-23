@@ -103,11 +103,10 @@ class instructivosController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    
+
 
     public function destroy($username, $id)
     {
-        // Buscar al usuario por nombre de usuario
         $user = DB::table('users')->where('username', $username)->first();
 
         if (!$user) {
@@ -116,34 +115,30 @@ class instructivosController extends Controller
         if ($user->permiso !== 'Traffic') {
             return response()->json(['message' => 'Se requieren permisos de Tráfico.'], 403);
         }
-
-        // Buscar el registro en asign y obtener el nombre del archivo
-        $asign = DB::table('asign')->where('id', $id)->first();
+        $asign = DB::table('asign')->where('cntr_number', $id)->first();
         if (!$asign) {
             return response()->json(['message' => 'Registro no encontrado.'], 404);
         }
-
         if (!$asign->file_instruction) {
             return response()->json(['message' => 'El instructivo ya no existe en el registro.'], 404);
         }
 
-        $booking = $asign->booking; // Asegúrate de que $asign tenga esta propiedad
+        $booking = $asign->booking; 
         $cntr_number = $asign->cntr_number;
+        $filePath = base_path('public/instructivos/' . $booking . '/' . $cntr_number . '/' . $asign->file_instruction);
 
-        // Construir la ruta completa del archivo
-        $filePath = storage_path('instructivos/' . $booking . '/' . $cntr_number . '/' . $asign->file_instruction);
-
-        // Intentar eliminar el archivo físico si existe
         if (file_exists($filePath)) {
             try {
                 unlink($filePath);
+                
             } catch (\Exception $e) {
                 return response()->json(['message' => 'Error al eliminar el archivo físico.', 'error' => $e->getMessage()], 500);
             }
+        } else {
+            return response()->json(['message' => 'El archivo no existe.'], 404);
         }
 
-        // Actualizar la base de datos para eliminar la referencia al archivo
-        $updated = DB::table('asign')->where('id', $id)->update(['file_instruction' => null]);
+        $updated = DB::table('asign')->where('cntr_number', $id)->update(['file_instruction' => null]);
 
         if ($updated) {
             return response()->json(['message' => 'Instructivo eliminado correctamente.']);
