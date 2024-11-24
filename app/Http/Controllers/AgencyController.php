@@ -15,7 +15,7 @@ class AgencyController extends Controller
      */
     public function index()
     {
-        $agencies = DB::table('agencies')->get();       
+        $agencies = DB::table('agencies')->get();
         return $agencies;
     }
 
@@ -37,20 +37,32 @@ class AgencyController extends Controller
      */
     public function store(Request $request)
     {
-        $agency = new Agency();
-        $agency->description = $request['description'];
-        $agency->razon_social = $request['razon_social'];
-        $agency->tax_id= $request['tax_id'];
-        $agency->puerto = $request['puerto'];
-        $agency->contact_phone = $request['contact_phone'];
-        $agency->contact_name = $request['contact_name'];
-        $agency->contact_mail = $request['contact_mail'];
-        $agency->user = $request['user'];
-        $agency->empresa = $request['empresa'];
-        $agency->observation_gral = $request['observation_gral'];
-        $agency->save();
+        try {
+            $validated = $request->validate([
+                'description' => 'required|string|max:255',
+                'razon_social' => 'required|string|max:255',
+                'tax_id' => 'required|numeric|digits_between:8,12',
+                'puerto' => 'required|string|max:255',
+                'contact_phone' => 'required|numeric|digits_between:7,12',
+                'contact_name' => 'required|string|max:255',
+                'contact_mail' => 'required|email|max:255',
+                'user' => 'required|string|max:255',
+                'empresa' => 'required|string|max:255',
+                'observation_gral' => 'nullable|string|max:255',
+            ]);
 
-        return $agency;
+            $agency = Agency::create($validated);
+            return response()->json([
+                'message' => 'Agencia creada con éxito',
+                'data' => $agency
+            ], 201);
+        } catch (\Exception $e) {
+            // Manejo de errores si algo falla
+            return response()->json([
+                'message' => 'No se pudo crear la agencia',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -84,20 +96,32 @@ class AgencyController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $agency = Agency::findOrFail($id);
-        $agency->description = $request['description'];
-        $agency->razon_social = $request['razon_social'];
-        $agency->tax_id= $request['tax_id'];
-        $agency->puerto = $request['puerto'];
-        $agency->contact_phone = $request['contact_phone'];
-        $agency->contact_name = $request['contact_name'];
-        $agency->contact_mail = $request['contact_mail'];
-        $agency->user = $request['user'];
-        $agency->empresa = $request['empresa'];
-        $agency->observation_gral = $request['observation_gral'];
-        $agency->save();
+        try {
+            $validated = $request->validate([
+                'description' => 'required|string|max:255',
+                'razon_social' => 'required|string|max:255',
+                'tax_id' => 'required|numeric|digits_between:8,12',
+                'puerto' => 'required|string|max:255',
+                'contact_phone' => 'required|numeric|digits_between:7,12',
+                'contact_name' => 'required|string|max:255',
+                'contact_mail' => 'required|email|max:255',
+                'user' => 'required|string|max:255',
+                'empresa' => 'required|string|max:255',
+                'observation_gral' => 'nullable|string|max:255',
+            ]);
+            $agency = Agency::findOrFail($id);
+            $agency->update($validated);
 
-        return $agency;
+            return response()->json([
+                'message' => 'Agencia actualizada con éxito',
+                'data' => $agency
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'No se pudo actualizar la agencia',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -106,14 +130,14 @@ class AgencyController extends Controller
      * @param  \App\Models\Agency  $agency
      * @return \Illuminate\Http\Response
      */
-    public function destroy( $id)
+    public function destroy($id)
     {
         Agency::destroy($id);
 
         $existe = Agency::find($id);
-        if($existe){
+        if ($existe) {
             return 'No se elimino la Agencia';
-        }else{
+        } else {
             return 'Se elimino la Agencia';
         };
     }

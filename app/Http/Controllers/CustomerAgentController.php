@@ -15,13 +15,13 @@ class CustomerAgentController extends Controller
      */
     public function index()
     {
-        $customerAgents = DB::table('customer_agents')->get();         
+        $customerAgents = DB::table('customer_agents')->get();
         return $customerAgents;
     }
 
     public function indexCompany($empresa)
     {
-        $customerAgent = DB::table('customer_agents')->where('empresa','=',$empresa)->get();
+        $customerAgent = DB::table('customer_agents')->where('empresa', '=', $empresa)->get();
         return $customerAgent;
     }
 
@@ -43,18 +43,31 @@ class CustomerAgentController extends Controller
      */
     public function store(Request $request)
     {
-        $customerAgent = new CustomerAgent();
-        $customerAgent->razon_social = $request['razon_social'];
-        $customerAgent->tax_id = $request['tax_id'];
-        $customerAgent->pais = $request['pais'];
-        $customerAgent->provincia = $request['provincia'];
-        $customerAgent->mail = $request['mail'];
-        $customerAgent->phone = $request['phone'];
-        $customerAgent->user = $request['user'];
-        $customerAgent->empresa = $request['empresa'];
-        $customerAgent->save();
+        try {
+            $validated = $request->validate([
+                'razon_social' => 'required|string|max:255',
+                'tax_id' => 'required|numeric|digits_between:8,12',
+                'pais' => 'nullable|string|max:255',
+                'provincia' => 'nullable|string|max:255',
+                'mail' => 'nullable|email|max:255',
+                'phone' => 'nullable|numeric|digits_between:7,12',
+                'user' => 'nullable|string|max:255',
+                'empresa' => 'nullable|string|max:255',
+            ]);
 
-        return $customerAgent;
+            $customerAgent = CustomerAgent::create($validated);
+
+            return response()->json([
+                'message' => 'Despachante creado con éxito',
+                'data' => $customerAgent
+            ], 201);
+        } catch (\Exception $e) {
+            // Manejo de errores si algo falla
+            return response()->json([
+                'message' => 'No se pudo crear el Despachante',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -63,9 +76,9 @@ class CustomerAgentController extends Controller
      * @param  \App\Models\CustomerAgent  $customerAgent
      * @return \Illuminate\Http\Response
      */
-    public function show( $id)
+    public function show($id)
     {
-        $customerAgent = DB::table('customer_agents')->where('id','=',$id)->get();
+        $customerAgent = DB::table('customer_agents')->where('id', '=', $id)->get();
         return $customerAgent;
     }
 
@@ -89,18 +102,30 @@ class CustomerAgentController extends Controller
      */
     public function update(Request $request,  $id)
     {
-        $customerAgent = CustomerAgent::findOrFail($id);
-        $customerAgent->razon_social = $request['razon_social'];
-        $customerAgent->tax_id = $request['tax_id'];
-        $customerAgent->pais = $request['pais'];
-        $customerAgent->provincia = $request['provincia'];
-        $customerAgent->mail = $request['mail'];
-        $customerAgent->phone = $request['phone'];
-        $customerAgent->user = $request['user'];
-        $customerAgent->empresa = $request['empresa'];
-        $customerAgent->save();
+        try {
+            $validated = $request->validate([
+                'razon_social' => 'required|string|max:255',
+                'tax_id' => 'required|numeric|digits_between:8,12',
+                'pais' => 'nullable|string|max:255',
+                'provincia' => 'nullable|string|max:255',
+                'mail' => 'nullable|email|max:255',
+                'phone' => 'nullable|numeric|digits_between:7,12',
+                'user' => 'nullable|string|max:255',
+                'empresa' => 'nullable|string|max:255',
+            ]);
+            $customerAgent = CustomerAgent::findOrFail($id);
+            $customerAgent->update($validated);
 
-        return $customerAgent;
+            return response()->json([
+                'message' => 'Despachante actualizado con éxito',
+                'data' => $customerAgent
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'No se pudo actualizar el despachante',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -111,13 +136,23 @@ class CustomerAgentController extends Controller
      */
     public function destroy($id)
     {
-        CustomerAgent::destroy($id);
-
-        $existe = CustomerAgent::find($id);
-        if($existe){
-            return 'No se elimino el Customer Agent';
-        }else{
-            return 'Se elimino el Customer Agent';
-        };
+        try {
+            CustomerAgent::destroy($id);
+            $existe = CustomerAgent::find($id);
+            if ($existe) {
+                return response()->json([
+                    'message' => 'No se eliminó el Despachante. Inténtalo de nuevo.',
+                ], 400);
+            } else {
+                return response()->json([
+                    'message' => 'Despachante eliminado con éxito.',
+                ], 200);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Ocurrió un error al intentar eliminar el Despachante.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

@@ -228,7 +228,7 @@ class cargaController extends Controller
                 
         } else {
 
-            $todasLasCargasDeEstaSemana =  Carga::whereNull('carga.deleted_at')
+            $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
                 ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                 ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
@@ -244,16 +244,15 @@ class cargaController extends Controller
     }
     public function loadFinishedTransport($transport)
     {
+        $transportIds = explode(',', $transport);
+        $razonSocialList = Transport::whereIn('id', $transportIds)->pluck('razon_social');
 
-        $transport = Transport::find($transport);
-
-
-            $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
+        $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
             ->join('cntr', 'cntr.booking', '=', 'carga.booking')
             ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
             ->select('carga.ref_customer', 'carga.booking', 'carga.shipper','carga.commodity', 'carga.type', 'carga.load_place', 'carga.unload_place', 'carga.load_date', 'carga.cut_off_fis', 'carga.custom_place',  'carga.custom_agent','carga.custom_place_impo', 'carga.custom_agent_impo', 'cntr.cntr_number', 'cntr.cntr_type', 'cntr.main_status','cntr.out_usd', 'cntr.observation_out', 'asign.driver', 'asign.transport', 'asign.truck', 'asign.truck_semi')
             ->where('cntr.main_status', '=', 'TERMINADA')
-            ->where('asign.transport', '=', $transport->razon_social)
+            ->whereIn('asign.transport', $razonSocialList)
             ->whereNull('cntr.deleted_at')
             ->whereNull('asign.deleted_at')
             ->orderBy('carga.load_date', 'ASC')->get();
@@ -480,7 +479,7 @@ class cargaController extends Controller
             $sbx = DB::table('variables')->select('sandbox')->get();
             $inboxEmail = env('INBOX_EMAIL');
             if ($sbx[0]->sandbox == 0) {
-                Mail::to(['gzarate@totaltradegroup.com', 'rquero@totaltradegroup.com', 'smingo@totaltradegroup.com'])->cc(['cs.auxiliar@totaltradegroup.com'])->bcc($inboxEmail)->send(new UpdateCarga($modificacionesCntr, $modificacionesCarga,$carga));
+                Mail::to(['gzarate@totaltradegroup.com', 'rquero@totaltradegroup.com', 'smingo@totaltradegroup.com', 'lgonzalez@totaltradegroup.com'])->cc(['cs.auxiliar@totaltradegroup.com'])->bcc($inboxEmail)->send(new UpdateCarga($modificacionesCntr, $modificacionesCarga,$carga));
             } elseif ($sbx[0]->sandbox == 2) {
                 Mail::to(['customer@qa.botzero.com.ar', 'abel.mazzitelli@gmail.com'])->cc(['copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])->bcc($inboxEmail)->send(new UpdateCarga($modificacionesCntr, $modificacionesCarga,$carga));
             }else {
@@ -554,7 +553,6 @@ class cargaController extends Controller
             // Validación de datos
             $request->validate([
                 'ref_customer' => 'required',
-                'tarifa_ref' => 'required',
                 'trader' => 'required',
                 'booking' => 'required',
                 'qviajes' => 'required',

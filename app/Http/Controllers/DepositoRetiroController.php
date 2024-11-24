@@ -15,7 +15,7 @@ class DepositoRetiroController extends Controller
      */
     public function index()
     {
-        $depositoRetiros = DB::table('deposito_retiros')->get();         
+        $depositoRetiros = DB::table('deposito_retiros')->get();
         return $depositoRetiros;
     }
 
@@ -37,20 +37,32 @@ class DepositoRetiroController extends Controller
      */
     public function store(Request $request)
     {
-        $depositoRetiro = new DepositoRetiro();
-        $depositoRetiro->title = $request['title'];
-        $depositoRetiro->address = $request['address'];
-        $depositoRetiro->country= $request['country'];
-        $depositoRetiro->city = $request['city'];
-        $depositoRetiro->km_from_town = $request['km_from_town'];
-        $depositoRetiro->latitud = $request['latitud'];
-        $depositoRetiro->longitud = $request['longitud'];
-        $depositoRetiro->link_maps = $request['link_maps'];
-        $depositoRetiro->user = $request['user'];
-        $depositoRetiro->empresa = $request['empresa'];
-        $depositoRetiro->save();
+        try {
+            $validated = $request->validate([
+                'title' => 'required|string|max:255',
+                'address' => 'required|string|max:255',
+                'country' => 'required|string|max:255',
+                'city' => 'required|string|max:255',
+                'km_from_town' => 'required|numeric',
+                'latitud' => 'required|regex:/^-?\d{1,3}\.\d+$/',
+                'longitud' => 'required|regex:/^-?\d{1,3}\.\d+$/',
+                'link_maps' => 'required|string|max:255',
+                'user' => 'required|string|max:255',
+                'empresa' => 'required|string|max:255',
+            ]);
 
-        return $depositoRetiro;
+            $depositoRetiro = DepositoRetiro::create($validated);
+            return response()->json([
+                'message' => 'Deposito creado con éxito',
+                'data' => $depositoRetiro
+            ], 201);
+        } catch (\Exception $e) {
+            // Manejo de errores si algo falla
+            return response()->json([
+                'message' => 'No se pudo crear el Deposito',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -84,20 +96,32 @@ class DepositoRetiroController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $depositoRetiro = DepositoRetiro::findOrFail($id);
-        $depositoRetiro->title = $request['title'];
-        $depositoRetiro->address = $request['address'];
-        $depositoRetiro->country= $request['country'];
-        $depositoRetiro->city = $request['city'];
-        $depositoRetiro->km_from_town = $request['km_from_town'];
-        $depositoRetiro->latitud = $request['latitud'];
-        $depositoRetiro->longitud = $request['longitud'];
-        $depositoRetiro->link_maps = $request['link_maps'];
-        $depositoRetiro->user = $request['user'];
-        $depositoRetiro->empresa = $request['empresa'];
-        $depositoRetiro->save();
+        try {
+            $validated = $request->validate([
+                'title' => 'required|string|max:255',
+                'address' => 'required|string|max:255',
+                'country' => 'required|string|max:255',
+                'city' => 'required|string|max:255',
+                'km_from_town' => 'required|numeric',
+                'latitud' => 'required|regex:/^-?\d{1,3}\.\d+$/',
+                'longitud' => 'required|regex:/^-?\d{1,3}\.\d+$/',
+                'link_maps' => 'required|string|max:255',
+                'user' => 'required|string|max:255',
+                'empresa' => 'required|string|max:255',
+            ]);
+            $depositoRetiro = DepositoRetiro::findOrFail($id);
+            $depositoRetiro->update($validated);
 
-        return $depositoRetiro;
+            return response()->json([
+                'message' => 'Deposito actualizado con éxito',
+                'data' => $depositoRetiro
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'No se pudo actualizar el Deposito',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -106,14 +130,14 @@ class DepositoRetiroController extends Controller
      * @param  \App\Models\DepositoRetiro  $depositoRetiro
      * @return \Illuminate\Http\Response
      */
-    public function destroy( $id)
+    public function destroy($id)
     {
         DepositoRetiro::destroy($id);
 
         $existe = DepositoRetiro::find($id);
-        if($existe){
+        if ($existe) {
             return 'No se elimino la Agencia';
-        }else{
+        } else {
             return 'Se elimino la Agencia';
         };
     }

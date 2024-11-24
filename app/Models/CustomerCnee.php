@@ -8,4 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 class CustomerCnee extends Model
 {
     use HasFactory;
+    protected $fillable = [
+        'razon_social',
+        'tax_id',
+        'address',
+        'city',
+        'country',
+        'postal_code',
+        'create_user',
+        'company',
+        'remarks'
+    ];
 }
