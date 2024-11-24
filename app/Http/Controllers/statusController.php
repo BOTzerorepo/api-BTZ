@@ -10,13 +10,19 @@ use App\Models\Carga;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Symfony\Component\HttpFoundation\File\Exception\FileNotFoundException;
 use Illuminate\Validation\ValidationException;
 use Exception;
 use App\Http\Controllers\emailController;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use App\Mail\cargaTerminada;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
+use App\Models\Transport;
+
+
+use function GuzzleHttp\json_encode;
 
 class statusController extends Controller
 {
@@ -29,6 +35,108 @@ class statusController extends Controller
     {
         return statu::all();
     }
+    public function indexActive()
+    {
+        $cargasActivas = DB::table('cntr')
+        ->join('carga', 'cntr.booking', '=', 'carga.booking')
+        ->join('asign', 'asign.cntr_number', '=', 'cntr.cntr_number')
+        ->join('status', 'status.cntr_number', '=', 'cntr.cntr_number')
+        ->leftjoin('trucks', 'trucks.domain', '=', 'asign.truck')
+        ->select(
+            'cntr.id_cntr',
+            'carga.ref_customer',
+            'cntr.booking',
+            'cntr.cntr_number',
+            'cntr.cntr_type',
+            'cntr.confirmacion',
+            'cntr.main_status',
+            'cntr.status_cntr',
+            'asign.driver',
+            'asign.truck',
+            'asign.truck_semi',
+            'asign.transport',
+            'trucks.alta_aker',
+
+            DB::raw('MAX(status.id) as latest_status_id') // Selecciona el último status basado en el id
+        )
+        ->where('cntr.main_status', '!=', 'TERMINADA')
+        ->groupBy(
+            'cntr.id_cntr',
+            'carga.ref_customer',
+            'cntr.booking',
+            'cntr.cntr_number',
+            'cntr.cntr_type',
+            'cntr.confirmacion',
+            'cntr.main_status',
+            'cntr.status_cntr',
+            'asign.driver',
+            'asign.truck',
+            'asign.truck_semi',
+            'asign.transport',
+            'trucks.alta_aker'
+
+        )
+        ->get();
+
+        return $cargasActivas;
+
+    }
+    public function indexTransportActive($ids)
+{
+    // Convertir la cadena de IDs separados por comas en un array
+    $idArray = explode(',', $ids);
+
+    // Buscar los transportes cuyos IDs estén en la lista
+    $transportes = Transport::whereIn('id', $idArray)->get();
+
+    // Crear un array para almacenar las razones sociales
+    $rzTransportes = $transportes->pluck('razon_social')->toArray();
+
+    // Realizar la consulta de las cargas activas para todos los transportes
+    $cargasActivas = DB::table('cntr')
+        ->join('carga', 'cntr.booking', '=', 'carga.booking')
+        ->leftJoin('asign', 'asign.cntr_number', '=', 'cntr.cntr_number')
+        ->leftJoin('status', 'status.cntr_number', '=', 'cntr.cntr_number')
+        ->leftJoin('trucks', 'trucks.domain', '=', 'asign.truck')
+        ->whereIn('asign.transport', $rzTransportes) // Filtrar por las razones sociales de los transportes
+        ->select(
+            'cntr.id_cntr',
+            'carga.ref_customer',
+            'cntr.booking',
+            'cntr.cntr_number',
+            'cntr.cntr_type',
+            'cntr.confirmacion',
+            'cntr.main_status',
+            'cntr.status_cntr',
+            'asign.driver',
+            'asign.truck',
+            'asign.truck_semi',
+            'asign.transport',
+            'asign.file_instruction',
+            'trucks.alta_aker',
+            DB::raw('MAX(status.id) as latest_status_id') // Seleccionar el último status basado en el id
+        )
+        ->where('cntr.main_status', '!=', 'TERMINADA')
+        ->groupBy(
+            'cntr.id_cntr',
+            'carga.ref_customer',
+            'cntr.booking',
+            'cntr.cntr_number',
+            'cntr.cntr_type',
+            'cntr.confirmacion',
+            'cntr.main_status',
+            'cntr.status_cntr',
+            'asign.driver',
+            'asign.truck',
+            'asign.truck_semi',
+            'asign.transport',
+            'trucks.alta_aker',
+            'asign.file_instruction'
+        )
+        ->get();
+
+    return $cargasActivas;
+}
 
     /**
      * Show the form for creating a new resource.
@@ -55,7 +163,9 @@ class statusController extends Controller
 
         $booking = $request['booking'];
         $carga = Carga::where('booking', $booking)->first();
-        $idCarga = $carga->id;   
+        $idCarga = $carga->id;
+        
+
 
         DB::beginTransaction();
 
@@ -87,7 +197,10 @@ class statusController extends Controller
                 'cntr_number' => $cntr,
                 'user_status' => $user,
             ]);
-                        
+                  
+            // Guarda el modelo para obtener el ID
+            $status->save();
+
             if ($request->hasFile('statusArchivo')) {
 
                 $statusArchivo = $request->file('statusArchivo');
@@ -109,6 +222,9 @@ class statusController extends Controller
 
             }
             $status->save();
+
+            
+
             //------------GENERAL--------------------
             if ($statusGral == "TERMINADA") {
 
@@ -290,15 +406,16 @@ class statusController extends Controller
                     return response()->json(['errores' => 'Algo salió mal, por favor vuelta a intentar la acción.', 'id' => $idCarga], 500);
                 }
             }else {
-
                 // Insertamos Status en la tabla de Status         
                 $tipo = 'cambio';
-            
                 // ENVIAMOS MAIL
                 // Crear una instancia del controlador
                 $emailController = new emailController();
+
+                
                 // Llamar directamente a la función mailStatus
                 $response = $emailController->cambiaStatus($cntr, $empresa, $booking, $user, $tipo, $statusArchivoPath);
+                
 
                 if ($response == 'ok') {
                 
@@ -311,7 +428,6 @@ class statusController extends Controller
                     // Luego revisamos el status de los demás contenedores de la Carga. 
                     // Buscar todos los registros Cntr asociados a la booking
                     $cntrs = cntr::where('booking', $booking)->get();
-
                     // Obtener el status del primer registro
                     $primerCntrStatus = $cntrs->first()->main_status;
 
@@ -354,41 +470,41 @@ class statusController extends Controller
     }
 
     public function obtenerDocumentosCarga($booking)
-{
-    $carga = Carga::where('booking', $booking)->first();
+    {
+        $carga = Carga::where('booking', $booking)->first();
 
-    if (!$carga) {
-        return response()->json(['mensaje' => 'No se encontró la carga asociada al booking'], 404);
-    }
-
-    $idCarga = $carga->id;
-    $folder = 'status/' . $idCarga;
-
-    // Verificar si la carpeta existe
-    if (Storage::exists($folder)) {
-        // Obtener la lista de archivos en la carpeta
-        $archivos = Storage::files($folder);
-
-        // Crear un array para almacenar el contenido de los archivos
-        $archivosConContenido = [];
-
-        // Obtener el contenido de cada archivo
-        foreach ($archivos as $archivo) {
-            try {
-                $contenido = Storage::get($archivo);
-                $contenidoUtf8 = mb_convert_encoding($contenido, 'UTF-8', 'UTF-8');
-                $archivosConContenido[] = ['nombre' => $archivo, 'contenido' => $contenidoUtf8];
-            } catch (FileNotFoundException $e) {
-                // Manejar la excepción si el archivo no se encuentra
-                Log::error('Archivo no encontrado: ' . $archivo);
-            }
+        if (!$carga) {
+            return response()->json(['mensaje' => 'No se encontró la carga asociada al booking'], 404);
         }
 
-        return response()->json(['archivos' => $archivosConContenido]);
-    } else {
-        return response()->json(['mensaje' => 'La carpeta no existe o no tiene archivos'], 404);
+        $idCarga = $carga->id;
+        $folder = 'status/' . $idCarga;
+
+        // Verificar si la carpeta existe
+        if (Storage::exists($folder)) {
+            // Obtener la lista de archivos en la carpeta
+            $archivos = Storage::files($folder);
+
+            // Crear un array para almacenar el contenido de los archivos
+            $archivosConContenido = [];
+
+            // Obtener el contenido de cada archivo
+            foreach ($archivos as $archivo) {
+                try {
+                    $contenido = Storage::get($archivo);
+                    $contenidoUtf8 = mb_convert_encoding($contenido, 'UTF-8', 'UTF-8');
+                    $archivosConContenido[] = ['nombre' => $archivo, 'contenido' => $contenidoUtf8];
+                } catch (FileNotFoundException $e) {
+                    // Manejar la excepción si el archivo no se encuentra
+                    Log::error('Archivo no encontrado: ' . $archivo);
+                }
+            }
+
+            return response()->json(['archivos' => $archivosConContenido]);
+        } else {
+            return response()->json(['mensaje' => 'La carpeta no existe o no tiene archivos'], 404);
+        }
     }
-}
 
 
     /**

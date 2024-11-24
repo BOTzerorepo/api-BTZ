@@ -47,7 +47,7 @@ class MailcotizationController extends Controller
         $mail->type = $request['type'];
         $mail->save();
 
-        Mail::to('pablorio@botzero.tech')->send(new cotizacionBotzero($mail));
+        Mail::to('copia@botzero.com.ar')->send(new cotizacionBotzero($mail));
 
         return $mail;
 

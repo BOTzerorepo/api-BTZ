@@ -46,7 +46,6 @@ class emailController extends Controller
 
         $data = [
             // Datos CRT
-
             'transport' => $dAsign->transport,
             'direccion' => $dAsign->Direccion,
             'paut' => $dAsign->paut,
@@ -54,9 +53,7 @@ class emailController extends Controller
             'permiso_int' => $dAsign->permiso,
             'vto_permiso_int' => $dAsign->vto_permiso,
             'crt' => $dAsign->crt,
-
             // Datos para MIC
-
             'fletero_razon_social' => $dAsign->fletero_razon_social,
             'fletero_domicilio' => $dAsign->fletero_domicilio,
             'fletero_cuit' => $dAsign->fletero_cuit,
@@ -64,24 +61,19 @@ class emailController extends Controller
             'fletero_permiso' => $dAsign->fletero_permiso,
             'fletero_vto_permiso' => $dAsign->fletero_vto_permiso,
             'confirmacion' => $dAsign->confirmacion,
-
             'driver' => $dAsign->driver,
             'documento' => $dAsign->documento,
-
             'truck' => $dAsign->truck,
             'truck_modelo' => $dAsign->model,
             'truck_year' => $dAsign->year,
             'truck_chasis' => $dAsign->chasis,
             'truck_poliza' => $dAsign->poliza,
             'truck_vto_poliza' => $dAsign->vto_poliza,
-
             'truck_semi' => $dAsign->truck_semi,
             'truck_semi_poliza' => $dAsign->semi_poliza,
             'truck_semi_vto_poliza' => $dAsign->semi_vto_poliza,
-
             'cntr_number' => $dAsign->cntr_number,
             'booking' => $dAsign->booking,
-
             'user' => $dAsign->user,
             'company' => $dAsign->company,
             'ref_customer' => $dAsign->ref_customer,
@@ -113,7 +105,7 @@ class emailController extends Controller
             return 'ok';
         } else {
 
-            Mail::to($to)->cc(['priopelliza@gmail.com'])->bcc($inboxEmail)->send(new cargaAsignada($data, $date));
+            Mail::to($to)->cc(['copia@botzero.com.ar'])->bcc($inboxEmail)->send(new cargaAsignada($data, $date));
 
             $logapi = new logapi();
             $logapi->user = $dAsign->user;
@@ -183,7 +175,7 @@ class emailController extends Controller
             $sbx = DB::table('variables')->select('sandbox')->first();
             $inboxEmail = env('INBOX_EMAIL');
             // Determine the recipient and log message based on sandbox status
-            $recipient = $to ? $to->email : 'pablorio@botzero.tech';
+            $recipient = $to ? $to->email : 'copia@botzero.com.ar';
             $logMessage = '+ Sandbox +' . ($sbx->sandbox == 0 ? '' : 'to: ' . $recipient) . 'AsignaUnidadTransporte-User:' . $asign->user . '|Transporte:' . $asign->transport . '| ATA:' . $asign->transport_agent . '| Bandera:' . $asign->pais . '| CUIT :' . $asign->tax_id;
             if ($sbx->sandbox == 0) {
                 // Send email
@@ -195,7 +187,7 @@ class emailController extends Controller
 
             } else {
 
-                Mail::to($to)->cc(['priopelliza@gmail.com'])->bcc($inboxEmail)->send(new transporteAsignado($data, $date));
+                Mail::to($to)->cc(['copia@botzero.com.ar'])->bcc($inboxEmail)->send(new transporteAsignado($data, $date));
             }
 
             // Log API action again with updated log message
@@ -222,12 +214,13 @@ class emailController extends Controller
         $logapi->save();
         $date = Carbon::now('-03:00');
 
-
         if ($tipo == 'problema') {
 
-            $qd = DB::table('status')->select('status.id','status.status','cntr.cntr_type','carga.trader','carga.type','carga.ref_customer','cntr.confirmacion' )
+            $qd = DB::table('status')->select('status.id','status.status','cntr.cntr_type','carga.trader','carga.type','carga.ref_customer','cntr.confirmacion','asign.transport','asign.transport_agent','asign.truck','asign.truck_semi','asign.driver','drivers.documento')
             ->join('cntr','cntr.cntr_number','=','status.cntr_number')
             ->join('carga', 'carga.booking', '=', 'cntr.booking')
+            ->leftJoin('asign','asign.cntr_number','=','status.cntr_number')
+            ->leftJoin('drivers','drivers.nombre','=','asign.driver')
             ->where('status.cntr_number', '=', $cntr)->latest('id')->first();
             $description = $qd->status;
             $datos = [
@@ -242,7 +235,13 @@ class emailController extends Controller
                 'cntr_type' => $qd->cntr_type,
                 'trader' => $qd->trader,
                 'type' => $qd->type,
-                'ref_customer' => $qd->ref_customer
+                'ref_customer' => $qd->ref_customer,
+                'transport' => $qd->transport,
+                'transport_agent' => $qd->transport_agent,
+                'driver' => $qd->driver,
+                'truck' => $qd->truck,
+                'truck_semi' => $qd->truck_semi,
+                'documento' => $qd->documento,
             ];
 
 
@@ -261,16 +260,18 @@ class emailController extends Controller
                 return 'ok';
             } else {
 
-                Mail::to($to)->cc(['priopelliza@gmail.com'])->bcc($inboxEmail)
+                Mail::to($to)->cc(['copia@botzero.com.ar'])->bcc($inboxEmail)
                 ->send(new CargaConProblemas($datos, $statusArchivoPath));
 
                 return 'ok';
             }
         } elseif ($tipo == 'stacking') {
 
-            $qd = DB::table('status')->select('status.main_status','status.id','status.status','cntr.cntr_type','carga.trader','carga.type','carga.ref_customer','cntr.confirmacion')
+            $qd = DB::table('status')->select('status.main_status','status.id','status.status','cntr.cntr_type','carga.trader','carga.type','carga.ref_customer','cntr.confirmacion','asign.transport','asign.transport_agent','asign.truck','asign.truck_semi','asign.driver','drivers.documento')
             ->join('cntr', 'cntr.cntr_number', '=', 'status.cntr_number')
             ->join('carga', 'carga.booking', '=', 'cntr.booking')
+            ->leftJoin('asign','asign.cntr_number','=','status.cntr_number')
+            ->leftJoin('drivers','drivers.nombre','=','asign.driver')
             ->where('status.cntr_number', '=', $cntr)->latest('status.id')->first();
             $description = $qd->status;
             $status = $qd->main_status;
@@ -286,7 +287,13 @@ class emailController extends Controller
                 'cntr_type' => $qd->cntr_type,
                 'trader' => $qd->trader,
                 'type' => $qd->type,
-                'ref_customer' => $qd->ref_customer
+                'ref_customer' => $qd->ref_customer,
+                'transport' => $qd->transport,
+                'transport_agent' => $qd->transport_agent,
+                'driver' => $qd->driver,
+                'truck' => $qd->truck,
+                'truck_semi' => $qd->truck_semi,
+                'documento' => $qd->documento,
             ];
 
             $qto = DB::table('carga')->select('users.email')
@@ -300,16 +307,17 @@ class emailController extends Controller
                 ->send(new IngresadoStacking($datos, $statusArchivoPath));
                 return 'ok';
             } else {
-                Mail::to($to)->cc(['priopelliza@gmail.com'])->bcc($inboxEmail)
+                Mail::to($to)->cc(['copia@botzero.com.ar'])->bcc($inboxEmail)
                 ->send(new IngresadoStacking($datos, $statusArchivoPath));
                 return 'ok';
             }
         } elseif ($tipo == 'terminada') {
 
-
-            $qd = DB::table('status')->select('status.id', 'status.status', 'cntr.cntr_type', 'carga.trader', 'carga.type', 'carga.ref_customer','cntr.confirmacion')
+            $qd = DB::table('status')->select('status.id', 'status.status', 'cntr.cntr_type', 'carga.trader', 'carga.type', 'carga.ref_customer','cntr.confirmacion','asign.transport','asign.transport_agent','asign.truck','asign.truck_semi','asign.driver','drivers.documento')
                 ->join('cntr', 'cntr.cntr_number', '=', 'status.cntr_number')
                 ->join('carga', 'carga.booking', '=', 'cntr.booking')
+                ->leftJoin('asign','asign.cntr_number','=','status.cntr_number')
+                ->leftJoin('drivers','drivers.nombre','=','asign.driver')
                 ->where('status.cntr_number', '=', $cntr)->latest('id')->first();
             $description = $qd->status;
             $datos = [
@@ -322,12 +330,16 @@ class emailController extends Controller
                 'status' => 'con Problema',
                 'cntr_type' => $qd->cntr_type,
                 'confirmacion' => $qd->confirmacion,
-
                 'trader' => $qd->trader,
                 'type' => $qd->type,
-                'ref_customer' => $qd->ref_customer
+                'ref_customer' => $qd->ref_customer,
+                'transport' => $qd->transport,
+                'transport_agent' => $qd->transport_agent,
+                'driver' => $qd->driver,
+                'truck' => $qd->truck,
+                'truck_semi' => $qd->truck_semi,
+                'documento' => $qd->documento,
             ];
-
 
             $qto = DB::table('carga')->select('users.email')
                 ->join('users', 'users.username', '=', 'carga.user')
@@ -344,7 +356,7 @@ class emailController extends Controller
                 return 'ok';
             } else {
 
-                Mail::to($to)->cc(['priopelliza@gmail.com'])->bcc($inboxEmail)
+                Mail::to($to)->cc(['copia@botzero.com.ar'])->bcc($inboxEmail)
                     ->send(new cargaTerminada($datos, $statusArchivoPath));
 
                 return 'ok';
@@ -352,9 +364,11 @@ class emailController extends Controller
         } else {
 
 
-            $qd = DB::table('status')->select('status.main_status', 'status.id', 'status.status', 'cntr.cntr_type', 'carga.trader', 'carga.type', 'carga.ref_customer','cntr.confirmacion')
+            $qd = DB::table('status')->select('status.main_status', 'status.id', 'status.status', 'cntr.cntr_type', 'carga.trader', 'carga.type', 'carga.ref_customer','cntr.confirmacion','asign.transport','asign.transport_agent','asign.truck','asign.truck_semi','asign.driver','drivers.documento')
             ->join('cntr', 'cntr.cntr_number', '=', 'status.cntr_number')
             ->join('carga', 'carga.booking', '=', 'cntr.booking')
+            ->leftJoin('asign','asign.cntr_number','=','status.cntr_number')
+            ->leftJoin('drivers','drivers.nombre','=','asign.driver')
             ->where('status.cntr_number', '=', $cntr)->latest('status.id')->first();
             $description = $qd->status;
             $status = $qd->main_status;
@@ -363,7 +377,6 @@ class emailController extends Controller
                 'cntr' => $cntr,
                 'description' =>  $description,
                 'confirmacion' => $qd->confirmacion,
-
                 'user' => $user,
                 'empresa' => $empresa,
                 'booking' => $booking,
@@ -372,7 +385,13 @@ class emailController extends Controller
                 'cntr_type' => $qd->cntr_type,
                 'trader' => $qd->trader,
                 'type' => $qd->type,
-                'ref_customer' => $qd->ref_customer
+                'ref_customer' => $qd->ref_customer,
+                'transport' => $qd->transport,
+                'transport_agent' => $qd->transport_agent,
+                'driver' => $qd->driver,
+                'truck' => $qd->truck,
+                'truck_semi' => $qd->truck_semi,
+                'documento' => $qd->documento,
             ];
 
             $qto = DB::table('carga')->select('users.email')
@@ -393,7 +412,7 @@ class emailController extends Controller
                 $logApi->save();
                 return 'ok';
             } else {
-                Mail::to($to)->cc(['priopelliza@gmail.com'])->bcc($inboxEmail)
+                Mail::to($to)->cc(['copia@botzero.com.ar'])->bcc($inboxEmail)
                 ->send(new CamnioStatus($datos, $statusArchivoPath));
                 $logApi = new logapi();
                 $logApi->user = $user;
@@ -496,7 +515,7 @@ class emailController extends Controller
         $inboxEmail = env('INBOX_EMAIL');
         if ($sbx[0]->sandbox == 0) {
 
-            $mail = Mail::to(['gzarate@totaltradegroup.com', 'rquero@totaltradegroup.com', 'smingo@totaltradegroup.com'])->cc(['cs.auxiliar@totaltradegroup.com'])->bcc($inboxEmail)->send(new avisoNewCarga($datos));
+            $mail = Mail::to(['gzarate@totaltradegroup.com', 'rquero@totaltradegroup.com', 'smingo@totaltradegroup.com', 'lgonzalez@totaltradegroup.com'])->cc(['cs.auxiliar@totaltradegroup.com'])->bcc($inboxEmail)->send(new avisoNewCarga($datos));
             $logApi = new logapi();
             $logApi->user = $user[0]->username;
             $logApi->detalle = "envio email to(['ddicarlo@totaltradegroup.com', 'rquero@totaltradegroup.com', 'cs.auxiliar@totaltradegroup.com'])->cc(['gzarate@totaltradegroup.com', 'fzgaib@totaltradegroup.com'])";
