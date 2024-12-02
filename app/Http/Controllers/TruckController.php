@@ -31,6 +31,11 @@ class TruckController extends Controller
 
         return $truck;
     }
+    public function indexTotal()
+    {
+        $trucks = truck::all();
+        return $trucks;
+    }
     public function indexTransport($transport)
     {
         // Convertir la cadena de transportes a un array
@@ -183,17 +188,26 @@ class TruckController extends Controller
     public function destroy(truck $truck)
     {
         $id = $truck->id;
-        truck::destroy($id);
+        
+        try {
+            truck::destroy($id);
+            $existe = truck::find($id);
+            if ($existe) {
+                return response()->json([
+                    'message' => 'No se eliminó el Tractor. Inténtalo de nuevo.',
+                ], 400);
+            } else {
+                return response()->json([
+                    'message' => 'Tractor eliminado con éxito.',
+                ], 200);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Ocurrió un error al intentar eliminar el Tractor.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
 
-        $existe = truck::find($id);
-
-        if ($existe) {
-
-            return 'No se elimino el Tractor';
-        } else {
-
-            return 'Se elimino el Tractor';
-        };
     }
     public function issetTruck($domain)
     {
