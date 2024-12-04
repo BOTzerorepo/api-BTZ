@@ -167,7 +167,7 @@ class ServiceSatelital extends Controller
             ->join('asign', 'trucks.domain', '=', 'asign.truck')
             ->join('cntr', 'cntr.cntr_number', '=', 'asign.cntr_number')
             ->join('carga', 'carga.booking', '=', 'cntr.booking')
-            ->join('aduanas', 'aduanas.description', '=', 'carga.custom_place')
+            ->leftJoin('aduanas', 'aduanas.description', '=', 'carga.custom_place')
             ->join('customer_load_places', 'customer_load_places.description', '=', 'carga.load_place')
             ->join('customer_unload_places', 'customer_unload_places.description', '=', 'carga.unload_place')
             ->select('cntr.id_cntr as IdTrip', 'carga.id as idCarga', 'trucks.id', 'trucks.id_satelital', 'trucks.domain', 'customer_load_places.description as LugarCarga', 'customer_load_places.latitud as CargaLat', 'customer_load_places.longitud as CargaLng', 'aduanas.description as LugarAduana', 'aduanas.lat as aduanaLat', 'aduanas.lon as aduanaLon', 'customer_unload_places.description as lugarDescarga', 'customer_unload_places.latitud as descargaLat', 'customer_unload_places.longitud as descargaLon')
@@ -216,7 +216,7 @@ class ServiceSatelital extends Controller
                     ]       
                 ] 
             ];*/
-            
+
 
             if (array_key_exists('data', $r)) {
 
@@ -229,9 +229,9 @@ class ServiceSatelital extends Controller
                 $positionDB->lat = $posicionLat;
                 $positionDB->lng = $posicionLon;
                 $positionDB->asigned = 1;
-            
+
                 $positionDB->save();
-            
+
                 $IdTrip = $camion->IdTrip;
                 //return [$posicionLat, $posicionLon, $camion->CargaLat, $camion->CargaLng];
                 // Calcular distancias usando la función reutilizable
@@ -245,13 +245,13 @@ class ServiceSatelital extends Controller
                     $requestCarga = new Psr7Request('GET', env('APP_URL') . '/api/accionLugarDeCarga/' . $IdTrip);
                     $resCarga = $clientCarga->sendAsync($requestCarga)->wait();
                 }
-            
+
                 if ($d2 <= 200) { // Dentro del rango de Aduana
                     $clientAduana = new Client();
                     $requestAduana = new Psr7Request('GET', env('APP_URL') . '/api/accionLugarAduana/' . $IdTrip);
                     $resAduana = $clientAduana->sendAsync($requestAduana)->wait();
                 }
-            
+
                 if ($d3 <= 200) { // Dentro del rango de Descarga
                     $clientDescarga = new Client();
                     $requestDescarga = new Psr7Request('GET', env('APP_URL') . '/api/accionLugarDescarga/' . $IdTrip);
@@ -271,53 +271,12 @@ class ServiceSatelital extends Controller
                     $requestCarga = new Psr7Request('GET', env('APP_URL') . '/api/accionFueraLugarDeCarga/' . $IdTrip);
                     $resCarga = $clientCarga->sendAsync($requestCarga)->wait();
                 }
-            
+
                 if ($d2 > 200 && $description === "EN ADUANA") { // Fuera del rango de Aduana
                     $clientAduana = new Client();
                     $requestAduana = new Psr7Request('GET', env('APP_URL') . '/api/accionFueraLugarAduana/' . $IdTrip);
                     $resAduana = $clientAduana->sendAsync($requestAduana)->wait();
                 }
-            
-            }
-            
-        }
-
-        $truckPosition = DB::table('trucks')->where('alta_aker', "!=", 0)->get();
-
-        foreach ($truckPosition as $camion) {
-
-            $client = new Client();
-            $headers = [
-                'Content-Type' => 'application/json'
-            ];
-
-
-            $body = '{
-                    "patentes":["' . $camion->domain . '"],
-                    "cercania":true,
-                    "domicilio":false,
-                    "apiCode":"E6HW19",
-                    "phone":"2612128105"
-                    }';
-
-
-            $request = new Psr7Request('GET', 'https://app.akercontrol.com/ws/v2/servicios', $headers, $body);
-            $res = $client->sendAsync($request)->wait();
-            $respuesta = $res->getBody();
-            $r = json_decode($respuesta, true);
-            $keys = array($r);
-
-            if (array_key_exists('data', $r)) {
-
-                $datos = $keys[0]['data'][$camion->domain];
-                $posicionLat = $datos['ult_latitud'];
-                $posicionLon = $datos['ult_longitud'];
-
-                $positionDB = new position();
-                $positionDB->dominio = $camion->domain;
-                $positionDB->lat = $posicionLat;
-                $positionDB->lng = $posicionLon;
-                $positionDB->save();
             }
         }
     }
@@ -820,25 +779,25 @@ class ServiceSatelital extends Controller
     public function revisarCoordenadas()
     {
         $detalleComparaciones = [];
-    
+
         // Obtener todas las asignaciones activas desde la tabla asign
         $asignaciones = asign::whereNull('deleted_at')
             ->whereNotNull('truck')
             ->whereIn('booking', Carga::where('status', '!=', 'TERMINADA')->pluck('booking'))
             ->get();
-    
+
         foreach ($asignaciones as $asignacion) {
             // Obtener los datos del truck y el contenedor a partir de la asignación
             $truckDomain = $asignacion->truck;  // Dominio del truck
             $cntrNumber = $asignacion->cntr_number;    // Número del contenedor
-    
+
             // Obtener los datos del contenedor desde la tabla cntr
             $contenedor = DB::table('cntr')->where('cntr_number', $cntrNumber)->first();
-    
+
             if (!$contenedor || !$truckDomain) {
                 continue; // Si no se encuentra el contenedor o el dominio del truck, se omite esta asignación
             }
-    
+
             // Realizar una solicitud a la API para obtener las coordenadas del truck
             $client = new Client();
             $headers = ['Content-Type' => 'application/json'];
@@ -849,12 +808,12 @@ class ServiceSatelital extends Controller
                 "apiCode" => "E6HW19",
                 "phone" => "2612128105"
             ]);
-    
+
             $request = new Psr7Request('GET', 'https://app.akercontrol.com/ws/v2/servicios', $headers, $body);
             $res = $client->sendAsync($request)->wait();
             $respuesta = $res->getBody();
             $r = json_decode($respuesta, true);
-    
+
             /*$r = [
                 'data' => [ 
                     $truckDomain => [
@@ -863,7 +822,7 @@ class ServiceSatelital extends Controller
                     ]       
                 ] 
             ];*/
-    
+
             // Verificar si la solicitud fue exitosa y si hay coordenadas disponibles
             if (isset($r['data'])) {
                 $datos = $r['data'][$truckDomain];  // Obtener las coordenadas del truck
@@ -900,22 +859,22 @@ class ServiceSatelital extends Controller
                     )
                     ->orderBy('cntr_interest_point.order', 'asc') // Ordenar por el campo "order"
                     ->get();
-    
+
                 // Identificar el punto de interés activo
                 // Filtrar puntos activos (activo no es 0) y ordenarlos por "order" en forma descendente
                 $puntoActivo = $puntosDeInteres
-                ->filter(function ($punto) {
-                    return $punto->activo !== 0; // Filtrar puntos activos
-                })
-                ->sortByDesc('order') // Ordenar por el campo "order" en forma descendente
-                ->first(); // Obtener el primer resultado de la lista filtrada y ordenada
+                    ->filter(function ($punto) {
+                        return $punto->activo !== 0; // Filtrar puntos activos
+                    })
+                    ->sortByDesc('order') // Ordenar por el campo "order" en forma descendente
+                    ->first(); // Obtener el primer resultado de la lista filtrada y ordenada
 
                 if ($puntoActivo) {
                     // Calcular la distancia con el punto activo
                     $distanciaPuntoActivo = $this->calcularDistancia($latitud, $longitud, $puntoActivo->latitude, $puntoActivo->longitude);
-    
+
                     // Si la distancia es mayor al radio, significa que el camión ha salido
-                    if ($distanciaPuntoActivo > $puntoActivo->radius && $contenedor->main_status === $puntoActivo->status_transition ) {
+                    if ($distanciaPuntoActivo > $puntoActivo->radius && $contenedor->main_status === $puntoActivo->status_transition) {
                         // 1. Verificar si el estado es 1 (ya se envió el correo de entrada)
                         if ($puntoActivo->activo === 1) {
                             // 2. Realizar las acciones de salida del punto de interés activo
@@ -926,7 +885,7 @@ class ServiceSatelital extends Controller
                             DB::table('cntr_interest_point')
                                 ->where('id', $puntoActivo->cntr_interest_point_id)
                                 ->update(['activo' => 2]);
-    
+
                             // Guardar el detalle de la salida
                             $detalleComparacion = [
                                 'cntr_id' => $contenedor->id_cntr,
@@ -936,7 +895,7 @@ class ServiceSatelital extends Controller
                                 'accion' => 'salida'
                             ];
                             $detalleComparaciones[] = $detalleComparacion;
-    
+
                             // Desactivar el punto activo
                             $puntoActivo = null;
                         }
@@ -944,23 +903,23 @@ class ServiceSatelital extends Controller
                 } else {
                     // Si no hay un punto activo, buscar el primer punto de interés
                     $puntoInteresInicial = $puntosDeInteres->firstWhere('order', 1);
-    
+
                     if ($puntoInteresInicial) {
                         // Calcular la distancia al punto inicial
                         $distancia = $this->calcularDistancia($latitud, $longitud, $puntoInteresInicial->latitude, $puntoInteresInicial->longitude);
-    
+
                         // Si está dentro del radio del primer punto, marcarlo como activo
-                        if ($distancia <= $puntoInteresInicial->radius && $contenedor->main_status === $puntoInteresInicial->status_transition ) {
+                        if ($distancia <= $puntoInteresInicial->radius && $contenedor->main_status === $puntoInteresInicial->status_transition) {
                             // 1. Verificar si el estado es 0 (no se ha enviado ningún correo)
                             if ($puntoInteresInicial->activo === 0) {
                                 // 2. Realizar las acciones de entrada del punto inicial
                                 $this->ejecutarAccionEntrada($puntoInteresInicial->interest_point_id, $contenedor->id_cntr);
-    
+
                                 // 3. Marcar el punto de interés como 1 (se envió correo de entrada)
                                 DB::table('cntr_interest_point')
                                     ->where('id', $puntoInteresInicial->cntr_interest_point_id)
                                     ->update(['activo' => 1]);
-    
+
                                 // Guardar el detalle de la entrada
                                 $detalleComparacion = [
                                     'cntr_id' => $contenedor->id_cntr,
@@ -970,30 +929,30 @@ class ServiceSatelital extends Controller
                                     'accion' => 'entrada'
                                 ];
                                 $detalleComparaciones[] = $detalleComparacion;
-    
+
                                 // Marcar como punto activo
                                 $puntoActivo = $puntoInteresInicial;
                             }
                         }
                     }
                 }
-                
+
                 // Si hay un nuevo punto activo, buscar el siguiente punto en orden
                 if ($puntoActivo) {
-                   
+
                     $indicePuntoActivo = $puntosDeInteres->search(function ($punto) use ($puntoActivo) {
                         return $punto->cntr_interest_point_id === $puntoActivo->cntr_interest_point_id;
                     });
 
                     // Obtener el siguiente punto de interés en la lista
                     $siguientePunto = $puntosDeInteres->get($indicePuntoActivo + 1);
-    
+
                     if ($siguientePunto) {
                         // Calcular la distancia con el siguiente punto de interés
                         $distanciaSiguiente = $this->calcularDistancia($latitud, $longitud, $siguientePunto->latitude, $siguientePunto->longitude);
-                    
+
                         // Si está dentro del radio del siguiente punto
-                        if ($distanciaSiguiente <= $siguientePunto->radius && $contenedor->main_status === $siguientePunto->status_transition ) {
+                        if ($distanciaSiguiente <= $siguientePunto->radius && $contenedor->main_status === $siguientePunto->status_transition) {
                             // Si el punto activo NO tiene el estado 2, se ejecuta la acción de salida
                             if ($puntoActivo->activo !== 2) {
                                 // 1. Realizar las acciones de salida del punto activo
@@ -1004,7 +963,7 @@ class ServiceSatelital extends Controller
                                 DB::table('cntr_interest_point')
                                     ->where('id', $puntoActivo->cntr_interest_point_id)
                                     ->update(['activo' => 2]);
-                    
+
                                 // Guardar el detalle de la salida
                                 $detalleComparacionSalida = [
                                     'cntr_id' => $contenedor->id_cntr,
@@ -1015,17 +974,17 @@ class ServiceSatelital extends Controller
                                 ];
                                 $detalleComparaciones[] = $detalleComparacionSalida;
                             }
-                    
+
                             // Verificar el estado del siguiente punto (debe ser 0 para enviar correo de entrada)
                             if ($siguientePunto->activo === 0 && $contenedor->main_status == $siguientePunto->status_transition) {
                                 // 4. Realizar las acciones de entrada en el siguiente punto
                                 $this->ejecutarAccionEntrada($siguientePunto->interest_point_id, $contenedor->id_cntr);
-                    
+
                                 // 5. Marcar el siguiente punto como 1 (se envió correo de entrada)
                                 DB::table('cntr_interest_point')
                                     ->where('id', $siguientePunto->cntr_interest_point_id)
                                     ->update(['activo' => 1]);
-                    
+
                                 // Guardar el detalle de la entrada
                                 $detalleComparacionEntrada = [
                                     'cntr_id' => $contenedor->id_cntr,
@@ -1042,7 +1001,7 @@ class ServiceSatelital extends Controller
             }
         }
         return $detalleComparaciones; // Retorna los detalles de comparación si es necesario
-    }    
+    }
     public function calcularDistancia($latitud1, $longitud1, $latitud2, $longitud2)
     {
         $radioTierra = 6371; // Radio de la Tierra en kilómetros

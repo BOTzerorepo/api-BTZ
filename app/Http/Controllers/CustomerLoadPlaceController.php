@@ -16,7 +16,8 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
-
+use App\Models\cntr;
+use App\Models\Carga;
 
 class CustomerLoadPlaceController extends Controller
 {
@@ -64,7 +65,6 @@ class CustomerLoadPlaceController extends Controller
      */
     public function accionLugarDeCarga($idTrip)
     {
-
         $date = Carbon::now('-03:00');
         $qc = DB::table('cntr')->select('cntr_number', 'booking', 'confirmacion')->where('id_cntr', '=', $idTrip)->get();
         $cntr = $qc[0];
@@ -73,7 +73,6 @@ class CustomerLoadPlaceController extends Controller
         $description = $qd->status;
 
         if ($qd->main_status != 'CARGANDO') {
-
             DB::table('status')->insert([
                 'status' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts del Lugar de Carga.',
                 'main_status' => 'CARGANDO',
@@ -86,6 +85,20 @@ class CustomerLoadPlaceController extends Controller
                     'main_status' => 'CARGANDO',
                     'status_cntr' => '[AUTOMATICO] Camión se encuentra en un radio de 200 mts del Lugar de Carga.'
                 ]);
+
+            $cntrs = cntr::where('booking', $cntr->booking)->get();
+            // Obtener el status del primer registro
+            $primerCntrStatus = $cntrs->first()->main_status;
+
+            // Verificar si todos los registros tienen el mismo status
+            $equal = $cntrs->every(function ($cntr) use ($primerCntrStatus) {
+                return $cntr->main_status == $primerCntrStatus;
+            });
+
+            // Si todos los registros tienen el mismo status, actualizar el status de la carga
+            if ($equal) {
+                Carga::where('booking', $cntr->booking)->update(['status' => $primerCntrStatus]);
+            }
 
             $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
             $description = $qd->status;
@@ -118,7 +131,6 @@ class CustomerLoadPlaceController extends Controller
             } elseif ($sbx[0]->sandbox == 2) {
 
                 Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new cargaCargando($datos));
-
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
                 $logApi->detalle = "envio email cargaCargando to:" . $mail;
@@ -134,7 +146,6 @@ class CustomerLoadPlaceController extends Controller
             }
 
             $actualizarAvisado = statu::find($qd->id);
-
             $avisadoMas = $actualizarAvisado->avisado + 1;
             $actualizarAvisado->avisado = $avisadoMas;
             $actualizarAvisado->save();
@@ -143,8 +154,6 @@ class CustomerLoadPlaceController extends Controller
         } else {
 
             if ($qd->avisado == 0) {
-
-
 
                 DB::table('status')->insert([
                     'status' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts del Lugar de Carga.',
@@ -159,6 +168,19 @@ class CustomerLoadPlaceController extends Controller
                         'main_status' => 'CARGANDO',
                         'status_cntr' => '[AUTOMATICO] Camión se encuentra en un radio de 200 mts del Lugar de Carga.'
                     ]);
+                $cntrs = cntr::where('booking', $cntr->booking)->get();
+                // Obtener el status del primer registro
+                $primerCntrStatus = $cntrs->first()->main_status;
+
+                // Verificar si todos los registros tienen el mismo status
+                $equal = $cntrs->every(function ($cntr) use ($primerCntrStatus) {
+                    return $cntr->main_status == $primerCntrStatus;
+                });
+
+                // Si todos los registros tienen el mismo status, actualizar el status de la carga
+                if ($equal) {
+                    Carga::where('booking', $cntr->booking)->update(['status' => $primerCntrStatus]);
+                }
 
                 $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
                 $description = $qd->status;
@@ -183,8 +205,6 @@ class CustomerLoadPlaceController extends Controller
                 $inboxEmail = env('INBOX_EMAIL');
 
                 if ($sbx[0]->sandbox == 0) {
-
-
                     Mail::to($mail)->bcc($inboxEmail)->send(new cargaCargando($datos));
 
                     $logApi = new logapi();
@@ -247,7 +267,19 @@ class CustomerLoadPlaceController extends Controller
                     'main_status' => 'EN ADUANA',
                     'status_cntr' => '[AUTOMATICO] Camión se encuentra en un radio de 200 mts de la Aduana asignada.'
                 ]);
+            $cntrs = cntr::where('booking', $cntr->booking)->get();
+            // Obtener el status del primer registro
+            $primerCntrStatus = $cntrs->first()->main_status;
 
+            // Verificar si todos los registros tienen el mismo status
+            $equal = $cntrs->every(function ($cntr) use ($primerCntrStatus) {
+                return $cntr->main_status == $primerCntrStatus;
+            });
+
+            // Si todos los registros tienen el mismo status, actualizar el status de la carga
+            if ($equal) {
+                Carga::where('booking', $cntr->booking)->update(['status' => $primerCntrStatus]);
+            }
             $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
             $description = $qd->status;
 
@@ -316,7 +348,19 @@ class CustomerLoadPlaceController extends Controller
                         'main_status' => 'EN ADUANA',
                         'status_cntr' => '[AUTOMATICO] Camión se encuentra en un radio de 200 mts de la Aduana asignada.'
                     ]);
+                $cntrs = cntr::where('booking', $cntr->booking)->get();
+                // Obtener el status del primer registro
+                $primerCntrStatus = $cntrs->first()->main_status;
 
+                // Verificar si todos los registros tienen el mismo status
+                $equal = $cntrs->every(function ($cntr) use ($primerCntrStatus) {
+                    return $cntr->main_status == $primerCntrStatus;
+                });
+
+                // Si todos los registros tienen el mismo status, actualizar el status de la carga
+                if ($equal) {
+                    Carga::where('booking', $cntr->booking)->update(['status' => $primerCntrStatus]);
+                }
                 $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
                 $description = $qd->status;
 
@@ -336,13 +380,9 @@ class CustomerLoadPlaceController extends Controller
                     'date' => $date
                 ];
 
-
-
                 $sbx = DB::table('variables')->select('sandbox')->get();
                 $inboxEmail = env('INBOX_EMAIL');
                 if ($sbx[0]->sandbox == 0) {
-
-
                     Mail::to($mail)->bcc($inboxEmail)->send(new cargaAduana($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
@@ -386,8 +426,6 @@ class CustomerLoadPlaceController extends Controller
 
         if ($qd->main_status != 'STACKING') {
 
-
-
             DB::table('status')->insert([
                 'status' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts del Lugar de Descarga.',
                 'main_status' => 'STACKING',
@@ -401,7 +439,19 @@ class CustomerLoadPlaceController extends Controller
                     'main_status' => 'STACKING',
                     'status_cntr' => '[AUTOMATICO] Camión se encuentra en un radio de 200 mts del Lugar de Descarga.'
                 ]);
+            $cntrs = cntr::where('booking', $cntr->booking)->get();
+            // Obtener el status del primer registro
+            $primerCntrStatus = $cntrs->first()->main_status;
 
+            // Verificar si todos los registros tienen el mismo status
+            $equal = $cntrs->every(function ($cntr) use ($primerCntrStatus) {
+                return $cntr->main_status == $primerCntrStatus;
+            });
+
+            // Si todos los registros tienen el mismo status, actualizar el status de la carga
+            if ($equal) {
+                Carga::where('booking', $cntr->booking)->update(['status' => $primerCntrStatus]);
+            }
             $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
             $description = $qd->status;
 
@@ -468,7 +518,19 @@ class CustomerLoadPlaceController extends Controller
                         'main_status' => 'STACKING',
                         'status_cntr' => '[AUTOMATICO] Camión se encuentra en un radio de 200 mts del Lugar de Descarga.'
                     ]);
+                $cntrs = cntr::where('booking', $cntr->booking)->get();
+                // Obtener el status del primer registro
+                $primerCntrStatus = $cntrs->first()->main_status;
 
+                // Verificar si todos los registros tienen el mismo status
+                $equal = $cntrs->every(function ($cntr) use ($primerCntrStatus) {
+                    return $cntr->main_status == $primerCntrStatus;
+                });
+
+                // Si todos los registros tienen el mismo status, actualizar el status de la carga
+                if ($equal) {
+                    Carga::where('booking', $cntr->booking)->update(['status' => $primerCntrStatus]);
+                }
                 $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
                 $description = $qd->status;
 
@@ -606,8 +668,6 @@ class CustomerLoadPlaceController extends Controller
 
             if ($qd->avisado == 0) {
 
-
-
                 DB::table('status')->insert([
                     'status' => '[AUTOMATICO] El camión ha salido del área de carga y se encuentra a más de 200 metros del lugar.',
                     'main_status' => 'SALIENDO CARGAR',
@@ -621,7 +681,7 @@ class CustomerLoadPlaceController extends Controller
                         'main_status' => 'SALIENDO CARGAR',
                         'status_cntr' => '[AUTOMATICO] El camión ha salido del área de carga y se encuentra a más de 200 metros del lugar.'
                     ]);
-
+            
                 $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
                 $description = $qd->status;
 
@@ -709,7 +769,19 @@ class CustomerLoadPlaceController extends Controller
                     'main_status' => 'YENDO A DESCARGAR',
                     'status_cntr' => '[AUTOMATICO] El camión ha salido de la aduana asignada y se encuentra a más de 200 metros del lugar.'
                 ]);
+            $cntrs = cntr::where('booking', $cntr->booking)->get();
+            // Obtener el status del primer registro
+            $primerCntrStatus = $cntrs->first()->main_status;
 
+            // Verificar si todos los registros tienen el mismo status
+            $equal = $cntrs->every(function ($cntr) use ($primerCntrStatus) {
+                return $cntr->main_status == $primerCntrStatus;
+            });
+
+            // Si todos los registros tienen el mismo status, actualizar el status de la carga
+            if ($equal) {
+                Carga::where('booking', $cntr->booking)->update(['status' => $primerCntrStatus]);
+            }
             $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
             $description = $qd->status;
 
@@ -776,7 +848,19 @@ class CustomerLoadPlaceController extends Controller
                         'main_status' => 'YENDO A DESCARGAR',
                         'status_cntr' => '[AUTOMATICO] El camión ha salido de la aduana asignada y se encuentra a más de 200 metros del lugar.'
                     ]);
+                $cntrs = cntr::where('booking', $cntr->booking)->get();
+                // Obtener el status del primer registro
+                $primerCntrStatus = $cntrs->first()->main_status;
 
+                // Verificar si todos los registros tienen el mismo status
+                $equal = $cntrs->every(function ($cntr) use ($primerCntrStatus) {
+                    return $cntr->main_status == $primerCntrStatus;
+                });
+
+                // Si todos los registros tienen el mismo status, actualizar el status de la carga
+                if ($equal) {
+                    Carga::where('booking', $cntr->booking)->update(['status' => $primerCntrStatus]);
+                }
                 $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
                 $description = $qd->status;
 
@@ -796,12 +880,9 @@ class CustomerLoadPlaceController extends Controller
                     'date' => $date
                 ];
 
-
-
                 $sbx = DB::table('variables')->select('sandbox')->get();
                 $inboxEmail = env('INBOX_EMAIL');
                 if ($sbx[0]->sandbox == 0) {
-
 
                     Mail::to($mail)->bcc($inboxEmail)->send(new cargaFueraAduana($datos));
                     $logApi = new logapi();
