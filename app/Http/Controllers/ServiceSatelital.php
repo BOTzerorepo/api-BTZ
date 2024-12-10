@@ -230,13 +230,13 @@ class ServiceSatelital extends Controller
                 $posicionLon = $datos['ult_longitud'];
             
                 //CONSULTAR PACHIIIIIIIIIIIIII
-                /*$positionDB = new position();
+                $positionDB = new position();
                 $positionDB->dominio = $camion->domain;
                 $positionDB->lat = $posicionLat;
                 $positionDB->lng = $posicionLon;
                 $positionDB->asigned = 1;
 
-                $positionDB->save();*/
+                $positionDB->save();
 
                 $IdTrip = $camion->IdTrip;
                 //return [$posicionLat, $posicionLon, $camion->CargaLat, $camion->CargaLng];
