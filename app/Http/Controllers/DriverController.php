@@ -17,7 +17,7 @@ class DriverController extends Controller
      */
     public function index()
     {
-        $drivers = Driver::all();
+        $drivers = Driver::whereNull('deleted_at')->get();
         return $drivers;
     }
     public function indexTransport($idTransport)
