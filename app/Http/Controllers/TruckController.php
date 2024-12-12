@@ -232,11 +232,9 @@ class TruckController extends Controller
      */
     public function destroy(truck $truck)
     {
-        $id = $truck->id;
-
         try {
-            truck::destroy($id);
-            $existe = truck::find($id);
+            truck::destroy($truck->id);
+            $existe = truck::find($truck->id);
             if ($existe) {
                 return response()->json([
                     'message' => 'No se eliminó el Tractor. Inténtalo de nuevo.',
