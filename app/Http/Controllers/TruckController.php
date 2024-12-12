@@ -77,11 +77,29 @@ class TruckController extends Controller
      */
     public function store(StoreTruckRequest $request)
     {
-        // Obtener el `customer_id` (simulación en este caso)
-        $customerId = 2;
-
-        // Crear el camión
         try {
+            $validated = $request->validate([
+                'model' => 'required|string|max:255',
+                'type' => 'required|string|max:255',
+                'domain' => 'required|string|unique:trucks,domain',
+                'alta_aker' => 'nullable|numeric',
+                'satelital' => 'nullable|string|max:255',
+                'id_satelital' => 'nullable|numeric',
+                'act_owner' => 'nullable|numeric',
+                'year' => 'required|numeric',
+                'device_truck' => 'required|numeric',
+                'satelital_location' => 'required|numeric',
+                'user' => 'required|string|max:255',
+                'customer_id' => 'required|numeric',
+                'fletero_id' => 'nullable|numeric',
+                'transport_ids' => 'required|numeric',
+                'chasis' => 'nullable|string|max:255',
+                'poliza' => 'nullable|string|max:255',
+                'vto_poliza' => 'nullable|date',
+                'doc_poliza' => 'nullable|string|max:255',
+            ]);
+
+            $customerId = 2;
             $truck = Truck::create([
                 'model' => $request->model,
                 'chasis' => $request->chasis,
@@ -143,40 +161,67 @@ class TruckController extends Controller
      */
     public function update(UpdateTruckRequest $request, Truck $truck)
     {
-        $od = $truck->domain;
+        try {
+            $validated = $request->validate([
+                'model' => 'required|string|max:255',
+                'type' => 'required|string|max:255',
+                'domain' => "required|string|unique:trucks,domain,$truck->id",
+                'alta_aker' => 'nullable|numeric',
+                'satelital' => 'nullable|string|max:255',
+                'id_satelital' => 'nullable|numeric',
+                'act_owner' => 'nullable|numeric',
+                'year' => 'required|numeric',
+                'device_truck' => 'required|numeric',
+                'satelital_location' => 'required|numeric',
+                'user' => 'required|string|max:255',
+                'customer_id' => 'required|numeric',
+                'fletero_id' => 'nullable|numeric',
+                'transport_ids' => 'required|numeric',
+                'chasis' => 'nullable|string|max:255',
+                'poliza' => 'nullable|string|max:255',
+                'vto_poliza' => 'nullable|date',
+                'doc_poliza' => 'nullable|string|max:255',
+            ]);
+            
+            $asign = DB::table('asign')->where('truck', $truck->domain)->first();
 
-        $asign = DB::table('asign')->where('truck', $od)->first();
+            if ($asign) {
+                DB::table('asign')
+                    ->where('truck', $truck->domain)
+                    ->update(['truck' => $request->domain]);
+            }
 
-        if ($asign) {
-            DB::table('asign')
-                ->where('truck', $od)
-                ->update(['truck' => $request->domain]);
+            $customerId = DB::table('users')->where('username', $request->user)->value('customer_id');
+
+            $truck->update([
+                'model' => $request->model,
+                'type' => $request->type,
+                'domain' => $request->domain,
+                'chasis' => $request->chasis,
+                'poliza' => $request->poliza,
+                'vto_poliza' => $request->vto_poliza,
+                'year' => $request->year,
+                'device_truck' => $request->device_truck,
+                'satelital_location' => $request->satelital_location,
+                'transport_id' => $request->transport_ids,
+                'user' => $request->user,
+                'customer_id' => $customerId,
+                'fletero_id' => $request->fletero_id // Asociar con Fletero
+            ]);
+
+            $resultado = $this->serviceSatelital->issetDominio($request->domain);
+
+            return response()->json([
+                'message' => 'Camión actualizado exitosamente.',
+                'data' => $truck,
+                'resultado' => $resultado,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al actualizar el camión.',
+                'error' => $e->getMessage(),
+            ], 500);
         }
-
-        $customerId = DB::table('users')->where('username', $request->user)->value('customer_id');
-
-        $truck->update([
-            'model' => $request->model,
-            'type' => $request->type,
-            'domain' => $request->domain,
-            'chasis' => $request->chasis,
-            'poliza' => $request->poliza,
-            'vto_poliza' => $request->vto_poliza,
-            'year' => $request->year,
-            'device_truck' => $request->device_truck,
-            'satelital_location' => $request->satelital_location,
-            'transport_id' => $request->transport_ids,
-            'user' => $request->user,
-            'customer_id' => $customerId,
-            'fletero_id' => $request->fletero_id // Asociar con Fletero
-        ]);
-
-        $this->serviceSatelital->issetDominio($request->domain);
-
-        return response()->json([
-            'message' => 'Camión actualizado exitosamente.',
-            'data' => $truck,
-        ], 200);
     }
 
     /**
@@ -188,7 +233,7 @@ class TruckController extends Controller
     public function destroy(truck $truck)
     {
         $id = $truck->id;
-        
+
         try {
             truck::destroy($id);
             $existe = truck::find($id);
@@ -207,7 +252,6 @@ class TruckController extends Controller
                 'error' => $e->getMessage(),
             ], 500);
         }
-
     }
     public function issetTruck($domain)
     {
