@@ -258,7 +258,7 @@ Route::get('/trucks', 'App\Http\Controllers\TruckController@indexTotal');
 Route::post('/trailer', 'App\Http\Controllers\TrailerController@store'); // C
 Route::get('/trailer/{customer}', 'App\Http\Controllers\TrailerController@index'); // R ALL
 Route::get('/trailerTransport/{transport}', 'App\Http\Controllers\TrailerController@indexTransport'); // R ALL
-
+Route::get('/trailerTraffic', 'App\Http\Controllers\TrailerController@indexTraffic');
 Route::get('/trailer/{trailer}', 'App\Http\Controllers\TrailerController@show'); // R ONE
 Route::post('/trailer/{trailer}', 'App\Http\Controllers\TrailerController@update'); // U
 Route::delete('/trailer/{trailer}', 'App\Http\Controllers\TrailerController@destroy'); // D

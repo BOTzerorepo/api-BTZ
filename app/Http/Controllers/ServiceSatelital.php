@@ -163,6 +163,7 @@ class ServiceSatelital extends Controller
 
     public function serviceSatelital()
     {
+        
         $todosMisCamiones = DB::table('trucks')
             ->join('asign', 'trucks.domain', '=', 'asign.truck')
             ->join('cntr', 'cntr.cntr_number', '=', 'asign.cntr_number')
@@ -171,10 +172,14 @@ class ServiceSatelital extends Controller
             ->join('customer_load_places', 'customer_load_places.description', '=', 'carga.load_place')
             ->join('customer_unload_places', 'customer_unload_places.description', '=', 'carga.unload_place')
             ->select('cntr.id_cntr as IdTrip', 'carga.id as idCarga', 'trucks.id', 'trucks.id_satelital', 'trucks.domain', 'customer_load_places.description as LugarCarga', 'customer_load_places.latitud as CargaLat', 'customer_load_places.longitud as CargaLng', 'aduanas.description as LugarAduana', 'aduanas.lat as aduanaLat', 'aduanas.lon as aduanaLon', 'customer_unload_places.description as lugarDescarga', 'customer_unload_places.latitud as descargaLat', 'customer_unload_places.longitud as descargaLon')
+            ->where('carga.deleted_at', '=', null)
             ->where('cntr.main_status', '!=', 'TERMINADA')
             ->where('trucks.alta_aker', '!=', 0)
             ->get();
 
+        //return $todosMisCamiones;
+        
+        
         foreach ($todosMisCamiones as $camion) {
 
             $client = new Client();
