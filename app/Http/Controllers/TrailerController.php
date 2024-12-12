@@ -21,6 +21,11 @@ class TrailerController extends Controller
         $trailer = trailer::where('customer_id', '=', $customer)->get();
         return $trailer;
     }
+    public function indexTraffic()
+    {
+        $trailer = trailer::all();
+        return $trailer;
+    }
     public function indexTransport($transport)
     {
         // Convertir $transport en un array si contiene varios IDs separados por comas
