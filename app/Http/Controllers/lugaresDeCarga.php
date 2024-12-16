@@ -154,7 +154,7 @@ class lugaresDeCarga extends Controller
                     $logApi->save();
                 }else {
 
-                Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaCargando($datos));
+                Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaCargando($datos));
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
                 $logApi->detalle = "+ Sandbox + envio email cargaCargando to :" . $mail;
@@ -281,7 +281,7 @@ class lugaresDeCarga extends Controller
                 $logApi->save();
             }else {
 
-                Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaCargando($datos));
+                Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaCargando($datos));
 
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
@@ -387,7 +387,7 @@ class lugaresDeCarga extends Controller
                     $logApi->save();
                  }else {
 
-                    Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaAduana($datos));
+                    Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaAduana($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "+ Sandbox + envio email cargaAduana to:" . $mail;
@@ -511,7 +511,7 @@ class lugaresDeCarga extends Controller
                 $logApi->save();
             } else {
 
-                Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaAduana($datos));
+                Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaAduana($datos));
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
                 $logApi->detalle = "+ Sandbox + envio email cargaAduana to: " . $mail;
@@ -595,7 +595,7 @@ class lugaresDeCarga extends Controller
                     $logApi->save();
                 }else {
 
-                    Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaDescarga($datos));
+                    Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaDescarga($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "+ Sandbox + envio email cargaDescarga to: " . $mail;
@@ -654,7 +654,7 @@ class lugaresDeCarga extends Controller
 
                 } else {
 
-                    Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaDescarga($datos));
+                    Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaDescarga($datos));
 
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
@@ -723,7 +723,7 @@ class lugaresDeCarga extends Controller
                 $logApi->save();
             }else {
 
-                Mail::to('pablorio@botzero.tech')->bcc($inboxEmail)->send(new cargaDescarga($datos));
+                Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaDescarga($datos));
 
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
