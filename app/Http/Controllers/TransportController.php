@@ -59,41 +59,86 @@ class TransportController extends Controller
      */
     public function store(Request $request)
     {
-        $transporte = Transport::withTrashed()
-            ->where('cuit', $request['cuit'])
-            ->orWhere('razon_social', $request['razon_social'])
-            ->first();
+        try {
+            $validated = $request->validate([
+                'razon_social' => 'required|string|max:255',
+                'CUIT' => 'required|numeric|digits_between:8,12|unique:transports,CUIT',
+                'direccion' => 'required|string|max:255',
+                'pais' => 'required|string|max:255',
+                'provincia' => 'required|string|max:255',
+                'satelital' => 'nullable|string|max:255',
+                'paut' => 'nullable|string|max:255',
+                'permiso' => 'nullable|string|max:255',
+                'vto_permiso' => 'nullable|string|max:255',
+                'contacto_logistica_nombre' => 'required|string|max:255',
+                'contacto_logistica_celular' => 'required|numeric|digits_between:7,12',
+                'contacto_logistica_mail' => 'required|email|max:255',
+                'contacto_admin_nombre' => 'required|string|max:255',
+                'contacto_admin_celular' => 'required|numeric|digits_between:7,12',
+                'contacto_admin_mail' => 'required|email|max:255',
+                'user' => 'required|string|max:255',
+                'empresa' => 'required|string|max:255',
+                'observation' => 'nullable|string|max:255',
+            ]);
 
-        if ($transporte) {
-            // Si el registro está eliminado, lo restauramos
-            if ($transporte->trashed()) {
-                $transporte->restore();
+            $transporte = Transport::withTrashed()
+                ->where('CUIT', $request['CUIT'])
+                ->orWhere('razon_social', $request['razon_social'])
+                ->first();
+
+            if ($transporte) {
+                // Si el registro está eliminado, lo restauramos
+                if ($transporte->trashed()) {
+                    $transporte->restore();
+                }
+            } else {
+                // Crear un nuevo registro
+                $transporte = new Transport();
             }
-        } else {
-            // Crear un nuevo registro
-            $transporte = new Transport();
+            // Asignación masiva
+            $transporte->fill($request->only([
+                'razon_social',
+                'CUIT',
+                'direccion',
+                'pais',
+                'provincia',
+                'satelital',
+                'paut',
+                'permiso',
+                'vto_permiso',
+                'contacto_logistica_nombre',
+                'contacto_logistica_celular',
+                'contacto_logistica_mail',
+                'contacto_admin_nombre',
+                'contacto_admin_celular',
+                'contacto_admin_mail',
+                'user',
+                'empresa',
+                'observation'
+            ]));
+
+            $transporte->save();
+            // Enviar correo
+            try {
+                Mail::to('copia@botzero.com.ar')->send(new nuevoTranporte($transporte));
+            } catch (\Exception $mailException) {
+                return response()->json([
+                    'message' => 'Transporte creado, pero falló el envío de correo.',
+                    'data' => $transporte,
+                    'mail_error' => $mailException->getMessage()
+                ], 201);
+            }
+
+            return response()->json([
+                'message' => 'Transporte creado con éxito',
+                'data' => $transporte
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'No se pudo crear el Transporte',
+                'error' => $e->getMessage()
+            ], 500);
         }
-        $transporte->razon_social = $request['razon_social'];
-        $transporte->CUIT = $request['CUIT'];
-        $transporte->Direccion = $request['direccion'];
-        $transporte->pais = $request['pais'];
-        $transporte->Provincia = $request['provincia'];
-        $transporte->paut = $request['paut'];
-        $transporte->permiso = $request['permiso'];
-        $transporte->vto_permiso = $request['vto_permiso'];
-        $transporte->contacto_logistica_nombre = $request['contacto_logistica_nombre'];
-        $transporte->contacto_logistica_celular = $request['contacto_logistica_celular'];
-        $transporte->contacto_logistica_mail = $request['contacto_logistica_mail'];
-        $transporte->contacto_admin_nombre = $request['contacto_admin_nombre'];
-        $transporte->contacto_admin_celular = $request['contacto_admin_celular'];
-        $transporte->contacto_admin_mail = $request['contacto_admin_mail'];
-        $transporte->user = $request['user'];
-        $transporte->empresa = $request['empresa'];
-        $transporte->satelital = $request['satelital'];
-        $transporte->observation = $request['observation'];
-        $transporte->save();
-        Mail::to('pablorio@botzero.ar')->send(new nuevoTranporte($transporte));
-        return $transporte;
     }
 
     /**
@@ -135,30 +180,40 @@ class TransportController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $transporte = Transport::findOrFail($id);
+        try {
+            $validated = $request->validate([
+                'razon_social' => 'required|string|max:255',
+                'CUIT' => "required|numeric|digits_between:8,12|unique:transports,CUIT,$id",
+                'direccion' => 'required|string|max:255',
+                'pais' => 'required|string|max:255',
+                'provincia' => 'required|string|max:255',
+                'satelital' => 'nullable|string|max:255',
+                'paut' => 'nullable|string|max:255',
+                'permiso' => 'nullable|string|max:255',
+                'vto_permiso' => 'nullable|string|max:255',
+                'contacto_logistica_nombre' => 'required|string|max:255',
+                'contacto_logistica_celular' => 'required|numeric|digits_between:7,12',
+                'contacto_logistica_mail' => 'required|email|max:255',
+                'contacto_admin_nombre' => 'required|string|max:255',
+                'contacto_admin_celular' => 'required|numeric|digits_between:7,12',
+                'contacto_admin_mail' => 'required|email|max:255',
+                'user' => 'required|string|max:255',
+                'empresa' => 'required|string|max:255',
+                'observation' => 'nullable|string|max:255',
+            ]);
+            $transporte = Transport::findOrFail($id);
+            $transporte->update($validated);
 
-        $transporte->razon_social = $request['razon_social'];
-        $transporte->CUIT = $request['CUIT'];
-        $transporte->Direccion = $request['direccion'];
-        $transporte->pais = $request['pais'];
-        $transporte->Provincia = $request['provincia'];
-        $transporte->paut = $request['paut'];
-        $transporte->permiso = $request['permiso'];
-        $transporte->vto_permiso = $request['vto_permiso'];
-        $transporte->contacto_logistica_nombre = $request['contacto_logistica_nombre'];
-        $transporte->contacto_logistica_celular = $request['contacto_logistica_celular'];
-        $transporte->contacto_logistica_mail = $request['contacto_logistica_mail'];
-        $transporte->contacto_admin_nombre = $request['contacto_admin_nombre'];
-        $transporte->contacto_admin_celular = $request['contacto_admin_celular'];
-        $transporte->contacto_admin_mail = $request['contacto_admin_mail'];
-        $transporte->user = $request['user'];
-        $transporte->empresa = $request['empresa'];
-        $transporte->satelital = $request['satelital'];
-        $transporte->observation = $request['observation'];
-        $transporte->save();
-
-
-        return $transporte;
+            return response()->json([
+                'message' => 'Transporte actualizado con éxito',
+                'data' => $transporte
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'No se pudo actualizar el transporte',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -507,8 +562,8 @@ class TransportController extends Controller
             $asign = asign::whereNull('deleted_at')->where('cntr_number', '=', $cntr->cntr_number)->first();
 
             $transportDeAsign = Transport::whereNull('deleted_at')
-                    ->where('id', $request->input('transport'))
-                    ->firstOrFail();
+                ->where('id', $request->input('transport'))
+                ->firstOrFail();
 
             //Actualizar el asign
             $asign->transport = $transportDeAsign->razon_social;

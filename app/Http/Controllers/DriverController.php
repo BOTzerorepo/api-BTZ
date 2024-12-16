@@ -17,7 +17,7 @@ class DriverController extends Controller
      */
     public function index()
     {
-        $drivers = Driver::all();
+        $drivers = Driver::whereNull('deleted_at')->get();
         return $drivers;
     }
     public function indexTransport($idTransport)
@@ -42,6 +42,23 @@ class DriverController extends Controller
     public function store(Request $request)
     {
         try {
+            $validated = $request->validate([
+                'nombre' => 'required|string|max:255',
+                'foto' => 'nullable|string|max:255',
+                'documento' => 'required|numeric|digits_between:8,12|unique:transports,CUIT',
+                'vto_carnet' => 'nullable|date',
+                'WhatsApp' => 'nullable|numeric|digits_between:7,12',
+                'mail' => 'nullable|email|max:255',
+                'user' => 'required|string|max:255',
+                'empresa' => 'required|string|max:255',
+                'transporte' => 'nullable|string|max:255',
+                'status_chofer' => 'nullable|string|max:255',
+                'place' => 'nullable|string|max:255',
+                'Observaciones' => 'nullable|string|max:255',
+                'customer_id' => 'nullable|numeric',
+                'fletero_id' => 'nullable|numeric',
+                'id_transport' => 'nullable|numeric',
+            ]);
             // Verificación y asignación de transporte
             if ($request['transporte'] != null) {
                 $transport = Transport::where('razon_social', '=', $request['transporte'])->first();
@@ -128,6 +145,23 @@ class DriverController extends Controller
     public function update(Request $request, $id)
     {
         try {
+            $validated = $request->validate([
+                'nombre' => 'required|string|max:255',
+                'foto' => 'nullable|string|max:255',
+                'documento' => "required|numeric|digits_between:8,12|unique:transports,CUIT,$id",
+                'vto_carnet' => 'nullable|date',
+                'WhatsApp' => 'nullable|numeric|digits_between:7,12',
+                'mail' => 'nullable|email|max:255',
+                'user' => 'required|string|max:255',
+                'empresa' => 'required|string|max:255',
+                'transporte' => 'nullable|string|max:255',
+                'status_chofer' => 'nullable|string|max:255',
+                'place' => 'nullable|string|max:255',
+                'Observaciones' => 'nullable|string|max:255',
+                'customer_id' => 'nullable|numeric',
+                'fletero_id' => 'nullable|numeric',
+                'id_transport' => 'nullable|numeric',
+            ]);
             // Verificación y asignación de transporte
             if ($request['transporte'] != null) {
                 $transport = Transport::where('razon_social', '=', $request['transporte'])->first();

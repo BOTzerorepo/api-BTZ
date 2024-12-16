@@ -9,4 +9,12 @@ class port extends Model
 {
     
     use HasFactory;
+
+    protected $fillable = [
+        'description',
+        'pais',
+        'provincia',
+        'sigla',
+    ];
+
 }

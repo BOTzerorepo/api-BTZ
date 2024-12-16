@@ -56,10 +56,10 @@ class statusController extends Controller
             'asign.truck_semi',
             'asign.transport',
             'trucks.alta_aker',
-
             DB::raw('MAX(status.id) as latest_status_id') // Selecciona el último status basado en el id
         )
         ->where('cntr.main_status', '!=', 'TERMINADA')
+        ->where('carga.deleted_at', '=', null)
         ->groupBy(
             'cntr.id_cntr',
             'carga.ref_customer',
