@@ -37,13 +37,26 @@ class finalPointController extends Controller
      */
     public function store(Request $request)
     {
-        $final_points = new port();
-        $final_points->description = $request['description'];
-        $final_points->pais = $request['pais'];
-        $final_points->provincia = $request['provincia'];
-        $final_points->save();
+        try {
+            $validated = $request->validate([
+                'description' => 'required|string|max:255',
+                'pais' => 'required|string|max:255',
+                'provincia' => 'required|string|max:255',
+            ]);
 
-        return $final_points;
+            $final_points = port::create($validated);
+
+            return response()->json([
+                'message' => 'Destino final creado con éxito',
+                'data' => $final_points
+            ], 201);
+        } catch (\Exception $e) {
+            // Manejo de errores si algo falla
+            return response()->json([
+                'message' => 'No se pudo crear el Destino final',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -78,14 +91,26 @@ class finalPointController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $final_points = port::findOrFail($id);
-        $final_points->description = $request['description'];
-        $final_points->pais = $request['pais'];
-        $final_points->provincia = $request['provincia'];
-        $final_points->sigla = $request['sigla'];
-        $final_points->save();
+        try {
+            $validated = $request->validate([
+                'description' => 'required|string|max:255',
+                'pais' => 'required|string|max:255',
+                'provincia' => 'required|string|max:255',
+                'sigla' => 'nullable|string|max:255',
+            ]);
+            $final_points = port::findOrFail($id);
+            $final_points->update($validated);
 
-        return $final_points;
+            return response()->json([
+                'message' => 'Destino final actualizado con éxito',
+                'data' => $final_points
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'No se pudo actualizar el destino final',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
