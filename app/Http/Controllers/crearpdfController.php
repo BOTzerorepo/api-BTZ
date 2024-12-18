@@ -84,7 +84,7 @@ class crearpdfController extends Controller
                         'aduanaImpo.razon_social as aduanaImpo_agent', 'aduanaImpo.mail as aduanaImpo_mail', 'aduanaImpo.phone as aduanaImpo_phone',
                         'customer_unload_places.description as descarga_place', 'customer_unload_places.address as descarga_address', 'customer_unload_places.city as descarga_city', 'customer_unload_places.link_maps as descarga_link'
                     ]);
-
+                    
                 $row = $respuesta_file[0];
 
                 $logApi = new logapi();
@@ -118,7 +118,7 @@ class crearpdfController extends Controller
 
                         $data = [
                             'id_asign' => $row->id,
-                            'img' => $base . '/public/image/empresas/' . $row->img,
+                            'img' => 'https://apitotaltrade.botzero.ar/public/image/empresas/' . $row->img,
                             'cuit' => $row->cuit,
                             'title' => $row->title,
                             'booking' => $row->booking,
@@ -241,7 +241,7 @@ class crearpdfController extends Controller
 
                         $data = [
                             'id_asign' => $row->id,
-                            'img' => $base . '/public/image/empresas/' . $row->img,
+                            'img' => 'https://apitotaltrade.botzero.ar/public/image/empresas/' . $row->img,
                             'cuit' => $row->cuit,
                             'title' => $row->title,
                             'booking' => $row->booking,
@@ -343,7 +343,7 @@ class crearpdfController extends Controller
 
                         $data = [
                             'id_asign' => $row->id,
-                            'img' => $base . '/public/image/empresas/' . $row->img,
+                            'img' => 'https://apitotaltrade.botzero.ar/public/image/empresas/' . $row->img,
                             'cuit' => $row->cuit,
                             'title' => $row->title,
                             'booking' => $row->booking,
@@ -399,8 +399,7 @@ class crearpdfController extends Controller
                             'rf_venti' => $row->rf_venti
 
                         ];
-
-
+                        
                         if (!file_exists('instructivos/' . $booking)) {
 
                             /* Si no Existe la Carperta Del booking */
@@ -437,11 +436,11 @@ class crearpdfController extends Controller
                         }
 
                         $file_name = 'instructivo_' . $booking . '_' . $cntr_number . '.pdf';
-
+                        
                         // Ya sabemos que esta creada (o la creamos) entonces creamos variables para usar durante todo el proceso.
 
                         $save_folder = $folder . $file_name;
-
+                        
                         // Generamos el Archivo PDF
                         $pdf = FacadePdf::loadView('pdf.instructivoCargaExpoTer', $data);
                         file_put_contents($save_folder, $pdf->output());
@@ -455,7 +454,7 @@ class crearpdfController extends Controller
 
                         $data = [
                             'id_asign' => $row->id,
-                            'img' => $base . '/public/image/empresas/' . $row->img,
+                            'img' => 'https://apitotaltrade.botzero.ar/public/image/empresas/' . $row->img,
                             'cuit' => $row->cuit,
                             'title' => $row->title,
                             'booking' => $row->booking,
@@ -570,7 +569,7 @@ class crearpdfController extends Controller
                         $data = [
 
                             'id_asign' => $row->id,
-                            'img' => $base . '/public/image/empresas/' . $row->img,
+                            'img' => 'https://apitotaltrade.botzero.ar/public/image/empresas/' . $row->img,
                             'cuit' => $row->cuit,
                             'title' => $row->title,
                             'booking' => $row->booking,
@@ -684,7 +683,7 @@ class crearpdfController extends Controller
 
                         $data = [
                             'id_asign' => $row->id,
-                            'img' => $base . '/public/image/empresas/' . $row->img,
+                            'img' => 'https://apitotaltrade.botzero.ar/public/image/empresas/' . $row->img,
                             'cuit' => $row->cuit,
                             'title' => $row->title,
                             'retiro_place' => $row->retiro_place,
