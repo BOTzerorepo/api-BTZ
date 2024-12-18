@@ -118,7 +118,7 @@ class crearpdfController extends Controller
 
                         $data = [
                             'id_asign' => $row->id,
-                            'img' => 'https://apitotaltrade.botzero.ar/public/image/empresas/' . $row->img,
+                            'img' => asset('image/empresas/' . $row->img),
                             'cuit' => $row->cuit,
                             'title' => $row->title,
                             'booking' => $row->booking,
@@ -241,7 +241,7 @@ class crearpdfController extends Controller
 
                         $data = [
                             'id_asign' => $row->id,
-                            'img' => 'https://apitotaltrade.botzero.ar/public/image/empresas/' . $row->img,
+                            'img' => asset('image/empresas/' . $row->img),
                             'cuit' => $row->cuit,
                             'title' => $row->title,
                             'booking' => $row->booking,
@@ -343,7 +343,7 @@ class crearpdfController extends Controller
 
                         $data = [
                             'id_asign' => $row->id,
-                            'img' => 'https://apitotaltrade.botzero.ar/public/image/empresas/' . $row->img,
+                            'img' => asset('image/empresas/' . $row->img),
                             'cuit' => $row->cuit,
                             'title' => $row->title,
                             'booking' => $row->booking,
@@ -454,7 +454,7 @@ class crearpdfController extends Controller
 
                         $data = [
                             'id_asign' => $row->id,
-                            'img' => 'https://apitotaltrade.botzero.ar/public/image/empresas/' . $row->img,
+                            'img' => asset('image/empresas/' . $row->img),
                             'cuit' => $row->cuit,
                             'title' => $row->title,
                             'booking' => $row->booking,
@@ -569,7 +569,7 @@ class crearpdfController extends Controller
                         $data = [
 
                             'id_asign' => $row->id,
-                            'img' => 'https://apitotaltrade.botzero.ar/public/image/empresas/' . $row->img,
+                            'img' => asset('image/empresas/' . $row->img),
                             'cuit' => $row->cuit,
                             'title' => $row->title,
                             'booking' => $row->booking,
@@ -683,7 +683,7 @@ class crearpdfController extends Controller
 
                         $data = [
                             'id_asign' => $row->id,
-                            'img' => 'https://apitotaltrade.botzero.ar/public/image/empresas/' . $row->img,
+                            'img' => asset('image/empresas/' . $row->img),
                             'cuit' => $row->cuit,
                             'title' => $row->title,
                             'retiro_place' => $row->retiro_place,
