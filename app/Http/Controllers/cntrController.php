@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\crearpdfController;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 
 class cntrController extends Controller
 {
@@ -119,13 +120,14 @@ class cntrController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    
-     private function deleteDirectory($dir) {
+
+    private function deleteDirectory($dir)
+    {
         if (File::exists($dir)) {
             File::deleteDirectory($dir);
         }
     }
-    
+
     public function update(Request $request, $id)
     {
         $this->validate($request, [
@@ -160,15 +162,21 @@ class cntrController extends Controller
                 DB::table('asign')->where('cntr_number', $cntrOld)->update(['file_instruction' => null]);
                 // Llamar a la función carga() del controlador crearpdfController
                 DB::commit();
-                $crearpdfController = new crearpdfController();
-                $crearpdfController->carga($request['cntr_number']);
+                try {
+                    $crearpdfController = app(crearpdfController::class);
+                    $crearpdfController->carga($request['cntr_number']);
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    Log::error('Error al ejecutar el método carga en crearpdfController: ' . $e->getMessage());
+                    return response()->json(['error' => $e->getMessage()], 500);
+                }
+                
             }
-            
+            DB::commit();
             return response()->json([
                 'detail' => $cntr,
                 'idCarga' => $idCarga
             ], 200);
-
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['error' => $e->getMessage()], 500);
