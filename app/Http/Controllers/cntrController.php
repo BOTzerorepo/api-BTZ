@@ -159,7 +159,7 @@ class cntrController extends Controller
 
                 $this->deleteDirectory($dirPath);
 
-                DB::table('asign')->where('cntr_number', $cntrOld)->update(['file_instruction' => null]);
+                DB::table('asign')->where('cntr_number', $request['cntr_number'])->update(['file_instruction' => null]);
                 // Llamar a la función carga() del controlador crearpdfController
                 DB::commit();
                 try {
@@ -170,7 +170,6 @@ class cntrController extends Controller
                     Log::error('Error al ejecutar el método carga en crearpdfController: ' . $e->getMessage());
                     return response()->json(['error' => $e->getMessage()], 500);
                 }
-                
             }
             DB::commit();
             return response()->json([
