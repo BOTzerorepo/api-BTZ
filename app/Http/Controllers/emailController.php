@@ -86,8 +86,8 @@ class emailController extends Controller
         $sbx = DB::table('variables')->select('sandbox')->get();
         $inboxEmail = env('INBOX_EMAIL');
         if ($sbx[0]->sandbox == 0) {
-
-            Mail::to($to)->cc(['gzarate@totaltradegroup.com'])->bcc($inboxEmail)->send(new cargaAsignada($data, $date));
+            
+            Mail::to($to)->cc(['gzarate@totaltradegroup.com','lgonzalez@totaltradegroup.com'])->bcc($inboxEmail)->send(new cargaAsignada($data, $date));
 
             $logapi = new logapi();
             $logapi->user = $dAsign->user;
@@ -179,7 +179,7 @@ class emailController extends Controller
             $logMessage = '+ Sandbox +' . ($sbx->sandbox == 0 ? '' : 'to: ' . $recipient) . 'AsignaUnidadTransporte-User:' . $asign->user . '|Transporte:' . $asign->transport . '| ATA:' . $asign->transport_agent . '| Bandera:' . $asign->pais . '| CUIT :' . $asign->tax_id;
             if ($sbx->sandbox == 0) {
                 // Send email
-                Mail::to($to)->cc(['gzarate@totaltradegroup.com'])->bcc($inboxEmail)->send(new transporteAsignado($data, $date));
+                Mail::to($to)->cc(['gzarate@totaltradegroup.com','lgonzalez@totaltradegroup.com'])->bcc($inboxEmail)->send(new transporteAsignado($data, $date));
             
             } elseif ($sbx->sandbox == 2) {
 
@@ -254,7 +254,7 @@ class emailController extends Controller
             $inboxEmail = env('INBOX_EMAIL');
             if ($sbx[0]->sandbox == 0) {
 
-                Mail::to($to)->cc(['gzarate@totaltradegroup.com'])->bcc($inboxEmail)
+                Mail::to($to)->cc(['gzarate@totaltradegroup.com','lgonzalez@totaltradegroup.com'])->bcc($inboxEmail)
                 ->send(new CargaConProblemas($datos, $statusArchivoPath));
 
                 return 'ok';
@@ -303,7 +303,7 @@ class emailController extends Controller
             $sbx = DB::table('variables')->select('sandbox')->get();
             $inboxEmail = env('INBOX_EMAIL');
             if ($sbx[0]->sandbox == 0) {
-                Mail::to($to)->cc(['gzarate@totaltradegroup.com'])->bcc($inboxEmail)
+                Mail::to($to)->cc(['gzarate@totaltradegroup.com','lgonzalez@totaltradegroup.com'])->bcc($inboxEmail)
                 ->send(new IngresadoStacking($datos, $statusArchivoPath));
                 return 'ok';
             } else {
@@ -350,7 +350,7 @@ class emailController extends Controller
             $inboxEmail = env('INBOX_EMAIL');
             if ($sbx[0]->sandbox == 0) {
 
-                Mail::to($to)->cc(['gzarate@totaltradegroup.com'])->bcc($inboxEmail)
+                Mail::to($to)->cc(['gzarate@totaltradegroup.com','lgonzalez@totaltradegroup.com'])->bcc($inboxEmail)
                     ->send(new cargaTerminada($datos, $statusArchivoPath));
 
                 return 'ok';
@@ -403,7 +403,7 @@ class emailController extends Controller
             $inboxEmail = env('INBOX_EMAIL');
             if ($sbx[0]->sandbox == 0) {
 
-                Mail::to($to)->cc(['gzarate@totaltradegroup.com'])
+                Mail::to($to)->cc(['gzarate@totaltradegroup.com','lgonzalez@totaltradegroup.com'])
                 ->bcc($inboxEmail)->send(new CamnioStatus($datos, $statusArchivoPath));
 
                 $logApi = new logapi();
