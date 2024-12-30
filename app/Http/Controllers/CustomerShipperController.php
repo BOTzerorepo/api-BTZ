@@ -15,13 +15,13 @@ class CustomerShipperController extends Controller
      */
     public function index()
     {
-        $customersShipper = DB::table('customer_shippers')->get();         
+        $customersShipper = DB::table('customer_shippers')->get();
         return $customersShipper;
     }
 
     public function indexCompany($company)
     {
-        $customersShipper = DB::table('customer_shippers')->where('company','=',$company)->get();
+        $customersShipper = DB::table('customer_shippers')->where('company', '=', $company)->get();
         return $customersShipper;
     }
 
@@ -43,19 +43,32 @@ class CustomerShipperController extends Controller
      */
     public function store(Request $request)
     {
-        $customerShipper = new CustomerShipper();
-        $customerShipper->razon_social = $request['razon_social'];
-        $customerShipper->tax_id = $request['tax_id'];
-        $customerShipper->address = $request['address'];
-        $customerShipper->city = $request['city'];
-        $customerShipper->country = $request['country'];
-        $customerShipper->postal_code = $request['postal_code'];
-        $customerShipper->create_user = $request['create_user'];
-        $customerShipper->company = $request['company'];
-        $customerShipper->remarks = $request['remarks'];
-        $customerShipper->save();
+        try {
+            $validated = $request->validate([
+                'razon_social' => 'required|string|max:255',
+                'tax_id' => 'required|numeric|digits_between:8,12',
+                'address' => 'nullable|string|max:255',
+                'city' => 'nullable|string|max:255',
+                'country' => 'nullable|string|max:255',
+                'postal_code' => 'nullable|numeric|digits_between:2,6',
+                'create_user' => 'nullable|string|max:255',
+                'company' => 'nullable|string|max:255',
+                'remarks' => 'nullable|string|max:255',
+            ]);
 
-        return $customerShipper;
+            $customerShipper = CustomerShipper::create($validated);
+
+            return response()->json([
+                'message' => 'Shipper creada con éxito',
+                'data' => $customerShipper
+            ], 201);
+        } catch (\Exception $e) {
+            // Manejo de errores si algo falla
+            return response()->json([
+                'message' => 'No se pudo crear Shipper',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -66,7 +79,7 @@ class CustomerShipperController extends Controller
      */
     public function show($id)
     {
-        $customerShipper = DB::table('customer_shippers')->where('id','=',$id)->get();
+        $customerShipper = DB::table('customer_shippers')->where('id', '=', $id)->get();
         return $customerShipper;
     }
 
@@ -90,19 +103,31 @@ class CustomerShipperController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $customerShipper = CustomerShipper::findOrFail($id);
-        $customerShipper->razon_social = $request['razon_social'];
-        $customerShipper->tax_id = $request['tax_id'];
-        $customerShipper->address = $request['address'];
-        $customerShipper->city = $request['city'];
-        $customerShipper->country = $request['country'];
-        $customerShipper->postal_code = $request['postal_code'];
-        $customerShipper->create_user = $request['create_user'];
-        $customerShipper->company = $request['company'];
-        $customerShipper->remarks = $request['remarks'];
-        $customerShipper->save();
+        try {
+            $validated = $request->validate([
+                'razon_social' => 'required|string|max:255',
+                'tax_id' => 'required|numeric|digits_between:8,12',
+                'address' => 'nullable|string|max:255',
+                'city' => 'nullable|string|max:255',
+                'country' => 'nullable|string|max:255',
+                'postal_code' => 'nullable|numeric|digits_between:2,6',
+                'create_user' => 'nullable|string|max:255',
+                'company' => 'nullable|string|max:255',
+                'remarks' => 'nullable|string|max:255',
+            ]);
+            $customerShipper = CustomerShipper::findOrFail($id);
+            $customerShipper->update($validated);
 
-        return $customerShipper;
+            return response()->json([
+                'message' => 'Shipper actualizado con éxito',
+                'data' => $customerShipper
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'No se pudo actualizar el Shipper',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -113,13 +138,23 @@ class CustomerShipperController extends Controller
      */
     public function destroy($id)
     {
-        CustomerShipper::destroy($id);
-
-        $existe = CustomerShipper::find($id);
-        if($existe){
-            return 'No se elimino el Customer Ntfy';
-        }else{
-            return 'Se elimino el Customer Ntfy';
-        };
+        try {
+            CustomerShipper::destroy($id);
+            $existe = CustomerShipper::find($id);
+            if ($existe) {
+                return response()->json([
+                    'message' => 'No se eliminó el Shipper. Inténtalo de nuevo.',
+                ], 400);
+            } else {
+                return response()->json([
+                    'message' => 'Shipper eliminado con éxito.',
+                ], 200);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Ocurrió un error al intentar eliminar el Shipper.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

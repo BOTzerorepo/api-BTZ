@@ -7,6 +7,7 @@ use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Google\Client as GoogleClient;
 use Illuminate\Filesystem\Filesystem;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class FcmTokenController extends Controller
@@ -67,16 +68,6 @@ class FcmTokenController extends Controller
             throw new \Exception("El archivo de configuración no existe en la ruta especificada: $archivoPath");
         }
 
-/* 
-        $file = new Filesystem();
-        $archivo = $file->get(storage_path('/app/botzero-test-firebase-adminsdk-l750d-5108c493e1.json'));
-      
-        // Inicializa el cliente de Google para usar la cuenta de servicio
-        $googleClient = new GoogleClient();
-        $googleClient->setAuthConfig(json_decode($archivo, true));
-        //$googleClient->setAuthConfig($archivo);
-        
- */
         // Obtiene el token de acceso
         $accessToken = $googleClient->fetchAccessTokenWithAssertion()['access_token'];
 
@@ -115,7 +106,27 @@ class FcmTokenController extends Controller
 
         return response()->json(['message' => 'Notificaciones enviadas.']);
     }
-    public function takeUser($user){
+    public function getUsersWithTokens(){
+
+        // Suponiendo que tienes una relación entre User y FcmToken
+        $users = DB::table('users')
+        ->join('fcm_tokens','fcm_tokens.user_id','=','users.id')
+        ->select('users.id','users.username','fcm_tokens.token')
+        ->get(); // Trae solo id y nombre del usuario
+        // Formato de respuesta JSON
+        $data = $users->map(function ($user) {
+            return [
+                'id' => $user->id,
+                'name' => $user->username,
+                'token' => $user->token
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+        ], 200);
+    
 
         
     }

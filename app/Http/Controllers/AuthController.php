@@ -21,9 +21,9 @@ class AuthController extends Controller
             'username' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'pass' => 'required|string|min:6|confirmed',
-            'name' => 'nullable|string',
-            'last_name' => 'nullable|string',
-            'celular' => 'nullable|numeric',
+            'name' => 'nullable|string|max:20',
+            'last_name' => 'nullable|string|max:29',
+            'celular' => 'nullable|string',
             'empresa' => 'nullable|string'
         ]);
         
@@ -34,7 +34,7 @@ class AuthController extends Controller
 
         try {
             $user = User::create([
-                    'username' => $request->get('name'),
+                    'username' => $request->get('username'),
                     'email' => $request->get('email'),
                     'pass' => bcrypt($request->get('pass')),  
                     'name' => $request->get('name'),

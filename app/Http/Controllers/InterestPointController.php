@@ -260,8 +260,9 @@ class InterestPointController extends Controller
 
         // Verificar que haya puntos en el request
         $pointsData = $request->input('points');
-        if (!is_array($pointsData) || empty($pointsData)) {
-            return response()->json(['message' => 'Datos de puntos de interés no válidos o vacíos'], 400);
+        if ( empty($pointsData)) {
+            DB::table('cntr_interest_point')->where('cntr_id_cntr', '=', $cntr->id_cntr)->delete();
+            return response()->json(['message' => 'Todos los puntos de interés eliminados porque no se enviaron puntos nuevos'], 200);
         }
 
         // Eliminar todos los puntos de interés actuales de este CNTR

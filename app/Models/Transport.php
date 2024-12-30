@@ -14,6 +14,27 @@ class Transport extends Model implements AuditableContract
 
     protected $table = 'transports';
 
+    protected $fillable = [
+        'razon_social',
+        'CUIT',
+        'direccion',
+        'pais',
+        'provincia',
+        'satelital',
+        'paut',
+        'permiso',
+        'vto_permiso',
+        'contacto_logistica_nombre',
+        'contacto_logistica_celular',
+        'contacto_logistica_mail',
+        'contacto_admin_nombre',
+        'contacto_admin_celular',
+        'contacto_admin_mail',
+        'user',
+        'empresa',
+        'observation',
+    ];
+
     public function fleteros()
     {
         return $this->belongsToMany(Fletero::class, 'transport_fletero');

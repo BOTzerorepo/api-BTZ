@@ -24,6 +24,10 @@ class User extends Authenticatable implements AuditableContract, JWTSubject
     protected $fillable = [
         'username',
         'email',
+        'celular',
+        'name',
+        'last_name',
+        'empresa',
         'pass',
         'celular',
         'empresa',

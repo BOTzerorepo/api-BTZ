@@ -17,6 +17,7 @@ Route::group(['middleware' => 'auth:api'], function () {
   Route::get('takeUser', 'App\Http\Controllers\FcmTokenController@takeUser');
 
 });
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -26,13 +27,15 @@ Route::group(['middleware' => 'auth:api'], function () {
 | routes are loaded by the RouteServiceProvider within a group which
 | is assigned the "api" middleware group. Enjoy building your API!
 |
-*/
+*/ 
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/notificationMobile/{token}/{title}/{body}/{plataforma}', 'App\Http\Controllers\FcmTokenController@sendNotification');
+Route::get('/getUsersToken', 'App\Http\Controllers\FcmTokenController@getUsersWithTokens');
+
+Route::get('/notificationMobile/{token}/{title}/{body}', 'App\Http\Controllers\FcmTokenController@sendNotification');
 Route::put('/registerToken', 'App\Http\Controllers\FcmTokenController@registerToken');
 Route::put('/updatToken', 'App\Http\Controllers\FcmTokenController@updateToken');
 
@@ -119,8 +122,9 @@ Route::get('/mailStatus/{cntr}/{empresa}/{booking}/{user}/{tipo}/{statusArchivoP
 Route::get('/cargaAsignada/{id}','App\Http\Controllers\emailController@cargaAsignada');  // Llega Correo Ok
 
 //REMPLAZAR  CON LA ASIGNACION DEL TRANSPORTE Y ENVIAR MAIL
-Route::post('/transporteAsignado/{id}','App\Http\Controllers\TransportController@transporteAsignado');  // Llega Correo Ok
-
+Route::post('/transporteAsignado/{id}','App\Http\Controllers\TransportController@transporteAsignado'); 
+Route::post('/asignarUnidadTransporte/{id}','App\Http\Controllers\TransportController@asignarUnidadTransporte'); 
+Route::post('/confirmarUnidad/{id}','App\Http\Controllers\TransportController@confirmarUnidad'); 
 // Route::post('/imprimir/create','App\Http\Controllers\crearpdfControllerPDF@store')mostrar todos
 // Route::get('/imprimirIns','App\Http\Controllers\imprimirPDF@store'); //mostrar todos
 // Route::put('/imprimir/{id}','App\Http\Controllers\imprimirPDF@update');//actualizar
@@ -171,6 +175,8 @@ Route::get('/lugarDeCarga/{patente}','App\Http\Controllers\CustomerLoadPlaceCont
 Route::get('/accionLugarDeCarga/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionLugarDeCarga'); // LLEGO OK EMAIL
 Route::get('/accionLugarAduana/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionLugarAduana');// LLEGO OK EMAIL
 Route::get('/accionLugarDescarga/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionLugarDescarga');// LLEGO OK EMAIL
+Route::get('/accionFueraLugarDeCarga/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionFueraLugarDeCarga'); // LLEGO OK EMAIL
+Route::get('/accionFueraLugarAduana/{idTrip}','App\Http\Controllers\CustomerLoadPlaceController@accionFueraLugarAduana');// LLEGO OK EMAIL
 Route::get('/servicioSatelital','App\Http\Controllers\ServiceSatelital@serviceSatelital');
 Route::get('/pruebaSatelital','App\Http\Controllers\ServiceSatelital@servicePrueba');
 Route::get('/flota','App\Http\Controllers\ServiceSatelital@flota');
@@ -231,7 +237,7 @@ Route::get('/user/{user}', 'App\Http\Controllers\UserController@show');
 // CNTR
 
 Route::resource('/cntr',cntrController::class);
-
+Route::get('/datosConfirmar/{cntrId}', 'App\Http\Controllers\cntrController@datosConfirmar');
 
 // FLETERO CONTROLLER 
 
@@ -247,16 +253,16 @@ Route::get('/truck/{truck}', 'App\Http\Controllers\TruckController@show'); // R 
 Route::post('/truck/{truck}', 'App\Http\Controllers\TruckController@update'); // U 
 Route::delete('/truck/{truck}', 'App\Http\Controllers\TruckController@destroy'); // D 
 Route::get('/truckTransport/{truck}', 'App\Http\Controllers\TruckController@showTransport'); // Show For Transport
-
+Route::get('/trucks', 'App\Http\Controllers\TruckController@indexTotal');
 // TRAILER CONTROLLLER 
 Route::post('/trailer', 'App\Http\Controllers\TrailerController@store'); // C
 Route::get('/trailer/{customer}', 'App\Http\Controllers\TrailerController@index'); // R ALL
 Route::get('/trailerTransport/{transport}', 'App\Http\Controllers\TrailerController@indexTransport'); // R ALL
-
+Route::get('/trailerTraffic', 'App\Http\Controllers\TrailerController@indexTraffic');
 Route::get('/trailer/{trailer}', 'App\Http\Controllers\TrailerController@show'); // R ONE
 Route::post('/trailer/{trailer}', 'App\Http\Controllers\TrailerController@update'); // U
 Route::delete('/trailer/{trailer}', 'App\Http\Controllers\TrailerController@destroy'); // D
-Route::get('/trailerTransport/{transport_id}', 'App\Http\Controllers\TrailerController@showTrailer'); // Show for Transport
+//Route::get('/trailerTransport/{transport_id}', 'App\Http\Controllers\TrailerController@showTrailer'); // Show for Transport
 
 //Ata
 Route::get('/atas','App\Http\Controllers\AtaController@index'); //Busca todos los Agente de transporte
@@ -285,7 +291,8 @@ Route::get('/transporteRazonSocial/{razonSocial}','App\Http\Controllers\Transpor
 Route::post('/transporte','App\Http\Controllers\TransportController@store'); 
 Route::post('/transporte/{id}','App\Http\Controllers\TransportController@update'); 
 Route::delete('/transporte/{id}','App\Http\Controllers\TransportController@destroy'); 
-
+Route::get('/transportesUsuario/{id}','App\Http\Controllers\TransportController@transportesUsuario'); 
+Route::post('/transportesAsignEditar/{id}','App\Http\Controllers\TransportController@transportesAsignEditar'); 
 //Agencia
 Route::get('/agencias','App\Http\Controllers\AgencyController@index'); //Busca todas las agencias
 Route::get('/agencia/{id}','App\Http\Controllers\AgencyController@show'); //Busca una sola agencia

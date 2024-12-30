@@ -16,7 +16,7 @@ class AtaController extends Controller
      */
     public function index()
     {
-        $atas = DB::table('atas')->get();       
+        $atas = DB::table('atas')->get();
         return $atas;
     }
 
@@ -38,18 +38,30 @@ class AtaController extends Controller
      */
     public function store(Request $request)
     {
-        $ata = new Ata();
-        $ata->razon_social = $request['razon_social'];
-        $ata->tax_id= $request['tax_id'];
-        $ata->provincia = $request['provincia'];
-        $ata->phone = $request['phone'];
-        $ata->pais = $request['pais'];
-        $ata->mail = $request['mail'];
-        $ata->user = $request['user'];
-        $ata->empresa = $request['empresa'];
-        $ata->save();
+        try {
+            $validated = $request->validate([
+                'razon_social' => 'required|string|max:255',
+                'tax_id' => 'required|numeric|digits_between:8,12',
+                'provincia' => 'nullable|string|max:255',
+                'phone' => 'nullable|numeric|digits_between:7,12',
+                'pais' => 'nullable|string',
+                'mail' => 'nullable|email|max:255',
+                'user' => 'nullable|string|max:255',
+                'empresa' => 'nullable|string|max:255',
+            ]);
 
-        return $ata;
+            $ata = Ata::create($validated);
+            return response()->json([
+                'message' => 'Lugar de descarga creada con éxito',
+                'data' => $ata
+            ], 201);
+        } catch (\Exception $e) {
+            // Manejo de errores si algo falla
+            return response()->json([
+                'message' => 'No se pudo crear el Lugar de descarga',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -60,7 +72,7 @@ class AtaController extends Controller
      */
     public function show($id)
     {
-        $ata = DB::table('atas')->where('id','=',$id)->get();
+        $ata = DB::table('atas')->where('id', '=', $id)->get();
         return $ata;
     }
 
@@ -84,18 +96,30 @@ class AtaController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $ata = Ata::findOrFail($id);
-        $ata->razon_social = $request['razon_social'];
-        $ata->tax_id= $request['tax_id'];
-        $ata->provincia = $request['provincia'];
-        $ata->phone = $request['phone'];
-        $ata->pais = $request['pais'];
-        $ata->mail = $request['mail'];
-        $ata->user = $request['user'];
-        $ata->empresa = $request['empresa'];
-        $ata->save();
+        try {
+            $validated = $request->validate([
+                'razon_social' => 'required|string|max:255',
+                'tax_id' => 'required|numeric|digits_between:8,12',
+                'provincia' => 'nullable|string|max:255',
+                'phone' => 'nullable|numeric|digits_between:7,12',
+                'pais' => 'nullable|string',
+                'mail' => 'nullable|email|max:255',
+                'user' => 'nullable|string|max:255',
+                'empresa' => 'nullable|string|max:255',
+            ]);
+            $ata = Ata::findOrFail($id);
+            $ata->update($validated);
 
-        return $ata;
+            return response()->json([
+                'message' => 'Ata actualizado con éxito',
+                'data' => $ata
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'No se pudo actualizar el ata',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -106,13 +130,23 @@ class AtaController extends Controller
      */
     public function destroy($id)
     {
-        Ata::destroy($id);
-
-        $existe = Ata::find($id);
-        if($existe){
-            return 'No se elimino el Agente de Transporte';
-        }else{
-            return 'Se elimino el Agente de Transporte';
-        };
+        try {
+            Ata::destroy($id);
+            $existe = Ata::find($id);
+            if ($existe) {
+                return response()->json([
+                    'message' => 'No se eliminó el Ata. Inténtalo de nuevo.',
+                ], 400);
+            } else {
+                return response()->json([
+                    'message' => 'Ata eliminado con éxito.',
+                ], 200);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Ocurrió un error al intentar eliminar el Ata.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 }
