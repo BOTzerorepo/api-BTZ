@@ -42,7 +42,7 @@ class verpdfController extends Controller
             $folder = 'instructivos/' . $booking . '/' . $cntr_number . '/';
             $save_folder = $folder . $file_name;
 
-                // sino está generado el Instrtructivo lo creamos. 
+            // sino está generado el Instrtructivo lo creamos. 
             $respuesta_file = DB::table('carga')
                 ->join('cntr', 'carga.booking', '=', 'cntr.booking')
                 ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
@@ -56,437 +56,472 @@ class verpdfController extends Controller
                 ->distinct()
                 ->get([
                     'asign.id',
-                    'razon_social.img', 'razon_social.cuit', 'razon_social.title',
-                    'asign.transport', 'asign.transport_agent', 'asign.observation_load', 'asign.agent_port',
-                    'carga.custom_place', 'carga.bl_hbl', 'carga.senasa', 'carga.senasa_string', 'carga.tara', 'carga.tara_string', 'carga.type', 'carga.ref_customer', 'carga.load_date', 'carga.booking', 'carga.importador', 'carga.shipper', 'carga.commodity', 'carga.load_place', 'carga.unload_place', 'carga.cut_off_fis', 'carga.oceans_line', 'carga.vessel', 'carga.voyage', 'carga.final_point', 'carga.observation_customer', 'carga.custom_agent', 'carga.custom_place_impo', 'carga.ref_customer', 'carga.ex_alto', 'carga.ex_ancho', 'carga.ex_largo', 'carga.obs_imo', 'carga.rf_tem', 'carga.rf_humedad', 'carga.rf_venti',
-                    'cntr.cntr_number', 'cntr.confirmacion', 'cntr.cntr_seal', 'cntr.cntr_type', 'cntr.net_weight', 'cntr.retiro_place', 'cntr.out_usd', 'cntr.modo_pago_out', 'cntr.observation_out', 
-                    'customer_load_places.link_maps', 'customer_load_places.address', 'customer_load_places.city',
+                    'razon_social.img',
+                    'razon_social.cuit',
+                    'razon_social.title',
+                    'asign.transport',
+                    'asign.transport_agent',
+                    'asign.observation_load',
+                    'asign.agent_port',
+                    'carga.custom_place',
+                    'carga.bl_hbl',
+                    'carga.senasa',
+                    'carga.senasa_string',
+                    'carga.tara',
+                    'carga.tara_string',
+                    'carga.type',
+                    'carga.ref_customer',
+                    'carga.load_date',
+                    'carga.booking',
+                    'carga.importador',
+                    'carga.shipper',
+                    'carga.commodity',
+                    'carga.load_place',
+                    'carga.unload_place',
+                    'carga.cut_off_fis',
+                    'carga.oceans_line',
+                    'carga.vessel',
+                    'carga.voyage',
+                    'carga.final_point',
+                    'carga.observation_customer',
+                    'carga.custom_agent',
+                    'carga.custom_place_impo',
+                    'carga.ref_customer',
+                    'carga.ex_alto',
+                    'carga.ex_ancho',
+                    'carga.ex_largo',
+                    'carga.obs_imo',
+                    'carga.rf_tem',
+                    'carga.rf_humedad',
+                    'carga.rf_venti',
+                    'cntr.cntr_number',
+                    'cntr.confirmacion',
+                    'cntr.cntr_seal',
+                    'cntr.cntr_type',
+                    'cntr.net_weight',
+                    'cntr.retiro_place',
+                    'cntr.out_usd',
+                    'cntr.modo_pago_out',
+                    'cntr.observation_out',
+                    'customer_load_places.link_maps',
+                    'customer_load_places.address',
+                    'customer_load_places.city',
                     'agencies.observation_gral',
-                    'aduanaExpo.mail', 'aduanaExpo.phone',
-                    'aduanaImpo.razon_social as aduanaImpo_agent', 'aduanaImpo.mail as aduanaImpo_mail', 'aduanaImpo.phone as aduanaImpo_phone',
-                    'customer_unload_places.description as descarga_place', 'customer_unload_places.address as descarga_address', 'customer_unload_places.city as descarga_city', 'customer_unload_places.link_maps as descarga_link'
+                    'aduanaExpo.mail',
+                    'aduanaExpo.phone',
+                    'aduanaImpo.razon_social as aduanaImpo_agent',
+                    'aduanaImpo.mail as aduanaImpo_mail',
+                    'aduanaImpo.phone as aduanaImpo_phone',
+                    'customer_unload_places.description as descarga_place',
+                    'customer_unload_places.address as descarga_address',
+                    'customer_unload_places.city as descarga_city',
+                    'customer_unload_places.link_maps as descarga_link'
                 ]);
 
-                $row = $respuesta_file[0];
+            $row = $respuesta_file[0];
 
-                $weekMap = [
-                    0 => 'Domingo',
-                    1 => 'Lunes',
-                    2 => 'Martes',
-                    3 => 'Miércoles',
-                    4 => 'Jueves',
-                    5 => 'Viernes',
-                    6 => 'Sábado',
-                ];
-                
-                $day = Carbon::parse($row->load_date)->dayOfWeek;
-                $date = Carbon::parse($row->load_date)->format('d-m-Y');
-                $dayW = $weekMap[$day];
-                $load_date = $dayW . ' ' . $date;
+            $weekMap = [
+                0 => 'Domingo',
+                1 => 'Lunes',
+                2 => 'Martes',
+                3 => 'Miércoles',
+                4 => 'Jueves',
+                5 => 'Viernes',
+                6 => 'Sábado',
+            ];
 
-                if ($respuesta_file->count() >= 1) {
+            $day = Carbon::parse($row->load_date)->dayOfWeek;
+            $date = Carbon::parse($row->load_date)->format('d-m-Y');
+            $dayW = $weekMap[$day];
+            $load_date = $dayW . ' ' . $date;
 
-                    if ($row->type == 'Puesta FOB') {
+            if ($respuesta_file->count() >= 1) {
 
-                        $data = [
-                            'id_asign' => $row->id,
-                            'img' => $base . '/public/image/empresas/' . $row->img,
-                            'cuit' => $row->cuit,
-                            'title' => $row->title,
-                            'booking' => $row->booking,
-                            'shipper' => $row->shipper,
-                            'commodity' => $row->commodity,
-                            'tara' => $row->tara,
-                            'tara_string' => $row->tara_string,
-                            'load_place' => $row->load_place,
-                            'unload_place' => $row->unload_place,
-                            'cut_off_fis' => $row->cut_off_fis,
-                            'oceans_line' => $row->oceans_line,
-                            'vessel' => $row->vessel,
-                            'voyage' => $row->voyage,
-                            'final_point' => $row->final_point,
-                            'custom_agent' => $row->custom_agent,
-                            'custom_agent_mail' => $row->mail,
-                            'custom_agent_phone' => $row->phone,
-                            'custom_place' => $row->custom_place,
-                            'ref_customer' => $row->ref_customer,
-                            'cntr_number' => $row->cntr_number,
-                            'confirmacion' => $row->confirmacion,
-                            'cntr_seal' => $row->cntr_seal,
-                            'cntr_type' => $row->cntr_type,
-                            'net_weight' => $row->net_weight,
-                            'retiro_place' => $row->retiro_place,
-                            'transport' => $row->transport,
-                            'transport_agent' => $row->transport_agent,
-                            'observation_load' => $row->observation_load,
-                            'agent_port' => $row->agent_port,
-                            'out_usd' => $row->out_usd,
-                            'observation_out' => $row->observation_out,
-                            'load_date' => $load_date,
-                            'link_maps' => $row->link_maps,
-                            'address' => $row->address,
-                            'city' => $row->city,
-                            'observaciones_agencia' => $row->observation_gral,
-                            'observation_customer' => $row->observation_customer,
-                            'ex_alto' => $row->ex_alto,
-                            'ex_ancho' => $row->ex_ancho,
-                            'ex_largo' => $row->ex_largo,
-                            'obs_imo' => $row->obs_imo,
-                            'rf_tem' => $row->rf_tem,
-                            'rf_humedad' => $row->rf_humedad,
-                            'rf_venti' => $row->rf_venti
+                if ($row->type == 'Puesta FOB') {
 
-                        ];
+                    $data = [
+                        'id_asign' => $row->id,
+                        'img' => asset('image/empresas/' . $row->img),
+                        'cuit' => $row->cuit,
+                        'title' => $row->title,
+                        'booking' => $row->booking,
+                        'shipper' => $row->shipper,
+                        'commodity' => $row->commodity,
+                        'tara' => $row->tara,
+                        'tara_string' => $row->tara_string,
+                        'load_place' => $row->load_place,
+                        'unload_place' => $row->unload_place,
+                        'cut_off_fis' => $row->cut_off_fis,
+                        'oceans_line' => $row->oceans_line,
+                        'vessel' => $row->vessel,
+                        'voyage' => $row->voyage,
+                        'final_point' => $row->final_point,
+                        'custom_agent' => $row->custom_agent,
+                        'custom_agent_mail' => $row->mail,
+                        'custom_agent_phone' => $row->phone,
+                        'custom_place' => $row->custom_place,
+                        'ref_customer' => $row->ref_customer,
+                        'cntr_number' => $row->cntr_number,
+                        'confirmacion' => $row->confirmacion,
+                        'cntr_seal' => $row->cntr_seal,
+                        'cntr_type' => $row->cntr_type,
+                        'net_weight' => $row->net_weight,
+                        'retiro_place' => $row->retiro_place,
+                        'transport' => $row->transport,
+                        'transport_agent' => $row->transport_agent,
+                        'observation_load' => $row->observation_load,
+                        'agent_port' => $row->agent_port,
+                        'out_usd' => $row->out_usd,
+                        'observation_out' => $row->observation_out,
+                        'load_date' => $load_date,
+                        'link_maps' => $row->link_maps,
+                        'address' => $row->address,
+                        'city' => $row->city,
+                        'observaciones_agencia' => $row->observation_gral,
+                        'observation_customer' => $row->observation_customer,
+                        'ex_alto' => $row->ex_alto,
+                        'ex_ancho' => $row->ex_ancho,
+                        'ex_largo' => $row->ex_largo,
+                        'obs_imo' => $row->obs_imo,
+                        'rf_tem' => $row->rf_tem,
+                        'rf_humedad' => $row->rf_humedad,
+                        'rf_venti' => $row->rf_venti
 
-                        return view('pdf.instructivoCargaFOB', $data);
+                    ];
 
-                    } elseif ($row->type == 'Expo Maritima') {
+                    return view('pdf.instructivoCargaFOB', $data);
+                } elseif ($row->type == 'Expo Maritima') {
 
-                        $data = [
-                            'id_asign' => $row->id,
-                            'img' => $base . '/public/image/empresas/' . $row->img,
-                            'cuit' => $row->cuit,
-                            'title' => $row->title,
-                            'booking' => $row->booking,
-                            'shipper' => $row->shipper,
-                            'commodity' => $row->commodity,
-                            'tara' => $row->tara,
-                            'tara_string' => $row->tara_string,
-                            'load_place' => $row->load_place,
-                            'unload_place' => $row->unload_place,
-                            'cut_off_fis' => $row->cut_off_fis,
-                            'oceans_line' => $row->oceans_line,
-                            'vessel' => $row->vessel,
-                            'voyage' => $row->voyage,
-                            'final_point' => $row->final_point,
-                            'custom_agent' => $row->custom_agent,
-                            'custom_agent_mail' => $row->mail,
-                            'custom_agent_phone' => $row->phone,
-                            'custom_place' => $row->custom_place,
-                            'ref_customer' => $row->ref_customer,
-                            'cntr_number' => $row->cntr_number,
-                            'confirmacion' => $row->confirmacion,
-                            'cntr_seal' => $row->cntr_seal,
-                            'cntr_type' => $row->cntr_type,
-                            'net_weight' => $row->net_weight,
-                            'retiro_place' => $row->retiro_place,
-                            'transport' => $row->transport,
-                            'transport_agent' => $row->transport_agent,
-                            'observation_load' => $row->observation_load,
-                            'agent_port' => $row->agent_port,
-                            'out_usd' => $row->out_usd,
-                            'observation_out' => $row->observation_out,
-                            'load_date' => $load_date,
-                            'link_maps' => $row->link_maps,
-                            'address' => $row->address,
-                            'city' => $row->city,
-                            'observaciones_agencia' => $row->observation_gral,
-                            'observation_customer' => $row->observation_customer,
-                            'ex_alto' => $row->ex_alto,
-                            'ex_ancho' => $row->ex_ancho,
-                            'ex_largo' => $row->ex_largo,
-                            'obs_imo' => $row->obs_imo,
-                            'rf_tem' => $row->rf_tem,
-                            'rf_humedad' => $row->rf_humedad,
-                            'rf_venti' => $row->rf_venti
+                    $data = [
+                        'id_asign' => $row->id,
+                        'img' => asset('image/empresas/' . $row->img),
+                        'cuit' => $row->cuit,
+                        'title' => $row->title,
+                        'booking' => $row->booking,
+                        'shipper' => $row->shipper,
+                        'commodity' => $row->commodity,
+                        'tara' => $row->tara,
+                        'tara_string' => $row->tara_string,
+                        'load_place' => $row->load_place,
+                        'unload_place' => $row->unload_place,
+                        'cut_off_fis' => $row->cut_off_fis,
+                        'oceans_line' => $row->oceans_line,
+                        'vessel' => $row->vessel,
+                        'voyage' => $row->voyage,
+                        'final_point' => $row->final_point,
+                        'custom_agent' => $row->custom_agent,
+                        'custom_agent_mail' => $row->mail,
+                        'custom_agent_phone' => $row->phone,
+                        'custom_place' => $row->custom_place,
+                        'ref_customer' => $row->ref_customer,
+                        'cntr_number' => $row->cntr_number,
+                        'confirmacion' => $row->confirmacion,
+                        'cntr_seal' => $row->cntr_seal,
+                        'cntr_type' => $row->cntr_type,
+                        'net_weight' => $row->net_weight,
+                        'retiro_place' => $row->retiro_place,
+                        'transport' => $row->transport,
+                        'transport_agent' => $row->transport_agent,
+                        'observation_load' => $row->observation_load,
+                        'agent_port' => $row->agent_port,
+                        'out_usd' => $row->out_usd,
+                        'observation_out' => $row->observation_out,
+                        'load_date' => $load_date,
+                        'link_maps' => $row->link_maps,
+                        'address' => $row->address,
+                        'city' => $row->city,
+                        'observaciones_agencia' => $row->observation_gral,
+                        'observation_customer' => $row->observation_customer,
+                        'ex_alto' => $row->ex_alto,
+                        'ex_ancho' => $row->ex_ancho,
+                        'ex_largo' => $row->ex_largo,
+                        'obs_imo' => $row->obs_imo,
+                        'rf_tem' => $row->rf_tem,
+                        'rf_humedad' => $row->rf_humedad,
+                        'rf_venti' => $row->rf_venti
 
-                        ];
-
-                        
-                        return view('pdf.instructivoCargaExpoMar', $data);
-    
-
-                    } elseif ($row->type == 'Expo Terrestre') {
-
-                        $data = [
-
-                            'id_asign' => $row->id,
-                            'img' => $base . '/public/image/empresas/' . $row->img,
-                            'cuit' => $row->cuit,
-                            'title' => $row->title,
-
-                            'booking' => $row->booking,
-                            'shipper' => $row->shipper,
-                            'commodity' => $row->commodity,
-                            'tara' => $row->tara,
-                            'tara_string' => $row->tara_string,
-                            'load_place' => $row->load_place,
-                            'unload_place' => $row->unload_place,
-                            'cut_off_fis' => $row->cut_off_fis,
-                            'oceans_line' => $row->oceans_line,
-                            'vessel' => $row->vessel,
-                            'voyage' => $row->voyage,
-                            'final_point' => $row->final_point,
-                            'custom_agent' => $row->custom_agent,
-                            'custom_agent_impo' => $row->aduanaImpo_agent,
-
-                            'custom_agent_mail' => $row->mail,
-                            'custom_agent_mail_impo' => $row->aduanaImpo_mail,
-
-                            'custom_agent_phone' => $row->phone,
-                            'custom_agent_phone_impo' => $row->aduanaImpo_phone,
-
-                            'custom_place' => $row->custom_place,
-                            'custom_place_impo' => $row->custom_place_impo,
-
-                            'ref_customer' => $row->ref_customer,
-                            'importador' => $row->importador,
-
-                            'cntr_number' => $row->cntr_number,
-                            'confirmacion' => $row->confirmacion,
-
-                            'cntr_seal' => $row->cntr_seal,
-                            'cntr_type' => $row->cntr_type,
-                            'net_weight' => $row->net_weight,
-                            'retiro_place' => $row->retiro_place,
-                            'transport' => $row->transport,
-                            'transport_agent' => $row->transport_agent,
-                            'observation_load' => $row->observation_load,
-                            'agent_port' => $row->agent_port,
-                            'out_usd' => $row->out_usd,
-                         
-                            'observation_out' => $row->observation_out,
-                            'load_date' => $load_date,
-                            'link_maps' => $row->link_maps,
-                            'address' => $row->address,
-                            'city' => $row->city,
-                            'observaciones_agencia' => $row->observation_gral,
-                            'observation_customer' => $row->observation_customer,
-                            "descarga_place" => $row->descarga_place,
-                            "descarga_address" => $row->descarga_address,
-                            "descarga_city" => $row->descarga_city,
-                            "descarga_link" => $row->descarga_link,
-                            'ex_alto' => $row->ex_alto,
-                            'ex_ancho' => $row->ex_ancho,
-                            'ex_largo' => $row->ex_largo,
-                            'obs_imo' => $row->obs_imo,
-                            'rf_tem' => $row->rf_tem,
-                            'rf_humedad' => $row->rf_humedad,
-                            'rf_venti' => $row->rf_venti
-
-                        ];
+                    ];
 
 
-                        
-                        return view('pdf.instructivoCargaExpoTer', $data);
-                        
+                    return view('pdf.instructivoCargaExpoMar', $data);
+                } elseif ($row->type == 'Expo Terrestre') {
 
-                    } elseif ($row->type == 'Impo Maritima') {
+                    $data = [
 
-                        $data = [
+                        'id_asign' => $row->id,
+                        'img' => asset('image/empresas/' . $row->img),
+                        'cuit' => $row->cuit,
+                        'title' => $row->title,
 
-                            'id_asign' => $row->id,
-                            'img' => $base . '/public/image/empresas/' . $row->img,
-                            'cuit' => $row->cuit,
-                            'title' => $row->title,
-                            
+                        'booking' => $row->booking,
+                        'shipper' => $row->shipper,
+                        'commodity' => $row->commodity,
+                        'tara' => $row->tara,
+                        'tara_string' => $row->tara_string,
+                        'load_place' => $row->load_place,
+                        'unload_place' => $row->unload_place,
+                        'cut_off_fis' => $row->cut_off_fis,
+                        'oceans_line' => $row->oceans_line,
+                        'vessel' => $row->vessel,
+                        'voyage' => $row->voyage,
+                        'final_point' => $row->final_point,
+                        'custom_agent' => $row->custom_agent,
+                        'custom_agent_impo' => $row->aduanaImpo_agent,
 
-                            'booking' => $row->booking,
-                            'bl_hbl' => $row->bl_hbl,
-                            'senasa' => $row->senasa,
-                            'senasa_string' => $row->senasa_string,
-                            'tara' => $row->tara,
-                            'tara_string' => $row->tara_string,
-                            'shipper' => $row->shipper,
-                            'commodity' => $row->commodity,
-                            'load_place' => $row->load_place,
-                            'unload_place' => $row->unload_place,
-                            'cut_off_fis' => $row->cut_off_fis,
-                            'oceans_line' => $row->oceans_line,
-                            'vessel' => $row->vessel,
-                            'voyage' => $row->voyage,
-                            'final_point' => $row->final_point,
-                            'custom_agent' => $row->custom_agent,
-                            'custom_agent_impo' => $row->aduanaImpo_agent,
+                        'custom_agent_mail' => $row->mail,
+                        'custom_agent_mail_impo' => $row->aduanaImpo_mail,
 
-                            'custom_agent_mail' => $row->mail,
-                            'custom_agent_mail_impo' => $row->aduanaImpo_mail,
+                        'custom_agent_phone' => $row->phone,
+                        'custom_agent_phone_impo' => $row->aduanaImpo_phone,
 
-                            'custom_agent_phone' => $row->phone,
-                            'custom_agent_phone_impo' => $row->aduanaImpo_phone,
+                        'custom_place' => $row->custom_place,
+                        'custom_place_impo' => $row->custom_place_impo,
 
-                            'custom_place' => $row->custom_place,
-                            'custom_place_impo' => $row->custom_place_impo,
+                        'ref_customer' => $row->ref_customer,
+                        'importador' => $row->importador,
 
-                            'ref_customer' => $row->ref_customer,
-                            'importador' => $row->importador,
+                        'cntr_number' => $row->cntr_number,
+                        'confirmacion' => $row->confirmacion,
 
-                            'cntr_number' => $row->cntr_number,
-                            'confirmacion' => $row->confirmacion,
+                        'cntr_seal' => $row->cntr_seal,
+                        'cntr_type' => $row->cntr_type,
+                        'net_weight' => $row->net_weight,
+                        'retiro_place' => $row->retiro_place,
+                        'transport' => $row->transport,
+                        'transport_agent' => $row->transport_agent,
+                        'observation_load' => $row->observation_load,
+                        'agent_port' => $row->agent_port,
+                        'out_usd' => $row->out_usd,
 
-                            'cntr_seal' => $row->cntr_seal,
-                            'cntr_type' => $row->cntr_type,
-                            'net_weight' => $row->net_weight,
-                            'retiro_place' => $row->retiro_place,
-                            'transport' => $row->transport,
-                            'transport_agent' => $row->transport_agent,
-                            'observation_load' => $row->observation_load,
-                            'agent_port' => $row->agent_port,
-                            'out_usd' => $row->out_usd,
-                           
-                            'observation_out' => $row->observation_out,
-                            'load_date' => $load_date,
-                            'link_maps' => $row->link_maps,
-                            'address' => $row->address,
-                            'city' => $row->city,
-                            'observaciones_agencia' => $row->observation_gral,
-                            'observation_customer' => $row->observation_customer,
-                            "descarga_place" => $row->descarga_place,
-                            "descarga_address" => $row->descarga_address,
-                            "descarga_city" => $row->descarga_city,
-                            "descarga_link" => $row->descarga_link,
-                            'ex_alto' => $row->ex_alto,
-                            'ex_ancho' => $row->ex_ancho,
-                            'ex_largo' => $row->ex_largo,
-                            'obs_imo' => $row->obs_imo,
-                            'rf_tem' => $row->rf_tem,
-                            'rf_humedad' => $row->rf_humedad,
-                            'rf_venti' => $row->rf_venti
+                        'observation_out' => $row->observation_out,
+                        'load_date' => $load_date,
+                        'link_maps' => $row->link_maps,
+                        'address' => $row->address,
+                        'city' => $row->city,
+                        'observaciones_agencia' => $row->observation_gral,
+                        'observation_customer' => $row->observation_customer,
+                        "descarga_place" => $row->descarga_place,
+                        "descarga_address" => $row->descarga_address,
+                        "descarga_city" => $row->descarga_city,
+                        "descarga_link" => $row->descarga_link,
+                        'ex_alto' => $row->ex_alto,
+                        'ex_ancho' => $row->ex_ancho,
+                        'ex_largo' => $row->ex_largo,
+                        'obs_imo' => $row->obs_imo,
+                        'rf_tem' => $row->rf_tem,
+                        'rf_humedad' => $row->rf_humedad,
+                        'rf_venti' => $row->rf_venti
 
-                        ];
+                    ];
 
+                    return view('pdf.instructivoCargaExpoTer', $data);
+                } elseif ($row->type == 'Impo Maritima') {
 
-                        
-                        return view('pdf.instructivoCargaImpoMar', $data);
-                      
+                    $data = [
 
-                    } elseif ($row->type == 'Impo Terrestre') {
-
-                        
-                        $data = [
-
-                            'id_asign' => $row->id,
-                            'img' => $base . '/public/image/empresas/' . $row->img,
-                            'cuit' => $row->cuit,
-                            'title' => $row->title,
-                            'booking' => $row->booking,
-                            'bl_hbl' => $row->bl_hbl,
-                            'senasa' => $row->senasa,
-                            'senasa_string' => $row->senasa_string,
-                            'tara' => $row->tara,
-                            'tara_string' => $row->tara_string,
-                            'shipper' => $row->shipper,
-                            'commodity' => $row->commodity,
-                            'load_place' => $row->load_place,
-                            'unload_place' => $row->unload_place,
-                            'cut_off_fis' => $row->cut_off_fis,
-                            'oceans_line' => $row->oceans_line,
-                            'vessel' => $row->vessel,
-                            'voyage' => $row->voyage,
-                            'final_point' => $row->final_point,
-                            'custom_agent' => $row->custom_agent,
-                            'custom_agent_impo' => $row->aduanaImpo_agent,
-                            'custom_agent_mail' => $row->mail,
-                            'custom_agent_mail_impo' => $row->aduanaImpo_mail,
-                            'custom_agent_phone' => $row->phone,
-                            'custom_agent_phone_impo' => $row->aduanaImpo_phone,
-                            'custom_place' => $row->custom_place,
-                            'custom_place_impo' => $row->custom_place_impo,
-
-                            'ref_customer' => $row->ref_customer,
-                            'importador' => $row->importador,
-
-                            'cntr_number' => $row->cntr_number,
-                            'confirmacion' => $row->confirmacion,
-
-                            'cntr_seal' => $row->cntr_seal,
-                            'cntr_type' => $row->cntr_type,
-                            'net_weight' => $row->net_weight,
-                            'retiro_place' => $row->retiro_place,
-                            'transport' => $row->transport,
-                            'transport_agent' => $row->transport_agent,
-                            'observation_load' => $row->observation_load,
-                            'agent_port' => $row->agent_port,
-                            'out_usd' => $row->out_usd,
-                            'observation_out' => $row->observation_out,
-                            'load_date' => $load_date,
-                            'link_maps' => $row->link_maps,
-                            'address' => $row->address,
-                            'city' => $row->city,
-                            'observaciones_agencia' => $row->observation_gral,
-                            'observation_customer' => $row->observation_customer,
-                            "descarga_place" => $row->descarga_place,
-                            "descarga_address" => $row->descarga_address,
-                            "descarga_city" => $row->descarga_city,
-                            "descarga_link" => $row->descarga_link,
-                            'ex_alto' => $row->ex_alto,
-                            'ex_ancho' => $row->ex_ancho,
-                            'ex_largo' => $row->ex_largo,
-                            'obs_imo' => $row->obs_imo,
-                            'rf_tem' => $row->rf_tem,
-                            'rf_humedad' => $row->rf_humedad,
-                            'rf_venti' => $row->rf_venti
-
-                        ];
-
-                       return view('pdf.instructivoCargaImpoTer', $data);
-                       
-
-                    } elseif ($row->type == 'Nacional') {
-
-                        $data = [
-
-                            'id_asign' => $row->id,
-                            'img' => $base . '/public/image/empresas/' . $row->img,
-                            'cuit' => $row->cuit,
-                            'title' => $row->title,
-                            'retiro_place' => $row->retiro_place,
-                            'booking' => $row->booking,                            
-                            'senasa' => $row->senasa,
-                            'senasa_string' => $row->senasa_string,
-                            'tara' => $row->tara,
-                            'tara_string' => $row->tara_string,
-                            'shipper' => $row->shipper,
-                            'commodity' => $row->commodity,
-                            'load_place' => $row->load_place,
-                            'unload_place' => $row->unload_place,
-                            'cut_off_fis' => $row->cut_off_fis,
-                            'ref_customer' => $row->ref_customer,                         
-                            'cntr_number' => $row->cntr_number,
-                            'confirmacion' => $row->confirmacion,
-                            'cntr_seal' => $row->cntr_seal,                        
-                            'cntr_type' => $row->cntr_type,
-                            'net_weight' => $row->net_weight,
-                            'transport' => $row->transport,
-                            'transport_agent' => $row->transport_agent,
-                            'observation_load' => $row->observation_load,
-                            'out_usd' => $row->out_usd,
-                            'load_date' => $load_date,
-                            'link_maps' => $row->link_maps,
-                            'address' => $row->address,
-                            'city' => $row->city,
-                            'observation_out' => $row-> observation_out,
-                            'observation_customer' => $row->observation_customer,
-                            "descarga_place" => $row->descarga_place,
-                            "descarga_address" => $row->descarga_address,
-                            "descarga_city" => $row->descarga_city,
-                            "descarga_link" => $row->descarga_link,
-                            'ex_alto' => $row->ex_alto,
-                            'ex_ancho' => $row->ex_ancho,
-                            'ex_largo' => $row->ex_largo,
-                            'obs_imo' => $row->obs_imo,
-                            'rf_tem' => $row->rf_tem,
-                            'rf_humedad' => $row->rf_humedad,
-                            'rf_venti' => $row->rf_venti
-
-                        ];
+                        'id_asign' => $row->id,
+                        'img' => asset('image/empresas/' . $row->img),
+                        'cuit' => $row->cuit,
+                        'title' => $row->title,
 
 
-                        return view('pdf.instructivoNacional', $data);
-                        
-                    
-                    }
-                } else {
+                        'booking' => $row->booking,
+                        'bl_hbl' => $row->bl_hbl,
+                        'senasa' => $row->senasa,
+                        'senasa_string' => $row->senasa_string,
+                        'tara' => $row->tara,
+                        'tara_string' => $row->tara_string,
+                        'shipper' => $row->shipper,
+                        'commodity' => $row->commodity,
+                        'load_place' => $row->load_place,
+                        'unload_place' => $row->unload_place,
+                        'cut_off_fis' => $row->cut_off_fis,
+                        'oceans_line' => $row->oceans_line,
+                        'vessel' => $row->vessel,
+                        'voyage' => $row->voyage,
+                        'final_point' => $row->final_point,
+                        'custom_agent' => $row->custom_agent,
+                        'custom_agent_impo' => $row->aduanaImpo_agent,
 
-                    return '#ERROR - No hay datos para mostrar';
+                        'custom_agent_mail' => $row->mail,
+                        'custom_agent_mail_impo' => $row->aduanaImpo_mail,
 
+                        'custom_agent_phone' => $row->phone,
+                        'custom_agent_phone_impo' => $row->aduanaImpo_phone,
+
+                        'custom_place' => $row->custom_place,
+                        'custom_place_impo' => $row->custom_place_impo,
+
+                        'ref_customer' => $row->ref_customer,
+                        'importador' => $row->importador,
+
+                        'cntr_number' => $row->cntr_number,
+                        'confirmacion' => $row->confirmacion,
+
+                        'cntr_seal' => $row->cntr_seal,
+                        'cntr_type' => $row->cntr_type,
+                        'net_weight' => $row->net_weight,
+                        'retiro_place' => $row->retiro_place,
+                        'transport' => $row->transport,
+                        'transport_agent' => $row->transport_agent,
+                        'observation_load' => $row->observation_load,
+                        'agent_port' => $row->agent_port,
+                        'out_usd' => $row->out_usd,
+
+                        'observation_out' => $row->observation_out,
+                        'load_date' => $load_date,
+                        'link_maps' => $row->link_maps,
+                        'address' => $row->address,
+                        'city' => $row->city,
+                        'observaciones_agencia' => $row->observation_gral,
+                        'observation_customer' => $row->observation_customer,
+                        "descarga_place" => $row->descarga_place,
+                        "descarga_address" => $row->descarga_address,
+                        "descarga_city" => $row->descarga_city,
+                        "descarga_link" => $row->descarga_link,
+                        'ex_alto' => $row->ex_alto,
+                        'ex_ancho' => $row->ex_ancho,
+                        'ex_largo' => $row->ex_largo,
+                        'obs_imo' => $row->obs_imo,
+                        'rf_tem' => $row->rf_tem,
+                        'rf_humedad' => $row->rf_humedad,
+                        'rf_venti' => $row->rf_venti
+
+                    ];
+
+
+
+                    return view('pdf.instructivoCargaImpoMar', $data);
+                } elseif ($row->type == 'Impo Terrestre') {
+
+
+                    $data = [
+
+                        'id_asign' => $row->id,
+                        'img' => asset('image/empresas/' . $row->img),
+                        'cuit' => $row->cuit,
+                        'title' => $row->title,
+                        'booking' => $row->booking,
+                        'bl_hbl' => $row->bl_hbl,
+                        'senasa' => $row->senasa,
+                        'senasa_string' => $row->senasa_string,
+                        'tara' => $row->tara,
+                        'tara_string' => $row->tara_string,
+                        'shipper' => $row->shipper,
+                        'commodity' => $row->commodity,
+                        'load_place' => $row->load_place,
+                        'unload_place' => $row->unload_place,
+                        'cut_off_fis' => $row->cut_off_fis,
+                        'oceans_line' => $row->oceans_line,
+                        'vessel' => $row->vessel,
+                        'voyage' => $row->voyage,
+                        'final_point' => $row->final_point,
+                        'custom_agent' => $row->custom_agent,
+                        'custom_agent_impo' => $row->aduanaImpo_agent,
+                        'custom_agent_mail' => $row->mail,
+                        'custom_agent_mail_impo' => $row->aduanaImpo_mail,
+                        'custom_agent_phone' => $row->phone,
+                        'custom_agent_phone_impo' => $row->aduanaImpo_phone,
+                        'custom_place' => $row->custom_place,
+                        'custom_place_impo' => $row->custom_place_impo,
+
+                        'ref_customer' => $row->ref_customer,
+                        'importador' => $row->importador,
+
+                        'cntr_number' => $row->cntr_number,
+                        'confirmacion' => $row->confirmacion,
+
+                        'cntr_seal' => $row->cntr_seal,
+                        'cntr_type' => $row->cntr_type,
+                        'net_weight' => $row->net_weight,
+                        'retiro_place' => $row->retiro_place,
+                        'transport' => $row->transport,
+                        'transport_agent' => $row->transport_agent,
+                        'observation_load' => $row->observation_load,
+                        'agent_port' => $row->agent_port,
+                        'out_usd' => $row->out_usd,
+                        'observation_out' => $row->observation_out,
+                        'load_date' => $load_date,
+                        'link_maps' => $row->link_maps,
+                        'address' => $row->address,
+                        'city' => $row->city,
+                        'observaciones_agencia' => $row->observation_gral,
+                        'observation_customer' => $row->observation_customer,
+                        "descarga_place" => $row->descarga_place,
+                        "descarga_address" => $row->descarga_address,
+                        "descarga_city" => $row->descarga_city,
+                        "descarga_link" => $row->descarga_link,
+                        'ex_alto' => $row->ex_alto,
+                        'ex_ancho' => $row->ex_ancho,
+                        'ex_largo' => $row->ex_largo,
+                        'obs_imo' => $row->obs_imo,
+                        'rf_tem' => $row->rf_tem,
+                        'rf_humedad' => $row->rf_humedad,
+                        'rf_venti' => $row->rf_venti
+
+                    ];
+
+                    return view('pdf.instructivoCargaImpoTer', $data);
+                } elseif ($row->type == 'Nacional') {
+
+                    $data = [
+
+                        'id_asign' => $row->id,
+                        'img' => asset('image/empresas/' . $row->img),
+                        'cuit' => $row->cuit,
+                        'title' => $row->title,
+                        'retiro_place' => $row->retiro_place,
+                        'booking' => $row->booking,
+                        'senasa' => $row->senasa,
+                        'senasa_string' => $row->senasa_string,
+                        'tara' => $row->tara,
+                        'tara_string' => $row->tara_string,
+                        'shipper' => $row->shipper,
+                        'commodity' => $row->commodity,
+                        'load_place' => $row->load_place,
+                        'unload_place' => $row->unload_place,
+                        'cut_off_fis' => $row->cut_off_fis,
+                        'ref_customer' => $row->ref_customer,
+                        'cntr_number' => $row->cntr_number,
+                        'confirmacion' => $row->confirmacion,
+                        'cntr_seal' => $row->cntr_seal,
+                        'cntr_type' => $row->cntr_type,
+                        'net_weight' => $row->net_weight,
+                        'transport' => $row->transport,
+                        'transport_agent' => $row->transport_agent,
+                        'observation_load' => $row->observation_load,
+                        'out_usd' => $row->out_usd,
+                        'load_date' => $load_date,
+                        'link_maps' => $row->link_maps,
+                        'address' => $row->address,
+                        'city' => $row->city,
+                        'observation_out' => $row->observation_out,
+                        'observation_customer' => $row->observation_customer,
+                        "descarga_place" => $row->descarga_place,
+                        "descarga_address" => $row->descarga_address,
+                        "descarga_city" => $row->descarga_city,
+                        "descarga_link" => $row->descarga_link,
+                        'ex_alto' => $row->ex_alto,
+                        'ex_ancho' => $row->ex_ancho,
+                        'ex_largo' => $row->ex_largo,
+                        'obs_imo' => $row->obs_imo,
+                        'rf_tem' => $row->rf_tem,
+                        'rf_humedad' => $row->rf_humedad,
+                        'rf_venti' => $row->rf_venti
+
+                    ];
+
+
+                    return view('pdf.instructivoNacional', $data);
                 }
             } else {
 
-                return '#ERROR - No hay coincidecias';
+                return '#ERROR - No hay datos para mostrar';
+            }
+        } else {
 
-            }   
-       
+            return '#ERROR - No hay coincidecias';
+        }
     }
     public function cargaPorMail($cntr)
     {
@@ -514,7 +549,7 @@ class verpdfController extends Controller
                 ->join('customer_load_places', 'customer_load_places.description', '=', 'carga.load_place')
                 ->where('cntr.cntr_number', '=', $cntr_number)
                 ->distinct()
-                ->get(['asign.id', 'asign.transport', 'asign.transport_agent', 'asign.observation_load', 'asign.agent_port', 'carga.custom_place', 'carga.load_date', 'carga.booking', 'carga.shipper', 'carga.commodity', 'carga.load_place', 'carga.unload_place', 'carga.cut_off_fis', 'carga.oceans_line', 'carga.vessel', 'carga.voyage', 'carga.final_point', 'carga.custom_agent', 'carga.ref_customer','cntr.cntr_number','cntr.confirmacion', 'cntr.cntr_seal', 'cntr.cntr_type', 'cntr.net_weight', 'cntr.retiro_place', 'cntr.out_usd', 'cntr.modo_pago_out', 'cntr.plazo_de_pago_out', 'customer_load_places.link_maps', 'customer_load_places.address', 'customer_load_places.city']);
+                ->get(['asign.id', 'asign.transport', 'asign.transport_agent', 'asign.observation_load', 'asign.agent_port', 'carga.custom_place', 'carga.load_date', 'carga.booking', 'carga.shipper', 'carga.commodity', 'carga.load_place', 'carga.unload_place', 'carga.cut_off_fis', 'carga.oceans_line', 'carga.vessel', 'carga.voyage', 'carga.final_point', 'carga.custom_agent', 'carga.ref_customer', 'cntr.cntr_number', 'cntr.confirmacion', 'cntr.cntr_seal', 'cntr.cntr_type', 'cntr.net_weight', 'cntr.retiro_place', 'cntr.out_usd', 'cntr.modo_pago_out', 'cntr.plazo_de_pago_out', 'customer_load_places.link_maps', 'customer_load_places.address', 'customer_load_places.city']);
             $row = $respuesta_file[0];
 
             $weekMap = [
@@ -588,7 +623,6 @@ class verpdfController extends Controller
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
                 $logApi->detalle = "envio email envioInstructivo to:" . $mail;
-
             } elseif ($sbx[0]->sandbox == 2) {
 
                 Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new envioInstructivo($data));
@@ -596,9 +630,7 @@ class verpdfController extends Controller
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
                 $logApi->detalle = "+ Sandbox + envio email envioInstructivo to: " . $mail;
-           
-
-            }else {
+            } else {
 
                 Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new envioInstructivo($data));
 
@@ -608,7 +640,6 @@ class verpdfController extends Controller
             }
 
             return 'ok';
-            
         } else {
 
             return 'no hay asignacio para ese camion';

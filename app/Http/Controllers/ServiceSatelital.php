@@ -163,7 +163,7 @@ class ServiceSatelital extends Controller
 
     public function serviceSatelital()
     {
-        
+
         $todosMisCamiones = DB::table('trucks')
             ->join('asign', 'trucks.domain', '=', 'asign.truck')
             ->join('cntr', 'cntr.cntr_number', '=', 'asign.cntr_number')
@@ -178,8 +178,8 @@ class ServiceSatelital extends Controller
             ->get();
 
         //return $todosMisCamiones;
-        
-        
+
+
         foreach ($todosMisCamiones as $camion) {
 
             $client = new Client();
@@ -228,7 +228,7 @@ class ServiceSatelital extends Controller
                 $datos = $keys[0]['data'][$camion->domain];
                 $posicionLat = $datos['ult_latitud'];
                 $posicionLon = $datos['ult_longitud'];
-            
+
                 $positionDB = new position();
                 $positionDB->dominio = $camion->domain;
                 $positionDB->lat = $posicionLat;
@@ -785,12 +785,18 @@ class ServiceSatelital extends Controller
     {
         $detalleComparaciones = [];
 
-        // Obtener todas las asignaciones activas desde la tabla asign
-        $asignaciones = asign::whereNull('deleted_at')
-            ->whereNotNull('truck')
-            ->whereIn('booking', Carga::where('status', '!=', 'TERMINADA')->pluck('booking'))
+        $asignaciones = DB::table('asign as a')
+            ->join('cntr as c', 'a.cntr_number', '=', 'c.cntr_number') // Unir con la tabla cntr
+            ->join('cntr_interest_point as cip', 'c.id_cntr', '=', 'cip.cntr_id_cntr') // Unir con puntos de interés
+            ->whereNull('a.deleted_at')
+            ->whereNotNull('a.truck')
+            ->whereIn('a.booking', DB::table('carga')
+                ->where('status', '!=', 'TERMINADA')
+                ->pluck('booking'))
+            ->select('a.*', 'c.*') // Seleccionar columnas necesarias
+            ->distinct() // Evitar duplicados
             ->get();
-
+            
         foreach ($asignaciones as $asignacion) {
             // Obtener los datos del truck y el contenedor a partir de la asignación
             $truckDomain = $asignacion->truck;  // Dominio del truck
@@ -833,7 +839,7 @@ class ServiceSatelital extends Controller
                 $datos = $r['data'][$truckDomain];  // Obtener las coordenadas del truck
                 $latitud = $datos['ult_latitud'];
                 $longitud = $datos['ult_longitud'];
-    
+
                 // Obtener los puntos de interés asociados al CNTR, ordenados por el campo "order"
                 $puntosDeInteres = DB::table('cntr_interest_point')
                     ->join('interest_points', 'cntr_interest_point.interest_point_id', '=', 'interest_points.id')

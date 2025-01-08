@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\FleteroController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\RolePermissionController;
 
 
 Route::post('register', [AuthController::class, 'register']);
@@ -17,6 +18,23 @@ Route::group(['middleware' => 'auth:api'], function () {
   Route::get('takeUser', 'App\Http\Controllers\FcmTokenController@takeUser');
 
 });
+
+// Rutas para permisos
+Route::post('/permissions', [RolePermissionController::class, 'createPermission']);
+Route::get('/permissions', [RolePermissionController::class, 'getPermissions']);
+
+// Rutas para roles
+Route::post('/roles', [RolePermissionController::class, 'createRole']);
+Route::get('/roles', [RolePermissionController::class, 'getRoles']);
+Route::post('/roles/assign-permissions', [RolePermissionController::class, 'assignPermissionsToRole']);
+Route::get('/roles/{roleId}/permissions', [RolePermissionController::class, 'getPermissionsByRole']);
+
+// Rutas para asignaciones
+Route::post('/users/assign-role', [RolePermissionController::class, 'assignRoleToUser']);
+Route::post('/users/assign-permission', [RolePermissionController::class, 'assignPermissionToUser']);
+Route::delete('/users/remove-role', [RolePermissionController::class, 'removeRoleFromUser']);
+Route::put('/users/sync-roles', [RolePermissionController::class, 'syncRolesForUser']);
+
 
 /*
 |--------------------------------------------------------------------------
