@@ -30,6 +30,10 @@ class User extends Authenticatable implements AuditableContract, JWTSubject
         'last_name',
         'empresa',
         'pass',
+        'celular',
+        'empresa',
+        'name',
+        'last_name'
     ];
 
     /**

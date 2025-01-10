@@ -16,6 +16,7 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
+        
         $validator = Validator::make($request->all(), [
             'username' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -25,10 +26,11 @@ class AuthController extends Controller
             'celular' => 'nullable|string',
             'empresa' => 'nullable|string'
         ]);
-
+        
         if ($validator->fails()) {
             return response()->json($validator->errors()->toJson(), 400);
         }
+        
 
         try {
             $user = User::create([
