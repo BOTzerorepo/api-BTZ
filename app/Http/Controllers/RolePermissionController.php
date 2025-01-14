@@ -7,6 +7,7 @@ use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use App\Models\User;
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
 
 class RolePermissionController extends Controller
@@ -38,6 +39,46 @@ class RolePermissionController extends Controller
             ], 422);
         } catch (\Exception $e) {
             // Otros errores (por ejemplo, problemas con la base de datos)
+            return response()->json([
+                'error' => 'Error interno del servidor',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    public function editPermission(Request $request, $id)
+    {
+        try {
+            // Validar entrada
+            $request->validate([
+                'name' => 'required|string|unique:permissions,name,' . $id, // Nombre único excepto para el permiso actual
+            ]);
+
+            // Buscar el permiso por ID
+            $permission = Permission::findOrFail($id);
+
+            // Actualizar el nombre del permiso
+            $permission->name = $request->name;
+            $permission->save();
+
+            // Respuesta en caso de éxito
+            return response()->json([
+                'message' => 'Permiso actualizado exitosamente.',
+                'permission' => $permission
+            ], 200);
+        } catch (ValidationException $e) {
+            // Errores de validación
+            return response()->json([
+                'error' => 'Error de validación',
+                'details' => $e->errors()
+            ], 422);
+        } catch (ModelNotFoundException $e) {
+            // Si el permiso no existe
+            return response()->json([
+                'error' => 'Permiso no encontrado.',
+                'message' => $e->getMessage()
+            ], 404);
+        } catch (\Exception $e) {
+            // Otros errores
             return response()->json([
                 'error' => 'Error interno del servidor',
                 'message' => $e->getMessage()
@@ -80,6 +121,68 @@ class RolePermissionController extends Controller
             return response()->json(['error' => 'Error interno del servidor', 'message' => $e->getMessage()], 500);
         }
     }
+    public function updateRole(Request $request, $id)
+    {
+        try {
+            // Validar los datos de entrada
+            $request->validate([
+                'name' => 'string|unique:roles,name,' . $id,
+                'permissions' => 'array',
+                'permissions.*' => 'exists:permissions,name',
+            ]);
+
+            // Buscar el rol por su ID
+            $role = Role::findOrFail($id);
+
+            // Actualizar el nombre del rol si es proporcionado
+            if ($request->has('name')) {
+                $role->name = $request->name;
+                $role->save();
+            }
+
+            // Actualizar los permisos del rol
+            if ($request->has('permissions')) {
+                $role->syncPermissions($request->permissions);
+            }
+
+            return response()->json([
+                'message' => 'Rol actualizado exitosamente.',
+                'role' => $role,
+            ], 200);
+        } catch (ValidationException $e) {
+            return response()->json(['error' => 'Error de validación', 'details' => $e->errors()], 422);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'Rol no encontrado', 'message' => $e->getMessage()], 404);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Error interno del servidor', 'message' => $e->getMessage()], 500);
+        }
+    }
+    public function deleteRole($id)
+    {
+        try {
+            // Obtener el rol por ID
+            $role = Role::findOrFail($id);
+
+            // Verificar si algún usuario tiene asignado este rol
+            if ($role->users()->exists()) {
+                return response()->json([
+                    'message' => 'No se puede eliminar el rol porque está asignado a uno o más usuarios.',
+                ], 400);
+            }
+
+            // Eliminar el rol
+            $role->delete();
+
+            return response()->json([
+                'message' => 'Rol eliminado exitosamente.',
+            ], 200);
+        } catch (Exception $e) {
+            return response()->json([
+                'message' => 'Error al eliminar el rol.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
+    }
 
     /*Obtener todos los roles.*/
     public function getRoles()
@@ -89,6 +192,41 @@ class RolePermissionController extends Controller
             return response()->json($roles);
         } catch (Exception $e) {
             return response()->json(['error' => 'Error interno del servidor', 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    public function deletePermission($id)
+    {
+        try {
+            // Buscar el permiso por ID
+            $permission = Permission::findOrFail($id);
+
+            // Verificar si el permiso está asociado a algún rol
+            if ($permission->roles()->exists()) {
+                return response()->json([
+                    'error' => 'El permiso no se puede eliminar porque está asociado a uno o más roles.'
+                ], 400);
+            }
+
+            // Eliminar el permiso
+            $permission->delete();
+
+            // Respuesta en caso de éxito
+            return response()->json([
+                'message' => 'Permiso eliminado exitosamente.'
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            // Si el permiso no existe
+            return response()->json([
+                'error' => 'Permiso no encontrado.',
+                'message' => $e->getMessage()
+            ], 404);
+        } catch (\Exception $e) {
+            // Otros errores
+            return response()->json([
+                'error' => 'Error interno del servidor',
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
 
@@ -124,6 +262,11 @@ class RolePermissionController extends Controller
             ]);
 
             $user = User::findOrFail($request->user_id);
+
+            // Eliminar todos los roles actuales del usuario
+            $user->roles()->detach();
+
+            // Asignar el nuevo rol
             $user->assignRole($request->role);
 
             return response()->json(['message' => 'Rol asignado al usuario correctamente.']);
@@ -204,5 +347,22 @@ class RolePermissionController extends Controller
         } catch (Exception $e) {
             return response()->json(['error' => 'Error interno del servidor', 'message' => $e->getMessage()], 500);
         }
+    }
+    public function getUserRoleAndPermissions($userId)
+    {
+        // Obtener el usuario por ID
+        $user = User::findOrFail($userId);
+
+        // Obtener el rol del usuario (asumiendo que cada usuario tiene un solo rol)
+        $role = $user->getRoleNames()->first();
+
+        // Obtener los permisos del rol
+        $permissions = Role::findByName($role)->permissions;
+
+        // Devolver el rol y los permisos del rol
+        return [
+            'role' => $role,
+            'permissions' => $permissions->pluck('name')
+        ];
     }
 }
