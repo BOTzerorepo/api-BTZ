@@ -61,6 +61,8 @@ class TruckController extends Controller
                 'transport_id' => $truck->transport_id,
                 'user' => $truck->user,
                 'fletero_id' => $truck->fletero_id,
+                'device_truck' => $truck->device_truck,
+                'satelital_location' => $truck->satelital_location,
                 'transport_name' => $truck->transport ? $truck->transport->razon_social : null, // Nombre del transporte asociado
                 'fletero_name' => $truck->fletero ? $truck->fletero->razon_social : null, // Nombre del fletero asociado
             ];

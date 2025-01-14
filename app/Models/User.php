@@ -11,10 +11,12 @@ use Laravel\Sanctum\HasApiTokens;
 use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 use OwenIt\Auditing\Auditable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use Spatie\Permission\Traits\HasRoles;
+use Spatie\Permission\Models\Role;
 
 class User extends Authenticatable implements AuditableContract, JWTSubject
 {
-    use HasApiTokens, HasFactory, Notifiable, Auditable;
+    use HasApiTokens, HasFactory, Notifiable, Auditable, HasRoles;
     use SoftDeletes;
     /**
      * The attributes that are mass assignable.
@@ -24,13 +26,9 @@ class User extends Authenticatable implements AuditableContract, JWTSubject
     protected $fillable = [
         'username',
         'email',
-        'celular',
-        'name',
-        'last_name',
         'empresa',
         'pass',
         'celular',
-        'empresa',
         'name',
         'last_name'
     ];
@@ -66,5 +64,4 @@ class User extends Authenticatable implements AuditableContract, JWTSubject
     {
         return $this->pass; // Cambia 'password' a 'pass'
     }
-    
 }

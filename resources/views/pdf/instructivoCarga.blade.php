@@ -1,7 +1,7 @@
 <table width="100%" border="0" cellpadding="1" cellspacing="0" bordercolor="#999999" class="tablaContenido">
     <tr>
         <td width="50%" valign="top" class="tdContenido" style="border:none; text-align:center;">
-            <img src="https://botzero.tech/ttl/images/ttl/TTchica.png" style="width:10rem;" alt="">
+            <img src="https://totaltrade.botzero.tech/images/ttl/TTchica.png" style="width:10rem;" alt="">
         </td>
     </tr>
 </table>

@@ -1,11 +1,9 @@
 <table width="100%" border="0" cellpadding="1" cellspacing="0" bordercolor="#999999" class="tablaContenido">
     <tr>
         <td width="50%" valign="top" class="tdContenido" style="border:none; text-align:left;">
-            <img src="https://botzero.tech/ttl/images/ttl/TTchica.png" style="width:10rem;height:8rem;" alt="">
+            <img src="https://totaltrade.botzero.tech/images/ttl/TTchica.png" style="width:10rem;height:8rem;" alt="">
         </td>
-        <td width="50%" valign="top" class="tdContenido" style="border:none; text-align:right;">
-            <img src="{{ $img }}" style="width:10rem; height:8rem;" alt="">
-        </td>
+        
     </tr>
 </table>
 <h3 style="text-align:left; margin-bottom: 0; font-family: sans-serif; text-transform: uppercase;" >Orden de Trabajo N° {{ $id_asign }}</h3>
