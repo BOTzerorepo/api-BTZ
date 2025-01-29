@@ -99,7 +99,9 @@ class statusController extends Controller
         ->leftJoin('status', 'status.cntr_number', '=', 'cntr.cntr_number')
         ->leftJoin('trucks', 'trucks.domain', '=', 'asign.truck')
         ->whereIn('asign.transport', $rzTransportes) // Filtrar por las razones sociales de los transportes
-        ->select(
+	->whereNull('carga.deleted_at') 
+        ->where('cntr.main_status', '!=', 'TERMINADA')
+	->select(
             'cntr.id_cntr',
             'carga.ref_customer',
             'cntr.booking',
@@ -116,7 +118,6 @@ class statusController extends Controller
             'trucks.alta_aker',
             DB::raw('MAX(status.id) as latest_status_id') // Seleccionar el último status basado en el id
         )
-        ->where('cntr.main_status', '!=', 'TERMINADA')
         ->groupBy(
             'cntr.id_cntr',
             'carga.ref_customer',
