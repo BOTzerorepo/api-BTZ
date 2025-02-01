@@ -395,16 +395,18 @@ class emailController extends Controller
             ];
 
             if ($sbx[0]->sandbox == 0) {
+                
                 $customer = DB::table('users')
                     ->where('username', '=', $carga->user)
                     ->value('email');
+
                 $toEmails = array_merge([$customer], (array) $toEmails);
-
+               
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new CamnioStatus($datos, $statusArchivoPath));
-
+        
                 $logApi = new logapi();
                 $logApi->user = $user;
-                $logApi->detalle = "envio email camnioStatus to: " . $toEmails;
+                $logApi->detalle = "envio email camnioStatus to:" . implode(', ', $toEmails);
                 $logApi->save();
                 return 'ok';
             } else {

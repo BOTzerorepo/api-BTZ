@@ -134,7 +134,7 @@ class CustomerLoadPlaceController extends Controller
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaCargando($datos));
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
-                $logApi->detalle = "envio email cargaCargando to:" . $toEmails;
+                $logApi->detalle = "envio email cargaCargando to:" . implode(', ', $toEmails);
                 $logApi->save();
             } elseif ($sbx[0]->sandbox == 2) {
 
@@ -223,7 +223,7 @@ class CustomerLoadPlaceController extends Controller
 
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
-                    $logApi->detalle = "envio email cargaCargando to:" . $toEmails;
+                    $logApi->detalle = "envio email cargaCargando to:". implode(', ', $toEmails);
                     $logApi->save();
                 } elseif ($sbx[0]->sandbox == 2) {
 
@@ -327,7 +327,7 @@ class CustomerLoadPlaceController extends Controller
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaAduana($datos));
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
-                $logApi->detalle = "envio email cargaAduana to:" . $toEmails;
+                $logApi->detalle = "envio email cargaAduana to:". implode(', ', $toEmails);
                 $logApi->save();
             } elseif ($sbx[0]->sandbox == 2) {
 
@@ -413,7 +413,7 @@ class CustomerLoadPlaceController extends Controller
                     Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaAduana($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
-                    $logApi->detalle = "envio email cargaAduana to:" . $toEmails;
+                    $logApi->detalle = "envio email cargaAduana to:". implode(', ', $toEmails);
                     $logApi->save();
                 } elseif ($sbx[0]->sandbox == 2) {
 
@@ -512,7 +512,7 @@ class CustomerLoadPlaceController extends Controller
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaDescarga($datos));
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
-                $logApi->detalle = "envio email cargaDescarga to:" . $toEmails;
+                $logApi->detalle = "envio email cargaDescarga to:". implode(', ', $toEmails);
                 $logApi->save();
             } elseif ($sbx[0]->sandbox == 2) {
 
@@ -598,7 +598,7 @@ class CustomerLoadPlaceController extends Controller
                     Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaDescarga($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
-                    $logApi->detalle = "envio email cargaDescarga to:" . $toEmails;
+                    $logApi->detalle = "envio email cargaDescarga to:". implode(', ', $toEmails);
                     $logApi->save();
                 } elseif ($sbx[0]->sandbox == 2) {
                     Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new cargaDescarga($datos));
@@ -683,7 +683,7 @@ class CustomerLoadPlaceController extends Controller
 
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
-                $logApi->detalle = "envio email cargaCargando to:" . $toEmails;
+                $logApi->detalle = "envio email cargaCargando to:". implode(', ', $toEmails);
                 $logApi->save();
             } elseif ($sbx[0]->sandbox == 2) {
 
@@ -762,7 +762,7 @@ class CustomerLoadPlaceController extends Controller
 
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
-                    $logApi->detalle = "envio email cargaCargando to:" . $toEmails;
+                    $logApi->detalle = "envio email cargaCargando to:". implode(', ', $toEmails);
                     $logApi->save();
                 } elseif ($sbx[0]->sandbox == 2) {
 
@@ -866,7 +866,7 @@ class CustomerLoadPlaceController extends Controller
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaFueraAduana($datos));
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
-                $logApi->detalle = "envio email cargaAduana to:" . $toEmails;
+                $logApi->detalle = "envio email cargaAduana to:". implode(', ', $toEmails);
                 $logApi->save();
             } elseif ($sbx[0]->sandbox == 2) {
 
@@ -952,7 +952,7 @@ class CustomerLoadPlaceController extends Controller
                     Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaFueraAduana($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
-                    $logApi->detalle = "envio email cargaAduana to: " . $toEmails;
+                    $logApi->detalle = "envio email cargaAduana to: ". implode(', ', $toEmails);
                     $logApi->save();
                 } elseif ($sbx[0]->sandbox == 2) {
 
