@@ -25,13 +25,11 @@ class cargaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
-    {
-    }
+    public function index() {}
 
     public function loadThisWeek($user)
     {
-        
+
         $user = User::where('username', '=', $user)->first();
         $terminaSemana = Carbon::parse('next Sunday')->endOfDay();
         $empiezaSemana = Carbon::parse('last monday')->startOfDay();
@@ -49,22 +47,20 @@ class cargaController extends Controller
                 ->where('carga.empresa', '=', $user->empresa)
                 ->orderBy('carga.load_date', 'ASC')
                 ->get();
-
         } elseif ($user->permiso == 'Transport') {
-       
-            $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
-            ->join('cntr', 'cntr.booking', '=', 'carga.booking')
-            ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
-            ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
-            ->whereNull('cntr.deleted_at')
-            ->whereNull('asign.deleted_at')
-            ->whereBetween('carga.load_date', [$empiezaSemana, $terminaSemana])
-            ->where('carga.status', '!=', 'TERMINADA')
-            ->where('carga.empresa', '=', $user->empresa)
-            ->orderBy('carga.load_date', 'ASC')
-            ->get();   
 
-        }  else {
+            $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
+                ->join('cntr', 'cntr.booking', '=', 'carga.booking')
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+                ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
+                ->whereNull('cntr.deleted_at')
+                ->whereNull('asign.deleted_at')
+                ->whereBetween('carga.load_date', [$empiezaSemana, $terminaSemana])
+                ->where('carga.status', '!=', 'TERMINADA')
+                ->where('carga.empresa', '=', $user->empresa)
+                ->orderBy('carga.load_date', 'ASC')
+                ->get();
+        } else {
             $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
                 ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
@@ -98,7 +94,7 @@ class cargaController extends Controller
         $user = User::where('username', '=', $user)->first();
         $empiezaSemana = Carbon::parse('last monday')->startOfDay();
 
-        if ($user->permiso == 'Traffic'|| $user->permiso == 'Master') {
+        if ($user->permiso == 'Traffic' || $user->permiso == 'Master') {
 
             $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
@@ -123,7 +119,7 @@ class cargaController extends Controller
                 ->where('carga.empresa', '=', $user->empresa)
                 ->orderBy('carga.load_date', 'ASC')
                 ->get();
-        }else {
+        } else {
 
             $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
@@ -139,8 +135,8 @@ class cargaController extends Controller
         }
         // Obtener los cntr y sus puntos de interés
         $cntrs = Cntr::whereIn('cntr_number', $todasLasCargasDeEstaSemana->pluck('cntr_number'))
-        ->with('interestPoints')
-        ->get()
+            ->with('interestPoints')
+            ->get()
             ->keyBy('cntr_number');
 
         // Mapear las cargas con sus puntos de interés
@@ -156,7 +152,7 @@ class cargaController extends Controller
 
         $terminaSemana = Carbon::parse('next Sunday')->endOfDay();
 
-        if ($user->permiso == 'Traffic'|| $user->permiso == 'Master') {
+        if ($user->permiso == 'Traffic' || $user->permiso == 'Master') {
 
             $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
@@ -168,7 +164,7 @@ class cargaController extends Controller
                 ->whereNull('cntr.deleted_at')
                 ->whereNull('asign.deleted_at')
                 ->orderBy('carga.load_date', 'ASC')->get();
-        }  elseif ($user->permiso == 'Transport') {
+        } elseif ($user->permiso == 'Transport') {
 
             $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
@@ -181,7 +177,7 @@ class cargaController extends Controller
                 ->where('carga.empresa', '=', $user->empresa)
                 ->orderBy('carga.load_date', 'ASC')
                 ->get();
-        }else {
+        } else {
 
             $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
@@ -198,8 +194,8 @@ class cargaController extends Controller
 
         // Obtener los cntr y sus puntos de interés
         $cntrs = Cntr::whereIn('cntr_number', $todasLasCargasDeEstaSemana->pluck('cntr_number'))
-        ->with('interestPoints')
-        ->get()
+            ->with('interestPoints')
+            ->get()
             ->keyBy('cntr_number');
 
         // Mapear las cargas con sus puntos de interés
@@ -214,7 +210,7 @@ class cargaController extends Controller
     {
         $user = User::where('username', '=', $user)->first();
 
-        if ($user->permiso == 'Traffic'|| $user->permiso == 'Master') {
+        if ($user->permiso == 'Traffic' || $user->permiso == 'Master') {
 
             $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
@@ -225,7 +221,6 @@ class cargaController extends Controller
                 ->whereNull('cntr.deleted_at')
                 ->whereNull('asign.deleted_at')
                 ->orderBy('carga.load_date', 'ASC')->get();
-                
         } else {
 
             $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
@@ -250,13 +245,13 @@ class cargaController extends Controller
         $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
             ->join('cntr', 'cntr.booking', '=', 'carga.booking')
             ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
-            ->select('carga.ref_customer', 'carga.booking', 'carga.shipper','carga.commodity', 'carga.type', 'carga.load_place', 'carga.unload_place', 'carga.load_date', 'carga.cut_off_fis', 'carga.custom_place',  'carga.custom_agent','carga.custom_place_impo', 'carga.custom_agent_impo', 'cntr.cntr_number', 'cntr.cntr_type', 'cntr.main_status','cntr.out_usd', 'cntr.observation_out', 'asign.driver', 'asign.transport', 'asign.truck', 'asign.truck_semi')
+            ->select('carga.ref_customer', 'carga.booking', 'carga.shipper', 'carga.commodity', 'carga.type', 'carga.load_place', 'carga.unload_place', 'carga.load_date', 'carga.cut_off_fis', 'carga.custom_place',  'carga.custom_agent', 'carga.custom_place_impo', 'carga.custom_agent_impo', 'cntr.cntr_number', 'cntr.cntr_type', 'cntr.main_status', 'cntr.out_usd', 'cntr.observation_out', 'asign.driver', 'asign.transport', 'asign.truck', 'asign.truck_semi')
             ->where('cntr.main_status', '=', 'TERMINADA')
             ->whereIn('asign.transport', $razonSocialList)
             ->whereNull('cntr.deleted_at')
             ->whereNull('asign.deleted_at')
             ->orderBy('carga.load_date', 'ASC')->get();
-       
+
 
         return $todasLasCargasDeEstaSemana;
     }
@@ -275,52 +270,49 @@ class cargaController extends Controller
 
         $user = User::where('username', '=', $user)->first();
 
-        if ($user->permiso == 'Traffic'|| $user->permiso == 'Master') {
+        if ($user->permiso == 'Traffic' || $user->permiso == 'Master') {
 
             $cargaPorId = Carga::whereNull('carga.deleted_at')
-            ->join('cntr', 'cntr.booking', '=', 'carga.booking')
-            ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
-            ->leftjoin('trucks', 'trucks.domain', '=', 'asign.truck')
-            ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport','asign.truck','asign.truck_semi','asign.file_instruction', 'trucks.alta_aker')
-            ->where('carga.empresa', '=', $user->empresa)
-            ->where('carga.id', '=', $id)
-            ->whereNull('cntr.deleted_at')
-            ->whereNull('asign.deleted_at')
-            ->orderBy('carga.load_date', 'DESC')->get();
+                ->join('cntr', 'cntr.booking', '=', 'carga.booking')
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+                ->leftjoin('trucks', 'trucks.domain', '=', 'asign.truck')
+                ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport', 'asign.truck', 'asign.truck_semi', 'asign.file_instruction', 'trucks.alta_aker')
+                ->where('carga.empresa', '=', $user->empresa)
+                ->where('carga.id', '=', $id)
+                ->whereNull('cntr.deleted_at')
+                ->whereNull('asign.deleted_at')
+                ->orderBy('carga.load_date', 'DESC')->get();
 
             return $cargaPorId;
-
-        }else{
+        } else {
 
             $cargaPorId = Carga::whereNull('carga.deleted_at')
-            ->join('cntr', 'cntr.booking', '=', 'carga.booking')
-            ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
-            ->leftjoin('trucks', 'trucks.domain', '=', 'asign.truck')
-            ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport','asign.truck','asign.truck_semi','asign.file_instruction','trucks.alta_aker')
-            ->where('carga.empresa', '=', $user->empresa)
-            ->where('carga.user', '=', $user->username)
-            ->where('carga.id', '=', $id)
-            ->whereNull('cntr.deleted_at')
-            ->whereNull('asign.deleted_at')
-            ->orderBy('carga.load_date', 'DESC')->get();
+                ->join('cntr', 'cntr.booking', '=', 'carga.booking')
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+                ->leftjoin('trucks', 'trucks.domain', '=', 'asign.truck')
+                ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport', 'asign.truck', 'asign.truck_semi', 'asign.file_instruction', 'trucks.alta_aker')
+                ->where('carga.empresa', '=', $user->empresa)
+                ->where('carga.user', '=', $user->username)
+                ->where('carga.id', '=', $id)
+                ->whereNull('cntr.deleted_at')
+                ->whereNull('asign.deleted_at')
+                ->orderBy('carga.load_date', 'DESC')->get();
 
             return $cargaPorId;
-            
         }
     }
 
     public function showCargaDomain($domain)
     {
 
-            $cargaPorId = Carga::whereNull('carga.deleted_at')
+        $cargaPorId = Carga::whereNull('carga.deleted_at')
             ->leftjoin('cntr', 'cntr.booking', '=', 'carga.booking')
             ->leftjoin('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
             ->leftjoin('trucks', 'trucks.domain', '=', 'asign.truck')
             ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport', 'asign.truck', 'asign.truck_semi', 'asign.file_instruction', 'trucks.alta_aker')
             ->where('asign.truck', '=', $domain)
             ->orderBy('carga.load_date', 'DESC')->get();
-            return $cargaPorId;
-       
+        return $cargaPorId;
     }
 
     /**
@@ -345,7 +337,7 @@ class cargaController extends Controller
         $booking = Carga::whereNull('deleted_at')->where('booking', '=', $booking)->get();
         return $booking->count();
     }
-    
+
     public function issetTrader($trader)
     {
         $trader = DB::table('customers')->where('registered_name', '=', $trader)->get();
@@ -410,7 +402,7 @@ class cargaController extends Controller
                 'retiro_place' => 'nullable|string',
                 'q_viajes' => 'nullable|integer',
             ]);
-    
+
             // Buscar la carga y actualizarla
             $carga = Carga::findOrFail($id);
             $cargaOriginal = $carga->getOriginal();
@@ -447,7 +439,7 @@ class cargaController extends Controller
                 'rf_humedad' => $validatedData['rf_humedad'],
                 'rf_venti' => $validatedData['rf_venti'],
             ]);
-            
+
             $changes = $carga->getChanges(); // Obtener los datos que fueron modificados
 
             // Buscar el CNTR relacionado y actualizarlo
@@ -478,15 +470,22 @@ class cargaController extends Controller
 
             $sbx = DB::table('variables')->select('sandbox')->get();
             $inboxEmail = env('INBOX_EMAIL');
+            $mailsTrafico = DB::table('particular_soft_configurations')->first();
+            $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
+            $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
+
             if ($sbx[0]->sandbox == 0) {
-                Mail::to(['gzarate@totaltradegroup.com', 'rquero@totaltradegroup.com', 'smingo@totaltradegroup.com', 'lgonzalez@totaltradegroup.com'])->cc(['cs.auxiliar@totaltradegroup.com'])->bcc($inboxEmail)->send(new UpdateCarga($modificacionesCntr, $modificacionesCarga,$carga));
+                $customer = DB::table('users')
+                    ->where('username', '=', $carga->user)
+                    ->value('email');
+                $toEmails = array_merge([$customer], (array) $toEmails);
+                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new UpdateCarga($modificacionesCntr, $modificacionesCarga, $carga));
             } elseif ($sbx[0]->sandbox == 2) {
-                Mail::to(['customer@qa.botzero.com.ar', 'abel.mazzitelli@gmail.com'])->cc(['copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])->bcc($inboxEmail)->send(new UpdateCarga($modificacionesCntr, $modificacionesCarga,$carga));
-            }else {
-                Mail::to(['equipoDemo1@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo2@botzero.com.ar'])->cc(['equipodemo2@botzero.com.ar', 'copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])->bcc($inboxEmail)->send(new UpdateCarga($modificacionesCntr, $modificacionesCarga,$carga));
+                Mail::to(['customer@qa.botzero.com.ar', 'abel.mazzitelli@gmail.com'])->cc(['copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])->bcc($inboxEmail)->send(new UpdateCarga($modificacionesCntr, $modificacionesCarga, $carga));
+            } else {
+                Mail::to(['equipoDemo1@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo2@botzero.com.ar'])->cc(['equipodemo2@botzero.com.ar', 'copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])->bcc($inboxEmail)->send(new UpdateCarga($modificacionesCntr, $modificacionesCarga, $carga));
             }
             return response()->json(['message' => 'Carga actualizada exitosamente.'], 200);
-    
         } catch (ValidationException $e) {
             DB::rollBack();
             $errors = [];
@@ -578,7 +577,6 @@ class cargaController extends Controller
                 // Si el registro está eliminado, restaurarlo
                 if ($carga->trashed()) {
                     $carga->restore();
-                    
                 }
             } else {
                 // Crear una nueva carga si no existe
@@ -644,7 +642,7 @@ class cargaController extends Controller
                 if ($cntr) {
                     // Si el registro está eliminado, restaurarlo
                     if ($cntr->trashed()) {
-                        $cntr->restore(); 
+                        $cntr->restore();
                     }
                 } else {
                     // Crear una nueva carga si no existe
@@ -659,12 +657,12 @@ class cargaController extends Controller
                 $cntr->save();
 
                 $asing = Asign::withTrashed()
-                ->where('cntr_number', $numAleatorio)
-                ->first();
+                    ->where('cntr_number', $numAleatorio)
+                    ->first();
                 if ($asing) {
                     // Si el registro está eliminado, restaurarlo
                     if ($asing->trashed()) {
-                        $asing->restore(); 
+                        $asing->restore();
                     }
                 } else {
                     // Crear una nueva carga si no existe
@@ -705,6 +703,4 @@ class cargaController extends Controller
             return response()->json(['error' => $errorMessage, 'message_type' => 'danger'], 500);
         }
     }
-
-
 }

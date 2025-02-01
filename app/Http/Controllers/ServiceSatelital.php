@@ -163,7 +163,7 @@ class ServiceSatelital extends Controller
 
     public function serviceSatelital()
     {
-        
+
         $todosMisCamiones = DB::table('trucks')
             ->join('asign', 'trucks.domain', '=', 'asign.truck')
             ->join('cntr', 'cntr.cntr_number', '=', 'asign.cntr_number')
@@ -178,8 +178,8 @@ class ServiceSatelital extends Controller
             ->get();
 
         //return $todosMisCamiones;
-        
-        
+
+
         foreach ($todosMisCamiones as $camion) {
 
             $client = new Client();
@@ -228,7 +228,7 @@ class ServiceSatelital extends Controller
                 $datos = $keys[0]['data'][$camion->domain];
                 $posicionLat = $datos['ult_latitud'];
                 $posicionLon = $datos['ult_longitud'];
-            
+
                 $positionDB = new position();
                 $positionDB->dominio = $camion->domain;
                 $positionDB->lat = $posicionLat;
@@ -833,7 +833,7 @@ class ServiceSatelital extends Controller
                 $datos = $r['data'][$truckDomain];  // Obtener las coordenadas del truck
                 $latitud = $datos['ult_latitud'];
                 $longitud = $datos['ult_longitud'];
-    
+
                 // Obtener los puntos de interés asociados al CNTR, ordenados por el campo "order"
                 $puntosDeInteres = DB::table('cntr_interest_point')
                     ->join('interest_points', 'cntr_interest_point.interest_point_id', '=', 'interest_points.id')
@@ -1038,8 +1038,13 @@ class ServiceSatelital extends Controller
         $mailsTrafico = DB::table('particular_soft_configurations')->first();
         $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
         $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
+        $carga = Carga::whereNull('deleted_at')->where('booking', '=', $contenedor->booking)->first();
 
         if ($sbx[0]->sandbox == 0) {
+            $customer = DB::table('users')
+                ->where('username', '=', $carga->user)
+                ->value('email');
+            $toEmails = array_merge([$customer], (array) $toEmails);
             Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new PuntoInteresEntrada($contenedor, $punto));
         } else {
             Mail::to(['copia@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo3@botzero.com.ar'])
@@ -1087,8 +1092,13 @@ class ServiceSatelital extends Controller
         $mailsTrafico = DB::table('particular_soft_configurations')->first();
         $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
         $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
+        $carga = Carga::whereNull('deleted_at')->where('booking', '=', $contenedor->booking)->first();
 
         if ($sbx[0]->sandbox == 0) {
+            $customer = DB::table('users')
+                ->where('username', '=', $carga->user)
+                ->value('email');
+            $toEmails = array_merge([$customer], (array) $toEmails);
             Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new PuntoInteresSalida($contenedor, $punto));
         } else {
             Mail::to(['copia@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo3@botzero.com.ar'])
@@ -1097,9 +1107,9 @@ class ServiceSatelital extends Controller
         }
         //SALIDA
         if ($punto->accion_correo_customer_salida) {
-            // Enviar correo al cliente
+            /* Enviar correo al cliente
             $customer = DB::table('users')->where('username', $contenedor->user_cntr)->first();
-            Mail::to($customer)->send(new PuntoInteresSalida($contenedor, $punto));
+            Mail::to($customer)->send(new PuntoInteresSalida($contenedor, $punto));*/
         }
         if ($punto->accion_correo_cliente_salida) {
             /* Enviar correo al cliente
