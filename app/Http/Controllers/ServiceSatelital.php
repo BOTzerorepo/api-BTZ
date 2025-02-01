@@ -1044,8 +1044,13 @@ class ServiceSatelital extends Controller
         $mailsTrafico = DB::table('particular_soft_configurations')->first();
         $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
         $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
+        $carga = Carga::whereNull('deleted_at')->where('booking', '=', $contenedor->booking)->first();
 
         if ($sbx[0]->sandbox == 0) {
+            $customer = DB::table('users')
+                ->where('username', '=', $carga->user)
+                ->value('email');
+            $toEmails = array_merge([$customer], (array) $toEmails);
             Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new PuntoInteresEntrada($contenedor, $punto));
         } else {
             Mail::to(['copia@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo3@botzero.com.ar'])
@@ -1093,8 +1098,13 @@ class ServiceSatelital extends Controller
         $mailsTrafico = DB::table('particular_soft_configurations')->first();
         $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
         $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
+        $carga = Carga::whereNull('deleted_at')->where('booking', '=', $contenedor->booking)->first();
 
         if ($sbx[0]->sandbox == 0) {
+            $customer = DB::table('users')
+                ->where('username', '=', $carga->user)
+                ->value('email');
+            $toEmails = array_merge([$customer], (array) $toEmails);
             Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new PuntoInteresSalida($contenedor, $punto));
         } else {
             Mail::to(['copia@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo3@botzero.com.ar'])
@@ -1103,9 +1113,9 @@ class ServiceSatelital extends Controller
         }
         //SALIDA
         if ($punto->accion_correo_customer_salida) {
-            // Enviar correo al cliente
+            /* Enviar correo al cliente
             $customer = DB::table('users')->where('username', $contenedor->user_cntr)->first();
-            Mail::to($customer)->send(new PuntoInteresSalida($contenedor, $punto));
+            Mail::to($customer)->send(new PuntoInteresSalida($contenedor, $punto));*/
         }
         if ($punto->accion_correo_cliente_salida) {
             /* Enviar correo al cliente
