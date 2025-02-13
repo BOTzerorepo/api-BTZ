@@ -44,6 +44,7 @@ Route::get('/takeUser', 'App\Http\Controllers\FcmTokenController@takeUser');
 
 
 
+
 Route::get('/ejecutar/{puntoActivoId}/{contenedorId}','App\Http\Controllers\ServiceSatelital@ejecutarAccionEntrada');
 Route::get('/points_of_interest','App\Http\Controllers\InterestPointController@index');
 Route::post('/points_of_interest','App\Http\Controllers\InterestPointController@store');
