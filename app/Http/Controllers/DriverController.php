@@ -26,7 +26,7 @@ class DriverController extends Controller
         $idArray = explode(',', $idTransport);
 
         // Buscar los drivers cuyos transport_id coincidan con cualquiera de los IDs en el array
-        $drivers = Driver::whereIn('transport_id', $idArray)->get();
+        $drivers = Driver::whereNull('deleted_at')->whereIn('transport_id', $idArray)->get();
 
         return $drivers;
     }

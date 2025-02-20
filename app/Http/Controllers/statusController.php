@@ -98,10 +98,10 @@ class statusController extends Controller
         ->leftJoin('asign', 'asign.cntr_number', '=', 'cntr.cntr_number')
         ->leftJoin('status', 'status.cntr_number', '=', 'cntr.cntr_number')
         ->leftJoin('trucks', 'trucks.domain', '=', 'asign.truck')
-        ->whereIn('asign.transport', $rzTransportes) // Filtrar por las razones sociales de los transportes
-	->whereNull('carga.deleted_at') 
+        ->whereIn('asign.transport', $rzTransportes) 
+        ->whereNull('carga.deleted_at') 
         ->where('cntr.main_status', '!=', 'TERMINADA')
-	->select(
+        ->select(
             'cntr.id_cntr',
             'carga.ref_customer',
             'cntr.booking',

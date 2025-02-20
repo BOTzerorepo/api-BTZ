@@ -785,12 +785,18 @@ class ServiceSatelital extends Controller
     {
         $detalleComparaciones = [];
 
-        // Obtener todas las asignaciones activas desde la tabla asign
-        $asignaciones = asign::whereNull('deleted_at')
-            ->whereNotNull('truck')
-            ->whereIn('booking', Carga::where('status', '!=', 'TERMINADA')->pluck('booking'))
+        $asignaciones = DB::table('asign as a')
+            ->join('cntr as c', 'a.cntr_number', '=', 'c.cntr_number') // Unir con la tabla cntr
+            ->join('cntr_interest_point as cip', 'c.id_cntr', '=', 'cip.cntr_id_cntr') // Unir con puntos de interés
+            ->whereNull('a.deleted_at')
+            ->whereNotNull('a.truck')
+            ->whereIn('a.booking', DB::table('carga')
+                ->where('status', '!=', 'TERMINADA')
+                ->pluck('booking'))
+            ->select('a.*', 'c.*') // Seleccionar columnas necesarias
+            ->distinct() // Evitar duplicados
             ->get();
-
+            
         foreach ($asignaciones as $asignacion) {
             // Obtener los datos del truck y el contenedor a partir de la asignación
             $truckDomain = $asignacion->truck;  // Dominio del truck
