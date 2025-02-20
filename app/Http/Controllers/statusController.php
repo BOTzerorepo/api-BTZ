@@ -180,7 +180,6 @@ class statusController extends Controller
                 'statusGral' => 'required',
                 'description' => 'required',
             ]);
-           
 
             //Datos que recibe del front
             $description = $request['description'];
@@ -220,12 +219,10 @@ class statusController extends Controller
 
             }else{
                 $statusArchivoPath = null;
-
             }
             $status->save();
 
-            
-
+        
             //------------GENERAL--------------------
             if ($statusGral == "TERMINADA") {
 
@@ -412,11 +409,11 @@ class statusController extends Controller
                 // ENVIAMOS MAIL
                 // Crear una instancia del controlador
                 $emailController = new emailController();
-
+                
                 
                 // Llamar directamente a la función mailStatus
                 $response = $emailController->cambiaStatus($cntr, $empresa, $booking, $user, $tipo, $statusArchivoPath);
-                
+
 
                 if ($response == 'ok') {
                 
