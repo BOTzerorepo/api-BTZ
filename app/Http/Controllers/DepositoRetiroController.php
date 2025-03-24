@@ -15,8 +15,20 @@ class DepositoRetiroController extends Controller
      */
     public function index()
     {
-        $depositoRetiros = DB::table('deposito_retiros')->get();
-        return $depositoRetiros;
+        try {
+            $depositoRetiros = DepositoRetiro::all();
+            return response()->json([
+                'data' => $depositoRetiros,
+                'success' => true
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+        
     }
 
     /**

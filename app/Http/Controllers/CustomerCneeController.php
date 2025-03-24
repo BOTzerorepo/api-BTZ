@@ -15,8 +15,38 @@ class CustomerCneeController extends Controller
      */
     public function index()
     {
-        $customerCnees = DB::table('customer_cnees')->get();
-        return $customerCnees;
+        try {
+            $customerCnees = CustomerCnee::all();
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'Customer Cnne obtenidos correctamente.',
+                'data' => $customerCnees
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener los Customer Cnne.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function indexCompany($company)
+    {
+        try {
+            $customerCnees = CustomerCnee::where('company', $company)->get();
+            return response()->json([
+                'data' => $customerCnees,
+                'success' => true
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

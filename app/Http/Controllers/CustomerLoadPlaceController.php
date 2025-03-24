@@ -333,8 +333,6 @@ class CustomerLoadPlaceController extends Controller
 
             if ($qd->avisado == 0) {
 
-
-
                 DB::table('status')->insert([
                     'status' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts de la aduana Asignada.',
                     'main_status' => 'EN ADUANA',
@@ -923,8 +921,19 @@ class CustomerLoadPlaceController extends Controller
      */
     public function index()
     {
-        $customerLoadPlaces = DB::table('customer_load_places')->get();
-        return $customerLoadPlaces;
+        try {
+            $customerLoadPlaces = CustomerLoadPlace::all();
+            return response()->json([
+                'data' => $customerLoadPlaces,
+                'success' => true
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function issetLugarDeCarga($description)

@@ -15,8 +15,19 @@ class commoditiesController extends Controller
      */
     public function index()
     {
-        $commodities = commodity::all();
-        return $commodities;
+        try {
+            $commodities = commodity::all();
+            return response()->json([
+                'data' => $commodities,
+                'success' => true
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

@@ -21,8 +21,19 @@ class CustomerShipperController extends Controller
 
     public function indexCompany($company)
     {
-        $customersShipper = DB::table('customer_shippers')->where('company', '=', $company)->get();
-        return $customersShipper;
+        try {
+            $customersShipper = CustomerShipper::where('company', $company)->get();
+            return response()->json([
+                'data' => $customersShipper,
+                'success' => true
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
