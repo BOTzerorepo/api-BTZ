@@ -114,8 +114,10 @@ Route::get('/carga/{id}/{user}','App\Http\Controllers\cargaController@show');
 Route::get('/cargaDomain/{domain}', 'App\Http\Controllers\cargaController@showCargaDomain');
 
 Route::get('/loadFinishedTransport/{transport}', 'App\Http\Controllers\cargaController@loadFinishedTransport');
-// STATUS
+Route::get('/cargaShowStatus/{id}', 'App\Http\Controllers\cargaController@getStatusById');
+Route::get('/showEdit/{id}/{user}','App\Http\Controllers\cargaController@showEdit');
 
+// STATUS
 Route::post('/statusCarga', 'App\Http\Controllers\statusController@updateStatusCarga');
 Route::get('/cargasActivas', 'App\Http\Controllers\statusController@indexActive');
 Route::get('/cargasActivasTransport/{transport}', 'App\Http\Controllers\statusController@indexTransportActive'); 

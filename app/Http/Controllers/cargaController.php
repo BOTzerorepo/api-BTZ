@@ -270,6 +270,43 @@ class cargaController extends Controller
     }
     public function show($id, $user)
     {
+
+        $user = User::where('username', '=', $user)->first();
+
+        if ($user->permiso == 'Traffic' || $user->permiso == 'Master') {
+
+            $cargaPorId = Carga::whereNull('carga.deleted_at')
+                ->join('cntr', 'cntr.booking', '=', 'carga.booking')
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+                ->leftjoin('trucks', 'trucks.domain', '=', 'asign.truck')
+                ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport', 'asign.truck', 'asign.truck_semi', 'asign.file_instruction', 'trucks.alta_aker')
+                ->where('carga.empresa', '=', $user->empresa)
+                ->where('carga.id', '=', $id)
+                ->whereNull('cntr.deleted_at')
+                ->whereNull('asign.deleted_at')
+                ->orderBy('carga.load_date', 'DESC')->get();
+
+            return $cargaPorId;
+        } else {
+
+            $cargaPorId = Carga::whereNull('carga.deleted_at')
+                ->join('cntr', 'cntr.booking', '=', 'carga.booking')
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+                ->leftjoin('trucks', 'trucks.domain', '=', 'asign.truck')
+                ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport', 'asign.truck', 'asign.truck_semi', 'asign.file_instruction', 'trucks.alta_aker')
+                ->where('carga.empresa', '=', $user->empresa)
+                ->where('carga.user', '=', $user->username)
+                ->where('carga.id', '=', $id)
+                ->whereNull('cntr.deleted_at')
+                ->whereNull('asign.deleted_at')
+                ->orderBy('carga.load_date', 'DESC')->get();
+
+            return $cargaPorId;
+        }
+    }
+
+    public function showEdit($id, $user)
+    {
         try {
             $user = User::where('username', '=', $user)->first();
 
@@ -280,37 +317,25 @@ class cargaController extends Controller
                 ], 404);
             }
 
-            if ($user->permiso == 'Traffic') {
-                $cargaPorId = Carga::whereNull('carga.deleted_at')
-                    ->join('cntr', 'cntr.booking', '=', 'carga.booking')
-                    ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
-                    ->leftjoin('trucks', 'trucks.domain', '=', 'asign.truck')
-                    ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport', 'asign.truck', 'asign.truck_semi', 'asign.file_instruction', 'trucks.alta_aker')
-                    ->where('carga.empresa', '=', $user->empresa)
-                    ->where('carga.id', '=', $id)
-                    ->whereNull('cntr.deleted_at')
-                    ->whereNull('asign.deleted_at')
-                    ->orderBy('carga.load_date', 'DESC')
-                    ->get(); 
-            } elseif ($user->permiso == 'Master') {
+            if ($user->permiso == 'Master' || $user->permiso == 'Customer') {
                 $cargaPorId = Carga::whereNull('carga.deleted_at')
                     ->where('carga.empresa', '=', $user->empresa)
                     ->where('carga.id', '=', $id)
                     ->first(); // Devuelve un objeto o null
-            
+
                 if ($cargaPorId) {
                     $booking = $cargaPorId->booking;
                     $cntrData = DB::table('cntr')->where('booking', $booking)->first();
-                    $qviajes = DB::table('cntr')->where('booking', $booking)->count(); 
-            
+                    $qviajes = DB::table('cntr')->where('booking', $booking)->count();
+
                     if ($cntrData) {
                         $cargaPorId->cntr_type = $cntrData->cntr_type;
                         $cargaPorId->retiro_place = $cntrData->retiro_place;
-                        $cargaPorId->qviajes = $qviajes; 
+                        $cargaPorId->qviajes = $qviajes;
                     } else {
                         $cargaPorId->cntr_type = null;
                         $cargaPorId->retiro_place = null;
-                        $cargaPorId->qviajes = 0; 
+                        $cargaPorId->qviajes = 0;
                     }
                 }
 
@@ -325,33 +350,7 @@ class cargaController extends Controller
                         'message' => 'Carga no encontrada'
                     ], 404);
                 }
-            } else {
-                $cargaPorId = Carga::whereNull('carga.deleted_at')
-                    ->join('cntr', 'cntr.booking', '=', 'carga.booking')
-                    ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
-                    ->leftjoin('trucks', 'trucks.domain', '=', 'asign.truck')
-                    ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport', 'asign.truck', 'asign.truck_semi', 'asign.file_instruction', 'trucks.alta_aker')
-                    ->where('carga.empresa', '=', $user->empresa)
-                    ->where('carga.user', '=', $user->username)
-                    ->where('carga.id', '=', $id)
-                    ->whereNull('cntr.deleted_at')
-                    ->whereNull('asign.deleted_at')
-                    ->orderBy('carga.load_date', 'DESC')
-                    ->get(); // Devuelve una colección
             }
-
-            // Verificar si se encontró la carga
-            if (($user->permiso == 'Master' && !$cargaPorId) || ($user->permiso != 'Master' && $cargaPorId->isEmpty())) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Carga no encontrada'
-                ], 404);
-            }
-
-            return response()->json([
-                'data' => $cargaPorId,
-                'success' => true
-            ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error interno del servidor',
@@ -1018,5 +1017,25 @@ class cargaController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function getStatusById($id)
+    {
+        $results = DB::table('carga')
+            ->join('status_type', 'carga.status', '=', 'status_type.STATUS')
+            ->select(
+                'status_type.id',
+                'carga.custom_place',
+                'carga.load_place',
+                'carga.unload_place',
+                'carga.booking'
+            )
+            ->where('carga.id', $id)
+            ->first();
+
+        return response()->json([
+            'success' => true,
+            'data' => $results
+        ]);
     }
 }

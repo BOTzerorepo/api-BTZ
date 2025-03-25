@@ -30,9 +30,19 @@ class TransportController extends Controller
      */
     public function index()
     {
-        $transportes = Transport::whereNull('deleted_at')->get();
-
-        return $transportes;
+        try {
+            $transportes = Transport::whereNull('deleted_at')->get();
+            return response()->json([
+                'data' => $transportes,
+                'success' => true
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
     public function indexTransporteCustomer($id_customer)
     {
