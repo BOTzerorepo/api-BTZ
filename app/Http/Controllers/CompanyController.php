@@ -15,8 +15,19 @@ class CompanyController extends Controller
      */
     public function index()
     {
-        $companies = DB::table('companies')->get();       
-        return $companies;
+        try {
+            $companies = Company::all();
+            return response()->json([
+                'data' => $companies,
+                'success' => true
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

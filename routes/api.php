@@ -66,7 +66,6 @@ Route::put('/updatToken', 'App\Http\Controllers\FcmTokenController@updateToken')
 Route::get('/notifyUsers', 'App\Http\Controllers\FcmTokenController@notifyUsers');
 Route::get('/takeUser', 'App\Http\Controllers\FcmTokenController@takeUser');
 
-Route::get('/users/without-role', 'App\Http\Controllers\UserController@usersWithoutRole');
 
 
 // Rutas para notificaciones
@@ -90,6 +89,7 @@ Route::get('/points_of_interest','App\Http\Controllers\InterestPointController@i
 Route::post('/points_of_interest','App\Http\Controllers\InterestPointController@store');
 Route::put('/points_of_interest/{id}','App\Http\Controllers\InterestPointController@update');
 Route::delete('/points_of_interest/{id}','App\Http\Controllers\InterestPointController@destroy');
+
 //CARGA--PUNTO INTERES
 Route::post('/points_of_interest_carga/{id}','App\Http\Controllers\InterestPointController@agregarPuntoInteresCarga');
 Route::get('/points_of_interest_cntr/{id}','App\Http\Controllers\InterestPointController@puntoInteresCntr');
@@ -269,9 +269,10 @@ o8o        o888o o88o     o8888o o8o        `8  Y8P o88o     o8888o  `Y8bood8P' 
 Route::delete('/carga/{id}', 'App\Http\Controllers\cargaController@destroy')->name('cargas.destroy');
 
 // USER
-
 Route::get('/user/{user}', 'App\Http\Controllers\UserController@show');
-
+Route::get('/users/without-role', 'App\Http\Controllers\UserController@usersWithoutRole');
+Route::get('/users', 'App\Http\Controllers\UserController@index');
+Route::get('/usersNullPermiso', 'App\Http\Controllers\UserController@indexNullPermiso');
 // CNTR
 
 Route::resource('/cntr',cntrController::class);

@@ -15,8 +15,38 @@ class UserController extends Controller
      */
     public function index()
     {
-        //
+        try {
+            $users = User::all();
+            return response()->json([
+                'data' => $users,
+                'success' => true
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
+
+    public function indexNullPermiso()
+    {
+        try {
+            $users = User::whereNull('permiso')->get();
+            return response()->json([
+                'data' => $users,
+                'success' => true
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function usersWithoutRole()
     {
         try {
