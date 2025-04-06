@@ -12,7 +12,7 @@ class AduanasController extends Controller
     public function index()
     {
         try {
-            $aduanas = Aduana::all();
+            $aduanas = Aduana::orderBy('description', 'ASC')->get();
             return response()->json([
                 'data' => $aduanas,
                 'success' => true

@@ -16,8 +16,7 @@ class CustomerCneeController extends Controller
     public function index()
     {
         try {
-            $customerCnees = CustomerCnee::all();
-    
+            $customerCnees = CustomerCnee::orderBy('razon_social')->get();
             return response()->json([
                 'success' => true,
                 'message' => 'Customer Cnne obtenidos correctamente.',
@@ -35,7 +34,7 @@ class CustomerCneeController extends Controller
     public function indexCompany($company)
     {
         try {
-            $customerCnees = CustomerCnee::where('company', $company)->get();
+            $customerCnees = CustomerCnee::where('company', $company)->orderBy('razon_social')->get();
             return response()->json([
                 'data' => $customerCnees,
                 'success' => true

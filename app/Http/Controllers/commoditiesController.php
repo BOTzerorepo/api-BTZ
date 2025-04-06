@@ -16,7 +16,7 @@ class commoditiesController extends Controller
     public function index()
     {
         try {
-            $commodities = commodity::all();
+            $commodities = commodity::orderBy('commodity', 'ASC')->get();
             return response()->json([
                 'data' => $commodities,
                 'success' => true

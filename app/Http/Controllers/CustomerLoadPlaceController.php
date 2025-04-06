@@ -922,7 +922,7 @@ class CustomerLoadPlaceController extends Controller
     public function index()
     {
         try {
-            $customerLoadPlaces = CustomerLoadPlace::all();
+            $customerLoadPlaces = CustomerLoadPlace::orderBy('description', 'ASC')->get();
             return response()->json([
                 'data' => $customerLoadPlaces,
                 'success' => true

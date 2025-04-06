@@ -17,7 +17,7 @@ class CustomerController extends Controller
     {
         try {
             
-            $customers = customer::all();
+            $customers = Customer::orderBy('registered_name', 'ASC')->get();
             return response()->json([
                 'data' => $customers,
                 'success' => true

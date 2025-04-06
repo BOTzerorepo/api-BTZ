@@ -16,8 +16,7 @@ class OceanLinesController extends Controller
     public function index()
     {
         try {
-            $oceanLines = OceanLines::all();
-    
+            $oceanLines = OceanLines::orderBy('razon_social', 'ASC')->get();
             return response()->json([
                 'success' => true,
                 'message' => 'Oceans Lines obtenidos correctamente.',

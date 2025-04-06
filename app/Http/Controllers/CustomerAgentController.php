@@ -16,7 +16,7 @@ class CustomerAgentController extends Controller
     public function index()
     {
         try {
-            $customerAgents = CustomerAgent::all();
+            $customerAgents = CustomerAgent::orderBy('razon_social', 'ASC')->get();
             return response()->json([
                 'data' => $customerAgents,
                 'success' => true

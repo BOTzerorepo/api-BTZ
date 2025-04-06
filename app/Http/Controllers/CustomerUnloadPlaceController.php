@@ -16,8 +16,7 @@ class CustomerUnloadPlaceController extends Controller
     public function index()
     {
         try {
-            $customerUnloadPlaces = CustomerUnloadPlace::all();
-    
+            $customerUnloadPlaces = CustomerUnloadPlace::orderBy('description', 'ASC')->get();
             return response()->json([
                 'success' => true,
                 'message' => 'Lugares de descarga obtenidos correctamente.',

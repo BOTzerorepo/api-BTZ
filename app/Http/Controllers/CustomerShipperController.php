@@ -22,7 +22,9 @@ class CustomerShipperController extends Controller
     public function indexCompany($company)
     {
         try {
-            $customersShipper = CustomerShipper::where('company', $company)->get();
+            $customersShipper = CustomerShipper::where('company', $company)
+                ->orderBy('razon_social', 'ASC')
+                ->get();
             return response()->json([
                 'data' => $customersShipper,
                 'success' => true

@@ -19,7 +19,7 @@ class CntrTypeController extends Controller
     public function index()
     {
         try {
-            $cntrTypes = CntrType::all();
+            $cntrTypes = CntrType::orderBy('title', 'ASC')->get();
             return response()->json([
                 'data' => $cntrTypes,
                 'success' => true

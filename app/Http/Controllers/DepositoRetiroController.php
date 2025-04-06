@@ -16,7 +16,7 @@ class DepositoRetiroController extends Controller
     public function index()
     {
         try {
-            $depositoRetiros = DepositoRetiro::all();
+            $depositoRetiros = DepositoRetiro::orderBy('title', 'ASC')->get();
             return response()->json([
                 'data' => $depositoRetiros,
                 'success' => true
