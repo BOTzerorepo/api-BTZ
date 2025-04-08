@@ -11,7 +11,9 @@ use App\Models\truck;
 use App\Models\Carga;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
+use App\Http\Controllers\crearpdfController;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 
 class cntrController extends Controller
 {
@@ -118,30 +120,65 @@ class cntrController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
+
+    private function deleteDirectory($dir)
+    {
+        if (File::exists($dir)) {
+            File::deleteDirectory($dir);
+        }
+    }
+
     public function update(Request $request, $id)
     {
-        $cntr = cntr::find($id);
+        $this->validate($request, [
+            'cntr_number' => 'required|string|max:255',
+            'cntr_seal' => 'nullable|string|max:255',
+            'confirmacion' => 'required|boolean',
+        ]);
 
-        if ($cntr) {
+        DB::beginTransaction();
+
+        try {
+            $cntr = cntr::findOrFail($id);
             $cntrOld = $cntr->cntr_number;
-        }
 
-        $cntr->cntr_number = $request['cntr_number'];
-        $cntr->cntr_seal = $request['cntr_seal'];
-        $cntr->confirmacion = $request['confirmacion'];
-        $cntr->save();
+            $asign = DB::table('asign')->where('cntr_number', $cntr->cntr_number)->first();
+            $idCarga = DB::table('carga')->where('booking', $cntr->booking)->value('id');
 
-        $asign = asign::where('cntr_number', $cntrOld)->update(['cntr_number' => $request['cntr_number']]);
-        $status = statu::where('cntr_number', $cntrOld)->update(['cntr_number' => $cntr->cntr_number]);
-        $idCarga = DB::table('carga')->where('booking', '=', $cntr->booking)->select('carga.id')->get();
+            $cntr->cntr_number = $request['cntr_number'];
+            $cntr->cntr_seal = $request['cntr_seal'];
+            $cntr->confirmacion = $request['confirmacion'];
+            $cntr->save();
 
-        if ($asign === 1) {
+            asign::where('cntr_number', $cntrOld)->update(['cntr_number' => $request['cntr_number']]);
+            statu::where('cntr_number', $cntrOld)->update(['cntr_number' => $request['cntr_number']]);
+
+            //Eliminar el archivo intructivo y generar uno nuevo 
+            if ($asign && $asign->file_instruction) {
+                $dirPath = base_path('public/instructivos/' . $asign->booking . '/' . $cntrOld);
+
+                $this->deleteDirectory($dirPath);
+
+                DB::table('asign')->where('cntr_number', $request['cntr_number'])->update(['file_instruction' => null]);
+                // Llamar a la función carga() del controlador crearpdfController
+                DB::commit();
+                try {
+                    $crearpdfController = app(crearpdfController::class);
+                    $crearpdfController->carga($request['cntr_number']);
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    Log::error('Error al ejecutar el método carga en crearpdfController: ' . $e->getMessage());
+                    return response()->json(['error' => $e->getMessage()], 500);
+                }
+            }
+            DB::commit();
             return response()->json([
-                'detail' => $cntr, // Aquí accedemos directamente al objeto $cntr
-                'idCarga' => $idCarga[0]->id // Aquí accedemos al primer elemento del array $idCarga
+                'detail' => $cntr,
+                'idCarga' => $idCarga
             ], 200);
-        } else {
-            return response()->json(['errores' => 'Algo salió mal, por favor vuelta a intentar la acción. Revise si el cntr no está asignado a otra unidad.', 'id' => $idCarga[0]->id], 500);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 
