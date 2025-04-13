@@ -288,4 +288,86 @@ class cntrController extends Controller
             ], 500);
         }
     }
+
+    public function statusResumen($user = null)
+    {
+        try {
+            $estados = [
+                'ASIGNADA',
+                'NO ASIGNADA',
+                'YENDO A CARGAR',
+                'CARGANDO',
+                'SALIENDO CARGAR',
+                'YENDO A DESCARGAR',
+                'EN ADUANA',
+                'STACKING'
+            ];
+
+            $counts = [];
+            $detalles = [];
+
+            foreach ($estados as $estado) {
+                if ($estado === 'NO ASIGNADA') {
+                    $counts[$estado] = cntr::withoutTrashed()
+                        ->when($user, fn($q) => $q->where('user_cntr', $user))
+                        ->whereIn('main_status', ['NO ASIGNADA', 'NO ASIGNED'])
+                        ->count();
+
+                    $detalles[$estado] = cntr::with(['carga', 'asign'])
+                        ->withoutTrashed()
+                        ->when($user, fn($q) => $q->where('user_cntr', $user))
+                        ->whereIn('main_status', ['NO ASIGNADA', 'NO ASIGNED'])
+                        ->get()
+                        ->map(function ($item) {
+                            $item->main_status = 'NO ASIGNADA'; // Unifica visualmente
+                            return $item;
+                        });
+                } else {
+                    $counts[$estado] = cntr::withoutTrashed()
+                        ->when($user, fn($q) => $q->where('user_cntr', $user))
+                        ->where('main_status', $estado)
+                        ->count();
+
+                    $detalles[$estado] = cntr::with(['carga', 'asign'])
+                        ->withoutTrashed()
+                        ->when($user, fn($q) => $q->where('user_cntr', $user))
+                        ->where('main_status', $estado)
+                        ->get();
+                }
+            }
+
+            // ACTIVOS (todos excepto TERMINADA)
+            $counts['ACTIVOS'] = cntr::withoutTrashed()
+                ->when($user, fn($q) => $q->where('user_cntr', $user))
+                ->where('main_status', '!=', 'TERMINADA')
+                ->count();
+
+            $detalles['ACTIVOS'] = cntr::with('carga')
+                ->withoutTrashed()
+                ->when($user, fn($q) => $q->where('user_cntr', $user))
+                ->where('main_status', '!=', 'TERMINADA')
+                ->select('cntr_number', 'cntr_type', 'main_status', 'booking')
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'cntr_number' => $item->cntr_number,
+                        'cntr_type' => $item->cntr_type,
+                        'shipper' => $item->carga->shipper ?? null,
+                        'main_status' => $item->main_status === 'NO ASIGNED' ? 'NO ASIGNADA' : $item->main_status,
+                    ];
+                });
+
+            return response()->json([
+                'counts' => $counts,
+                'detalles' => $detalles,
+                'success' => true
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

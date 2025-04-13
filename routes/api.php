@@ -11,6 +11,7 @@ use App\Http\Controllers\cargaController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
+Route::get('/cntr/estado-resumen/{user?}', [cntrController::class, 'statusResumen']);
 
 
 Route::group(['middleware' => 'auth:api'], function () {
