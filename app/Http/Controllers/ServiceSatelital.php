@@ -700,6 +700,7 @@ class ServiceSatelital extends Controller
                 )
                 ->where('asign.truck', '=', $domain)
                 ->whereNotNull('trucks.domain') // Aseguramos que la unión principal se mantenga
+                ->orderBy('carga.created_at', 'desc') 
                 ->get();
 
 
