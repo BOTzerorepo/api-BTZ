@@ -718,7 +718,7 @@ class cargaController extends Controller
                 ->select('carga.*',  'cntr.*', 'asign.driver', 'asign.transport')
                 ->whereNull('cntr.deleted_at')
                 ->whereNull('asign.deleted_at')
-                ->where('carga.status', '!=', 'TERMINADA')
+                ->where('cntr.main_status', '!=', 'TERMINADA')
                 ->where('carga.empresa', '=', $user->empresa)
                 ->orderBy('carga.load_date', 'ASC')
                 ->get();
@@ -730,7 +730,7 @@ class cargaController extends Controller
                 ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
                 ->whereNull('cntr.deleted_at')
                 ->whereNull('asign.deleted_at')
-                ->where('carga.status', '!=', 'TERMINADA')
+                ->where('cntr.main_status', '!=', 'TERMINADA')
                 ->where('carga.empresa', '=', $user->empresa)
                 ->orderBy('carga.load_date', 'ASC')
                 ->get();
@@ -741,7 +741,7 @@ class cargaController extends Controller
                 ->select('carga.*',  'cntr.*', 'asign.driver', 'asign.transport')
                 ->whereNull('cntr.deleted_at')
                 ->whereNull('asign.deleted_at')
-                ->where('carga.status', '!=', 'TERMINADA')
+                ->where('cntr.main_status', '!=', 'TERMINADA')
                 ->where('carga.empresa', '=', $user->empresa)
                 ->where('carga.user', '=', $user->username)
                 ->orderBy('carga.load_date', 'ASC')
