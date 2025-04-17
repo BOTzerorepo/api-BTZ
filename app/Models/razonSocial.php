@@ -9,8 +9,15 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class razonSocial extends Model
 {
     use HasFactory;
-    use SoftDeletes;
+    protected $table = 'razon_social';
     protected $fillable = [
-        'razon_social','cuit','direccion','provincia','pais','paut','permiso','vto_permiso'];
-
+        'razon_social',
+        'cuit',
+        'direccion',
+        'provincia',
+        'pais',
+        'paut',
+        'permiso',
+        'vto_permiso'
+    ];
 }

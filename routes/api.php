@@ -7,7 +7,8 @@ use App\Http\Controllers\FleteroController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\cargaController;
-
+use App\Http\Controllers\AsignController;
+use App\Http\Controllers\instructivosController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
@@ -67,7 +68,7 @@ Route::put('/updatToken', 'App\Http\Controllers\FcmTokenController@updateToken')
 Route::get('/notifyUsers', 'App\Http\Controllers\FcmTokenController@notifyUsers');
 Route::get('/takeUser', 'App\Http\Controllers\FcmTokenController@takeUser');
 
-
+Route::get('/imgAsignRazonSocial/{id}', [AsignController::class, 'imgAsignRazonSocial']);
 
 // Rutas para notificaciones
 Route::prefix('notifications')->group(function () {
@@ -133,7 +134,7 @@ Route::get('/historialStatus/{cntr}','App\Http\Controllers\statusController@show
 Route::get('/instructivos/{userTraffic}','App\Http\Controllers\instructivosController@index');
 Route::get('/instructivosdelete/{userTraffic}/{id}','App\Http\Controllers\instructivosController@destroy');
 Route::get('/instructivosTransport/{transport}', 'App\Http\Controllers\instructivosController@indexTransport'); 
-
+Route::put('/saveIntruction/{cntrNumber}', [instructivosController::class, 'saveIntruction']);
 
 // ASIGNACIONES
 Route::get('/truckAsign/{id}', 'App\Http\Controllers\TruckController@trailerAsign'); // Show for Transport no existe.
@@ -277,8 +278,8 @@ Route::get('/usersNullPermiso', 'App\Http\Controllers\UserController@indexNullPe
 // CNTR
 
 Route::resource('/cntr',cntrController::class);
-Route::get('/datosConfirmar/{cntrId}', 'App\Http\Controllers\cntrController@datosConfirmar');
-
+Route::get('/datosConfirmar/{cntrId}', [cntrController::class, 'datosConfirmar']);
+Route::get('/datosCntrNumber/{cntrNumber}', [cntrController::class, 'datosCntrNumber']);
 // FLETERO CONTROLLER 
 
 Route::resource('fleteros', FleteroController::class);

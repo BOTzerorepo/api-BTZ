@@ -289,6 +289,52 @@ class cntrController extends Controller
         }
     }
 
+    public function datosCntrNumber($cntrNumber)
+    {
+        try {
+            // Obtener el CNTR
+            $cntr = cntr::where('cntr_number', $cntrNumber)
+            ->whereNull('deleted_at')
+            ->firstOrFail();
+
+
+            // Obtener el asign asociado al CNTR
+            $asign = asign::whereNull('deleted_at')
+                ->where('cntr_number', $cntr->cntr_number)
+                ->firstOrFail();
+
+            // Obtener el transporte asociado a la asignación
+            $transport = Transport::whereNull('deleted_at')
+                ->where('razon_social', $asign->transport)
+                ->firstOrFail();
+
+            $truck = truck::where('domain', $asign->truck)
+                ->first();
+            // Obtener la carga asociada al CNTR
+
+            $carga = Carga::whereNull('deleted_at')
+                ->where('booking', $cntr->booking)
+                ->firstOrFail();
+
+            // Preparar la respuesta en formato JSON
+            $response = [
+                'cntr' => $cntr,
+                'asign' => $asign,
+                'transport' => $transport,
+                'carga' => $carga,
+                'truck' => $truck
+            ];
+
+            // Devolver la respuesta en formato JSON
+            return response()->json($response);
+        } catch (\Exception $e) {
+            // Manejar cualquier error que ocurra
+            return response()->json([
+                'error' => 'Error al obtener los datos: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
     public function statusResumen($user = null)
     {
         try {
