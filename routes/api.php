@@ -9,6 +9,8 @@ use App\Http\Controllers\RolePermissionController;
 use App\Http\Controllers\cargaController;
 use App\Http\Controllers\AsignController;
 use App\Http\Controllers\instructivosController;
+use App\Http\Controllers\ProfitController;
+
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
@@ -275,11 +277,15 @@ Route::get('/user/{user}', 'App\Http\Controllers\UserController@show');
 Route::get('/users/without-role', 'App\Http\Controllers\UserController@usersWithoutRole');
 Route::get('/users', 'App\Http\Controllers\UserController@index');
 Route::get('/usersNullPermiso', 'App\Http\Controllers\UserController@indexNullPermiso');
-// CNTR
 
+//PROFIT
+Route::get('/profitSumaCntr/{cntrNumber}', [ProfitController::class, 'profitSumaCntr']);
+Route::get('/profitCntr/{cntrNumber}', [ProfitController::class, 'profitCntr']);
+// CNTR
 Route::resource('/cntr',cntrController::class);
 Route::get('/datosConfirmar/{cntrId}', [cntrController::class, 'datosConfirmar']);
 Route::get('/datosCntrNumber/{cntrNumber}', [cntrController::class, 'datosCntrNumber']);
+
 // FLETERO CONTROLLER 
 
 Route::resource('fleteros', FleteroController::class);

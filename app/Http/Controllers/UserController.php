@@ -92,18 +92,23 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        $user = User::where('username', $id)->first();
-
-        $user = [
-            'id' => $user->id,
-            'username' => $user->username,
-            'email' => $user->email,
-            'phone' => $user->celular,
-            'company' => $user->empresa,
-            'customer_id' => $user->customer_id,
-            'permiso' => $user->permiso
-        ];
-        return $user;
+        try {
+            $user = DB::table('users')
+                ->join('empresas', 'empresas.razon_social', '=', 'users.Empresa')
+                ->where('users.username', $id)
+                ->select('users.*', 'empresas.*')
+                ->first();
+            return response()->json([
+                'success' => true,
+                'user' => $user,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió un error al calcular el profit.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
