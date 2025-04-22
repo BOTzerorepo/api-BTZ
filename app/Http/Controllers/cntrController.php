@@ -188,10 +188,34 @@ class cntrController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($cntrId)
     {
-        //
+        try {
+            $cntr = cntr::findOrFail($cntrId);
+            $asign = asign::where('cntr_number', $cntr->cntr_number)->first();
+
+            $carga = Carga::where('booking', $cntr->booking)->first();
+            // Eliminar el CNTR
+            $cntr->delete();
+            $asign->delete();
+
+            return response()->json([
+                'message' => 'CNTR eliminado con éxito.',
+                'id' => $carga->id,
+            ], 200);
+        } catch (\Exception $e) {
+            $cntr = cntr::findOrFail($cntrId);
+            $carga = Carga::where('booking', $cntr->booking)->first();
+            return response()->json([
+                'message' => 'Error al eliminar el CNTR.',
+                'id' => $carga->id,
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
+           
+
+
     public function issetCntr($cntr)
     {
         $cntrCount = cntr::where('cntr_number', $cntr)->get();

@@ -71,6 +71,8 @@ Route::get('/notifyUsers', 'App\Http\Controllers\FcmTokenController@notifyUsers'
 Route::get('/takeUser', 'App\Http\Controllers\FcmTokenController@takeUser');
 
 Route::get('/imgAsignRazonSocial/{id}', [AsignController::class, 'imgAsignRazonSocial']);
+Route::put('/editAsignacion/{cntrNumber}', [AsignController::class, 'editAsignacion']);
+Route::get('/asignacion/{cntrNumber}', [AsignController::class, 'show']);
 
 // Rutas para notificaciones
 Route::prefix('notifications')->group(function () {
@@ -281,10 +283,13 @@ Route::get('/usersNullPermiso', 'App\Http\Controllers\UserController@indexNullPe
 //PROFIT
 Route::get('/profitSumaCntr/{cntrNumber}', [ProfitController::class, 'profitSumaCntr']);
 Route::get('/profitCntr/{cntrNumber}', [ProfitController::class, 'profitCntr']);
+Route::post('/agregarInOn/{cntrNumber}', [ProfitController::class, 'agregarInOn']);
+
 // CNTR
 Route::resource('/cntr',cntrController::class);
 Route::get('/datosConfirmar/{cntrId}', [cntrController::class, 'datosConfirmar']);
 Route::get('/datosCntrNumber/{cntrNumber}', [cntrController::class, 'datosCntrNumber']);
+Route::delete('/cntr/{cntrId}', [cntrController::class, 'destroy']);
 
 // FLETERO CONTROLLER 
 

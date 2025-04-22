@@ -179,11 +179,7 @@ class statusController extends Controller
         $booking = $request['booking'];
         $carga = Carga::where('booking', $booking)->first();
         $idCarga = $carga->id;
-
-
-
         DB::beginTransaction();
-
         try {
 
             //------------GENERAL--------------------
@@ -195,13 +191,11 @@ class statusController extends Controller
                 'description' => 'required',
             ]);
 
-
             //Datos que recibe del front
             $description = $request['description'];
             $statusGral = $request['statusGral'];
             $user = $request['user'];
             $cntr = $request['cntr'];
-
             $empresa = $request['empresa'];
             //$statusArchivo = $request->file('statusArchivo');
 
@@ -235,11 +229,8 @@ class statusController extends Controller
             }
             $status->save();
 
-
-
             //------------GENERAL--------------------
             if ($statusGral == "TERMINADA") {
-
 
                 // ACTUALIZA STATUS
                 $tipo = 'terminada';
@@ -421,10 +412,8 @@ class statusController extends Controller
                 // Crear una instancia del controlador
                 $emailController = new emailController();
 
-
                 // Llamar directamente a la función mailStatus
                 $response = $emailController->cambiaStatus($cntr, $empresa, $booking, $user, $tipo, $statusArchivoPath);
-
 
                 if ($response == 'ok') {
 
@@ -523,12 +512,40 @@ class statusController extends Controller
      */
     public function showLast($id)
     {
-        return statu::find($id);
+        try {
+            $statu = statu::find($id);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Tipos de estados obtenidos correctamente.',
+                'data' => $statu
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener los tipos de estados.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
+
     public function showHistory($cntr)
     {
+        try {
+            $status = DB::table('status')->where('cntr_number', '=', $cntr)->orderBy('created_at', 'DESC')->get();
 
-        return DB::table('status')->where('cntr_number', '=', $cntr)->orderBy('created_at', 'DESC')->get();
+            return response()->json([
+                'success' => true,
+                'message' => 'Tipos de estados obtenidos correctamente.',
+                'data' => $status
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener los tipos de estados.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
