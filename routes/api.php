@@ -121,6 +121,7 @@ Route::get('/cargaDomain/{domain}', 'App\Http\Controllers\cargaController@showCa
 
 Route::get('/loadFinishedTransport/{transport}', 'App\Http\Controllers\cargaController@loadFinishedTransport');
 Route::get('/cargaShowStatus/{id}', 'App\Http\Controllers\cargaController@getStatusById');
+Route::get('/cargaShowStatusByCntr/{idCntr}', 'App\Http\Controllers\cargaController@getStatusByIdCntr');
 Route::get('/showEdit/{id}/{user}','App\Http\Controllers\cargaController@showEdit');
 
 // STATUS
@@ -284,6 +285,8 @@ Route::get('/usersNullPermiso', 'App\Http\Controllers\UserController@indexNullPe
 Route::get('/profitSumaCntr/{cntrNumber}', [ProfitController::class, 'profitSumaCntr']);
 Route::get('/profitCntr/{cntrNumber}', [ProfitController::class, 'profitCntr']);
 Route::post('/agregarInOn/{cntrNumber}', [ProfitController::class, 'agregarInOn']);
+Route::put('/actualizarInOn/{id}', [ProfitController::class, 'actualizarInOn']);
+Route::delete('/profit/{id}', [ProfitController::class, 'destroy']);
 
 // CNTR
 Route::resource('/cntr',cntrController::class);

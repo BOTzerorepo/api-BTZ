@@ -45,51 +45,57 @@ class cntrController extends Controller
      */
     public function store(Request $request)
     {
-        $booking = $request['booking'];
-        $qb = DB::table('cntr')->where('booking', '=', $booking)->get();
-        $numero = $qb->count() + 1;
+        try {
+            $booking = $request->input('booking');
+            $cntr_seal = $request->input('cntr_seal');
+            // Si viene cntr_type lo uso, si no lo dejo como null
+            $cntr_type = $request->has('cntr_type') ? $request['cntr_type'] : null;
+            // Igual con retiro_place
+            $retiro_place = $request->has('retiro_place') ? $request['retiro_place'] : null;
+            $confirmacion = $request->input('confirmacion') ?? 0;
+            $user_cntr = $request->input('user_cntr');
+            $company = $request->input('company');
 
-        if ($request['cntr_number']) {
+            // Buscar contenedores con ese booking para generar número nuevo si hace falta
+            $existingCntrs = DB::table('cntr')->where('booking', $booking)->get();
+            $numero = $existingCntrs->count() + 1;
 
-            $cntr_number = $request['cntr_number'];
-        } else {
+            $cntr_number = $request->input('cntr_number') ?: $booking . $numero;
 
-            $cntr_number = $booking . $numero;
-        }
+            // Crear el contenedor
+            $cntr = new cntr();
+            $cntr->booking = $booking;
+            $cntr->cntr_number = $cntr_number;
+            $cntr->cntr_seal = $cntr_seal;
+            $cntr->cntr_type = $cntr_type;
+            $cntr->retiro_place = $retiro_place;
+            $cntr->confirmacion = $confirmacion;
+            $cntr->user_cntr = $user_cntr;
+            $cntr->company = $company;
+            $cntr->save();
 
-        $cntr = new cntr();
-        $cntr->booking = $booking;
-        $cntr->cntr_number = $cntr_number;
-        $cntr->cntr_seal = $request['cntr_seal'];
-        $cntr->cntr_type = $request['cntr_type'];
-        $cntr->retiro_place = $qb[0]->retiro_place;
-        $cntr->confirmacion = $request['confirmacion'];
-        $cntr->user_cntr = $request['user_cntr'];
-        $cntr->company = $request['company'];
-        $cntr->save();
-
-        if ($cntr) {
-
+            // Insertar en asign
             $asign = new asign();
             $asign->cntr_number = $cntr_number;
             $asign->booking = $booking;
             $asign->save();
 
-            $idCarga = DB::table('carga')->where('booking', '=', $cntr->booking)->select('carga.id')->get();
+            // Obtener ID de carga
+            $idCarga = DB::table('carga')->where('booking', $booking)->value('id');
 
-            if ($asign->id) {
-                return response()->json([
-                    'detail' => $cntr, // Aquí accedemos directamente al objeto $cntr
-                    'idCarga' => $idCarga[0]->id // Aquí accedemos al primer elemento del array $idCarga
-                ], 200);
-            } else {
-                return response()->json(['errores' => 'Algo salió mal, hubo un errro en la asignación', 'id' => $idCarga[0]->id], 500);
-            }
-        } else {
-
-            return response()->json(['errores' => 'Algo salió mal: el contenedor ya existe o faltó algun dato.', 'cntr_number' => $cntr_number], 500);
+            return response()->json([
+                'success' => true,
+                'detail' => $cntr,
+                'idCarga' => $idCarga
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'errores' => 'Algo salió mal: ' . $e->getMessage()
+            ], 500);
         }
     }
+
 
     /**
      * Display the specified resource.
@@ -213,7 +219,7 @@ class cntrController extends Controller
             ], 500);
         }
     }
-           
+
 
 
     public function issetCntr($cntr)
@@ -318,8 +324,8 @@ class cntrController extends Controller
         try {
             // Obtener el CNTR
             $cntr = cntr::where('cntr_number', $cntrNumber)
-            ->whereNull('deleted_at')
-            ->firstOrFail();
+                ->whereNull('deleted_at')
+                ->firstOrFail();
 
 
             // Obtener el asign asociado al CNTR

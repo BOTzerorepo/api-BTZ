@@ -1038,4 +1038,27 @@ class cargaController extends Controller
             'data' => $results
         ]);
     }
+
+    public function getStatusByIdCntr($idCntr)
+    {
+        $results = DB::table('cntr')
+            ->join('status_type', 'cntr.main_status', '=', 'status_type.STATUS')
+            ->join('carga', 'cntr.booking', '=', 'carga.booking')
+            ->select(
+                'status_type.id',
+                'carga.custom_place',
+                'carga.load_place',
+                'carga.unload_place',
+                'cntr.main_status',
+                'cntr.status_cntr'
+            )
+            ->where('cntr.id_cntr', $idCntr)
+            ->first();
+
+
+        return response()->json([
+            'success' => true,
+            'data' => $results
+        ]);
+    }
 }
