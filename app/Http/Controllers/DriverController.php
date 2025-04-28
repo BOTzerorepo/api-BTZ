@@ -120,7 +120,7 @@ class DriverController extends Controller
         $id = $idTranport[0]->razon_social;
 
         /* Hay que recibir el id del Transporte */
-        $drivers = DB::table('drivers')->where('transporte', '=', $id)->get();
+        $drivers = DB::table('drivers')->whereNull('deleted_at')->where('transporte', '=', $id)->get();
         return $drivers;
     }
 

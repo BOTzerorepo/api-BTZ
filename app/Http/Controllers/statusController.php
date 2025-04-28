@@ -98,7 +98,9 @@ class statusController extends Controller
         ->leftJoin('asign', 'asign.cntr_number', '=', 'cntr.cntr_number')
         ->leftJoin('status', 'status.cntr_number', '=', 'cntr.cntr_number')
         ->leftJoin('trucks', 'trucks.domain', '=', 'asign.truck')
-        ->whereIn('asign.transport', $rzTransportes) // Filtrar por las razones sociales de los transportes
+        ->whereIn('asign.transport', $rzTransportes) 
+        ->whereNull('carga.deleted_at') 
+        ->where('cntr.main_status', '!=', 'TERMINADA')
         ->select(
             'cntr.id_cntr',
             'carga.ref_customer',
@@ -116,7 +118,6 @@ class statusController extends Controller
             'trucks.alta_aker',
             DB::raw('MAX(status.id) as latest_status_id') // Seleccionar el último status basado en el id
         )
-        ->where('cntr.main_status', '!=', 'TERMINADA')
         ->groupBy(
             'cntr.id_cntr',
             'carga.ref_customer',
@@ -179,7 +180,6 @@ class statusController extends Controller
                 'statusGral' => 'required',
                 'description' => 'required',
             ]);
-           
 
             //Datos que recibe del front
             $description = $request['description'];
@@ -219,12 +219,10 @@ class statusController extends Controller
 
             }else{
                 $statusArchivoPath = null;
-
             }
             $status->save();
 
-            
-
+        
             //------------GENERAL--------------------
             if ($statusGral == "TERMINADA") {
 
@@ -411,11 +409,11 @@ class statusController extends Controller
                 // ENVIAMOS MAIL
                 // Crear una instancia del controlador
                 $emailController = new emailController();
-
+                
                 
                 // Llamar directamente a la función mailStatus
                 $response = $emailController->cambiaStatus($cntr, $empresa, $booking, $user, $tipo, $statusArchivoPath);
-                
+
 
                 if ($response == 'ok') {
                 
