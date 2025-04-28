@@ -229,6 +229,7 @@ class statusController extends Controller
             }
             $status->save();
 
+
             //------------GENERAL--------------------
             if ($statusGral == "TERMINADA") {
 

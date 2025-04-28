@@ -315,7 +315,6 @@ class TransportController extends Controller
 
     public function transporteAsignado(Request $request, $cntrId)
     {
-
         DB::beginTransaction();
         try {
             // Validación de datos
@@ -337,13 +336,6 @@ class TransportController extends Controller
             $asign->user = $request->input('user');
             $asign->company = $request->input('company');
             $asign->save();
-
-            //Enviar mail
-            $sbx = DB::table('variables')->select('sandbox')->get();
-            $inboxEmail = env('INBOX_EMAIL');
-            $mailsTrafico = DB::table('particular_soft_configurations')->first();
-            $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
-            $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
 
             //DATOS PARA ENVIAR MAIL
             $date = Carbon::now('-03:00');
@@ -376,7 +368,20 @@ class TransportController extends Controller
                 ->join('users', 'transports.id', '=', 'users.transport_id')
                 ->where('asign.id', '=', $asign->id)
                 ->first();
+
+            //Enviar mail
+            $sbx = DB::table('variables')->select('sandbox')->get();
+            $inboxEmail = env('INBOX_EMAIL');
+            $mailsTrafico = DB::table('particular_soft_configurations')->first();
+            $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
+            $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
+            $carga = Carga::whereNull('deleted_at')->where('booking', '=', $asign->booking)->first();
+
             if ($sbx[0]->sandbox == 0) {
+                $customer = DB::table('users')
+                    ->where('username', '=', $carga->user)
+                    ->value('email');
+                $toEmails = array_merge([$customer], (array) $toEmails);
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new transporteAsignado($datos, $date));
                 // Enviar solo al correo del transporte
                 if ($transporteMail) {
@@ -389,9 +394,7 @@ class TransportController extends Controller
                     ->bcc($inboxEmail)->send(new transporteAsignado($datos, $date));
             }
 
-
             DB::commit();
-            $carga = Carga::whereNull('deleted_at')->where('booking', '=', $asign->booking)->first();
             return response()->json([
                 'message' => 'Transporte asignado correctamente al contenedor: ' .  $cntr->cntr_number,
                 'message_type' => 'success',
@@ -462,13 +465,6 @@ class TransportController extends Controller
             $asign->company = $request->input('empresa');
             $asign->save();
 
-            //Enviar mail
-            $sbx = DB::table('variables')->select('sandbox')->get();
-            $inboxEmail = env('INBOX_EMAIL');
-            $mailsTrafico = DB::table('particular_soft_configurations')->first();
-            $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
-            $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
-
             //DATOS PARA ENVIAR MAIL
             $date = Carbon::now('-03:00');
             $asignMail = DB::table('asign')
@@ -520,7 +516,19 @@ class TransportController extends Controller
                 'booking' => $asignMail->booking,
             ];
 
+            //Enviar mail
+            $sbx = DB::table('variables')->select('sandbox')->get();
+            $inboxEmail = env('INBOX_EMAIL');
+            $mailsTrafico = DB::table('particular_soft_configurations')->first();
+            $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
+            $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
+            $carga = Carga::whereNull('deleted_at')->where('booking', '=', $asign->booking)->first();
+
             if ($sbx[0]->sandbox == 0) {
+                $customer = DB::table('users')
+                    ->where('username', '=', $carga->user)
+                    ->value('email');
+                $toEmails = array_merge([$customer], (array) $toEmails);
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new asignarUnidadTransporte($datos, $date));
             } else {
                 Mail::to(['equipoDemo1@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo3@botzero.com.ar'])
@@ -529,7 +537,6 @@ class TransportController extends Controller
             }
 
             DB::commit();
-            $carga = Carga::whereNull('deleted_at')->where('booking', '=', $asign->booking)->first();
             return response()->json([
                 'message' => 'Unidad asignada correctamente al contenedor: ' .  $cntr->cntr_number,
                 'message_type' => 'success',
@@ -608,13 +615,6 @@ class TransportController extends Controller
             $asign->user = $request->input('user');
             $asign->company = $request->input('empresa');
             $asign->save();
-
-            //Enviar mail
-            $sbx = DB::table('variables')->select('sandbox')->get();
-            $inboxEmail = env('INBOX_EMAIL');
-            $mailsTrafico = DB::table('particular_soft_configurations')->first();
-            $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
-            $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
 
             //DATOS PARA ENVIAR MAIL
             $date = Carbon::now('-03:00');
@@ -702,9 +702,23 @@ class TransportController extends Controller
                 'cntr_type' => $asignMail->cntr_type,
                 'booking' => $asignMail->booking,
             ];
+            
+            //Enviar mail
+            $sbx = DB::table('variables')->select('sandbox')->get();
+            $inboxEmail = env('INBOX_EMAIL');
+            $mailsTrafico = DB::table('particular_soft_configurations')->first();
+            $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
+            $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
+            $carga = Carga::whereNull('deleted_at')->where('booking', '=', $asign->booking)->first();
 
             if ($sbx[0]->sandbox == 0) {
+                $customer = DB::table('users')
+                ->where('username', '=', $carga->user)
+                ->value('email');
+                $toEmails = array_merge([$customer], (array) $toEmails);
+
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaAsignada($datos, $date));
+                
                 $logapi = new logapi();
                 $logapi->user = $asignMail->user;
                 $logapi->detalle = 'AsignaUnidadCarga-User:' . $asignMail->user . '|Transporte:' . $asignMail->transport . '|Chofer:' . $asignMail->driver . '|Tractor:' . $asignMail->truck . '|Semi:' . $asignMail->truck_semi;
@@ -735,8 +749,6 @@ class TransportController extends Controller
                 $status->user_status = $asignMail->user;
                 $status->save();
             }
-
-            $carga = Carga::whereNull('deleted_at')->where('booking', '=', $asign->booking)->first();
 
             // ESTADO DEL DRIVE EN OCUPADO
             $driver = Driver::whereNull('deleted_at')->where('nombre', '=', $asign->driver)->first();

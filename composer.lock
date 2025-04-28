@@ -1488,22 +1488,22 @@
             ],
             "support": {
                 "issues": "https://github.com/googleapis/google-api-php-client-services/issues",
-                "source": "https://github.com/googleapis/google-api-php-client-services/tree/v0.396.0"
+                "source": "https://github.com/googleapis/google-api-php-client-services/tree/v0.390.0"
             },
-            "time": "2025-02-24T01:10:27+00:00"
+            "time": "2025-01-12T01:00:53+00:00"
         },
         {
             "name": "google/auth",
-            "version": "v1.46.0",
+            "version": "v1.45.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/google-auth-library-php.git",
-                "reference": "7fafae99a41984cbfb92508174263cf7bf3049b9"
+                "reference": "cfcb93162341ed5022fa976e621f0fa2b05ba6ad"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/google-auth-library-php/zipball/7fafae99a41984cbfb92508174263cf7bf3049b9",
-                "reference": "7fafae99a41984cbfb92508174263cf7bf3049b9",
+                "url": "https://api.github.com/repos/googleapis/google-auth-library-php/zipball/cfcb93162341ed5022fa976e621f0fa2b05ba6ad",
+                "reference": "cfcb93162341ed5022fa976e621f0fa2b05ba6ad",
                 "shasum": ""
             },
             "require": {
@@ -3441,6 +3441,7 @@
             "support": {
                 "issues": "https://github.com/SpartnerNL/Laravel-Excel/issues",
                 "source": "https://github.com/SpartnerNL/Laravel-Excel/tree/3.1.64"
+
             },
             "funding": [
                 {

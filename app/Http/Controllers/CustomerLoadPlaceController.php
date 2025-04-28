@@ -106,9 +106,6 @@ class CustomerLoadPlaceController extends Controller
             $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $cntr->booking)->get();
             $empresa = $qempresa[0]->empresa;
 
-            $qmail = DB::table('empresas')->where('razon_social', '=', $empresa)->select('mail_logistic')->get();
-            $mail = $qmail[0]->mail_logistic;
-
             $datos = [
                 'cntr' => $cntr->cntr_number,
                 'confirmacion' => $cntr->confirmacion,
@@ -119,21 +116,32 @@ class CustomerLoadPlaceController extends Controller
                 'date' => $date
             ];
 
+            //Enviar mail
             $sbx = DB::table('variables')->select('sandbox')->get();
             $inboxEmail = env('INBOX_EMAIL');
-            if ($sbx[0]->sandbox == 0) {
+            $mailsTrafico = DB::table('particular_soft_configurations')->first();
+            $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
+            $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
+            $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
 
-                Mail::to($mail)->bcc($inboxEmail)->send(new cargaCargando($datos));
+
+            if ($sbx[0]->sandbox == 0) {
+                $customer = DB::table('users')
+                    ->where('username', '=', $carga->user)
+                    ->value('email');
+                $toEmails = array_merge([$customer], (array) $toEmails);
+
+                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaCargando($datos));
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
-                $logApi->detalle = "envio email cargaCargando to:" . $mail;
+                $logApi->detalle = "envio email cargaCargando to:" . implode(', ', $toEmails);
                 $logApi->save();
             } elseif ($sbx[0]->sandbox == 2) {
 
                 Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new cargaCargando($datos));
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
-                $logApi->detalle = "envio email cargaCargando to:" . $mail;
+                $logApi->detalle = "envio email cargaCargando to: abel.mazzitelli@gmail.com";
                 $logApi->save();
             } else {
 
@@ -141,7 +149,7 @@ class CustomerLoadPlaceController extends Controller
 
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
-                $logApi->detalle = "envio email cargaCargando to:" . $mail;
+                $logApi->detalle = "envio email cargaCargando to: copia@botzero.com.ar";
                 $logApi->save();
             }
 
@@ -188,9 +196,6 @@ class CustomerLoadPlaceController extends Controller
                 $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $cntr->booking)->get();
                 $empresa = $qempresa[0]->empresa;
 
-                $qmail = DB::table('empresas')->where('razon_social', '=', $empresa)->select('mail_logistic')->get();
-                $mail = $qmail[0]->mail_logistic;
-
                 $datos = [
                     'cntr' => $cntr->cntr_number,
                     'description' =>  $description,
@@ -201,15 +206,24 @@ class CustomerLoadPlaceController extends Controller
                     'date' => $date
                 ];
 
+                //Enviar mail
                 $sbx = DB::table('variables')->select('sandbox')->get();
                 $inboxEmail = env('INBOX_EMAIL');
+                $mailsTrafico = DB::table('particular_soft_configurations')->first();
+                $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
+                $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
+                $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
 
                 if ($sbx[0]->sandbox == 0) {
-                    Mail::to($mail)->bcc($inboxEmail)->send(new cargaCargando($datos));
+                    $customer = DB::table('users')
+                        ->where('username', '=', $carga->user)
+                        ->value('email');
+                    $toEmails = array_merge([$customer], (array) $toEmails);
+                    Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaCargando($datos));
 
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
-                    $logApi->detalle = "envio email cargaCargando to:" . $mail;
+                    $logApi->detalle = "envio email cargaCargando to:". implode(', ', $toEmails);
                     $logApi->save();
                 } elseif ($sbx[0]->sandbox == 2) {
 
@@ -217,14 +231,14 @@ class CustomerLoadPlaceController extends Controller
 
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
-                    $logApi->detalle = "envio email cargaCargando to:" . $mail;
+                    $logApi->detalle = "envio email cargaCargando to: abel.mazzitelli@gmail.com";
                     $logApi->save();
                 } else {
                     Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaCargando($datos));
 
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
-                    $logApi->detalle = "envio email cargaCargando to:" . $mail;
+                    $logApi->detalle = "envio email cargaCargando to: copia@botzero.com.ar";
                     $logApi->save();
                 }
 
@@ -286,9 +300,6 @@ class CustomerLoadPlaceController extends Controller
             $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $cntr->booking)->get();
             $empresa = $qempresa[0]->empresa;
 
-            $qmail = DB::table('empresas')->where('razon_social', '=', $empresa)->select('mail_logistic')->get();
-            $mail = $qmail[0]->mail_logistic;
-
             $datos = [
                 'cntr' => $cntr->cntr_number,
                 'description' =>  $description,
@@ -299,14 +310,24 @@ class CustomerLoadPlaceController extends Controller
                 'date' => $date
             ];
 
+            //Enviar mail
             $sbx = DB::table('variables')->select('sandbox')->get();
             $inboxEmail = env('INBOX_EMAIL');
-            if ($sbx[0]->sandbox == 0) {
+            $mailsTrafico = DB::table('particular_soft_configurations')->first();
+            $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
+            $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
+            $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
 
-                Mail::to($mail)->bcc($inboxEmail)->send(new cargaAduana($datos));
+            if ($sbx[0]->sandbox == 0) {
+                $customer = DB::table('users')
+                    ->where('username', '=', $carga->user)
+                    ->value('email');
+                $toEmails = array_merge([$customer], (array) $toEmails);
+
+                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaAduana($datos));
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
-                $logApi->detalle = "envio email cargaAduana to:" . $mail;
+                $logApi->detalle = "envio email cargaAduana to:". implode(', ', $toEmails);
                 $logApi->save();
             } elseif ($sbx[0]->sandbox == 2) {
 
@@ -365,9 +386,6 @@ class CustomerLoadPlaceController extends Controller
                 $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $cntr->booking)->get();
                 $empresa = $qempresa[0]->empresa;
 
-                $qmail = DB::table('empresas')->where('razon_social', '=', $empresa)->select('mail_logistic')->get();
-                $mail = $qmail[0]->mail_logistic;
-
                 $datos = [
                     'cntr' => $cntr->cntr_number,
                     'description' =>  $description,
@@ -378,13 +396,24 @@ class CustomerLoadPlaceController extends Controller
                     'date' => $date
                 ];
 
+                //Enviar mail
                 $sbx = DB::table('variables')->select('sandbox')->get();
                 $inboxEmail = env('INBOX_EMAIL');
+                $mailsTrafico = DB::table('particular_soft_configurations')->first();
+                $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
+                $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
+                $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
+
                 if ($sbx[0]->sandbox == 0) {
-                    Mail::to($mail)->bcc($inboxEmail)->send(new cargaAduana($datos));
+                    $customer = DB::table('users')
+                        ->where('username', '=', $carga->user)
+                        ->value('email');
+                    $toEmails = array_merge([$customer], (array) $toEmails);
+
+                    Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaAduana($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
-                    $logApi->detalle = "envio email cargaAduana to:" . $mail;
+                    $logApi->detalle = "envio email cargaAduana to:". implode(', ', $toEmails);
                     $logApi->save();
                 } elseif ($sbx[0]->sandbox == 2) {
 
@@ -456,9 +485,6 @@ class CustomerLoadPlaceController extends Controller
             $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $cntr->booking)->get();
             $empresa = $qempresa[0]->empresa;
 
-            $qmail = DB::table('empresas')->where('razon_social', '=', $empresa)->select('mail_logistic')->get();
-            $mail = $qmail[0]->mail_logistic;
-
             $datos = [
                 'cntr' => $cntr->cntr_number,
                 'description' =>  $description,
@@ -469,14 +495,24 @@ class CustomerLoadPlaceController extends Controller
                 'date' => $date
             ];
 
+            //Enviar mail
             $sbx = DB::table('variables')->select('sandbox')->get();
             $inboxEmail = env('INBOX_EMAIL');
-            if ($sbx[0]->sandbox == 0) {
+            $mailsTrafico = DB::table('particular_soft_configurations')->first();
+            $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
+            $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
+            $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
 
-                Mail::to($mail)->bcc($inboxEmail)->send(new cargaDescarga($datos));
+            if ($sbx[0]->sandbox == 0) {
+                $customer = DB::table('users')
+                    ->where('username', '=', $carga->user)
+                    ->value('email');
+                $toEmails = array_merge([$customer], (array) $toEmails);
+
+                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaDescarga($datos));
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
-                $logApi->detalle = "envio email cargaDescarga to:" . $mail;
+                $logApi->detalle = "envio email cargaDescarga to:". implode(', ', $toEmails);
                 $logApi->save();
             } elseif ($sbx[0]->sandbox == 2) {
 
@@ -535,9 +571,6 @@ class CustomerLoadPlaceController extends Controller
                 $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $cntr->booking)->get();
                 $empresa = $qempresa[0]->empresa;
 
-                $qmail = DB::table('empresas')->where('razon_social', '=', $empresa)->select('mail_logistic')->get();
-                $mail = $qmail[0]->mail_logistic;
-
                 $datos = [
                     'cntr' => $cntr->cntr_number,
                     'confirmacion' => $cntr->confirmacion,
@@ -548,14 +581,24 @@ class CustomerLoadPlaceController extends Controller
                     'date' => $date
                 ];
 
+                //Enviar mail
                 $sbx = DB::table('variables')->select('sandbox')->get();
                 $inboxEmail = env('INBOX_EMAIL');
-                if ($sbx[0]->sandbox == 0) {
+                $mailsTrafico = DB::table('particular_soft_configurations')->first();
+                $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
+                $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
+                $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
 
-                    Mail::to($mail)->bcc($inboxEmail)->send(new cargaDescarga($datos));
+                if ($sbx[0]->sandbox == 0) {
+                    $customer = DB::table('users')
+                        ->where('username', '=', $carga->user)
+                        ->value('email');
+                    $toEmails = array_merge([$customer], (array) $toEmails);
+
+                    Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaDescarga($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
-                    $logApi->detalle = "envio email cargaDescarga to:" . $mail;
+                    $logApi->detalle = "envio email cargaDescarga to:". implode(', ', $toEmails);
                     $logApi->save();
                 } elseif ($sbx[0]->sandbox == 2) {
                     Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new cargaDescarga($datos));
@@ -613,9 +656,6 @@ class CustomerLoadPlaceController extends Controller
             $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $cntr->booking)->get();
             $empresa = $qempresa[0]->empresa;
 
-            $qmail = DB::table('empresas')->where('razon_social', '=', $empresa)->select('mail_logistic')->get();
-            $mail = $qmail[0]->mail_logistic;
-
             $datos = [
                 'cntr' => $cntr->cntr_number,
                 'confirmacion' => $cntr->confirmacion,
@@ -626,16 +666,24 @@ class CustomerLoadPlaceController extends Controller
                 'date' => $date
             ];
 
+            //Enviar mail
             $sbx = DB::table('variables')->select('sandbox')->get();
             $inboxEmail = env('INBOX_EMAIL');
+            $mailsTrafico = DB::table('particular_soft_configurations')->first();
+            $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
+            $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
+            $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
+
             if ($sbx[0]->sandbox == 0) {
-
-
-                Mail::to($mail)->bcc($inboxEmail)->send(new cargaFueraCargando($datos));
+                $customer = DB::table('users')
+                    ->where('username', '=', $carga->user)
+                    ->value('email');
+                $toEmails = array_merge([$customer], (array) $toEmails);
+                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaFueraCargando($datos));
 
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
-                $logApi->detalle = "envio email cargaCargando to:" . $mail;
+                $logApi->detalle = "envio email cargaCargando to:". implode(', ', $toEmails);
                 $logApi->save();
             } elseif ($sbx[0]->sandbox == 2) {
 
@@ -643,7 +691,7 @@ class CustomerLoadPlaceController extends Controller
 
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
-                $logApi->detalle = "envio email cargaCargando to:" . $mail;
+                $logApi->detalle = "envio email cargaCargando to: abel.mazzitelli@gmail.com";
                 $logApi->save();
             } else {
 
@@ -651,7 +699,7 @@ class CustomerLoadPlaceController extends Controller
 
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
-                $logApi->detalle = "envio email cargaCargando to:" . $mail;
+                $logApi->detalle = "envio email cargaCargando to: copia@botzero.com.ar";
                 $logApi->save();
             }
 
@@ -679,15 +727,12 @@ class CustomerLoadPlaceController extends Controller
                         'main_status' => 'SALIENDO CARGAR',
                         'status_cntr' => '[AUTOMATICO] El camión ha salido del área de carga y se encuentra a más de 200 metros del lugar.'
                     ]);
-            
+
                 $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
                 $description = $qd->status;
 
                 $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $cntr->booking)->get();
                 $empresa = $qempresa[0]->empresa;
-
-                $qmail = DB::table('empresas')->where('razon_social', '=', $empresa)->select('mail_logistic')->get();
-                $mail = $qmail[0]->mail_logistic;
 
                 $datos = [
                     'cntr' => $cntr->cntr_number,
@@ -699,17 +744,25 @@ class CustomerLoadPlaceController extends Controller
                     'date' => $date
                 ];
 
+                //Enviar mail
                 $sbx = DB::table('variables')->select('sandbox')->get();
                 $inboxEmail = env('INBOX_EMAIL');
+                $mailsTrafico = DB::table('particular_soft_configurations')->first();
+                $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
+                $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
+                $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
 
                 if ($sbx[0]->sandbox == 0) {
+                    $customer = DB::table('users')
+                        ->where('username', '=', $carga->user)
+                        ->value('email');
+                    $toEmails = array_merge([$customer], (array) $toEmails);
 
-
-                    Mail::to($mail)->bcc($inboxEmail)->send(new cargaFueraCargando($datos));
+                    Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaFueraCargando($datos));
 
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
-                    $logApi->detalle = "envio email cargaCargando to:" . $mail;
+                    $logApi->detalle = "envio email cargaCargando to:". implode(', ', $toEmails);
                     $logApi->save();
                 } elseif ($sbx[0]->sandbox == 2) {
 
@@ -717,14 +770,14 @@ class CustomerLoadPlaceController extends Controller
 
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
-                    $logApi->detalle = "envio email cargaCargando to:" . $mail;
+                    $logApi->detalle = "envio email cargaCargando to: abel.mazzitelli@gmail.com";
                     $logApi->save();
                 } else {
                     Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaFueraCargando($datos));
 
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
-                    $logApi->detalle = "envio email cargaCargando to:" . $mail;
+                    $logApi->detalle = "envio email cargaCargando to: copia@botzero.com.ar";
                     $logApi->save();
                 }
 
@@ -786,9 +839,6 @@ class CustomerLoadPlaceController extends Controller
             $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $cntr->booking)->get();
             $empresa = $qempresa[0]->empresa;
 
-            $qmail = DB::table('empresas')->where('razon_social', '=', $empresa)->select('mail_logistic')->get();
-            $mail = $qmail[0]->mail_logistic;
-
             $datos = [
                 'cntr' => $cntr->cntr_number,
                 'description' =>  $description,
@@ -799,21 +849,31 @@ class CustomerLoadPlaceController extends Controller
                 'date' => $date
             ];
 
+            //Enviar mail
             $sbx = DB::table('variables')->select('sandbox')->get();
             $inboxEmail = env('INBOX_EMAIL');
-            if ($sbx[0]->sandbox == 0) {
+            $mailsTrafico = DB::table('particular_soft_configurations')->first();
+            $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
+            $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
+            $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
 
-                Mail::to($mail)->bcc($inboxEmail)->send(new cargaFueraAduana($datos));
+            if ($sbx[0]->sandbox == 0) {
+                $customer = DB::table('users')
+                    ->where('username', '=', $carga->user)
+                    ->value('email');
+                $toEmails = array_merge([$customer], (array) $toEmails);
+
+                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaFueraAduana($datos));
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
-                $logApi->detalle = "envio email cargaAduana to:" . $mail;
+                $logApi->detalle = "envio email cargaAduana to:". implode(', ', $toEmails);
                 $logApi->save();
             } elseif ($sbx[0]->sandbox == 2) {
 
                 Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new cargaFueraAduana($datos));
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
-                $logApi->detalle = "envio email cargaAduana to: 'copia@botzero.com.ar'";
+                $logApi->detalle = "envio email cargaAduana to: abel.mazzitelli@gmail.com";
                 $logApi->save();
             } else {
                 Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaFueraAduana($datos));
@@ -865,9 +925,6 @@ class CustomerLoadPlaceController extends Controller
                 $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $cntr->booking)->get();
                 $empresa = $qempresa[0]->empresa;
 
-                $qmail = DB::table('empresas')->where('razon_social', '=', $empresa)->select('mail_logistic')->get();
-                $mail = $qmail[0]->mail_logistic;
-
                 $datos = [
                     'cntr' => $cntr->cntr_number,
                     'description' =>  $description,
@@ -878,21 +935,31 @@ class CustomerLoadPlaceController extends Controller
                     'date' => $date
                 ];
 
+                //Enviar mail
                 $sbx = DB::table('variables')->select('sandbox')->get();
                 $inboxEmail = env('INBOX_EMAIL');
-                if ($sbx[0]->sandbox == 0) {
+                $mailsTrafico = DB::table('particular_soft_configurations')->first();
+                $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
+                $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
+                $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
 
-                    Mail::to($mail)->bcc($inboxEmail)->send(new cargaFueraAduana($datos));
+                if ($sbx[0]->sandbox == 0) {
+                    $customer = DB::table('users')
+                        ->where('username', '=', $carga->user)
+                        ->value('email');
+                    $toEmails = array_merge([$customer], (array) $toEmails);
+
+                    Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaFueraAduana($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
-                    $logApi->detalle = "envio email cargaAduana to:" . $mail;
+                    $logApi->detalle = "envio email cargaAduana to: ". implode(', ', $toEmails);
                     $logApi->save();
                 } elseif ($sbx[0]->sandbox == 2) {
 
                     Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new cargaFueraAduana($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
-                    $logApi->detalle = "envio email cargaAduana to: 'copia@botzero.com.ar'";
+                    $logApi->detalle = "envio email cargaAduana to: abel.mazzitelli@gmail.com";
                     $logApi->save();
                 } else {
 
