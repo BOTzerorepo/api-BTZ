@@ -988,18 +988,30 @@ class CustomerLoadPlaceController extends Controller
      */
     public function index()
     {
-        $customerLoadPlaces = DB::table('customer_load_places')->get();
-        return $customerLoadPlaces;
+        try {
+            $customerLoadPlaces = CustomerLoadPlace::orderBy('description', 'ASC')->get();
+            return response()->json([
+                'data' => $customerLoadPlaces,
+                'success' => true
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
-    public function issetLugarDeCarga($description)
+    public function issetLugarDeCarga(Request $request)
     {
+        $description = $request->input('loadplace');
         $loadPlace = DB::table('customer_load_places')->where('description', '=', $description)->count();
         return $loadPlace;
     }
-    public function issetLugarDeDescarga($description)
+    public function issetLugarDeDescarga(Request $request)
     {
-
+        $description = $request->input('unloadplace');
         $unloadPlace = DB::table('customer_unload_places')->where('description', '=', $description)->count();
         return $unloadPlace;
     }

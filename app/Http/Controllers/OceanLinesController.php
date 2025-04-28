@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\commodity;
+use App\Models\OceanLines;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class commoditiesController extends Controller
+class OceanLinesController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -16,18 +16,19 @@ class commoditiesController extends Controller
     public function index()
     {
         try {
-            $commodities = commodity::orderBy('commodity', 'ASC')->get();
+            $oceanLines = OceanLines::orderBy('razon_social', 'ASC')->get();
             return response()->json([
-                'data' => $commodities,
-                'success' => true
+                'success' => true,
+                'message' => 'Oceans Lines obtenidos correctamente.',
+                'data' => $oceanLines
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'Error interno del servidor',
                 'success' => false,
+                'message' => 'Error al obtener las Oceans Lines.',
                 'error' => $e->getMessage()
             ], 500);
-        }
+        } 
     }
 
     /**
@@ -48,36 +49,27 @@ class commoditiesController extends Controller
      */
     public function store(Request $request)
     {
-
-        $commodity = new commodity();
-        $commodity->commodity = $request['commodity'];
-        $commodity->user = $request['user'];
-        $commodity->company = $request['company'];
-        $commodity->save();
-
-        return $commodity;
+        //
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Models\OceanLines  $oceanLines
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(OceanLines $oceanLines)
     {
-        $commodity = DB::table('commodities')->where('id', $id)->get();
-
-        return $commodity;
+        //
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Models\OceanLines  $oceanLines
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(OceanLines $oceanLines)
     {
         //
     }
@@ -86,35 +78,22 @@ class commoditiesController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \App\Models\OceanLines  $oceanLines
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, OceanLines $oceanLines)
     {
-        $commodity = commodity::findOrFail($id);
-        $commodity->commodity = $request['commodity'];
-        $commodity->user = $request['user'];
-        $commodity->company = $request['company'];
-        $commodity->save();
-
-        return $commodity;
+        //
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  \App\Models\OceanLines  $oceanLines
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(OceanLines $oceanLines)
     {
-        commodity::destroy($id);
-
-        $existe = commodity::find($id);
-        if ($existe) {
-            return 'No se elimino el Commodity';
-        } else {
-            return 'Se elimino el Commodity';
-        };
+        //
     }
 }

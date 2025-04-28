@@ -18,8 +18,19 @@ class CntrTypeController extends Controller
      */
     public function index()
     {
-        $cntrTypes = DB::table('cntr_types')->get();       
-        return $cntrTypes;
+        try {
+            $cntrTypes = CntrType::orderBy('title', 'ASC')->get();
+            return response()->json([
+                'data' => $cntrTypes,
+                'success' => true
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
