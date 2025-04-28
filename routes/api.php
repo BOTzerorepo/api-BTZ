@@ -82,7 +82,10 @@ Route::prefix('notifications')->group(function () {
     Route::get('/problems/details', [cargaController::class, 'getNotificationsWithProblemsDetails']);
     Route::get('/completed/details', [cargaController::class, 'getNotificationsCompletedDetails']);
     Route::get('/assigned/details', [cargaController::class, 'getNotificationsAssignedDetails']);
+    Route::post('/marcarLeidaAsignada', [cargaController::class, 'marcarNotificacionComoLeidaAsignada']);
+    Route::post('/marcarLeidaConProblema', [cargaController::class, 'marcarNotificacionComoLeidaConProblema']);
 });
+
 
 // Rutas para mensajes
 Route::prefix('messages')->group(function () {
@@ -247,13 +250,13 @@ oooooo     oooo       .o.       ooooo        ooooo oooooooooo.         .o.      
       `8'       o88o     o8888o o888ooooood8 o888o o888bood8P'   o88o     o8888o  `Y8bood8P'  o888o  `Y8bood8P'  o8o        `8  8 8 8 8 8 8 8
  */
 
-Route::get('issetBooking/{booking}', 'App\Http\Controllers\cargaController@issetBooking');
+Route::post('issetBooking', 'App\Http\Controllers\cargaController@issetBooking');
 Route::get('issetTransport/{cuit}', 'App\Http\Controllers\TransportController@issetTrasnsport');
 Route::get('issetTransportRazon/{razon_social}', 'App\Http\Controllers\TransportController@issetTransportRazon');
 Route::get('issetTruck/{domain}', 'App\Http\Controllers\TruckController@issetTruck');
-Route::get('issetTrader/{trader}', 'App\Http\Controllers\cargaController@issetTrader');
-Route::get('issetLoadPlace/{description}', 'App\Http\Controllers\CustomerLoadPlaceController@issetLugarDeCarga');
-Route::get('issetUnloadPlace/{description}', 'App\Http\Controllers\CustomerLoadPlaceController@issetLugarDeDescarga');
+Route::post('issetTrader', 'App\Http\Controllers\cargaController@issetTrader');
+Route::post('issetLoadPlace', 'App\Http\Controllers\CustomerLoadPlaceController@issetLugarDeCarga');
+Route::post('issetUnloadPlace', 'App\Http\Controllers\CustomerLoadPlaceController@issetLugarDeDescarga');
 Route::get('issetCntr/{cntr_number}', 'App\Http\Controllers\cntrController@issetCntr');
 Route::get('issetAsignacion/{dominio}', 'App\Http\Controllers\cntrController@issetAsign');
 Route::get('issetDriver', 'App\Http\Controllers\DriverController@issetDriver');
@@ -277,9 +280,11 @@ Route::delete('/carga/{id}', 'App\Http\Controllers\cargaController@destroy')->na
 
 // USER
 Route::get('/user/{user}', 'App\Http\Controllers\UserController@show');
+Route::put('/user/{id}', 'App\Http\Controllers\UserController@update');
 Route::get('/users/without-role', 'App\Http\Controllers\UserController@usersWithoutRole');
 Route::get('/users', 'App\Http\Controllers\UserController@index');
 Route::get('/usersNullPermiso', 'App\Http\Controllers\UserController@indexNullPermiso');
+Route::delete('/user/{id}', 'App\Http\Controllers\UserController@destroy');
 
 //PROFIT
 Route::get('/profitSumaCntr/{cntrNumber}', [ProfitController::class, 'profitSumaCntr']);
@@ -293,6 +298,7 @@ Route::resource('/cntr',cntrController::class);
 Route::get('/datosConfirmar/{cntrId}', [cntrController::class, 'datosConfirmar']);
 Route::get('/datosCntrNumber/{cntrNumber}', [cntrController::class, 'datosCntrNumber']);
 Route::delete('/cntr/{cntrId}', [cntrController::class, 'destroy']);
+Route::post('/storeCalifications', [cntrController::class, 'storeCalifications']);
 
 // FLETERO CONTROLLER 
 
@@ -412,14 +418,14 @@ Route::delete('/tipoCntr/{id}','App\Http\Controllers\CntrTypeController@destroy'
 Route::get('/modoPagos','App\Http\Controllers\PayModeController@index'); //Busca todos los modos de pago
 Route::get('/modoPago/{id}','App\Http\Controllers\PayModeController@show'); //Busca un modo de pago
 Route::post('/modoPago','App\Http\Controllers\PayModeController@store'); //Crea un nuevo modo de pago
-Route::post('/modoPago/{id}','App\Http\Controllers\PayModeController@update'); //Actualiza los datos de un modo de pago
+Route::put('/modoPago/{id}','App\Http\Controllers\PayModeController@update'); //Actualiza los datos de un modo de pago
 Route::delete('/modoPago/{id}','App\Http\Controllers\PayModeController@destroy'); //Elimina un modo de pago
 
 //Plazo de Pago
 Route::get('/plazoPagos','App\Http\Controllers\PayTimeController@index'); //Busca todos los plazos de pago
 Route::get('/plazoPago/{id}','App\Http\Controllers\PayTimeController@show'); //Busca un plazo de pago
 Route::post('/plazoPago','App\Http\Controllers\PayTimeController@store'); //Crea un nuevo plazo de pago
-Route::post('/plazoPago/{id}','App\Http\Controllers\PayTimeController@update'); //Actualiza los datos de un plazo de pago
+Route::put('/plazoPago/{id}','App\Http\Controllers\PayTimeController@update'); //Actualiza los datos de un plazo de pago
 Route::delete('/plazoPago/{id}','App\Http\Controllers\PayTimeController@destroy'); //Elimina un plazo de pago
 
 //Customer agent

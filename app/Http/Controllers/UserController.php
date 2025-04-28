@@ -131,7 +131,43 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        try {
+            $validated = $request->validate([
+                'username' => 'required|string|max:255',
+                'email' => 'required|email|max:255',
+                'celular' => 'nullable|string|max:20',
+                'empresa' => 'nullable|string|max:255',
+                'permiso' => 'required|string|max:50',
+                'transport_id' => 'nullable',
+            ]);
+
+            $user = User::findOrFail($id);
+            $user->username = $request->input('username');
+            $user->email = $request->input('email');
+            $user->celular = $request->input('celular');
+            $user->empresa = $request->input('empresa');
+            $user->permiso = $request->input('permiso');
+
+            // Si transport_id es array, lo convertimos en string separado por coma
+            $transport_id = $request->input('transport_id');
+            if (is_array($transport_id)) {
+                $user->transport_id = implode(',', $transport_id);
+            } else {
+                $user->transport_id = $transport_id;
+            }
+            $user->save();
+
+            return response()->json([
+                'message' => 'Usuario actualizado correctamente.',
+                'user' => $user
+            ], 200);
+        } catch (\Exception $e) {
+            // 6. Error general
+            return response()->json([
+                'message' => 'Error al actualizar el usuario.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -142,6 +178,23 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        //
+        try {
+            $deleted = User::destroy($id);
+
+            if ($deleted) {
+                return response()->json([
+                    'message' => 'El usuario fue eliminada correctamente.'
+                ], 200);
+            } else {
+                return response()->json([
+                    'message' => 'No se encontró el usuario o no se pudo eliminar.'
+                ], 404);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Ocurrió un error al intentar eliminar el usuario.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

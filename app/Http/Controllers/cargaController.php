@@ -390,14 +390,16 @@ class cargaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function issetBooking($booking)
+    public function issetBooking(Request $request)
     {
+        $booking = $request->input('booking');
         $booking = Carga::whereNull('deleted_at')->where('booking', '=', $booking)->get();
         return $booking->count();
     }
 
-    public function issetTrader($trader)
+    public function issetTrader(Request $request)
     {
+        $trader = $request->input('trader');
         $trader = DB::table('customers')->where('registered_name', '=', $trader)->get();
         return $trader->count();
     }
@@ -839,6 +841,7 @@ class cargaController extends Controller
             ], 500);
         }
     }
+
     public function getNotificationsWithProblemsDetails(Request $request)
     {
         try {
@@ -1060,5 +1063,65 @@ class cargaController extends Controller
             'success' => true,
             'data' => $results
         ]);
+    }
+
+    public function marcarNotificacionComoLeidaAsignada(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'cntr_number' => 'required|string|max:255',
+                'booking' => 'required|string',
+            ]);
+            // Tomamos los datos validados
+            $cntrNumber = $validated['cntr_number'];
+            $booking = $validated['booking'];
+
+            // Ejecutamos el UPDATE
+            $updatedRows = DB::table('notification')
+                ->where('cntr_number', $cntrNumber)
+                ->where('booking', $booking)
+                ->where('sta_carga', 'ASIGNADA')
+                ->update(['status' => 'Leido']);
+
+            return response()->json([
+                'success' => true,
+                'updated_rows' => $updatedRows,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function marcarNotificacionComoLeidaConProblema(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'cntr_number' => 'required|string|max:255',
+                'booking' => 'required|string',
+            ]);
+            // Tomamos los datos validados
+            $cntrNumber = $validated['cntr_number'];
+            $booking = $validated['booking'];
+
+            // Ejecutamos el UPDATE
+            $updatedRows = DB::table('notification')
+                ->where('cntr_number', $cntrNumber)
+                ->where('booking', $booking)
+                ->where('sta_carga', 'CON PROBLEMA')
+                ->update(['status' => 'Leido']);
+
+            return response()->json([
+                'success' => true,
+                'updated_rows' => $updatedRows,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

@@ -446,4 +446,50 @@ class cntrController extends Controller
             ], 500);
         }
     }
+
+    public function storeCalifications(Request $request)
+    {
+        try {
+            $request->validate([
+                'calificacion_carga' => 'nullable|numeric',
+                'calification_transport' => 'nullable|numeric',
+                'feedback_customer' => 'nullable|string',
+                'calification_driver' => 'nullable|numeric',
+                'booking' => 'nullable|string',
+                'cntr_number' => 'nullable|string',
+                'user' => 'nullable|string',
+            ]);
+
+            // Insertar calificación del chofer
+            DB::table('calification_driver')->insert([
+                'calification_driver' => $request->calification_driver,
+                'cntr_number' => $request->cntr_number,
+                'booking' => $request->booking,
+                'user' => $request->user,
+                'created_at' => now(),
+            ]);
+
+            // Insertar calificación del transporte
+            DB::table('calification_transport')->insert([
+                'calification_transport' => $request->calification_transport,
+                'cntr_number' => $request->cntr_number,
+                'booking' => $request->booking,
+                'user' => $request->user,
+                'Created_at' => now(),
+            ]);
+
+            // Actualizar calificación de carga en la tabla cntr
+            Cntr::where('cntr_number', $request->cntr_number)
+                ->update(['calificacion_carga' => $request->calificacion_carga]);
+
+            return response()->json([
+                'message' => 'Calificaciones guardadas correctamente.'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al guardar las calificaciones.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
