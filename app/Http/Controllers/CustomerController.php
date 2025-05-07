@@ -15,8 +15,20 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        $customers = DB::table('customers')->get();
-        return $customers;
+        try {
+            
+            $customers = Customer::orderBy('registered_name', 'ASC')->get();
+            return response()->json([
+                'data' => $customers,
+                'success' => true
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

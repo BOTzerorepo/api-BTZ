@@ -5,14 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PayMode extends Model
+class OceanLines extends Model
 {
     use HasFactory;
-    protected $table = 'pay_modes';
+    protected $table = 'ocean_lines';
     protected $fillable = [
-        'title',
-        'description',
+        'razon_social',
+        'pais',
+        'tax_id',
         'user',
         'empresa',
+        'andress',
+        'mail',
     ];
 }
