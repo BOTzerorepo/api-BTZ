@@ -45,51 +45,57 @@ class cntrController extends Controller
      */
     public function store(Request $request)
     {
-        $booking = $request['booking'];
-        $qb = DB::table('cntr')->where('booking', '=', $booking)->get();
-        $numero = $qb->count() + 1;
+        try {
+            $booking = $request->input('booking');
+            $cntr_seal = $request->input('cntr_seal');
+            // Si viene cntr_type lo uso, si no lo dejo como null
+            $cntr_type = $request->has('cntr_type') ? $request['cntr_type'] : null;
+            // Igual con retiro_place
+            $retiro_place = $request->has('retiro_place') ? $request['retiro_place'] : null;
+            $confirmacion = $request->input('confirmacion') ?? 0;
+            $user_cntr = $request->input('user_cntr');
+            $company = $request->input('company');
 
-        if ($request['cntr_number']) {
+            // Buscar contenedores con ese booking para generar número nuevo si hace falta
+            $existingCntrs = DB::table('cntr')->where('booking', $booking)->get();
+            $numero = $existingCntrs->count() + 1;
 
-            $cntr_number = $request['cntr_number'];
-        } else {
+            $cntr_number = $request->input('cntr_number') ?: $booking . $numero;
 
-            $cntr_number = $booking . $numero;
-        }
+            // Crear el contenedor
+            $cntr = new cntr();
+            $cntr->booking = $booking;
+            $cntr->cntr_number = $cntr_number;
+            $cntr->cntr_seal = $cntr_seal;
+            $cntr->cntr_type = $cntr_type;
+            $cntr->retiro_place = $retiro_place;
+            $cntr->confirmacion = $confirmacion;
+            $cntr->user_cntr = $user_cntr;
+            $cntr->company = $company;
+            $cntr->save();
 
-        $cntr = new cntr();
-        $cntr->booking = $booking;
-        $cntr->cntr_number = $cntr_number;
-        $cntr->cntr_seal = $request['cntr_seal'];
-        $cntr->cntr_type = $request['cntr_type'];
-        $cntr->retiro_place = $qb[0]->retiro_place;
-        $cntr->confirmacion = $request['confirmacion'];
-        $cntr->user_cntr = $request['user_cntr'];
-        $cntr->company = $request['company'];
-        $cntr->save();
-
-        if ($cntr) {
-
+            // Insertar en asign
             $asign = new asign();
             $asign->cntr_number = $cntr_number;
             $asign->booking = $booking;
             $asign->save();
 
-            $idCarga = DB::table('carga')->where('booking', '=', $cntr->booking)->select('carga.id')->get();
+            // Obtener ID de carga
+            $idCarga = DB::table('carga')->where('booking', $booking)->value('id');
 
-            if ($asign->id) {
-                return response()->json([
-                    'detail' => $cntr, // Aquí accedemos directamente al objeto $cntr
-                    'idCarga' => $idCarga[0]->id // Aquí accedemos al primer elemento del array $idCarga
-                ], 200);
-            } else {
-                return response()->json(['errores' => 'Algo salió mal, hubo un errro en la asignación', 'id' => $idCarga[0]->id], 500);
-            }
-        } else {
-
-            return response()->json(['errores' => 'Algo salió mal: el contenedor ya existe o faltó algun dato.', 'cntr_number' => $cntr_number], 500);
+            return response()->json([
+                'success' => true,
+                'detail' => $cntr,
+                'idCarga' => $idCarga
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'errores' => 'Algo salió mal: ' . $e->getMessage()
+            ], 500);
         }
     }
+
 
     /**
      * Display the specified resource.
@@ -188,10 +194,34 @@ class cntrController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($cntrId)
     {
-        //
+        try {
+            $cntr = cntr::findOrFail($cntrId);
+            $asign = asign::where('cntr_number', $cntr->cntr_number)->first();
+
+            $carga = Carga::where('booking', $cntr->booking)->first();
+            // Eliminar el CNTR
+            $cntr->delete();
+            $asign->delete();
+
+            return response()->json([
+                'message' => 'CNTR eliminado con éxito.',
+                'id' => $carga->id,
+            ], 200);
+        } catch (\Exception $e) {
+            $cntr = cntr::findOrFail($cntrId);
+            $carga = Carga::where('booking', $cntr->booking)->first();
+            return response()->json([
+                'message' => 'Error al eliminar el CNTR.',
+                'id' => $carga->id,
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
+
+
+
     public function issetCntr($cntr)
     {
         $cntrCount = cntr::where('cntr_number', $cntr)->get();
@@ -285,6 +315,180 @@ class cntrController extends Controller
             // Manejar cualquier error que ocurra
             return response()->json([
                 'error' => 'Error al obtener los datos: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function datosCntrNumber($cntrNumber)
+    {
+        try {
+            // Obtener el CNTR
+            $cntr = cntr::where('cntr_number', $cntrNumber)
+                ->whereNull('deleted_at')
+                ->firstOrFail();
+
+
+            // Obtener el asign asociado al CNTR
+            $asign = asign::whereNull('deleted_at')
+                ->where('cntr_number', $cntr->cntr_number)
+                ->firstOrFail();
+
+            // Obtener el transporte asociado a la asignación
+            $transport = Transport::whereNull('deleted_at')
+                ->where('razon_social', $asign->transport)
+                ->firstOrFail();
+
+            $truck = truck::where('domain', $asign->truck)
+                ->first();
+            // Obtener la carga asociada al CNTR
+
+            $carga = Carga::whereNull('deleted_at')
+                ->where('booking', $cntr->booking)
+                ->firstOrFail();
+
+            // Preparar la respuesta en formato JSON
+            $response = [
+                'cntr' => $cntr,
+                'asign' => $asign,
+                'transport' => $transport,
+                'carga' => $carga,
+                'truck' => $truck
+            ];
+
+            // Devolver la respuesta en formato JSON
+            return response()->json($response);
+        } catch (\Exception $e) {
+            // Manejar cualquier error que ocurra
+            return response()->json([
+                'error' => 'Error al obtener los datos: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function statusResumen($user = null)
+    {
+        try {
+            $estados = [
+                'ASIGNADA',
+                'NO ASIGNADA',
+                'YENDO A CARGAR',
+                'CARGANDO',
+                'SALIENDO CARGAR',
+                'YENDO A DESCARGAR',
+                'EN ADUANA',
+                'STACKING'
+            ];
+
+            $counts = [];
+            $detalles = [];
+
+            foreach ($estados as $estado) {
+                if ($estado === 'NO ASIGNADA') {
+                    $counts[$estado] = cntr::withoutTrashed()
+                        ->when($user, fn($q) => $q->where('user_cntr', $user))
+                        ->whereIn('main_status', ['NO ASIGNADA', 'NO ASIGNED'])
+                        ->count();
+
+                    $detalles[$estado] = cntr::with(['carga', 'asign'])
+                        ->withoutTrashed()
+                        ->when($user, fn($q) => $q->where('user_cntr', $user))
+                        ->whereIn('main_status', ['NO ASIGNADA', 'NO ASIGNED'])
+                        ->get()
+                        ->map(function ($item) {
+                            $item->main_status = 'NO ASIGNADA'; // Unifica visualmente
+                            return $item;
+                        });
+                } else {
+                    $counts[$estado] = cntr::withoutTrashed()
+                        ->when($user, fn($q) => $q->where('user_cntr', $user))
+                        ->where('main_status', $estado)
+                        ->count();
+
+                    $detalles[$estado] = cntr::with(['carga', 'asign'])
+                        ->withoutTrashed()
+                        ->when($user, fn($q) => $q->where('user_cntr', $user))
+                        ->where('main_status', $estado)
+                        ->get();
+                }
+            }
+
+            // ACTIVOS (todos excepto TERMINADA)
+            $counts['ACTIVOS'] = cntr::withoutTrashed()
+                ->when($user, fn($q) => $q->where('user_cntr', $user))
+                ->where('main_status', '!=', 'TERMINADA')
+                ->count();
+
+            $detalles['ACTIVOS'] = cntr::with('carga')
+                ->withoutTrashed()
+                ->when($user, fn($q) => $q->where('user_cntr', $user))
+                ->where('main_status', '!=', 'TERMINADA')
+                ->select('cntr_number', 'cntr_type', 'main_status', 'booking')
+                ->get()
+                ->map(function ($item) {
+                    return [
+                        'cntr_number' => $item->cntr_number,
+                        'cntr_type' => $item->cntr_type,
+                        'shipper' => $item->carga->shipper ?? null,
+                        'main_status' => $item->main_status === 'NO ASIGNED' ? 'NO ASIGNADA' : $item->main_status,
+                    ];
+                });
+
+            return response()->json([
+                'counts' => $counts,
+                'detalles' => $detalles,
+                'success' => true
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function storeCalifications(Request $request)
+    {
+        try {
+            $request->validate([
+                'calificacion_carga' => 'nullable|numeric',
+                'calification_transport' => 'nullable|numeric',
+                'feedback_customer' => 'nullable|string',
+                'calification_driver' => 'nullable|numeric',
+                'booking' => 'nullable|string',
+                'cntr_number' => 'nullable|string',
+                'user' => 'nullable|string',
+            ]);
+
+            // Insertar calificación del chofer
+            DB::table('calification_driver')->insert([
+                'calification_driver' => $request->calification_driver,
+                'cntr_number' => $request->cntr_number,
+                'booking' => $request->booking,
+                'user' => $request->user,
+                'created_at' => now(),
+            ]);
+
+            // Insertar calificación del transporte
+            DB::table('calification_transport')->insert([
+                'calification_transport' => $request->calification_transport,
+                'cntr_number' => $request->cntr_number,
+                'booking' => $request->booking,
+                'user' => $request->user,
+                'Created_at' => now(),
+            ]);
+
+            // Actualizar calificación de carga en la tabla cntr
+            Cntr::where('cntr_number', $request->cntr_number)
+                ->update(['calificacion_carga' => $request->calificacion_carga]);
+
+            return response()->json([
+                'message' => 'Calificaciones guardadas correctamente.'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al guardar las calificaciones.',
+                'error' => $e->getMessage()
             ], 500);
         }
     }

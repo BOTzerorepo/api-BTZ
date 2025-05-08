@@ -35,6 +35,6 @@ class asign extends Model implements AuditableContract
         'user',
         'company',
         'agent_port',
-        'sub_empresa',        
+        'sub_empresa',
     ];
 }

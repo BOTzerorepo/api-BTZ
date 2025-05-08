@@ -18,7 +18,7 @@ class cntr extends Model implements AuditableContract
         'id_cntr ',
         'booking',
         'cntr_number',
-        'cntr_seal',       
+        'cntr_seal',
         'cntr_type',
         'confirmacion',
         'net_weight',
@@ -51,7 +51,17 @@ class cntr extends Model implements AuditableContract
     public function interestPoints()
     {
         return $this->belongsToMany(InterestPoint::class, 'cntr_interest_point', 'cntr_id_cntr', 'interest_point_id')
-                    ->withPivot('order', 'activo')
-                    ->orderBy('cntr_interest_point.order');
+            ->withPivot('order', 'activo')
+            ->orderBy('cntr_interest_point.order');
+    }
+
+    public function carga()
+    {
+        return $this->belongsTo(Carga::class, 'booking', 'booking');
+    }
+
+    public function asign()
+    {
+        return $this->hasOne(asign::class, 'cntr_number', 'cntr_number');
     }
 }

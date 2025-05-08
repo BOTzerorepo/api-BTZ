@@ -15,8 +15,37 @@ class CustomerUnloadPlaceController extends Controller
      */
     public function index()
     {
-        $customerUnloadPlaces = DB::table('customer_unload_places')->get();
-        return $customerUnloadPlaces;
+        try {
+            $customerUnloadPlaces = CustomerUnloadPlace::orderBy('description', 'ASC')->get();
+            return response()->json([
+                'success' => true,
+                'message' => 'Lugares de descarga obtenidos correctamente.',
+                'data' => $customerUnloadPlaces
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener los lugares de descarga.',
+                'error' => $e->getMessage()
+            ], 500);
+        }   
+    }
+    public function indexComany($company)
+    {
+        try {
+            $customerUnloadPlaces = CustomerUnloadPlace::where('company', $company)->orderBy('description', 'ASC')->get();
+            return response()->json([
+                'success' => true,
+                'message' => 'Lugares de descarga obtenidos correctamente.',
+                'data' => $customerUnloadPlaces
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener los lugares de descarga.',
+                'error' => $e->getMessage()
+            ], 500);
+        }   
     }
 
     /**

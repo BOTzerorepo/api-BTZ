@@ -16,8 +16,19 @@ class AtaController extends Controller
      */
     public function index()
     {
-        $atas = DB::table('atas')->get();
-        return $atas;
+        try {
+            $atas = ATA::all();
+            return response()->json([
+                'data' => $atas,
+                'success' => true
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

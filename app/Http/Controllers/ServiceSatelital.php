@@ -161,6 +161,7 @@ class ServiceSatelital extends Controller
         }
     }
 
+    //MIGRAR A GO
     public function serviceSatelital()
     {
 
@@ -177,7 +178,6 @@ class ServiceSatelital extends Controller
             ->where('trucks.alta_aker', '!=', 0)
             ->get();
 
-        //return $todosMisCamiones;
 
 
         foreach ($todosMisCamiones as $camion) {
@@ -187,7 +187,6 @@ class ServiceSatelital extends Controller
                 'Content-Type' => 'application/json'
             ];
 
-            // TEST: E6HW19 - PRODUCCION: C2QC20
 
             if (env('APP_ENV') === 'production') {
                 $body = '{
@@ -285,6 +284,7 @@ class ServiceSatelital extends Controller
             }
         }
     }
+
     public function flota()
     {
 
@@ -700,6 +700,7 @@ class ServiceSatelital extends Controller
                 )
                 ->where('asign.truck', '=', $domain)
                 ->whereNotNull('trucks.domain') // Aseguramos que la unión principal se mantenga
+                ->orderBy('carga.created_at', 'desc') 
                 ->get();
 
 
@@ -781,6 +782,8 @@ class ServiceSatelital extends Controller
 
         return $camiones;
     }
+
+    //Migrar a GO
     public function revisarCoordenadas()
     {
         $detalleComparaciones = [];
@@ -796,6 +799,7 @@ class ServiceSatelital extends Controller
             ->select('a.*', 'c.*') // Seleccionar columnas necesarias
             ->distinct() // Evitar duplicados
             ->get();
+            
             
         foreach ($asignaciones as $asignacion) {
             // Obtener los datos del truck y el contenedor a partir de la asignación

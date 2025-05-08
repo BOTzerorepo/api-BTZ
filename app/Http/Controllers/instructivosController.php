@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Transport;
+use App\Models\asign;
+use App\Models\cntr;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+
 
 class instructivosController extends Controller
 {
@@ -14,7 +17,6 @@ class instructivosController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index($user)
-
     {
 
         $user = DB::table('users')->where('username', '=', $user)->first();
@@ -141,6 +143,54 @@ class instructivosController extends Controller
             return response()->json(['status' => 'success', 'message' => 'Instructivo eliminado correctamente.'], 200);
         } else {
             return response()->json(['status' => 'error', 'message' => 'Error al actualizar el registro.'], 500);
+        }
+    }
+
+    public function saveIntruction($cntrNumber, Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'agent_port' => 'nullable|string',
+                'sub_empresa' => 'nullable|string',
+                'out_usd' => 'nullable|numeric',
+                'company_invoice_out' => 'nullable|string',
+                'observation_out' => 'nullable|string',
+
+                'mail' => 'nullable|email|max:255',
+                'user' => 'nullable|string|max:255',
+                'empresa' => 'nullable|string|max:255',
+            ]);
+            // Actualizamos la asignacion. 
+            asign::where('cntr_number', $cntrNumber)
+                ->update([
+                    'agent_port' => $request->input('agent_port'),
+                    'sub_empresa' => $request->input('sub_empresa'),
+                ]);
+
+            cntr::where('cntr_number', $cntrNumber)
+                ->update([
+                    'out_usd' => $request->input('out_usd'),
+                    'company_invoice_out' => $request->input('company_invoice_out'),
+                    'observation_out' => $request->input('observation_out'),
+                ]);
+
+            DB::table('profit')->insert([
+                'out_usd' => $request->input('out_usd'),
+                'cntr_number' => $request->input('cntr_number'),
+                'out_razon_social' => $request->input('razon_social'),
+                'user' => $request->input('user'),
+                'out_detalle' => 'Flete Terrestre'
+            ]);
+
+            return response()->json([
+                'success' => true
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 }
