@@ -30,6 +30,23 @@ class CustomerUnloadPlaceController extends Controller
             ], 500);
         }   
     }
+    public function indexComany($company)
+    {
+        try {
+            $customerUnloadPlaces = CustomerUnloadPlace::where('company', $company)->orderBy('description', 'ASC')->get();
+            return response()->json([
+                'success' => true,
+                'message' => 'Lugares de descarga obtenidos correctamente.',
+                'data' => $customerUnloadPlaces
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener los lugares de descarga.',
+                'error' => $e->getMessage()
+            ], 500);
+        }   
+    }
 
     /**
      * Show the form for creating a new resource.
