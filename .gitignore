@@ -22,3 +22,5 @@ yarn-error.log
 database/schema/
 pruebaGit.txt
 composer.lock
+
+.codegpt

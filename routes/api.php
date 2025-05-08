@@ -70,6 +70,7 @@ Route::put('/updatToken', 'App\Http\Controllers\FcmTokenController@updateToken')
 Route::get('/notifyUsers', 'App\Http\Controllers\FcmTokenController@notifyUsers');
 Route::get('/takeUser', 'App\Http\Controllers\FcmTokenController@takeUser');
 
+
 Route::get('/imgAsignRazonSocial/{id}', [AsignController::class, 'imgAsignRazonSocial']);
 Route::put('/editAsignacion/{cntrNumber}', [AsignController::class, 'editAsignacion']);
 Route::get('/asignacion/{cntrNumber}', [AsignController::class, 'show']);
@@ -92,6 +93,7 @@ Route::prefix('messages')->group(function () {
     Route::get('/unread', [cargaController::class, 'getUnreadMessages']);
     Route::get('/unread/details', [cargaController::class, 'getUnreadMessagesDetails']);
 });
+
 
 Route::get('/ejecutar/{puntoActivoId}/{contenedorId}','App\Http\Controllers\ServiceSatelital@ejecutarAccionEntrada');
 Route::get('/points_of_interest','App\Http\Controllers\InterestPointController@index');
@@ -121,6 +123,8 @@ Route::get('/allCargoLastWeek/{user}','App\Http\Controllers\cargaController@load
 Route::get('/allCargoFinished/{user}','App\Http\Controllers\cargaController@loadFinished');
 Route::get('/carga/{id}/{user}','App\Http\Controllers\cargaController@show');
 Route::get('/cargaDomain/{domain}', 'App\Http\Controllers\cargaController@showCargaDomain');
+Route::get('/allCargo/{user}','App\Http\Controllers\cargaController@allCargo'); 
+
 
 Route::get('/loadFinishedTransport/{transport}', 'App\Http\Controllers\cargaController@loadFinishedTransport');
 Route::get('/cargaShowStatus/{id}', 'App\Http\Controllers\cargaController@getStatusById');
