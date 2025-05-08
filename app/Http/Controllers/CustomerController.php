@@ -30,6 +30,24 @@ class CustomerController extends Controller
             ], 500);
         }
     }
+    public function indexCompany($company)
+    {
+        try {
+            $customersShipper = Customer::where('company', $company)
+                ->orderBy('registered_name', 'ASC')
+                ->get();
+            return response()->json([
+                'data' => $customersShipper,
+                'success' => true
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 
     /**
      * Show the form for creating a new resource.
