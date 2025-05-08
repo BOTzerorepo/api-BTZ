@@ -15,8 +15,19 @@ class AgencyController extends Controller
      */
     public function index()
     {
-        $agencies = DB::table('agencies')->get();
-        return $agencies;
+        try {
+            $agencies = Agency::all();
+            return response()->json([
+                'data' => $agencies,
+                'success' => true
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

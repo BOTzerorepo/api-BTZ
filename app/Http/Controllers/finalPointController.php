@@ -15,8 +15,19 @@ class finalPointController extends Controller
      */
     public function index()
     {
-        $final_points = DB::table('ports')->get();
-        return $final_points;
+        try {
+            $final_points = DB::table('ports')->orderBy('description', 'ASC')->get();
+            return response()->json([
+                'data' => $final_points,
+                'success' => true
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

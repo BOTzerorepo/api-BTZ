@@ -33,111 +33,125 @@ class statusController extends Controller
      */
     public function index()
     {
-        return statu::all();
+        try {
+            $statusType = DB::table('status_type')->get();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Tipos de estados obtenidos correctamente.',
+                'data' => $statusType
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener los tipos de estados.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
+
     public function indexActive()
     {
         $cargasActivas = DB::table('cntr')
-        ->join('carga', 'cntr.booking', '=', 'carga.booking')
-        ->join('asign', 'asign.cntr_number', '=', 'cntr.cntr_number')
-        ->join('status', 'status.cntr_number', '=', 'cntr.cntr_number')
-        ->leftjoin('trucks', 'trucks.domain', '=', 'asign.truck')
-        ->select(
-            'cntr.id_cntr',
-            'carga.ref_customer',
-            'cntr.booking',
-            'cntr.cntr_number',
-            'cntr.cntr_type',
-            'cntr.confirmacion',
-            'cntr.main_status',
-            'cntr.status_cntr',
-            'asign.driver',
-            'asign.truck',
-            'asign.truck_semi',
-            'asign.transport',
-            'trucks.alta_aker',
-            DB::raw('MAX(status.id) as latest_status_id') // Selecciona el último status basado en el id
-        )
-        ->where('cntr.main_status', '!=', 'TERMINADA')
-        ->where('carga.deleted_at', '=', null)
-        ->groupBy(
-            'cntr.id_cntr',
-            'carga.ref_customer',
-            'cntr.booking',
-            'cntr.cntr_number',
-            'cntr.cntr_type',
-            'cntr.confirmacion',
-            'cntr.main_status',
-            'cntr.status_cntr',
-            'asign.driver',
-            'asign.truck',
-            'asign.truck_semi',
-            'asign.transport',
-            'trucks.alta_aker'
+            ->join('carga', 'cntr.booking', '=', 'carga.booking')
+            ->join('asign', 'asign.cntr_number', '=', 'cntr.cntr_number')
+            ->join('status', 'status.cntr_number', '=', 'cntr.cntr_number')
+            ->leftjoin('trucks', 'trucks.domain', '=', 'asign.truck')
+            ->select(
+                'cntr.id_cntr',
+                'carga.ref_customer',
+                'cntr.booking',
+                'cntr.cntr_number',
+                'cntr.cntr_type',
+                'cntr.confirmacion',
+                'cntr.main_status',
+                'cntr.status_cntr',
+                'asign.driver',
+                'asign.truck',
+                'asign.truck_semi',
+                'asign.transport',
+                'trucks.alta_aker',
+                DB::raw('MAX(status.id) as latest_status_id') // Selecciona el último status basado en el id
+            )
+            ->where('cntr.main_status', '!=', 'TERMINADA')
+            ->where('carga.deleted_at', '=', null)
+            ->groupBy(
+                'cntr.id_cntr',
+                'carga.ref_customer',
+                'cntr.booking',
+                'cntr.cntr_number',
+                'cntr.cntr_type',
+                'cntr.confirmacion',
+                'cntr.main_status',
+                'cntr.status_cntr',
+                'asign.driver',
+                'asign.truck',
+                'asign.truck_semi',
+                'asign.transport',
+                'trucks.alta_aker'
 
-        )
-        ->get();
+            )
+            ->get();
 
         return $cargasActivas;
-
     }
     public function indexTransportActive($ids)
-{
-    // Convertir la cadena de IDs separados por comas en un array
-    $idArray = explode(',', $ids);
+    {
+        // Convertir la cadena de IDs separados por comas en un array
+        $idArray = explode(',', $ids);
 
-    // Buscar los transportes cuyos IDs estén en la lista
-    $transportes = Transport::whereIn('id', $idArray)->get();
+        // Buscar los transportes cuyos IDs estén en la lista
+        $transportes = Transport::whereIn('id', $idArray)->get();
 
-    // Crear un array para almacenar las razones sociales
-    $rzTransportes = $transportes->pluck('razon_social')->toArray();
+        // Crear un array para almacenar las razones sociales
+        $rzTransportes = $transportes->pluck('razon_social')->toArray();
 
-    // Realizar la consulta de las cargas activas para todos los transportes
-    $cargasActivas = DB::table('cntr')
-        ->join('carga', 'cntr.booking', '=', 'carga.booking')
-        ->leftJoin('asign', 'asign.cntr_number', '=', 'cntr.cntr_number')
-        ->leftJoin('status', 'status.cntr_number', '=', 'cntr.cntr_number')
-        ->leftJoin('trucks', 'trucks.domain', '=', 'asign.truck')
-        ->whereIn('asign.transport', $rzTransportes) 
-        ->whereNull('carga.deleted_at') 
-        ->where('cntr.main_status', '!=', 'TERMINADA')
-        ->select(
-            'cntr.id_cntr',
-            'carga.ref_customer',
-            'cntr.booking',
-            'cntr.cntr_number',
-            'cntr.cntr_type',
-            'cntr.confirmacion',
-            'cntr.main_status',
-            'cntr.status_cntr',
-            'asign.driver',
-            'asign.truck',
-            'asign.truck_semi',
-            'asign.transport',
-            'asign.file_instruction',
-            'trucks.alta_aker',
-            DB::raw('MAX(status.id) as latest_status_id') // Seleccionar el último status basado en el id
-        )
-        ->groupBy(
-            'cntr.id_cntr',
-            'carga.ref_customer',
-            'cntr.booking',
-            'cntr.cntr_number',
-            'cntr.cntr_type',
-            'cntr.confirmacion',
-            'cntr.main_status',
-            'cntr.status_cntr',
-            'asign.driver',
-            'asign.truck',
-            'asign.truck_semi',
-            'asign.transport',
-            'trucks.alta_aker',
-            'asign.file_instruction'
-        )
-        ->get();
+        // Realizar la consulta de las cargas activas para todos los transportes
+        $cargasActivas = DB::table('cntr')
+            ->join('carga', 'cntr.booking', '=', 'carga.booking')
+            ->leftJoin('asign', 'asign.cntr_number', '=', 'cntr.cntr_number')
+            ->leftJoin('status', 'status.cntr_number', '=', 'cntr.cntr_number')
+            ->leftJoin('trucks', 'trucks.domain', '=', 'asign.truck')
+            ->whereIn('asign.transport', $rzTransportes)
+            ->whereNull('carga.deleted_at')
+            ->where('cntr.main_status', '!=', 'TERMINADA')
+            ->select(
+                'cntr.id_cntr',
+                'carga.ref_customer',
+                'cntr.booking',
+                'cntr.cntr_number',
+                'cntr.cntr_type',
+                'cntr.confirmacion',
+                'cntr.main_status',
+                'cntr.status_cntr',
+                'asign.driver',
+                'asign.truck',
+                'asign.truck_semi',
+                'asign.transport',
+                'asign.file_instruction',
+                'trucks.alta_aker',
+                DB::raw('MAX(status.id) as latest_status_id') // Seleccionar el último status basado en el id
+            )
+            ->groupBy(
+                'cntr.id_cntr',
+                'carga.ref_customer',
+                'cntr.booking',
+                'cntr.cntr_number',
+                'cntr.cntr_type',
+                'cntr.confirmacion',
+                'cntr.main_status',
+                'cntr.status_cntr',
+                'asign.driver',
+                'asign.truck',
+                'asign.truck_semi',
+                'asign.transport',
+                'trucks.alta_aker',
+                'asign.file_instruction'
+            )
+            ->get();
 
-    return $cargasActivas;
-}
+        return $cargasActivas;
+    }
 
     /**
      * Show the form for creating a new resource.
@@ -165,11 +179,7 @@ class statusController extends Controller
         $booking = $request['booking'];
         $carga = Carga::where('booking', $booking)->first();
         $idCarga = $carga->id;
-        
-
-
         DB::beginTransaction();
-
         try {
 
             //------------GENERAL--------------------
@@ -186,10 +196,9 @@ class statusController extends Controller
             $statusGral = $request['statusGral'];
             $user = $request['user'];
             $cntr = $request['cntr'];
-           
             $empresa = $request['empresa'];
             //$statusArchivo = $request->file('statusArchivo');
-            
+
             // ACTUALIZA STATUS
             $status = new statu([
                 'status' => $description,
@@ -197,15 +206,15 @@ class statusController extends Controller
                 'cntr_number' => $cntr,
                 'user_status' => $user,
             ]);
-                  
+
             // Guarda el modelo para obtener el ID
             $status->save();
 
             if ($request->hasFile('statusArchivo')) {
 
                 $statusArchivo = $request->file('statusArchivo');
-                $folder = 'status/'. $idCarga;
-            
+                $folder = 'status/' . $idCarga;
+
                 // Genera un nombre único basado en el idCarga y statusGral
                 $nombreArchivo =  $status->id . '.' . $statusArchivo->getClientOriginalExtension();
                 // Almacena el archivo en storage/app/public/status/idCarga/
@@ -213,19 +222,16 @@ class statusController extends Controller
                 // Resto del código si es necesario
                 // Después de guardar el archivo
                 $statusArchivoPath = $folder . '/' . $nombreArchivo;
-                $status->documento = $idCarga . '/' .$nombreArchivo;
+                $status->documento = $idCarga . '/' . $nombreArchivo;
                 $status->extension = $statusArchivo->getClientOriginalExtension();
-               
-
-            }else{
+            } else {
                 $statusArchivoPath = null;
             }
             $status->save();
 
-        
+
             //------------GENERAL--------------------
             if ($statusGral == "TERMINADA") {
-
 
                 // ACTUALIZA STATUS
                 $tipo = 'terminada';
@@ -279,12 +285,11 @@ class statusController extends Controller
                     DB::rollBack();
                     return response()->json(['errores' => 'Algo salió mal, por favor vuelta a intentar la acción.', 'id' => $idCarga], 500);
                 }
-                
             } elseif ($statusGral == "CON PROBLEMA") {
                 // SI TIENE PROBLEMAS.
                 // ACTUALIZA STATUS
                 $tipo = 'problema';
-            
+
                 // ENVIAMOS MAIL
                 // Crear una instancia del controlador
                 $emailController = new emailController();
@@ -321,35 +326,34 @@ class statusController extends Controller
                     if ($cntrModel) {
                         $user_to = $cntrModel->user_cntr;
                     }
-            
+
                     DB::table('notification')->insert([
-                      'title' => 'Carga ' . $cntr . ' con Problemas',
-                      'description' => $description,
-                      'user_to' => $user_to,
-                      'status' => 'No Leido',
-                      'sta_carga' => 'CON PROBLEMA',
-                      'user_create' => $user,
-                      'company_create' => $empresa,
-                      'cntr_number' => $cntr,
-                      'booking' => $booking,
+                        'title' => 'Carga ' . $cntr . ' con Problemas',
+                        'description' => $description,
+                        'user_to' => $user_to,
+                        'status' => 'No Leido',
+                        'sta_carga' => 'CON PROBLEMA',
+                        'user_create' => $user,
+                        'company_create' => $empresa,
+                        'cntr_number' => $cntr,
+                        'booking' => $booking,
                     ]);
-                
+
                     DB::commit();
                     // Devolver una respuesta JSON con información de éxito
                     return response()->json([
                         'id' => $idCarga,
-                        'errores' => 'Se modificó el satus a: ' . $statusGral .' y avisado por Correo al Cliente' ,
+                        'errores' => 'Se modificó el satus a: ' . $statusGral . ' y avisado por Correo al Cliente',
                     ], 200);
-
                 } else {
                     DB::rollBack();
                     return response()->json(['errores' => 'Algo salió mal, por favor vuelta a intentar la acción.', 'id' => $idCarga], 500);
                 }
-            }elseif ($statusGral == "STACKING") {
+            } elseif ($statusGral == "STACKING") {
                 // si la carga está en Staking, Actualizamos el Status en la tabla Status
 
                 $tipo = 'stacking';
-            
+
                 // ENVIAMOS MAIL
                 // Crear una instancia del controlador
                 $emailController = new emailController();
@@ -383,46 +387,43 @@ class statusController extends Controller
 
                     // cambiamos el estado del Chofer
                     $port = Carga::where('booking', $booking)->value('unload_place');
-            
+
                     // Obtener el chofer desde la asignación
                     $chofer = Asign::where('booking', $booking)
-                    ->where('cntr_number', $cntr)
-                    ->value('driver');
-                    
+                        ->where('cntr_number', $cntr)
+                        ->value('driver');
+
                     // Actualizar el estado del chofer en la tabla 'drivers'
                     Driver::where('nombre', $chofer)->update(['status_chofer' => 'libre', 'place' => $port]);
-                    
+
                     DB::commit();
                     // Devolver una respuesta JSON con información de éxito
                     return response()->json([
-                    'id' => $idCarga,
-                    'errores' => 'Se modificó el satus a: ' . $statusGral .' y avisado por Correo al Cliente' ,
+                        'id' => $idCarga,
+                        'errores' => 'Se modificó el satus a: ' . $statusGral . ' y avisado por Correo al Cliente',
                     ], 200);
-            
                 } else {
                     DB::rollBack();
                     return response()->json(['errores' => 'Algo salió mal, por favor vuelta a intentar la acción.', 'id' => $idCarga], 500);
                 }
-            }else {
+            } else {
                 // Insertamos Status en la tabla de Status         
                 $tipo = 'cambio';
                 // ENVIAMOS MAIL
                 // Crear una instancia del controlador
                 $emailController = new emailController();
-                
-                
+
                 // Llamar directamente a la función mailStatus
                 $response = $emailController->cambiaStatus($cntr, $empresa, $booking, $user, $tipo, $statusArchivoPath);
 
-
                 if ($response == 'ok') {
-                
+
                     // si todo esta ok, Acualizamos el estado del CNTR
                     $cntrModel = cntr::where('cntr_number', $cntr)->firstOrFail();
                     $cntrModel->main_status = $statusGral;
                     $cntrModel->status_cntr = $description;
                     $cntrModel->save();
-            
+
                     // Luego revisamos el status de los demás contenedores de la Carga. 
                     // Buscar todos los registros Cntr asociados a la booking
                     $cntrs = cntr::where('booking', $booking)->get();
@@ -441,9 +442,8 @@ class statusController extends Controller
                     DB::commit();
                     return response()->json([
                         'id' => $idCarga,
-                        'errores' => 'Se modificó el satus a: ' . $statusGral .' y avisado por Correo al Cliente' ,
+                        'errores' => 'Se modificó el satus a: ' . $statusGral . ' y avisado por Correo al Cliente',
                     ], 200);
-            
                 } else {
                     DB::rollBack();
                     return response()->json(['errores' => 'Algo salió mal, por favor vuelta a intentar la acción.', 'id' => $idCarga], 500);
@@ -513,12 +513,40 @@ class statusController extends Controller
      */
     public function showLast($id)
     {
-       return statu::find($id);
+        try {
+            $statu = statu::find($id);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Tipos de estados obtenidos correctamente.',
+                'data' => $statu
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener los tipos de estados.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
+
     public function showHistory($cntr)
     {
-      
-       return DB::table('status')->where('cntr_number','=',$cntr)->orderBy('created_at','DESC')->get();
+        try {
+            $status = DB::table('status')->where('cntr_number', '=', $cntr)->orderBy('created_at', 'DESC')->get();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Tipos de estados obtenidos correctamente.',
+                'data' => $status
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener los tipos de estados.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
