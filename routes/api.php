@@ -77,6 +77,7 @@ Route::get('/asignacion/{cntrNumber}', [AsignController::class, 'show']);
 
 // Rutas para notificaciones
 Route::prefix('notifications')->group(function () {
+    Route::get('/all', [cargaController::class, 'getNotifications']);
     Route::get('/problems', [cargaController::class, 'getNotificationsWithProblems']);
     Route::get('/completed', [cargaController::class, 'getNotificationsCompleted']);
     Route::get('/assigned', [cargaController::class, 'getNotificationsAssigned']);

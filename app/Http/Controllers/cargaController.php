@@ -765,7 +765,96 @@ class cargaController extends Controller
         }
     }
 
-    public function getNotificationsWithProblems(Request $request)
+    public function getNotifications(Request $request)
+    {
+        try {
+            $userId = $request->query('userId');
+            if (!$userId) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'El parámetro userId es requerido.'
+                ], 400);
+            }
+
+            $notificationsConProblema = DB::table('notification')
+                ->join('carga', 'notification.booking', '=', 'carga.booking')
+                ->join('cntr', 'notification.cntr_number', '=', 'cntr.cntr_number')
+                ->where('notification.user_to', $userId)
+                ->where('notification.status', 'No Leido')
+                ->where('notification.sta_carga', 'CON PROBLEMA')
+                ->select(
+                    'notification.id',
+                    'notification.title',
+                    'notification.description',
+                    'notification.user_create',
+                    'notification.Created_at',
+                    'notification.cntr_number',
+                    'notification.booking'
+                )
+                ->get();
+
+            $notificationsTerminada = DB::table('notification')
+                ->where('user_to', $userId)
+                ->where('status', 'No Leido')
+                ->where('sta_carga', 'TERMINADA')
+                ->select(
+                    'id',
+                    'title',
+                    'description',
+                    'user_create',
+                    'Created_at',
+                    'cntr_number',
+                    'booking'
+                )
+                ->get();
+
+            $notificationsAsignada = DB::table('notification')
+                ->where('user_to', $userId)
+                ->where('status', 'No Leido')
+                ->where('sta_carga', 'ASIGNADA')
+                ->select(
+                    'id',
+                    'title',
+                    'description',
+                    'user_create',
+                    'Created_at',
+                    'cntr_number',
+                    'booking'
+                )
+                ->get();
+
+            $messages = DB::table('mensajes')
+                ->where('para', $userId)
+                ->where('leido', '0')
+                ->where('estado', 'normal')
+                ->select(
+                    'id',
+                    'de',
+                    'mensaje',
+                    'fecha'
+                )
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'notificationsConProblema' => $notificationsConProblema,
+                'notificationsConProblemaCantidad' => $notificationsConProblema->count(),
+                'notificationsTerminada' => $notificationsTerminada,
+                'notificationsTerminadaCantidad' => $notificationsTerminada->count(),
+                'notificationsAsignada' => $notificationsAsignada,
+                'notificationsAsignadaCantidad' => $notificationsAsignada->count(),
+                'messages' => $messages,
+                'messagesCantidad' => $messages->count(),
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /*public function getNotificationsWithProblems(Request $request)
     {
         try {
             $userId = $request->query('userId');
@@ -1029,7 +1118,7 @@ class cargaController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
-    }
+    }*/
 
     public function getStatusById($id)
     {
@@ -1137,7 +1226,7 @@ class cargaController extends Controller
     {
 
         $user = User::where('username', '=', $user)->first();
-        
+
 
         // Selecciona las columnas específicas para evitar ambigüedad
         if ($user->permiso == 'Traffic' || $user->permiso == 'Master') {
