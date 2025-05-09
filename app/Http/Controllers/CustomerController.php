@@ -33,11 +33,9 @@ class CustomerController extends Controller
     public function indexCompany($company)
     {
         try {
-            $customersShipper = Customer::where('company', $company)
-                ->orderBy('registered_name', 'ASC')
-                ->get();
+            $customers = Customer::where('company', $company)->orderBy('registered_name', 'ASC')->get();
             return response()->json([
-                'data' => $customersShipper,
+                'data' => $customers,
                 'success' => true
             ], 200);
         } catch (\Exception $e) {
