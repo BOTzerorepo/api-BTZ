@@ -473,7 +473,7 @@ Route::delete('/customerShipper/{id}','App\Http\Controllers\CustomerShipperContr
 
 //Customer trader
 Route::get('/customers','App\Http\Controllers\CustomerController@index'); //Busca todos los Customer trader
-Route::get('/customerCompany/{company}','App\Http\Controllers\CustomerController@indexCompany'); //Busca todos los Customer trader de una compania
+Route::get('/customersCompany/{company}','App\Http\Controllers\CustomerController@indexCompany'); //Busca todos los Customer trader de una compania
 Route::get('/customer/{id}','App\Http\Controllers\CustomerController@show'); //Busca un Customer trader de una compania
 Route::get('/customer/{name}','App\Http\Controllers\CustomerController@showName'); //Busca un Customer trader de una compania
 Route::post('/customer','App\Http\Controllers\CustomerController@store'); //Crea un nuevo Customer trader
