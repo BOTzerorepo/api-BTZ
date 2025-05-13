@@ -30,10 +30,22 @@ class CustomerAgentController extends Controller
         }
     }
 
-    public function indexCompany($empresa)
+    public function indexCompany(Request $request)
     {
-        $customerAgent = DB::table('customer_agents')->where('empresa', '=', $empresa)->get();
-        return $customerAgent;
+        try {
+            $company = $request->input('company');
+            $customerAgents = CustomerAgent::orderBy('razon_social', 'ASC')->where('empresa', '=', $company)->get();
+            return response()->json([
+                'data' => $customerAgents,
+                'success' => true
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**

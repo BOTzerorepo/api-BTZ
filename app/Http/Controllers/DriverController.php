@@ -20,6 +20,13 @@ class DriverController extends Controller
         $drivers = Driver::whereNull('deleted_at')->get();
         return $drivers;
     }
+    public function indexCompany(Request $request)
+    {
+        $company = $request->input('company');
+        $drivers = Driver::whereNull('deleted_at')->where('empresa', '=', $company)->get();
+        return $drivers;
+    }
+
     public function indexTransport($idTransport)
     {
         // Convertir $idTransport en un array si no lo es (separado por comas)
@@ -116,11 +123,10 @@ class DriverController extends Controller
 
     public function showDriver($transporte)
     {
-        $idTranport = DB::table('transports')->where('id', '=', $transporte)->get('razon_social');
-        $id = $idTranport[0]->razon_social;
-
+        $idTranport = DB::table('transports')->where('id', '=', $transporte)->first();
+        $id = $idTranport->razon_social;
         /* Hay que recibir el id del Transporte */
-        $drivers = DB::table('drivers')->whereNull('deleted_at')->where('transporte', '=', $id)->get();
+        $drivers = DB::table('drivers')->whereNull('deleted_at')->where('transporte', '=', $id)->where('empresa', '=', $idTranport->empresa)->get();
         return $drivers;
     }
 

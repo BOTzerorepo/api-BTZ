@@ -95,6 +95,54 @@ class statusController extends Controller
 
         return $cargasActivas;
     }
+
+    public function indexActiveCompany(Request $request)
+    {
+        $company = $request->input('company');
+        $cargasActivas = DB::table('cntr')
+            ->join('carga', 'cntr.booking', '=', 'carga.booking')
+            ->join('asign', 'asign.cntr_number', '=', 'cntr.cntr_number')
+            ->join('status', 'status.cntr_number', '=', 'cntr.cntr_number')
+            ->leftjoin('trucks', 'trucks.domain', '=', 'asign.truck')
+            ->select(
+                'cntr.id_cntr',
+                'carga.ref_customer',
+                'cntr.booking',
+                'cntr.cntr_number',
+                'cntr.cntr_type',
+                'cntr.confirmacion',
+                'cntr.main_status',
+                'cntr.status_cntr',
+                'asign.driver',
+                'asign.truck',
+                'asign.truck_semi',
+                'asign.transport',
+                'trucks.alta_aker',
+                DB::raw('MAX(status.id) as latest_status_id') // Selecciona el último status basado en el id
+            )
+            ->where('cntr.main_status', '!=', 'TERMINADA')
+            ->where('carga.deleted_at', '=', null)
+            ->where('carga.empresa', '=', $company)
+            ->groupBy(
+                'cntr.id_cntr',
+                'carga.ref_customer',
+                'cntr.booking',
+                'cntr.cntr_number',
+                'cntr.cntr_type',
+                'cntr.confirmacion',
+                'cntr.main_status',
+                'cntr.status_cntr',
+                'asign.driver',
+                'asign.truck',
+                'asign.truck_semi',
+                'asign.transport',
+                'trucks.alta_aker'
+            )
+            ->get();
+
+        return $cargasActivas;
+    }
+
     public function indexTransportActive($ids)
     {
         // Convertir la cadena de IDs separados por comas en un array
