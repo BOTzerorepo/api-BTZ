@@ -44,6 +44,24 @@ class TransportController extends Controller
             ], 500);
         }
     }
+    public function indexCompany(Request $request)
+    {
+        try {
+            $company = $request->input('company');
+            $transportes = Transport::whereNull('deleted_at')->where('empresa','=', $company)->get();
+            return response()->json([
+                'data' => $transportes,
+                'success' => true
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    
     public function indexTransporteCustomer($id_customer)
     {
         $transportes = Transport::whereNull('deleted_at')->where('customer_id', '=', $id_customer)->get();

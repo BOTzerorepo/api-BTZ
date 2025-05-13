@@ -9,6 +9,7 @@ use App\Models\InterestPoint;
 use App\Models\Transport;
 use App\Models\truck;
 use App\Models\Carga;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\crearpdfController;
@@ -365,7 +366,7 @@ class cntrController extends Controller
         }
     }
 
-    public function statusResumen($user = null)
+    public function statusResumenCompany(Request $request)
     {
         try {
             $estados = [
@@ -379,20 +380,37 @@ class cntrController extends Controller
                 'STACKING'
             ];
 
+            $user = $request->input('user');
+            $company = null;
+            
+            if ($user) {
+                $userObj = DB::table('users')
+                ->where('users.username', $user)
+                ->first();
+                if ($userObj) {
+                    $company = $userObj->empresa; 
+                }
+            } else {
+                $company = $request->input('company'); 
+            }
+        
             $counts = [];
             $detalles = [];
+           
 
             foreach ($estados as $estado) {
                 if ($estado === 'NO ASIGNADA') {
                     $counts[$estado] = cntr::withoutTrashed()
                         ->when($user, fn($q) => $q->where('user_cntr', $user))
                         ->whereIn('main_status', ['NO ASIGNADA', 'NO ASIGNED'])
+                        ->where('company', $company)
                         ->count();
 
                     $detalles[$estado] = cntr::with(['carga', 'asign'])
                         ->withoutTrashed()
                         ->when($user, fn($q) => $q->where('user_cntr', $user))
                         ->whereIn('main_status', ['NO ASIGNADA', 'NO ASIGNED'])
+                        ->where('company', $company)
                         ->get()
                         ->map(function ($item) {
                             $item->main_status = 'NO ASIGNADA'; // Unifica visualmente
@@ -402,12 +420,14 @@ class cntrController extends Controller
                     $counts[$estado] = cntr::withoutTrashed()
                         ->when($user, fn($q) => $q->where('user_cntr', $user))
                         ->where('main_status', $estado)
+                        ->where('company', $company)
                         ->count();
 
                     $detalles[$estado] = cntr::with(['carga', 'asign'])
                         ->withoutTrashed()
                         ->when($user, fn($q) => $q->where('user_cntr', $user))
                         ->where('main_status', $estado)
+                        ->where('company', $company)
                         ->get();
                 }
             }
@@ -416,12 +436,14 @@ class cntrController extends Controller
             $counts['ACTIVOS'] = cntr::withoutTrashed()
                 ->when($user, fn($q) => $q->where('user_cntr', $user))
                 ->where('main_status', '!=', 'TERMINADA')
+                ->where('company', $company)
                 ->count();
 
             $detalles['ACTIVOS'] = cntr::with('carga')
                 ->withoutTrashed()
                 ->when($user, fn($q) => $q->where('user_cntr', $user))
                 ->where('main_status', '!=', 'TERMINADA')
+                ->where('company', $company)
                 ->select('cntr_number', 'cntr_type', 'main_status', 'booking')
                 ->get()
                 ->map(function ($item) {
@@ -446,6 +468,7 @@ class cntrController extends Controller
             ], 500);
         }
     }
+
 
     public function storeCalifications(Request $request)
     {

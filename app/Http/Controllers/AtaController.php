@@ -31,6 +31,24 @@ class AtaController extends Controller
         }
     }
 
+    public function indexCompany(Request $request)
+    {
+        try {
+            $company = $request->input('company');
+            $atas = ATA::where('empresa','=', $company)->get();
+            return response()->json([
+                'data' => $atas,
+                'success' => true
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     /**
      * Show the form for creating a new resource.
      *

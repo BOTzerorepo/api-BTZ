@@ -14,7 +14,8 @@ use App\Http\Controllers\ProfitController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
-Route::get('/cntr/estado-resumen/{user?}', [cntrController::class, 'statusResumen']);
+Route::get('/cntr/estado-resumen', [cntrController::class, 'statusResumenCompany']);
+
 
 
 Route::group(['middleware' => 'auth:api'], function () {
@@ -135,6 +136,7 @@ Route::get('/showEdit/{id}/{user}','App\Http\Controllers\cargaController@showEdi
 // STATUS
 Route::post('/statusCarga', 'App\Http\Controllers\statusController@updateStatusCarga');
 Route::get('/cargasActivas', 'App\Http\Controllers\statusController@indexActive');
+Route::get('/cargasActivasCompany', 'App\Http\Controllers\statusController@indexActiveCompany');
 Route::get('/cargasActivasTransport/{transport}', 'App\Http\Controllers\statusController@indexTransportActive'); 
 
 
@@ -333,6 +335,7 @@ Route::delete('/trailer/{trailer}', 'App\Http\Controllers\TrailerController@dest
 
 //Ata
 Route::get('/atas','App\Http\Controllers\AtaController@index'); //Busca todos los Agente de transporte
+Route::get('/atasCompany','App\Http\Controllers\AtaController@indexCompany'); //Busca todos los Agente de transporte
 Route::get('/ata/{id}','App\Http\Controllers\AtaController@show'); //Busca un Agente de transporte
 Route::post('/ata','App\Http\Controllers\AtaController@store'); //Crea un nuevo Agente de transporte
 Route::post('/ata/{id}','App\Http\Controllers\AtaController@update'); //Actualiza los datos de un Agente de transporte
@@ -341,6 +344,7 @@ Route::delete('/ata/{id}','App\Http\Controllers\AtaController@destroy'); //Elimi
 // DRIVER CONTROLLLER trailerAsign
 Route::get('/drivers/{transport_id}','App\Http\Controllers\DriverController@showDriver'); 
 Route::get('/drivers','App\Http\Controllers\DriverController@index');
+Route::get('/driversCompany','App\Http\Controllers\DriverController@indexCompany');
 Route::get('/driversTransport/{idTransport}', 'App\Http\Controllers\DriverController@indexTransport'); 
 
 Route::get('/driver/{id}','App\Http\Controllers\DriverController@show'); 
@@ -352,6 +356,7 @@ Route::delete('/driver/{id}','App\Http\Controllers\DriverController@destroy');
 //Transporte
 Route::get('/transporteCustomer/{id}','App\Http\Controllers\TransportController@indexTransporteCustomer'); //Busca todos los transportes del customerId
 Route::get('/transportes','App\Http\Controllers\TransportController@index'); 
+Route::get('/transportesCompany','App\Http\Controllers\TransportController@indexCompany'); 
 Route::get('/transporte/{id}','App\Http\Controllers\TransportController@show'); 
 Route::get('/transporteRazonSocial/{razonSocial}','App\Http\Controllers\TransportController@showRazonSocial'); 
 Route::post('/transporte','App\Http\Controllers\TransportController@store'); 
@@ -437,7 +442,7 @@ Route::delete('/plazoPago/{id}','App\Http\Controllers\PayTimeController@destroy'
 
 //Customer agent
 Route::get('/customerAgents','App\Http\Controllers\CustomerAgentController@index'); //Busca todos los Customer Shipper
-Route::get('/customerAgentEmpresa/{empresa}','App\Http\Controllers\CustomerAgentController@indexCompany'); //Busca todos los Customer Shipper de una compania
+Route::get('/customerAgentsCompany','App\Http\Controllers\CustomerAgentController@indexCompany'); //Busca todos los Customer Shipper de una compania
 Route::get('/customerAgent/{id}','App\Http\Controllers\CustomerAgentController@show'); //Busca un Customer Shipper de una compania
 Route::post('/customerAgent','App\Http\Controllers\CustomerAgentController@store'); //Crea un nuevo Customer Shipper
 Route::post('/customerAgent/{id}','App\Http\Controllers\CustomerAgentController@update'); //Actualiza los datos de un Customer Shipper
