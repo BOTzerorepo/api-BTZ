@@ -1,10 +1,14 @@
 <table width="100%" border="0" cellpadding="1" cellspacing="0" bordercolor="#999999" class="tablaContenido">
     <tr>
         <td width="50%" valign="top" class="tdContenido" style="border:none; text-align:left;">
-            <img src="hhttps://totaltrade.botzero.tech/images/ttl/TTchica.png" style="width:10rem;height:8rem;" alt="">
+            @if ($sandbox === 0)
+                <img src="https://totaltrade.botzero.tech/images/ttl/TTchica.png" style="width:10rem;height 8rem;" alt="">
+            @else
+                <img src="https://demo.botzero.tech/images/whiteLabel.png" style="width:10rem;height 8rem;" alt="">
+            @endif
         </td>
         <td width="50%" valign="top" class="tdContenido" style="border:none; text-align:right;">
-            <img src="{{ $img }}" style="width:10rem; height:8rem;" alt="">
+            <img src="{{ $img }}" style="width:10rem; height 8rem;" alt="">
         </td>
     </tr>
 </table>
