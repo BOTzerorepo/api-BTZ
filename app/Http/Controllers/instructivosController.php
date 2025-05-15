@@ -155,7 +155,6 @@ class instructivosController extends Controller
                 'out_usd' => 'nullable|numeric',
                 'company_invoice_out' => 'nullable|string',
                 'observation_out' => 'nullable|string',
-
                 'mail' => 'nullable|email|max:255',
                 'user' => 'nullable|string|max:255',
                 'empresa' => 'nullable|string|max:255',
@@ -176,8 +175,8 @@ class instructivosController extends Controller
 
             DB::table('profit')->insert([
                 'out_usd' => $request->input('out_usd'),
-                'cntr_number' => $request->input('cntr_number'),
-                'out_razon_social' => $request->input('razon_social'),
+                'cntr_number' => $cntrNumber,
+                'out_razon_social' => $request->input('out_razon_social'),
                 'user' => $request->input('user'),
                 'out_detalle' => 'Flete Terrestre'
             ]);
@@ -188,6 +187,7 @@ class instructivosController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error interno del servidor',
+                'message' => $request->input('user'),
                 'success' => false,
                 'error' => $e->getMessage()
             ], 500);

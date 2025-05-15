@@ -23,8 +23,9 @@ class verpdfController extends Controller
      */
     public function carga($cntr_number)
     {
-        $variables = DB::table('variables')->select('api')->get();
+        $variables = DB::table('variables')->select('api','sandbox')->get();
         $base = $variables[0]->api;
+        $sandbox = $variables[0]->sandbox;
 
         $respuesta = DB::table('asign')
             ->join('transports', 'transports.razon_social', '=', 'asign.transport')
@@ -185,8 +186,8 @@ class verpdfController extends Controller
                         'obs_imo' => $row->obs_imo,
                         'rf_tem' => $row->rf_tem,
                         'rf_humedad' => $row->rf_humedad,
-                        'rf_venti' => $row->rf_venti
-
+                        'rf_venti' => $row->rf_venti,
+                        'sandbox' => $sandbox
                     ];
 
                     return view('pdf.instructivoCargaFOB', $data);
@@ -238,7 +239,8 @@ class verpdfController extends Controller
                         'obs_imo' => $row->obs_imo,
                         'rf_tem' => $row->rf_tem,
                         'rf_humedad' => $row->rf_humedad,
-                        'rf_venti' => $row->rf_venti
+                        'rf_venti' => $row->rf_venti,
+                        'sandbox' => $sandbox
 
                     ];
 
@@ -310,7 +312,8 @@ class verpdfController extends Controller
                         'obs_imo' => $row->obs_imo,
                         'rf_tem' => $row->rf_tem,
                         'rf_humedad' => $row->rf_humedad,
-                        'rf_venti' => $row->rf_venti
+                        'rf_venti' => $row->rf_venti,
+                        'sandbox' => $sandbox
 
                     ];
 
@@ -385,7 +388,8 @@ class verpdfController extends Controller
                         'obs_imo' => $row->obs_imo,
                         'rf_tem' => $row->rf_tem,
                         'rf_humedad' => $row->rf_humedad,
-                        'rf_venti' => $row->rf_venti
+                        'rf_venti' => $row->rf_venti,
+                        'sandbox' => $sandbox
 
                     ];
 
@@ -457,7 +461,8 @@ class verpdfController extends Controller
                         'obs_imo' => $row->obs_imo,
                         'rf_tem' => $row->rf_tem,
                         'rf_humedad' => $row->rf_humedad,
-                        'rf_venti' => $row->rf_venti
+                        'rf_venti' => $row->rf_venti,
+                        'sandbox' => $sandbox
 
                     ];
 
@@ -507,7 +512,8 @@ class verpdfController extends Controller
                         'obs_imo' => $row->obs_imo,
                         'rf_tem' => $row->rf_tem,
                         'rf_humedad' => $row->rf_humedad,
-                        'rf_venti' => $row->rf_venti
+                        'rf_venti' => $row->rf_venti,
+                        'sandbox' => $sandbox
 
                     ];
 
