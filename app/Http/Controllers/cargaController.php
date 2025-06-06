@@ -332,14 +332,16 @@ class cargaController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function issetBooking($booking)
+    public function issetBooking(Request $request)
     {
+        $booking = $request->input('booking');
         $booking = Carga::whereNull('deleted_at')->where('booking', '=', $booking)->get();
         return $booking->count();
     }
 
-    public function issetTrader($trader)
+    public function issetTrader(Request $request)
     {
+        $trader = $request->input('trader');
         $trader = DB::table('customers')->where('registered_name', '=', $trader)->get();
         return $trader->count();
     }

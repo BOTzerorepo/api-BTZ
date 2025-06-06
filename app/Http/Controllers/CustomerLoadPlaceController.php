@@ -992,14 +992,15 @@ class CustomerLoadPlaceController extends Controller
         return $customerLoadPlaces;
     }
 
-    public function issetLugarDeCarga($description)
+    public function issetLugarDeCarga(Request $request)
     {
+        $description = $request->input('loadplace');
         $loadPlace = DB::table('customer_load_places')->where('description', '=', $description)->count();
         return $loadPlace;
     }
-    public function issetLugarDeDescarga($description)
+    public function issetLugarDeDescarga(Request $request)
     {
-
+        $description = $request->input('unloadplace');
         $unloadPlace = DB::table('customer_unload_places')->where('description', '=', $description)->count();
         return $unloadPlace;
     }

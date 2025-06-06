@@ -202,13 +202,13 @@ oooooo     oooo       .o.       ooooo        ooooo oooooooooo.         .o.      
       `8'       o88o     o8888o o888ooooood8 o888o o888bood8P'   o88o     o8888o  `Y8bood8P'  o888o  `Y8bood8P'  o8o        `8  8 8 8 8 8 8 8
  */
 
-Route::get('issetBooking/{booking}', 'App\Http\Controllers\cargaController@issetBooking');
+Route::post('issetBooking', 'App\Http\Controllers\cargaController@issetBooking');
 Route::get('issetTransport/{cuit}', 'App\Http\Controllers\TransportController@issetTrasnsport');
 Route::get('issetTransportRazon/{razon_social}', 'App\Http\Controllers\TransportController@issetTransportRazon');
 Route::get('issetTruck/{domain}', 'App\Http\Controllers\TruckController@issetTruck');
-Route::get('issetTrader/{trader}', 'App\Http\Controllers\cargaController@issetTrader');
-Route::get('issetLoadPlace/{description}', 'App\Http\Controllers\CustomerLoadPlaceController@issetLugarDeCarga');
-Route::get('issetUnloadPlace/{description}', 'App\Http\Controllers\CustomerLoadPlaceController@issetLugarDeDescarga');
+Route::post('issetTrader', 'App\Http\Controllers\cargaController@issetTrader');
+Route::post('issetLoadPlace', 'App\Http\Controllers\CustomerLoadPlaceController@issetLugarDeCarga');
+Route::post('issetUnloadPlace', 'App\Http\Controllers\CustomerLoadPlaceController@issetLugarDeDescarga');
 Route::get('issetCntr/{cntr_number}', 'App\Http\Controllers\cntrController@issetCntr');
 Route::get('issetAsignacion/{dominio}', 'App\Http\Controllers\cntrController@issetAsign');
 Route::get('issetDriver', 'App\Http\Controllers\DriverController@issetDriver');
