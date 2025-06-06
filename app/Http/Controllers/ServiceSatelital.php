@@ -699,6 +699,7 @@ class ServiceSatelital extends Controller
                     'transports.*'
                 )
                 ->where('asign.truck', '=', $domain)
+                ->whereNotIn('cntr.main_status', ['TERMINADA', 'NO ASIGNED'])
                 ->whereNotNull('trucks.domain') // Aseguramos que la unión principal se mantenga
                 ->get();
 
