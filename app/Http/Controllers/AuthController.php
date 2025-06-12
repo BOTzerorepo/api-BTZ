@@ -11,6 +11,7 @@ use Tymon\JWTAuth\Facades\JWTAuth; // Importa el JWTAuth
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
+use Spatie\Permission\Models\Role;
 
 class AuthController extends Controller 
 {
@@ -83,7 +84,8 @@ class AuthController extends Controller
         ) {
             // Generar el token
             $token = JWTAuth::fromUser($user);
-
+            $role = $user->getRoleNames()->first();
+            $permissions = Role::findByName($role)->permissions;
             // Devolver el token y la información del usuario
             return response()->json([
                 'token' => $token,
@@ -91,7 +93,8 @@ class AuthController extends Controller
                 'username' => $user->username,
                 'email' => $user->email,
                 'company' => $user->empresa,
-                'permiso' => $user->permiso,
+                'role' => $role,
+                'permiso' => $permissions->pluck('name'),
                 'transport_id' => $user->transport_id,
             ], 201);
         } else {

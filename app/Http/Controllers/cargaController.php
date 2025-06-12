@@ -91,12 +91,10 @@ class cargaController extends Controller
 
     public function loadLastWeek($user)
     {
-
         $user = User::where('username', '=', $user)->first();
         $empiezaSemana = Carbon::parse('last monday')->startOfDay();
 
         if ($user->permiso == 'Traffic' || $user->permiso == 'Master') {
-
             $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
                 ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
@@ -106,9 +104,9 @@ class cargaController extends Controller
                 ->where('carga.status', '!=', 'TERMINADA')
                 ->whereNull('cntr.deleted_at')
                 ->whereNull('asign.deleted_at')
-                ->orderBy('carga.load_date', 'ASC')->get();
+                ->orderBy('carga.load_date', 'ASC')
+                ->get();
         } elseif ($user->permiso == 'Transport') {
-
             $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
                 ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
@@ -121,7 +119,6 @@ class cargaController extends Controller
                 ->orderBy('carga.load_date', 'ASC')
                 ->get();
         } else {
-
             $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
                 ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
@@ -132,20 +129,20 @@ class cargaController extends Controller
                 ->where('carga.user', '=', $user->username)
                 ->whereNull('cntr.deleted_at')
                 ->whereNull('asign.deleted_at')
-                ->orderBy('carga.load_date', 'ASC')->get();
+                ->orderBy('carga.load_date', 'ASC')
+                ->get();
         }
-        // Obtener los cntr y sus puntos de interés
+
         $cntrs = Cntr::whereIn('cntr_number', $todasLasCargasDeEstaSemana->pluck('cntr_number'))
             ->with('interestPoints')
             ->get()
             ->keyBy('cntr_number');
 
-        // Mapear las cargas con sus puntos de interés
         $todasLasCargasDeEstaSemana->each(function ($carga) use ($cntrs) {
-            $carga->cntrs = $cntrs->get($carga->cntr_number); // Agregar los puntos de interés a cada carga
+            $carga->cntrs = $cntrs->get($carga->cntr_number);
         });
 
-        return $todasLasCargasDeEstaSemana;
+        return response()->json($todasLasCargasDeEstaSemana);
     }
 
     public function loadNextWeek($user)

@@ -10,7 +10,8 @@ use App\Http\Controllers\cargaController;
 use App\Http\Controllers\AsignController;
 use App\Http\Controllers\instructivosController;
 use App\Http\Controllers\ProfitController;
-
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Support\Facades\Auth;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
@@ -121,7 +122,27 @@ o888o   o888o  `Y8bood8P'  o8o        o888o o888ooooood8      o888o o8o        `
 
 Route::get('/allCargoThisWeek/{user}','App\Http\Controllers\cargaController@loadThisWeek'); 
 Route::get('/allCargoNextWeek/{user}','App\Http\Controllers\cargaController@loadNextWeek'); 
-Route::get('/allCargoLastWeek/{user}','App\Http\Controllers\cargaController@loadLastWeek'); 
+Route::get('/test-token', function () {
+    try {
+        $user = JWTAuth::parseToken()->authenticate();
+        return response()->json(['valid' => true, 'user' => $user]);
+    } catch (\Exception $e) {
+        return response()->json(['valid' => false, 'error' => $e->getMessage()]);
+    }
+});
+Route::middleware('auth:api')->get('/check-token', function () {
+    return response()->json(['ok' => true, 'user' => auth()->user()]);
+});
+Route::get('/check-token-force', function () {
+    Auth::shouldUse('api'); // 🔧 fuerza el guard jwt
+    return response()->json([
+        'status' => 'ok',
+        'user' => auth()->user(),
+    ]);
+});
+//Route::get('/allCargoLastWeek/{user}','App\Http\Controllers\cargaController@loadLastWeek'); 
+
+
 Route::get('/allCargoFinished/{user}','App\Http\Controllers\cargaController@loadFinished');
 Route::get('/carga/{id}/{user}','App\Http\Controllers\cargaController@show');
 Route::get('/cargaDomain/{domain}', 'App\Http\Controllers\cargaController@showCargaDomain');
