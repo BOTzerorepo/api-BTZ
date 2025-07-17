@@ -139,6 +139,7 @@ class UserController extends Controller
                 'empresa' => 'nullable|string|max:255',
                 'permiso' => 'required|string|max:50',
                 'transport_id' => 'nullable',
+                'cliente' => 'nullable',
             ]);
 
             $user = User::findOrFail($id);
@@ -147,6 +148,7 @@ class UserController extends Controller
             $user->celular = $request->input('celular');
             $user->empresa = $request->input('empresa');
             $user->permiso = $request->input('permiso');
+            $user->cliente_id = $request->input('cliente');
 
             // Si transport_id es array, lo convertimos en string separado por coma
             $transport_id = $request->input('transport_id');
