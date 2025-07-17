@@ -1236,8 +1236,9 @@ class cargaController extends Controller
                 'carga.custom_place',
                 'carga.load_place',
                 'carga.unload_place',
+                'carga.booking',
                 'cntr.main_status',
-                'cntr.status_cntr'
+                'cntr.status_cntr',
             )
             ->where('cntr.id_cntr', $idCntr)
             ->first();
