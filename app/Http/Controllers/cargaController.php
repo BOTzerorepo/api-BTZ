@@ -148,7 +148,7 @@ class cargaController extends Controller
                     ->orderBy('carga.load_date', 'ASC')
                     ->get();
             } elseif ($user->permiso == 'ClienteEmpresa') {
-                    $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
+                $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                     ->join('cntr', 'cntr.booking', '=', 'carga.booking')
                     ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                     ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
@@ -157,7 +157,7 @@ class cargaController extends Controller
                     ->whereNull('cntr.deleted_at')
                     ->whereNull('asign.deleted_at')
                     ->where(function ($q) use ($user) {
-                        $q->where('carga.cliente_id', $user->id); 
+                        $q->where('carga.cliente_id', $user->id);
 
                         // Si NO está asignada directamente a nadie, aplicar la relación por empresa
                         $q->orWhere(function ($sub) use ($user) {
@@ -236,7 +236,7 @@ class cargaController extends Controller
                     ->orderBy('carga.load_date', 'ASC')
                     ->get();
             } elseif ($user->permiso == 'ClienteEmpresa') {
-                    $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
+                $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                     ->join('cntr', 'cntr.booking', '=', 'carga.booking')
                     ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                     ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
@@ -245,7 +245,7 @@ class cargaController extends Controller
                     ->whereNull('cntr.deleted_at')
                     ->whereNull('asign.deleted_at')
                     ->where(function ($q) use ($user) {
-                        $q->where('carga.cliente_id', $user->id); 
+                        $q->where('carga.cliente_id', $user->id);
 
                         // Si NO está asignada directamente a nadie, aplicar la relación por empresa
                         $q->orWhere(function ($sub) use ($user) {
@@ -305,6 +305,32 @@ class cargaController extends Controller
                 ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
                 ->where('carga.status', '=', 'TERMINADA')
                 ->where('carga.empresa', '=', $user->empresa)
+                ->whereNull('cntr.deleted_at')
+                ->whereNull('asign.deleted_at')
+                ->orderBy('carga.load_date', 'ASC')->get();
+        } elseif ($user->permiso == 'ClienteEmpresa') {
+
+            $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
+                ->join('cntr', 'cntr.booking', '=', 'carga.booking')
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+                ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
+                ->where('carga.status', '=', 'TERMINADA')
+                ->where(function ($q) use ($user) {
+                    $q->where('carga.cliente_id', $user->id);
+
+                    // Si NO está asignada directamente a nadie, aplicar la relación por empresa
+                    $q->orWhere(function ($sub) use ($user) {
+                        $sub->whereNull('carga.cliente_id'); // ← solo aplica esta lógica si no hay cliente_id asignado
+
+                        if (!empty($user->cliente_id)) {
+                            $sub->where(function ($inner) use ($user) {
+                                $inner->where('carga.trader', $user->cliente_id)
+                                    ->orWhere('carga.shipper', $user->cliente_id)
+                                    ->orWhere('carga.importador', $user->cliente_id);
+                            });
+                        }
+                    });
+                })
                 ->whereNull('cntr.deleted_at')
                 ->whereNull('asign.deleted_at')
                 ->orderBy('carga.load_date', 'ASC')->get();
