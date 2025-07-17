@@ -10,6 +10,7 @@ use App\Http\Controllers\cargaController;
 use App\Http\Controllers\AsignController;
 use App\Http\Controllers\instructivosController;
 use App\Http\Controllers\ProfitController;
+use App\Http\Controllers\UserController;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Auth;
 
@@ -298,6 +299,8 @@ Route::get('/users/without-role', 'App\Http\Controllers\UserController@usersWith
 Route::get('/users', 'App\Http\Controllers\UserController@index');
 Route::get('/usersNullPermiso', 'App\Http\Controllers\UserController@indexNullPermiso');
 Route::delete('/user/{id}', 'App\Http\Controllers\UserController@destroy');
+Route::get('/users/by-permiso/{permiso}', [UserController::class, 'usersByPermiso']);
+
 
 //PROFIT
 Route::get('/profitSumaCntr/{cntrNumber}', [ProfitController::class, 'profitSumaCntr']);

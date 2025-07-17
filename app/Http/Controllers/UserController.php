@@ -63,6 +63,30 @@ class UserController extends Controller
             ], 500);
         }
     }
+    public function usersByPermiso($permiso)
+    {
+        try {
+            if (!$permiso) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'El permiso es obligatorio.'
+                ], 400);
+            }
+
+            $users = User::where('permiso', $permiso)->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $users
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     /**
      * Show the form for creating a new resource.
      *

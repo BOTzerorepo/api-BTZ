@@ -58,6 +58,33 @@ class cargaController extends Controller
                     ->where('carga.empresa', '=', $user->empresa)
                     ->orderBy('carga.load_date', 'ASC')
                     ->get();
+            } elseif ($user->permiso == 'ClienteEmpresa') {
+                $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
+                    ->join('cntr', 'cntr.booking', '=', 'carga.booking')
+                    ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+                    ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
+                    ->whereBetween('carga.load_date', [$empiezaSemana, $terminaSemana])
+                    ->where('carga.status', '!=', 'TERMINADA')
+                    ->whereNull('cntr.deleted_at')
+                    ->whereNull('asign.deleted_at')
+                    ->where(function ($q) use ($user) {
+                        $q->where('carga.cliente_id', $user->id); // si está asignada directamente
+
+                        // Si NO está asignada directamente a nadie, aplicar la relación por empresa
+                        $q->orWhere(function ($sub) use ($user) {
+                            $sub->whereNull('carga.cliente_id'); // ← solo aplica esta lógica si no hay cliente_id asignado
+
+                            if (!empty($user->cliente_id)) {
+                                $sub->where(function ($inner) use ($user) {
+                                    $inner->where('carga.trader', $user->cliente_id)
+                                        ->orWhere('carga.shipper', $user->cliente_id)
+                                        ->orWhere('carga.importador', $user->cliente_id);
+                                });
+                            }
+                        });
+                    })
+                    ->orderBy('carga.load_date', 'ASC')
+                    ->get();
             } else {
                 $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                     ->join('cntr', 'cntr.booking', '=', 'carga.booking')
@@ -120,16 +147,31 @@ class cargaController extends Controller
                     ->whereNull('asign.deleted_at')
                     ->orderBy('carga.load_date', 'ASC')
                     ->get();
-            }elseif ($user->permiso == 'ClienteEmpresa') {
-                $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
+            } elseif ($user->permiso == 'ClienteEmpresa') {
+                    $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                     ->join('cntr', 'cntr.booking', '=', 'carga.booking')
                     ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                     ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
                     ->where('carga.load_date', "<", $empiezaSemana)
-                    ->where('carga.empresa', '=', $user->empresa)
                     ->where('carga.status', '!=', 'TERMINADA')
                     ->whereNull('cntr.deleted_at')
                     ->whereNull('asign.deleted_at')
+                    ->where(function ($q) use ($user) {
+                        $q->where('carga.cliente_id', $user->id); 
+
+                        // Si NO está asignada directamente a nadie, aplicar la relación por empresa
+                        $q->orWhere(function ($sub) use ($user) {
+                            $sub->whereNull('carga.cliente_id'); // ← solo aplica esta lógica si no hay cliente_id asignado
+
+                            if (!empty($user->cliente_id)) {
+                                $sub->where(function ($inner) use ($user) {
+                                    $inner->where('carga.trader', $user->cliente_id)
+                                        ->orWhere('carga.shipper', $user->cliente_id)
+                                        ->orWhere('carga.importador', $user->cliente_id);
+                                });
+                            }
+                        });
+                    })
                     ->orderBy('carga.load_date', 'ASC')
                     ->get();
             } else {
@@ -191,6 +233,33 @@ class cargaController extends Controller
                     ->where('carga.load_date', ">", $terminaSemana)
                     ->where('carga.status', '!=', 'TERMINADA')
                     ->where('carga.empresa', '=', $user->empresa)
+                    ->orderBy('carga.load_date', 'ASC')
+                    ->get();
+            } elseif ($user->permiso == 'ClienteEmpresa') {
+                    $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
+                    ->join('cntr', 'cntr.booking', '=', 'carga.booking')
+                    ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+                    ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
+                    ->where('carga.load_date', ">", $terminaSemana)
+                    ->where('carga.status', '!=', 'TERMINADA')
+                    ->whereNull('cntr.deleted_at')
+                    ->whereNull('asign.deleted_at')
+                    ->where(function ($q) use ($user) {
+                        $q->where('carga.cliente_id', $user->id); 
+
+                        // Si NO está asignada directamente a nadie, aplicar la relación por empresa
+                        $q->orWhere(function ($sub) use ($user) {
+                            $sub->whereNull('carga.cliente_id'); // ← solo aplica esta lógica si no hay cliente_id asignado
+
+                            if (!empty($user->cliente_id)) {
+                                $sub->where(function ($inner) use ($user) {
+                                    $inner->where('carga.trader', $user->cliente_id)
+                                        ->orWhere('carga.shipper', $user->cliente_id)
+                                        ->orWhere('carga.importador', $user->cliente_id);
+                                });
+                            }
+                        });
+                    })
                     ->orderBy('carga.load_date', 'ASC')
                     ->get();
             } else {
@@ -289,7 +358,7 @@ class cargaController extends Controller
 
         $user = User::where('username', '=', $user)->first();
 
-        if ($user->permiso == 'Traffic' || $user->permiso == 'Master') {
+        if ($user->permiso == 'Traffic' || $user->permiso == 'Master' || $user->permiso == 'ClienteEmpresa') {
 
             $cargaPorId = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
@@ -693,6 +762,7 @@ class cargaController extends Controller
             $carga->comercial_reference = $request->input('comercial_reference');
             $carga->observation_customer = $request->input('observation_customer');
             $carga->tarifa_ref = $request->input('tarifa_ref');
+            $carga->cliente_id = $request->input('clienteId');
             $carga->user = $request->input('user');
             $carga->empresa = $request->input('empresa');
             $carga->status = $request->input('status');
