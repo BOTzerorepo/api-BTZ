@@ -988,8 +988,35 @@ class CustomerLoadPlaceController extends Controller
      */
     public function index()
     {
-        $customerLoadPlaces = DB::table('customer_load_places')->get();
-        return $customerLoadPlaces;
+        try {
+            $customerLoadPlaces = CustomerLoadPlace::orderBy('description', 'ASC')->get();
+            return response()->json([
+                'data' => $customerLoadPlaces,
+                'success' => true
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    public function indexCompany($company)
+    {
+        try {
+            $customerLoadPlaces = CustomerLoadPlace::where('company', $company)->orderBy('description', 'ASC')->get();
+            return response()->json([
+                'data' => $customerLoadPlaces,
+                'success' => true
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function issetLugarDeCarga(Request $request)

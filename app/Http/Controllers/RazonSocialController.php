@@ -19,8 +19,19 @@ class RazonSocialController extends Controller
     }
     public function index()
     {
-        $razonesSociales = razonSocial::all();
-        return response()->json($razonesSociales, 200);
+        try {
+            $razonesSociales = razonSocial::all();
+            return response()->json([
+                'data' => $razonesSociales,
+                'success' => true
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error interno del servidor',
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function store(Request $request){

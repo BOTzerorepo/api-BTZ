@@ -5,17 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Customer extends Model
+class OceanLines extends Model
 {
     use HasFactory;
+    protected $table = 'ocean_lines';
     protected $fillable = [
-        'registered_name',
+        'razon_social',
+        'pais',
         'tax_id',
-        'contact_name',
-        'contact_phone',
-        'contact_mail',
-        'company',
-        'created_at',
-        'updated_at'
+        'user',
+        'empresa',
+        'andress',
+        'mail',
     ];
 }

@@ -37,14 +37,33 @@ class PayTimeController extends Controller
      */
     public function store(Request $request)
     {
-        $payTime = new PayTime();
-        $payTime->title = $request['title'];
-        $payTime->description= $request['description'];
-        $payTime->user = $request['user'];
-        $payTime->empresa = $request['empresa'];
-        $payTime->save();
+        try {
+            $validated = $request->validate([
+                'title' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'user' => 'required|string',
+                'empresa' => 'required|string',
+            ]);
 
-        return $payTime;
+            $payTime = PayTime::create([
+                'title' => $validated['title'],
+                'description' => $validated['description'] ?? null,
+                'user' => $validated['user'],
+                'empresa' => $validated['empresa'],
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Plazo de pago creado correctamente.',
+                'data' => $payTime
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al crear el modo de pago.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -78,14 +97,34 @@ class PayTimeController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $payTime = PayTime::findOrFail($id);
-        $payTime->title = $request['title'];
-        $payTime->description= $request['description'];
-        $payTime->user = $request['user'];
-        $payTime->empresa = $request['empresa'];
-        $payTime->save();
+        try {
+            $validated = $request->validate([
+                'title' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'user' => 'required|string',
+                'empresa' => 'required|string',
+            ]);
 
-        return $payTime;
+            $payTime = PayTime::findOrFail($id);
+            $payTime->update([
+                'title' => $validated['title'],
+                'description' => $validated['description'] ?? null,
+                'user' => $validated['user'],
+                'empresa' => $validated['empresa'],
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Plazo de pago actualizado correctamente.',
+                'data' => $payTime
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar el modo de pago.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
