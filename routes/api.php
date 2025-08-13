@@ -572,3 +572,8 @@ Route::get('/excelTransports', 'App\Http\Controllers\excelController@transports'
 
 Route::get('transportesAker', 'App\Http\Controllers\AkerTransportController@index');
 Route::get('truckAker', 'App\Http\Controllers\AkerTruckController@index');
+
+
+// - CMA CGM ---------------------
+
+Route::get('cmaCgm','App\Http\Controllers\CmaCgmController@index');
