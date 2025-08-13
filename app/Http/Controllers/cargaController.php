@@ -612,6 +612,7 @@ class cargaController extends Controller
             $carga->ref_customer = $request->input('ref_customer');
             $carga->senasa = $request->input('senasa');
             $carga->senasa_string = $request->input('senasa_string');
+            $carga->cma_t_o = $request->input('cma_t_o');
             $carga->tara = $request->input('tara');
             $carga->tara_string = $request->input('tara_string');
             $carga->referencia_carga = $request->input('referencia_carga');
