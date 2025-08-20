@@ -553,6 +553,7 @@ class cargaController extends Controller
                 'oceans_line' => 'nullable|string',
                 'senasa' => 'nullable|string',
                 'tara' => 'nullable|string',
+                'cma_t_o' => 'nullable|string',
                 'importador' => 'nullable|string',
                 'tarifa_ref' => 'nullable|string',
                 'load_date' => 'nullable|string',
@@ -593,6 +594,8 @@ class cargaController extends Controller
                 'oceans_line' => $validatedData['oceans_line'],
                 'senasa' => $validatedData['senasa'],
                 'tara' => $validatedData['tara'],
+                'cma_t_o' => $validatedData['cma_t_o'],
+
                 'importador' => $validatedData['importador'],
                 'tarifa_ref' => $validatedData['tarifa_ref'],
                 'load_date' => $validatedData['load_date'],
