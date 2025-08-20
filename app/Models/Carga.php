@@ -64,5 +64,7 @@ class Carga extends Model implements AuditableContract
         'document_bookingConf',
         'created_at',
         'type',
+        'cma_t_o',
+
     ];
 }
