@@ -723,6 +723,7 @@ class cargaController extends Controller
 
     public function guardarFormulario(Request $request)
     {
+
         DB::beginTransaction();
         try {
             // Validación de datos
@@ -734,6 +735,7 @@ class cargaController extends Controller
                 'cntr_type' => 'required',
                 'commodity' => 'required',
                 'tara' => 'required',
+                'cma_t_o' => 'nullable|string',
                 'load_place' => 'required',
                 'load_date' => 'required',
                 'unload_place' => 'required',
