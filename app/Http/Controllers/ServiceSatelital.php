@@ -23,6 +23,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use LDAP\Result;
 use Mockery\Undefined;
@@ -1084,16 +1085,28 @@ class ServiceSatelital extends Controller
     }
     public function ejecutarAccionSalida($puntoActivoId, $contenedorId)
     {
-
         // Obtener datos del contenedor desde la tabla 'cntr'
-
         $contenedor = DB::table('cntr')
             ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
             ->join('carga', 'cntr.booking', '=', 'carga.booking')
             ->where('cntr.id_cntr', $contenedorId)
             ->select('cntr.*', 'asign.*', 'carga.*')
             ->first();
+        
         $punto = DB::table('interest_points')->where('id', $puntoActivoId)->first();
+        
+        if($contenedor->cma_t_o != null){
+
+            $base    = rtrim(env('API_CMA_BOTZERO'), '/');
+            $client = new Client();
+            $headers = ['Content-Type' => 'application/json'];
+            $request = new Psr7Request('GET', "{$base}/cma/estArrAtCusLoc/{$contenedor->cma_t_o}/{$contenedor->cntr_number}/{$punto->latitude}/{$punto->longitude}", $headers);
+            $res = $client->sendAsync($request)->wait();
+            $respuesta = $res->getBody();
+            $r = json_decode($respuesta, true);
+            Log::info('Respuesta CMA - Est Arr At Cus Loc: ' . $r);
+            
+        }
 
         $sbx = DB::table('variables')->select('sandbox')->get();
         $inboxEmail = env('INBOX_EMAIL');
