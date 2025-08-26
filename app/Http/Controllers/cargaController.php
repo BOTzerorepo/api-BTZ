@@ -16,6 +16,10 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Mail\UpdateCarga;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Transport;
+use GuzzleHttp\Psr7\Request as Psr7Request;
+use GuzzleHttp\Client;
+
+
 
 
 class cargaController extends Controller
@@ -546,7 +550,7 @@ class cargaController extends Controller
                 'custom_agent' => 'nullable|string',
                 'custom_agent_impo' => 'nullable|string',
                 'custom_place' => 'nullable|string',
-                'custom_place_impo' => 'nullable|string',
+                'custom_place_impo' => 'nullable|string', 
                 'load_place' => 'nullable|string',
                 'unload_place' => 'nullable|string',
                 'final_point' => 'nullable|string',
@@ -573,8 +577,8 @@ class cargaController extends Controller
                 'rf_humedad' => 'nullable|numeric',
                 'rf_venti' => 'nullable|numeric',
                 'cntr_type' => 'nullable|string',
-                'retiro_place' => 'nullable|string',
-                'q_viajes' => 'nullable|integer',
+                'retiro_place' => 'nullable|string ',
+                'q_viajes' => 'nullable|integer', 
             ]);
 
             // Buscar la carga y actualizarla
@@ -587,7 +591,7 @@ class cargaController extends Controller
                 'custom_agent' => $validatedData['custom_agent'],
                 'custom_agent_impo' => $validatedData['custom_agent_impo'],
                 'custom_place' => $validatedData['custom_place'],
-                'custom_place_impo' => $validatedData['custom_place_impo'],
+                'custom_place_impo' => $validatedData['custom_place_impo'], 
                 'load_place' => $validatedData['load_place'],
                 'unload_place' => $validatedData['unload_place'],
                 'final_point' => $validatedData['final_point'],
@@ -595,7 +599,6 @@ class cargaController extends Controller
                 'senasa' => $validatedData['senasa'],
                 'tara' => $validatedData['tara'],
                 'cma_t_o' => $validatedData['cma_t_o'],
-
                 'importador' => $validatedData['importador'],
                 'tarifa_ref' => $validatedData['tarifa_ref'],
                 'load_date' => $validatedData['load_date'],
@@ -613,11 +616,38 @@ class cargaController extends Controller
                 'obs_imo' => $validatedData['obs_imo'],
                 'rf_tem' => $validatedData['rf_tem'],
                 'rf_humedad' => $validatedData['rf_humedad'],
-                'rf_venti' => $validatedData['rf_venti'],
+                'rf_venti' => $validatedData['rf_venti'], 
             ]);
+
+
 
             $changes = $carga->getChanges(); // Obtener los datos que fueron modificados
 
+            if ($request->has('load_date')) {
+
+                $cntrs = DB::table('cntr')->where('booking', $carga->booking)->get();
+                
+                foreach ($cntrs as $cntr) {
+
+                   
+                    // Actualizar la fecha de carga en cada CNTR relacionado
+                    $client = new Client();
+                $headers = [
+                    'Content-Type' => 'application/json'
+                ];
+
+                $request = new Psr7Request(
+                    'GET',
+                    env('API_CMA_BOTZERO').'/cma/estDepCustLoc/'.$cntr->cntr_number.'/'.$validatedData['cma_t_o'],
+                    $headers
+                );
+                $res = $client->sendAsync($request)->wait();
+                $respuesta = $res->getBody();
+                $data = json_decode($respuesta, true);   
+                }
+                    
+                 
+            }
             // Buscar el CNTR relacionado y actualizarlo
             $cntr = cntr::where('booking', $carga->booking)->firstOrFail();
             $cntrOriginal = $cntr->getOriginal();
@@ -643,6 +673,7 @@ class cargaController extends Controller
                     'nuevo' => $newValue
                 ];
             }
+
 
             $sbx = DB::table('variables')->select('sandbox')->get();
             $inboxEmail = env('INBOX_EMAIL');
@@ -971,6 +1002,33 @@ class cargaController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function getForTO($cma_t_o, $cntr_number){
+
+        $cargaPorId = Carga::whereNull('carga.deleted_at')
+            ->leftjoin('cntr', 'cntr.booking', '=', 'carga.booking')
+            ->leftjoin('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+            ->leftjoin('trucks', 'trucks.domain', '=', 'asign.truck')
+            ->leftJoin('customer_load_places', 'carga.load_place', '=', 'customer_load_places.description')
+            ->select('carga.booking','carga.cma_t_o','carga.load_date','carga.unload_place','carga.load_place','carga.ref_customer', 
+            'cntr.cntr_number','cntr.retiro_place','cntr.retiro_place','cntr.status_cntr','cntr.main_status','asign.driver', 'asign.transport', 'asign.truck', 'asign.truck_semi', 'asign.file_instruction', 'trucks.alta_aker','customer_load_places.latitud','customer_load_places.longitud','customer_load_places.country','customer_load_places.city',)
+            ->where('carga.cma_t_o', '=', $cma_t_o)
+            ->where('cntr.cntr_number', '=', $cntr_number)
+            ->orderBy('carga.load_date', 'DESC')->get();
+
+        return $cargaPorId;
+
+    }
+    public function issetTo($cntr_number){
+
+        
+        $booking = Carga::whereNull('carga.deleted_at')
+            ->leftJoin('cntr', 'cntr.booking', '=', 'carga.booking')
+            ->where('cntr.cntr_number', '=', $cntr_number)
+            ->get();
+        return $booking->count();
+
     }
 
     /*public function getNotificationsWithProblems(Request $request)

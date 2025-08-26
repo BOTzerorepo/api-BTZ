@@ -18,6 +18,9 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 use App\Models\cntr;
 use App\Models\Carga;
+use GuzzleHttp\Client;
+use GuzzleHttp\Psr7\Request as Psr7Request;
+use Illuminate\Support\Facades\Log;
 
 class CustomerLoadPlaceController extends Controller
 {
@@ -72,6 +75,82 @@ class CustomerLoadPlaceController extends Controller
         $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
         $description = $qd->status;
 
+        /* ++++++++++++++++++++++++++ ACCION CMA (no corta el flujo) +++++++++++++++++++++++++++ */
+
+        $cmaResults = ['steps' => [], 'errors' => []];
+
+        $place = DB::table('carga as c')
+            ->join('customer_load_places as clp', 'c.load_place', '=', 'clp.description')
+            ->where('c.booking', $cntr->booking)
+            ->select('c.cma_t_o', 'clp.latitud', 'clp.longitud')
+            ->first();
+
+        if (!$place || empty($place->cma_t_o)) {
+            Log::warning('CMA: sin cma_t_o para booking ' . ($cntr->booking ?? 'N/D'));
+            // NO retornamos: simplemente no se envían eventos CMA y continuás con el resto del método
+        } else {
+            $cma_t_o = $place->cma_t_o;
+            $lat     = $place->latitud;
+            $lon     = $place->longitud;
+
+            $base    = rtrim(env('API_CMA_BOTZERO'), '/');
+            $headers = ['Content-Type' => 'application/json'];
+
+            $client = new Client([
+                'http_errors' => false, // no lance excepción en 4xx/5xx
+                'timeout'     => 30,
+            ]);
+
+            // Helper para enviar y loguear sin cortar
+            $send = function (string $label, string $url) use ($client, $headers, &$cmaResults) {
+                try {
+                    $req   = new Psr7Request('GET', $url, $headers);
+                    $res   = $client->send($req);
+                    $body  = (string) $res->getBody();
+                    $data  = json_decode($body, true);
+
+                    if (!is_array($data) || (($data['ok'] ?? false) !== true)) {
+                        $status = $data['http'] ?? $res->getStatusCode();
+                        Log::alert("CMA Error {$label}: {$status}", ['body' => $body]);
+                        $cmaResults['errors'][] = ['step' => $label, 'status' => $status, 'body' => $body];
+                    } else {
+                        $cmaResults['steps'][$label] = $data;
+                    }
+                } catch (\Throwable $e) {
+                    Log::error("CMA Exception {$label}: " . $e->getMessage());
+                    $cmaResults['errors'][] = ['step' => $label, 'exception' => $e->getMessage()];
+                }
+            };
+
+            // 1) ACT departure at customer location
+            $send(
+                'actDepCustLoc',
+                "{$base}/cma/actDepCustLoc/{$cntr->cntr_number}/{$cma_t_o}"
+            );
+
+            // 2) EST arrival at customer location
+            $send(
+                'estArrAtCusLoc',
+                "{$base}/cma/estArrAtCusLoc/{$cma_t_o}/{$cntr->cntr_number}/{$lat}/{$lon}"
+            );
+
+            // 3) cambio de flag (1)
+            $send(
+                'changeFlag1',
+                "{$base}/cma/changeFlag/1/{$cntr->cntr_number}"
+            );
+
+            // Si querés un resumen en logs al final del bloque:
+            if (!empty($cmaResults['errors'])) {
+                Log::warning('CMA finalizado con errores', $cmaResults['errors']);
+            } else {
+                Log::info('CMA finalizado OK', array_keys($cmaResults['steps']));
+            }
+        }
+
+
+        /* +++++++++++++++++++++++++++ FIN ACCION CMA  */
+
         if ($qd->main_status != 'CARGANDO') {
             DB::table('status')->insert([
                 'status' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts del Lugar de Carga.',
@@ -85,6 +164,7 @@ class CustomerLoadPlaceController extends Controller
                     'main_status' => 'CARGANDO',
                     'status_cntr' => '[AUTOMATICO] Camión se encuentra en un radio de 200 mts del Lugar de Carga.'
                 ]);
+
 
             $cntrs = cntr::where('booking', $cntr->booking)->get();
             // Obtener el status del primer registro
@@ -223,7 +303,7 @@ class CustomerLoadPlaceController extends Controller
 
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
-                    $logApi->detalle = "envio email cargaCargando to:". implode(', ', $toEmails);
+                    $logApi->detalle = "envio email cargaCargando to:" . implode(', ', $toEmails);
                     $logApi->save();
                 } elseif ($sbx[0]->sandbox == 2) {
 
@@ -327,7 +407,7 @@ class CustomerLoadPlaceController extends Controller
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaAduana($datos));
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
-                $logApi->detalle = "envio email cargaAduana to:". implode(', ', $toEmails);
+                $logApi->detalle = "envio email cargaAduana to:" . implode(', ', $toEmails);
                 $logApi->save();
             } elseif ($sbx[0]->sandbox == 2) {
 
@@ -413,7 +493,7 @@ class CustomerLoadPlaceController extends Controller
                     Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaAduana($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
-                    $logApi->detalle = "envio email cargaAduana to:". implode(', ', $toEmails);
+                    $logApi->detalle = "envio email cargaAduana to:" . implode(', ', $toEmails);
                     $logApi->save();
                 } elseif ($sbx[0]->sandbox == 2) {
 
@@ -512,7 +592,7 @@ class CustomerLoadPlaceController extends Controller
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaDescarga($datos));
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
-                $logApi->detalle = "envio email cargaDescarga to:". implode(', ', $toEmails);
+                $logApi->detalle = "envio email cargaDescarga to:" . implode(', ', $toEmails);
                 $logApi->save();
             } elseif ($sbx[0]->sandbox == 2) {
 
@@ -598,7 +678,7 @@ class CustomerLoadPlaceController extends Controller
                     Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaDescarga($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
-                    $logApi->detalle = "envio email cargaDescarga to:". implode(', ', $toEmails);
+                    $logApi->detalle = "envio email cargaDescarga to:" . implode(', ', $toEmails);
                     $logApi->save();
                 } elseif ($sbx[0]->sandbox == 2) {
                     Mail::to('abel.mazzitelli@gmail.com')->bcc($inboxEmail)->send(new cargaDescarga($datos));
@@ -627,6 +707,7 @@ class CustomerLoadPlaceController extends Controller
 
     public function accionFueraLugarDeCarga($idTrip)
     {
+        /* CODIGO0012 - Completar con Endpoints CMA cuando el cntr tenga T/O */
 
         $date = Carbon::now('-03:00');
         $qc = DB::table('cntr')->select('cntr_number', 'booking', 'confirmacion')->where('id_cntr', '=', $idTrip)->get();
@@ -683,7 +764,7 @@ class CustomerLoadPlaceController extends Controller
 
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
-                $logApi->detalle = "envio email cargaCargando to:". implode(', ', $toEmails);
+                $logApi->detalle = "envio email cargaCargando to:" . implode(', ', $toEmails);
                 $logApi->save();
             } elseif ($sbx[0]->sandbox == 2) {
 
@@ -762,7 +843,7 @@ class CustomerLoadPlaceController extends Controller
 
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
-                    $logApi->detalle = "envio email cargaCargando to:". implode(', ', $toEmails);
+                    $logApi->detalle = "envio email cargaCargando to:" . implode(', ', $toEmails);
                     $logApi->save();
                 } elseif ($sbx[0]->sandbox == 2) {
 
@@ -866,7 +947,7 @@ class CustomerLoadPlaceController extends Controller
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaFueraAduana($datos));
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
-                $logApi->detalle = "envio email cargaAduana to:". implode(', ', $toEmails);
+                $logApi->detalle = "envio email cargaAduana to:" . implode(', ', $toEmails);
                 $logApi->save();
             } elseif ($sbx[0]->sandbox == 2) {
 
@@ -952,7 +1033,7 @@ class CustomerLoadPlaceController extends Controller
                     Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaFueraAduana($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
-                    $logApi->detalle = "envio email cargaAduana to: ". implode(', ', $toEmails);
+                    $logApi->detalle = "envio email cargaAduana to: " . implode(', ', $toEmails);
                     $logApi->save();
                 } elseif ($sbx[0]->sandbox == 2) {
 
