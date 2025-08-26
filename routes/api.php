@@ -576,4 +576,6 @@ Route::get('truckAker', 'App\Http\Controllers\AkerTruckController@index');
 
 // - CMA CGM ---------------------
 
-Route::get('cmaCgm','App\Http\Controllers\CmaCgmController@index');
+//Route::get('cmaCgm','App\Http\Controllers\CmaCgmController@index');
+Route::get('cmaCgm/getForTO/{cma_to}/{cntr_number}', [cargaController::class,'getForTO']);
+Route::get('cmaCgm/issetTo/{cntr_number}', [cargaController::class,'issetTo']);

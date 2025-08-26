@@ -13,8 +13,11 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\crearpdfController;
+use GuzzleHttp\Client;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
+use GuzzleHttp\Psr7\Request as Psr7Request;
+
 
 class cntrController extends Controller
 {
@@ -157,6 +160,28 @@ class cntrController extends Controller
             $cntr->confirmacion = $request['confirmacion'];
             $cntr->save();
 
+            $issetTO = Carga::whereNull('carga.deleted_at')
+            ->leftJoin('cntr', 'cntr.booking', '=', 'carga.booking')
+            ->where('cntr.cntr_number', '=', $cntr->cntr_number)
+            ->get();
+            $tO = $issetTO[0]->cma_t_o;
+            
+            if($issetTO->count() == 1){
+                $client = new Client();
+                $headers = [
+                    'Content-Type' => 'application/json'
+                ];
+
+                $request = new Psr7Request(
+                    'GET',
+                    env('API_CMA_BOTZERO').'/cma/estDepCustLoc/'.$cntr->cntr_number.'/'.$tO,
+                    $headers
+                );
+                $res = $client->sendAsync($request)->wait();
+                $respuesta = $res->getBody();
+                $data = json_decode($respuesta, true);               
+            } 
+
             asign::where('cntr_number', $cntrOld)->update(['cntr_number' => $request['cntr_number']]);
             statu::where('cntr_number', $cntrOld)->update(['cntr_number' => $request['cntr_number']]);
 
@@ -187,6 +212,8 @@ class cntrController extends Controller
             DB::rollBack();
             return response()->json(['error' => $e->getMessage()], 500);
         }
+
+
     }
 
     /**

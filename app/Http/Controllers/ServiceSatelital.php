@@ -626,8 +626,6 @@ class ServiceSatelital extends Controller
         return $camiones;
     }
 
-
-
     public function flotaId($domain)
     {
         $client = new Client();
@@ -1137,4 +1135,5 @@ class ServiceSatelital extends Controller
             Mail::to( $customer)->send(new MailPuntoDeInteres($contenedor, $punto ));*/
         }
     }
+    
 }
