@@ -75,81 +75,6 @@ class CustomerLoadPlaceController extends Controller
         $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
         $description = $qd->status;
 
-        /* ++++++++++++++++++++++++++ ACCION CMA (no corta el flujo) +++++++++++++++++++++++++++ */
-
-        $cmaResults = ['steps' => [], 'errors' => []];
-
-        $place = DB::table('carga as c')
-            ->join('customer_load_places as clp', 'c.load_place', '=', 'clp.description')
-            ->where('c.booking', $cntr->booking)
-            ->select('c.cma_t_o', 'clp.latitud', 'clp.longitud')
-            ->first();
-
-        if (!$place || empty($place->cma_t_o)) {
-            Log::warning('CMA: sin cma_t_o para booking ' . ($cntr->booking ?? 'N/D'));
-            // NO retornamos: simplemente no se envían eventos CMA y continuás con el resto del método
-        } else {
-            $cma_t_o = $place->cma_t_o;
-            $lat     = $place->latitud;
-            $lon     = $place->longitud;
-
-            $base    = rtrim(env('API_CMA_BOTZERO'), '/');
-            $headers = ['Content-Type' => 'application/json'];
-
-            $client = new Client([
-                'http_errors' => false, // no lance excepción en 4xx/5xx
-                'timeout'     => 30,
-            ]);
-
-            // Helper para enviar y loguear sin cortar
-            $send = function (string $label, string $url) use ($client, $headers, &$cmaResults) {
-                try {
-                    $req   = new Psr7Request('GET', $url, $headers);
-                    $res   = $client->send($req);
-                    $body  = (string) $res->getBody();
-                    $data  = json_decode($body, true);
-
-                    if (!is_array($data) || (($data['ok'] ?? false) !== true)) {
-                        $status = $data['http'] ?? $res->getStatusCode();
-                        Log::alert("CMA Error {$label}: {$status}", ['body' => $body]);
-                        $cmaResults['errors'][] = ['step' => $label, 'status' => $status, 'body' => $body];
-                    } else {
-                        $cmaResults['steps'][$label] = $data;
-                    }
-                } catch (\Throwable $e) {
-                    Log::error("CMA Exception {$label}: " . $e->getMessage());
-                    $cmaResults['errors'][] = ['step' => $label, 'exception' => $e->getMessage()];
-                }
-            };
-
-            // 1) ACT departure at customer location
-            $send(
-                'actDepCustLoc',
-                "{$base}/cma/actDepCustLoc/{$cntr->cntr_number}/{$cma_t_o}"
-            );
-
-            // 2) EST arrival at customer location
-            $send(
-                'estArrAtCusLoc',
-                "{$base}/cma/estArrAtCusLoc/{$cma_t_o}/{$cntr->cntr_number}/{$lat}/{$lon}"
-            );
-
-            // 3) cambio de flag (1)
-            $send(
-                'changeFlag1',
-                "{$base}/cma/changeFlag/1/{$cntr->cntr_number}"
-            );
-
-            // Si querés un resumen en logs al final del bloque:
-            if (!empty($cmaResults['errors'])) {
-                Log::warning('CMA finalizado con errores', $cmaResults['errors']);
-            } else {
-                Log::info('CMA finalizado OK', array_keys($cmaResults['steps']));
-            }
-        }
-
-
-        /* +++++++++++++++++++++++++++ FIN ACCION CMA  */
 
         if ($qd->main_status != 'CARGANDO') {
             DB::table('status')->insert([
@@ -335,6 +260,50 @@ class CustomerLoadPlaceController extends Controller
         return 'ERROR: algo anduvo mal.';
     }
 
+
+
+/**
+ * Envía a CMA el cambio de flag para un contenedor.
+ *
+ * @param string $cntrNumber   Número de contenedor
+ * @param int    $flag         Valor del flag (por defecto 1)
+ * @param int    $timeout      Timeout HTTP en segundos (por defecto 30)
+ * @return array               ['ok'=>bool, 'http'=>int, 'data'=>mixed] (no lanza excepción)
+ */
+private function cmaChangeFlag(string $cntrNumber, int $flag = 1, int $timeout = 30): array
+{
+    $base = rtrim(env('API_CMA_BOTZERO'), '/');
+    if (!$base) {
+        Log::error('CMA: API_CMA_BOTZERO no configurado');
+        return ['ok' => false, 'http' => 500, 'error' => 'API_CMA_BOTZERO no configurado'];
+    }
+
+    $url     = "{$base}/cma/changeFlag/{$flag}/{$cntrNumber}";
+    $headers = ['Content-Type' => 'application/json'];
+
+    try {
+        $client  = new Client(['http_errors' => false, 'timeout' => $timeout]);
+        $request = new Psr7Request('GET', $url, $headers);
+
+        $res   = $client->send($request);
+        $code  = $res->getStatusCode();
+        $body  = (string) $res->getBody();
+        $data  = json_decode($body, true);
+
+        if (!is_array($data) || (($data['ok'] ?? false) !== true)) {
+            $status = $data['http'] ?? $code;
+            Log::alert("CMA Error changeFlag({$flag}) {$cntrNumber}: {$status}", ['body' => $body]);
+            return ['ok' => false, 'http' => $status, 'data' => $data ?? $body];
+        }
+
+        Log::info("CMA OK changeFlag({$flag}) {$cntrNumber}");
+        return ['ok' => true, 'http' => $data['http'] ?? $code, 'data' => $data];
+    } catch (\Throwable $e) {
+        Log::error("CMA Exception changeFlag({$flag}) {$cntrNumber}: {$e->getMessage()}");
+        return ['ok' => false, 'http' => 500, 'error' => $e->getMessage()];
+    }
+}
+
     public function accionLugarAduana($idTrip)
     {
 
@@ -345,6 +314,11 @@ class CustomerLoadPlaceController extends Controller
         // cual es el ultimo status.
         $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
         $description = $qd->status;
+
+
+        /* ++++++++++++++ ACCION CMA +++++++++++++++ */
+            $result = $this->cmaChangeFlag($cntr->cntr_number, 3);
+        /* ++++++++++++++ FIN ACCION CMA +++++++++++ */
 
         if ($qd->main_status != 'EN ADUANA') {
 
@@ -715,6 +689,84 @@ class CustomerLoadPlaceController extends Controller
         // cual es el ultimo status.
         $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
         $description = $qd->status;
+
+
+
+        /* ++++++++++++++++++++++++++ ACCION CMA (no corta el flujo) +++++++++++++++++++++++++++ */
+
+        $cmaResults = ['steps' => [], 'errors' => []];
+
+        $place = DB::table('carga as c')
+            ->join('customer_load_places as clp', 'c.load_place', '=', 'clp.description')
+            ->where('c.booking', $cntr->booking)
+            ->select('c.cma_t_o', 'clp.latitud', 'clp.longitud')
+            ->first();
+
+        if (!$place || empty($place->cma_t_o)) {
+            Log::warning('CMA: sin cma_t_o para booking ' . ($cntr->booking ?? 'N/D'));
+            // NO retornamos: simplemente no se envían eventos CMA y continuás con el resto del método
+        } else {
+            $cma_t_o = $place->cma_t_o;
+            $lat     = $place->latitud;
+            $lon     = $place->longitud;
+
+            $base    = rtrim(env('API_CMA_BOTZERO'), '/');
+            $headers = ['Content-Type' => 'application/json'];
+
+            $client = new Client([
+                'http_errors' => false, // no lance excepción en 4xx/5xx
+                'timeout'     => 30,
+            ]);
+
+            // Helper para enviar y loguear sin cortar
+            $send = function (string $label, string $url) use ($client, $headers, &$cmaResults) {
+                try {
+                    $req   = new Psr7Request('GET', $url, $headers);
+                    $res   = $client->send($req);
+                    $body  = (string) $res->getBody();
+                    $data  = json_decode($body, true);
+
+                    if (!is_array($data) || (($data['ok'] ?? false) !== true)) {
+                        $status = $data['http'] ?? $res->getStatusCode();
+                        Log::alert("CMA Error {$label}: {$status}", ['body' => $body]);
+                        $cmaResults['errors'][] = ['step' => $label, 'status' => $status, 'body' => $body];
+                    } else {
+                        $cmaResults['steps'][$label] = $data;
+                    }
+                } catch (\Throwable $e) {
+                    Log::error("CMA Exception {$label}: " . $e->getMessage());
+                    $cmaResults['errors'][] = ['step' => $label, 'exception' => $e->getMessage()];
+                }
+            };
+
+            // 1) ACT departure at customer location
+            $send(
+                'actDepCustLoc',
+                "{$base}/cma/actDepCustLoc/{$cntr->cntr_number}/{$cma_t_o}"
+            );
+
+            // 2) EST arrival at customer location
+            $send(
+                'estArrAtCusLoc',
+                "{$base}/cma/estArrAtCusLoc/{$cma_t_o}/{$cntr->cntr_number}/{$lat}/{$lon}"
+            );
+
+            // 3) cambio de flag (1)
+            $send(
+                'changeFlag1',
+                "{$base}/cma/changeFlag/1/{$cntr->cntr_number}"
+            );
+
+            // Si querés un resumen en logs al final del bloque:
+            if (!empty($cmaResults['errors'])) {
+                Log::warning('CMA finalizado con errores', $cmaResults['errors']);
+            } else {
+                Log::info('CMA finalizado OK', array_keys($cmaResults['steps']));
+            }
+        }
+
+
+        /* +++++++++++++++++++++++++++ FIN ACCION CMA  */
 
         if ($qd->main_status != 'SALIENDO CARGAR' && $qd->avisado == 1) {
 
