@@ -259,50 +259,67 @@ class CustomerLoadPlaceController extends Controller
         }
         return 'ERROR: algo anduvo mal.';
     }
-
-
-
-/**
- * Envía a CMA el cambio de flag para un contenedor.
- *
- * @param string $cntrNumber   Número de contenedor
- * @param int    $flag         Valor del flag (por defecto 1)
- * @param int    $timeout      Timeout HTTP en segundos (por defecto 30)
- * @return array               ['ok'=>bool, 'http'=>int, 'data'=>mixed] (no lanza excepción)
- */
-private function cmaChangeFlag(string $cntrNumber, int $flag = 1, int $timeout = 30): array
-{
-    $base = rtrim(env('API_CMA_BOTZERO'), '/');
-    if (!$base) {
-        Log::error('CMA: API_CMA_BOTZERO no configurado');
-        return ['ok' => false, 'http' => 500, 'error' => 'API_CMA_BOTZERO no configurado'];
-    }
-
-    $url     = "{$base}/cma/changeFlag/{$flag}/{$cntrNumber}";
-    $headers = ['Content-Type' => 'application/json'];
-
-    try {
-        $client  = new Client(['http_errors' => false, 'timeout' => $timeout]);
-        $request = new Psr7Request('GET', $url, $headers);
-
-        $res   = $client->send($request);
-        $code  = $res->getStatusCode();
-        $body  = (string) $res->getBody();
-        $data  = json_decode($body, true);
-
-        if (!is_array($data) || (($data['ok'] ?? false) !== true)) {
-            $status = $data['http'] ?? $code;
-            Log::alert("CMA Error changeFlag({$flag}) {$cntrNumber}: {$status}", ['body' => $body]);
-            return ['ok' => false, 'http' => $status, 'data' => $data ?? $body];
+    /**
+     * Envía a CMA el cambio de flag para un contenedor.
+     *
+     * @param string $cntrNumber   Número de contenedor
+     * @param int    $flag         Valor del flag (por defecto 1)
+     * @param int    $timeout      Timeout HTTP en segundos (por defecto 30)
+     * @return array               ['ok'=>bool, 'http'=>int, 'data'=>mixed] (no lanza excepción)
+     */
+    private function cmaChangeFlag(string $cntrNumber, int $flag = 1, int $timeout = 30): array
+    {
+        $base = rtrim(env('API_CMA_BOTZERO'), '/');
+        if (!$base) {
+            Log::error('CMA: API_CMA_BOTZERO no configurado');
+            return ['ok' => false, 'http' => 500, 'error' => 'API_CMA_BOTZERO no configurado'];
         }
 
-        Log::info("CMA OK changeFlag({$flag}) {$cntrNumber}");
-        return ['ok' => true, 'http' => $data['http'] ?? $code, 'data' => $data];
-    } catch (\Throwable $e) {
-        Log::error("CMA Exception changeFlag({$flag}) {$cntrNumber}: {$e->getMessage()}");
-        return ['ok' => false, 'http' => 500, 'error' => $e->getMessage()];
+        $url     = "{$base}/cma/changeFlag/{$flag}/{$cntrNumber}";
+        $headers = ['Content-Type' => 'application/json'];
+
+        try {
+            $client  = new Client(['http_errors' => false, 'timeout' => $timeout]);
+            $request = new Psr7Request('GET', $url, $headers);
+
+            $res   = $client->send($request);
+            $code  = $res->getStatusCode();
+            $body  = (string) $res->getBody();
+            $data  = json_decode($body, true);
+
+            if (!is_array($data) || (($data['ok'] ?? false) !== true)) {
+                $status = $data['http'] ?? $code;
+                Log::alert("CMA Error changeFlag({$flag}) {$cntrNumber}: {$status}", ['body' => $body]);
+                return ['ok' => false, 'http' => $status, 'data' => $data ?? $body];
+            }
+
+            Log::info("CMA OK changeFlag({$flag}) {$cntrNumber}");
+            return ['ok' => true, 'http' => $data['http'] ?? $code, 'data' => $data];
+        } catch (\Throwable $e) {
+            Log::error("CMA Exception changeFlag({$flag}) {$cntrNumber}: {$e->getMessage()}");
+            return ['ok' => false, 'http' => 500, 'error' => $e->getMessage()];
+        }
+         // ---------- POST a n8n ----------
+         try {
+            $payload = [
+                'function'   => __FUNCTION__, // te manda el nombre de la función actual
+                'contenedor' => $contenedor->cntr_number,
+                'cma_t_o'    => $contenedor->cma_t_o,
+                'lat'        => $punto->latitude,
+                'lon'        => $punto->longitude,
+                'respuesta'  => $r, // lo que devolvió CMA
+            ];
+
+            $postRes = $client->post('https://n8n.rail.ar/webhook/reporte-cma', [
+                'headers' => $headers,
+                'json'    => $payload,
+            ]);
+
+            Log::info('Posteado a n8n: ' . $postRes->getBody());
+        } catch (\Exception $e) {
+            Log::error('Error enviando a n8n: ' . $e->getMessage());
+        }
     }
-}
 
     public function accionLugarAduana($idTrip)
     {
@@ -317,7 +334,7 @@ private function cmaChangeFlag(string $cntrNumber, int $flag = 1, int $timeout =
 
 
         /* ++++++++++++++ ACCION CMA +++++++++++++++ */
-            $result = $this->cmaChangeFlag($cntr->cntr_number, 3);
+        $result = $this->cmaChangeFlag($cntr->cntr_number, 3);
         /* ++++++++++++++ FIN ACCION CMA +++++++++++ */
 
         if ($qd->main_status != 'EN ADUANA') {
@@ -756,6 +773,23 @@ private function cmaChangeFlag(string $cntrNumber, int $flag = 1, int $timeout =
                 'changeFlag1',
                 "{$base}/cma/changeFlag/1/{$cntr->cntr_number}"
             );
+             // ---------- POST a n8n ----------
+             try {
+                $payload = [
+                    'function'   => __FUNCTION__, // te manda el nombre de la función actual
+                    
+                    'respuesta'  => 'varias', // lo que devolvió CMA
+                ];
+
+                $postRes = $client->post('https://n8n.rail.ar/webhook/reporte-cma', [
+                    'headers' => $headers,
+                    'json'    => $payload,
+                ]);
+
+                Log::info('Posteado a n8n: ' . $postRes->getBody());
+            } catch (\Exception $e) {
+                Log::error('Error enviando a n8n: ' . $e->getMessage());
+            }
 
             // Si querés un resumen en logs al final del bloque:
             if (!empty($cmaResults['errors'])) {
