@@ -699,7 +699,7 @@ class ServiceSatelital extends Controller
                 )
                 ->where('asign.truck', '=', $domain)
                 ->whereNotNull('trucks.domain') // Aseguramos que la unión principal se mantenga
-                ->orderBy('carga.created_at', 'desc') 
+                ->orderBy('carga.created_at', 'desc')
                 ->get();
 
 
@@ -798,8 +798,8 @@ class ServiceSatelital extends Controller
             ->select('a.*', 'c.*') // Seleccionar columnas necesarias
             ->distinct() // Evitar duplicados
             ->get();
-            
-            
+
+
         foreach ($asignaciones as $asignacion) {
             // Obtener los datos del truck y el contenedor a partir de la asignación
             $truckDomain = $asignacion->truck;  // Dominio del truck
@@ -1042,6 +1042,39 @@ class ServiceSatelital extends Controller
             ->first();
         $punto = DB::table('interest_points')->where('id', $puntoActivoId)->first();
 
+        if ($contenedor->cma_t_o != null) {
+
+            $base    = rtrim(env('API_CMA_BOTZERO'), '/');
+            $client = new Client();
+            $headers = ['Content-Type' => 'application/json'];
+            $request = new Psr7Request('GET', "{$base}/cma/estArrAtCusLoc/{$contenedor->cma_t_o}/{$contenedor->cntr_number}/{$punto->latitude}/{$punto->longitude}", $headers);
+            $res = $client->sendAsync($request)->wait();
+            $respuesta = $res->getBody();
+            $r = json_decode($respuesta, true);
+            Log::info('Respuesta CMA - Est Arr At Cus Loc: ' . $r);
+
+             // ---------- POST a n8n ----------
+             try {
+                $payload = [
+                    'function'   => __FUNCTION__, // te manda el nombre de la función actual
+                    'contenedor' => $contenedor->cntr_number,
+                    'cma_t_o'    => $contenedor->cma_t_o,
+                    'lat'        => $punto->latitude,
+                    'lon'        => $punto->longitude,
+                    'respuesta'  => $r, // lo que devolvió CMA
+                ];
+
+                $postRes = $client->post('https://n8n.rail.ar/webhook/reporte-cma', [
+                    'headers' => $headers,
+                    'json'    => $payload,
+                ]);
+
+                Log::info('Posteado a n8n: ' . $postRes->getBody());
+            } catch (\Exception $e) {
+                Log::error('Error enviando a n8n: ' . $e->getMessage());
+            }
+        }
+
         $sbx = DB::table('variables')->select('sandbox')->get();
         $inboxEmail = env('INBOX_EMAIL');
         $mailsTrafico = DB::table('particular_soft_configurations')->first();
@@ -1092,10 +1125,10 @@ class ServiceSatelital extends Controller
             ->where('cntr.id_cntr', $contenedorId)
             ->select('cntr.*', 'asign.*', 'carga.*')
             ->first();
-        
+
         $punto = DB::table('interest_points')->where('id', $puntoActivoId)->first();
-        
-        if($contenedor->cma_t_o != null){
+
+        if ($contenedor->cma_t_o != null) {
 
             $base    = rtrim(env('API_CMA_BOTZERO'), '/');
             $client = new Client();
@@ -1105,7 +1138,28 @@ class ServiceSatelital extends Controller
             $respuesta = $res->getBody();
             $r = json_decode($respuesta, true);
             Log::info('Respuesta CMA - Est Arr At Cus Loc: ' . $r);
-            
+
+
+            // ---------- POST a n8n ----------
+            try {
+                $payload = [
+                    'function'   => __FUNCTION__, // te manda el nombre de la función actual
+                    'contenedor' => $contenedor->cntr_number,
+                    'cma_t_o'    => $contenedor->cma_t_o,
+                    'lat'        => $punto->latitude,
+                    'lon'        => $punto->longitude,
+                    'respuesta'  => $r, // lo que devolvió CMA
+                ];
+
+                $postRes = $client->post('https://n8n.rail.ar/webhook/reporte-cma', [
+                    'headers' => $headers,
+                    'json'    => $payload,
+                ]);
+
+                Log::info('Posteado a n8n: ' . $postRes->getBody());
+            } catch (\Exception $e) {
+                Log::error('Error enviando a n8n: ' . $e->getMessage());
+            }
         }
 
         $sbx = DB::table('variables')->select('sandbox')->get();
@@ -1148,5 +1202,4 @@ class ServiceSatelital extends Controller
             Mail::to( $customer)->send(new MailPuntoDeInteres($contenedor, $punto ));*/
         }
     }
-    
 }

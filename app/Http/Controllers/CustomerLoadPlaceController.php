@@ -259,9 +259,6 @@ class CustomerLoadPlaceController extends Controller
         }
         return 'ERROR: algo anduvo mal.';
     }
-
-
-
     /**
      * Envía a CMA el cambio de flag para un contenedor.
      *
@@ -301,6 +298,26 @@ class CustomerLoadPlaceController extends Controller
         } catch (\Throwable $e) {
             Log::error("CMA Exception changeFlag({$flag}) {$cntrNumber}: {$e->getMessage()}");
             return ['ok' => false, 'http' => 500, 'error' => $e->getMessage()];
+        }
+         // ---------- POST a n8n ----------
+         try {
+            $payload = [
+                'function'   => __FUNCTION__, // te manda el nombre de la función actual
+                'contenedor' => $contenedor->cntr_number,
+                'cma_t_o'    => $contenedor->cma_t_o,
+                'lat'        => $punto->latitude,
+                'lon'        => $punto->longitude,
+                'respuesta'  => $r, // lo que devolvió CMA
+            ];
+
+            $postRes = $client->post('https://n8n.rail.ar/webhook/reporte-cma', [
+                'headers' => $headers,
+                'json'    => $payload,
+            ]);
+
+            Log::info('Posteado a n8n: ' . $postRes->getBody());
+        } catch (\Exception $e) {
+            Log::error('Error enviando a n8n: ' . $e->getMessage());
         }
     }
 
@@ -756,6 +773,23 @@ class CustomerLoadPlaceController extends Controller
                 'changeFlag1',
                 "{$base}/cma/changeFlag/1/{$cntr->cntr_number}"
             );
+             // ---------- POST a n8n ----------
+             try {
+                $payload = [
+                    'function'   => __FUNCTION__, // te manda el nombre de la función actual
+                    
+                    'respuesta'  => 'varias', // lo que devolvió CMA
+                ];
+
+                $postRes = $client->post('https://n8n.rail.ar/webhook/reporte-cma', [
+                    'headers' => $headers,
+                    'json'    => $payload,
+                ]);
+
+                Log::info('Posteado a n8n: ' . $postRes->getBody());
+            } catch (\Exception $e) {
+                Log::error('Error enviando a n8n: ' . $e->getMessage());
+            }
 
             // Si querés un resumen en logs al final del bloque:
             if (!empty($cmaResults['errors'])) {
