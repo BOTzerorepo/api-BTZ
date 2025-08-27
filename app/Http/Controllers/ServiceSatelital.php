@@ -1137,7 +1137,7 @@ class ServiceSatelital extends Controller
             $res = $client->sendAsync($request)->wait();
             $respuesta = $res->getBody();
             $r = json_decode($respuesta, true);
-            Log::info('Respuesta CMA - Est Arr At Cus Loc: ' . $r);
+            //Log::info('Respuesta CMA - Est Arr At Cus Loc: ' . $r);
 
 
             // ---------- POST a n8n ----------
