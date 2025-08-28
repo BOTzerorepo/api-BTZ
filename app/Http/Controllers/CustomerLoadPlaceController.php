@@ -125,12 +125,25 @@ class CustomerLoadPlaceController extends Controller
             $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
             $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
 
-
+            $cliente = DB::table('users')
+            ->where('cliente_id', '=', $carga->client_id)
+            ->first();
+    
             if ($sbx[0]->sandbox == 0) {
+
+                if (!$cliente) {
+                    // Logueás un warning para debug
+                    Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+    
+                    // Podés definir un mail fallback para no perder la notificación
+                    $clienteEmail = 'soporte@botzero.com.ar';
+                } else {
+                    $clienteEmail = $cliente->email;
+                }
                 $customer = DB::table('users')
                     ->where('username', '=', $carga->user)
                     ->value('email');
-                $toEmails = array_merge([$customer], (array) $toEmails);
+                $toEmails = array_merge([$customer,$clienteEmail], (array) $toEmails);
 
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaCargando($datos));
                 $logApi = new logapi();
@@ -214,12 +227,25 @@ class CustomerLoadPlaceController extends Controller
                 $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
                 $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
                 $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
+                $cliente = DB::table('users')
+        ->where('cliente_id', '=', $carga->client_id)
+        ->first();
 
                 if ($sbx[0]->sandbox == 0) {
+
+                    if (!$cliente) {
+                        // Logueás un warning para debug
+                        Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+        
+                        // Podés definir un mail fallback para no perder la notificación
+                        $clienteEmail = 'soporte@botzero.com.ar';
+                    } else {
+                        $clienteEmail = $cliente->email;
+                    }
                     $customer = DB::table('users')
                         ->where('username', '=', $carga->user)
                         ->value('email');
-                    $toEmails = array_merge([$customer], (array) $toEmails);
+                    $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
                     Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaCargando($datos));
 
                     $logApi = new logapi();
@@ -403,12 +429,25 @@ class CustomerLoadPlaceController extends Controller
             $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
             $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
             $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
+            $cliente = DB::table('users')
+        ->where('cliente_id', '=', $carga->client_id)
+        ->first();
 
             if ($sbx[0]->sandbox == 0) {
+
+                if (!$cliente) {
+                    // Logueás un warning para debug
+                    Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+    
+                    // Podés definir un mail fallback para no perder la notificación
+                    $clienteEmail = 'soporte@botzero.com.ar';
+                } else {
+                    $clienteEmail = $cliente->email;
+                }
                 $customer = DB::table('users')
                     ->where('username', '=', $carga->user)
                     ->value('email');
-                $toEmails = array_merge([$customer], (array) $toEmails);
+                $toEmails = array_merge([$customer,$clienteEmail], (array) $toEmails);
 
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaAduana($datos));
                 $logApi = new logapi();
@@ -489,12 +528,25 @@ class CustomerLoadPlaceController extends Controller
                 $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
                 $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
                 $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
+                $cliente = DB::table('users')
+        ->where('cliente_id', '=', $carga->client_id)
+        ->first();
+
 
                 if ($sbx[0]->sandbox == 0) {
+                    if (!$cliente) {
+                        // Logueás un warning para debug
+                        Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+        
+                        // Podés definir un mail fallback para no perder la notificación
+                        $clienteEmail = 'soporte@botzero.com.ar';
+                    } else {
+                        $clienteEmail = $cliente->email;
+                    }
                     $customer = DB::table('users')
                         ->where('username', '=', $carga->user)
                         ->value('email');
-                    $toEmails = array_merge([$customer], (array) $toEmails);
+                    $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
 
                     Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaAduana($datos));
                     $logApi = new logapi();
@@ -628,6 +680,10 @@ class CustomerLoadPlaceController extends Controller
                 'booking' => $cntr->booking,
                 'date' => $date
             ];
+       
+
+           
+
 
             //Enviar mail
             $sbx = DB::table('variables')->select('sandbox')->get();
@@ -636,12 +692,24 @@ class CustomerLoadPlaceController extends Controller
             $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
             $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
             $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
+            $cliente = DB::table('users')
+            ->where('cliente_id', '=', $carga->client_id)
+            ->first();
 
             if ($sbx[0]->sandbox == 0) {
+                if (!$cliente) {
+                    // Logueás un warning para debug
+                    Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+    
+                    // Podés definir un mail fallback para no perder la notificación
+                    $clienteEmail = 'soporte@botzero.com.ar';
+                } else {
+                    $clienteEmail = $cliente->email;
+                }
                 $customer = DB::table('users')
                     ->where('username', '=', $carga->user)
                     ->value('email');
-                $toEmails = array_merge([$customer], (array) $toEmails);
+                $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
 
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaDescarga($datos));
                 $logApi = new logapi();
@@ -715,6 +783,9 @@ class CustomerLoadPlaceController extends Controller
                     'date' => $date
                 ];
 
+                
+        
+
                 //Enviar mail
                 $sbx = DB::table('variables')->select('sandbox')->get();
                 $inboxEmail = env('INBOX_EMAIL');
@@ -722,12 +793,25 @@ class CustomerLoadPlaceController extends Controller
                 $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
                 $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
                 $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
+                $cliente = DB::table('users')
+                ->where('cliente_id', '=', $carga->client_id)
+                ->first();
+        
 
                 if ($sbx[0]->sandbox == 0) {
+                    if (!$cliente) {
+                        // Logueás un warning para debug
+                        Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+        
+                        // Podés definir un mail fallback para no perder la notificación
+                        $clienteEmail = 'soporte@botzero.com.ar';
+                    } else {
+                        $clienteEmail = $cliente->email;
+                    }
                     $customer = DB::table('users')
                         ->where('username', '=', $carga->user)
                         ->value('email');
-                    $toEmails = array_merge([$customer], (array) $toEmails);
+                    $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
 
                     Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaDescarga($datos));
                     $logApi = new logapi();
@@ -907,12 +991,23 @@ class CustomerLoadPlaceController extends Controller
             $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
             $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
             $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
-
+            $cliente = DB::table('users')
+            ->where('cliente_id', '=', $carga->client_id)
+            ->first();
             if ($sbx[0]->sandbox == 0) {
+                if (!$cliente) {
+                    // Logueás un warning para debug
+                    Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+    
+                    // Podés definir un mail fallback para no perder la notificación
+                    $clienteEmail = 'soporte@botzero.com.ar';
+                } else {
+                    $clienteEmail = $cliente->email;
+                }
                 $customer = DB::table('users')
                     ->where('username', '=', $carga->user)
                     ->value('email');
-                $toEmails = array_merge([$customer], (array) $toEmails);
+                $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaFueraCargando($datos));
 
                 $logApi = new logapi();
@@ -985,12 +1080,25 @@ class CustomerLoadPlaceController extends Controller
                 $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
                 $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
                 $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
+                $cliente = DB::table('users')
+        ->where('cliente_id', '=', $carga->client_id)
+        ->first();
+
 
                 if ($sbx[0]->sandbox == 0) {
+                    if (!$cliente) {
+                        // Logueás un warning para debug
+                        Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+        
+                        // Podés definir un mail fallback para no perder la notificación
+                        $clienteEmail = 'soporte@botzero.com.ar';
+                    } else {
+                        $clienteEmail = $cliente->email;
+                    }
                     $customer = DB::table('users')
                         ->where('username', '=', $carga->user)
                         ->value('email');
-                    $toEmails = array_merge([$customer], (array) $toEmails);
+                    $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
 
                     Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaFueraCargando($datos));
 
@@ -1149,12 +1257,24 @@ class CustomerLoadPlaceController extends Controller
             $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
             $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
             $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
-
+            $cliente = DB::table('users')
+            ->where('cliente_id', '=', $carga->client_id)
+            ->first();
+    
             if ($sbx[0]->sandbox == 0) {
+                if (!$cliente) {
+                    // Logueás un warning para debug
+                    Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+    
+                    // Podés definir un mail fallback para no perder la notificación
+                    $clienteEmail = 'soporte@botzero.com.ar';
+                } else {
+                    $clienteEmail = $cliente->email;
+                }
                 $customer = DB::table('users')
                     ->where('username', '=', $carga->user)
                     ->value('email');
-                $toEmails = array_merge([$customer], (array) $toEmails);
+                $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
 
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaFueraAduana($datos));
                 $logApi = new logapi();
@@ -1235,12 +1355,25 @@ class CustomerLoadPlaceController extends Controller
                 $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
                 $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
                 $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
+                $cliente = DB::table('users')
+        ->where('cliente_id', '=', $carga->client_id)
+        ->first();
 
                 if ($sbx[0]->sandbox == 0) {
+                    if (!$cliente) {
+                        // Logueás un warning para debug
+                        Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+        
+                        // Podés definir un mail fallback para no perder la notificación
+                        $clienteEmail = 'soporte@botzero.com.ar';
+                    } else {
+                        $clienteEmail = $cliente->email;
+                    }
+                   
                     $customer = DB::table('users')
                         ->where('username', '=', $carga->user)
                         ->value('email');
-                    $toEmails = array_merge([$customer], (array) $toEmails);
+                    $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
 
                     Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaFueraAduana($datos));
                     $logApi = new logapi();
