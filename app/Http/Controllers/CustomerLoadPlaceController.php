@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 use App\Models\cntr;
 use App\Models\Carga;
+use Google\Service\SQLAdmin\Flag;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Request as Psr7Request;
 use Illuminate\Support\Facades\Log;
@@ -61,11 +62,6 @@ class CustomerLoadPlaceController extends Controller
 
         // SELECT * FROM `carga` INNER JOIN `cntr` INNER JOIN `asign` ON carga.booking = cntr.booking AND cntr.cntr_number = asign.cntr_number WHERE asign.truck = 'AE792WJ';
     }
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function accionLugarDeCarga($idTrip)
     {
         $date = Carbon::now('-03:00');
@@ -259,14 +255,6 @@ class CustomerLoadPlaceController extends Controller
         }
         return 'ERROR: algo anduvo mal.';
     }
-    /**
-     * Envía a CMA el cambio de flag para un contenedor.
-     *
-     * @param string $cntrNumber   Número de contenedor
-     * @param int    $flag         Valor del flag (por defecto 1)
-     * @param int    $timeout      Timeout HTTP en segundos (por defecto 30)
-     * @return array               ['ok'=>bool, 'http'=>int, 'data'=>mixed] (no lanza excepción)
-     */
     private function cmaChangeFlag(string $cntrNumber, int $flag = 1, int $timeout = 30): array
     {
         $base = rtrim(env('API_CMA_BOTZERO'), '/');
@@ -274,6 +262,7 @@ class CustomerLoadPlaceController extends Controller
             Log::error('CMA: API_CMA_BOTZERO no configurado');
             return ['ok' => false, 'http' => 500, 'error' => 'API_CMA_BOTZERO no configurado'];
         }
+       
 
         $url     = "{$base}/cma/changeFlag/{$flag}/{$cntrNumber}";
         $headers = ['Content-Type' => 'application/json'];
@@ -325,18 +314,44 @@ class CustomerLoadPlaceController extends Controller
     {
 
         $date = Carbon::now('-03:00');
-        $qc = DB::table('cntr')->select('cntr_number', 'booking', 'confirmacion')->where('id_cntr', '=', $idTrip)->get();
+        $qc = DB::table('cntr')->select('cntr.cntr_number', 'cntr.booking', 'cntr.confirmacion','carga.cma_t_o')
+        ->join('carga', 'cntr.booking', '=', 'carga.booking')
+        ->where('id_cntr', '=', $idTrip)->get();
         $cntr = $qc[0];
 
         // cual es el ultimo status.
         $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
         $description = $qd->status;
 
+        if( $cntr->cma_t_o != null){
+             /* ++++++++++++++ ACCION CMA +++++++++++++++ */
+        $result = $this->cmaChangeFlag($cntr->cntr_number, 2);
+        // ---------- POST a n8n ----------
+        $client  = new Client(['http_errors' => false, 'timeout' => 30]);
+        $headers = ['Content-Type' => 'application/json'];
+        try {
+           $payload = [
+               'function'   => __FUNCTION__, // te manda el nombre de la función actual
+               'contenedor' => $cntr->cntr_number,
+               'cma_t_o'    => $cntr->cma_t_o,
+               'lat'        => 'FLAG 2 - EN ADUANA',
+               'lon'        => 'FLAG 2 - EN ADUANA',
+               'respuesta'  => 'alguna', // lo que devolvió CMA
+           ];
 
-        /* ++++++++++++++ ACCION CMA +++++++++++++++ */
-        $result = $this->cmaChangeFlag($cntr->cntr_number, 3);
-        /* ++++++++++++++ FIN ACCION CMA +++++++++++ */
+           $postRes = $client->post('https://n8n.rail.ar/webhook/reporte-cma', [
+               'headers' => $headers,
+               'json'    => $payload,
+           ]);
 
+           Log::info('Posteado a n8n: ' . $postRes->getBody());
+       } catch (\Exception $e) {
+           Log::error('Error enviando a n8n: ' . $e->getMessage());
+       }
+       /* ++++++++++++++ FIN ACCION CMA +++++++++++ */
+
+        }
+       
         if ($qd->main_status != 'EN ADUANA') {
 
             DB::table('status')->insert([
@@ -514,13 +529,61 @@ class CustomerLoadPlaceController extends Controller
     }
     public function accionLugarDescarga($idTrip)
     {
+
+       
         $date = Carbon::now('-03:00');
         $qc = DB::table('cntr')->select('cntr_number', 'booking', 'confirmacion')->where('id_cntr', '=', $idTrip)->get();
         $cntr = $qc[0];
+        $contenedor = DB::table('cntr')
+        ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+        ->join('carga', 'cntr.booking', '=', 'carga.booking')
+        ->where('cntr.id_cntr', $idTrip)
+        ->select('cntr.*', 'asign.*', 'carga.*')
+        ->first();
 
         // cual es el ultimo status.
         $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
         $description = $qd->status;
+
+
+         /* Aca falta CMA-CGM */
+         if ($contenedor->cma_t_o != null) {
+
+            $base    = rtrim(env('API_CMA_BOTZERO'), '/');
+            $client = new Client();
+            $headers = ['Content-Type' => 'application/json'];
+            $request = new Psr7Request('GET', "{$base}/cma/actArrAtCusLoc/{$contenedor->cntr_number}/{$contenedor->cma_t_o}", $headers);
+            $res = $client->sendAsync($request)->wait();
+            $respuesta = $res->getBody();
+            $r = json_decode($respuesta, true);
+            Log::info('Respuesta CMA - Act Arr At Cus Loc: ' . $respuesta);
+
+             // ---------- POST a n8n ----------
+             try {
+                $payload = [
+                    'function'   => __FUNCTION__, // te manda el nombre de la función actual
+                    'contenedor' => $contenedor->cntr_number,
+                    'cma_t_o'    => $contenedor->cma_t_o,
+                    'lat'        => 'LUGAR DE DESCARGA',
+                    'lon'        => 'LUGAR DE DESCARGA',
+                    'respuesta'  => $r, // lo que devolvió CMA
+                ];
+
+                $postRes = $client->post('https://n8n.rail.ar/webhook/reporte-cma', [
+                    'headers' => $headers,
+                    'json'    => $payload,
+                ]);
+
+                Log::info('Posteado a n8n: ' . $postRes->getBody());
+            } catch (\Exception $e) {
+                Log::error('Error enviando a n8n: ' . $e->getMessage());
+            }
+        }
+
+
+
+
+         /* FIN CMA-CGM */
 
         if ($qd->main_status != 'STACKING') {
 
@@ -698,7 +761,7 @@ class CustomerLoadPlaceController extends Controller
 
     public function accionFueraLugarDeCarga($idTrip)
     {
-        /* CODIGO0012 - Completar con Endpoints CMA cuando el cntr tenga T/O */
+        
 
         $date = Carbon::now('-03:00');
         $qc = DB::table('cntr')->select('cntr_number', 'booking', 'confirmacion')->where('id_cntr', '=', $idTrip)->get();
@@ -777,6 +840,10 @@ class CustomerLoadPlaceController extends Controller
              try {
                 $payload = [
                     'function'   => __FUNCTION__, // te manda el nombre de la función actual
+                    'contenedor' => $cntr->cntr_number,
+                    'cma_t_o'    => $cma_t_o,
+                    'lat'        => $lat,
+                    'lon'        => $lon,
                     
                     'respuesta'  => 'varias', // lo que devolvió CMA
                 ];
@@ -964,13 +1031,72 @@ class CustomerLoadPlaceController extends Controller
     public function accionFueraLugarAduana($idTrip)
     {
 
+        
         $date = Carbon::now('-03:00');
-        $qc = DB::table('cntr')->select('cntr_number', 'booking', 'confirmacion')->where('id_cntr', '=', $idTrip)->get();
-        $cntr = $qc[0];
+        $cntr = DB::table('cntr')->select('cntr_number', 'booking', 'confirmacion')
+        ->join('carga', 'cntr.booking', '=', 'carga.booking')
+        ->select('cntr.cntr_number', 'cntr.booking', 'cntr.confirmacion', 'carga.cma_t_o')
+        ->where('cntr.id_cntr', '=', $idTrip)
+        ->first();
+
 
         // cual es el ultimo status.
         $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
         $description = $qd->status;
+
+
+        if ($cntr->cma_t_o != null) {
+
+
+            $place = DB::table('carga as c')
+            ->join('aduanas as ad', 'c.custom_place', '=', 'ad.description')
+            ->where('c.booking', $cntr->booking)
+            ->select('c.cma_t_o', 'ad.lat', 'ad.lon')
+            ->first();
+            if (!$place){
+
+                $place = DB::table('carga as c')
+                ->join('aduanas as ad', 'c.custom_place_impo', '=', 'ad.description')
+                ->where('c.booking', $cntr->booking)
+                ->select('c.cma_t_o', 'ad.lat', 'ad.lon')
+                ->first();
+            }
+
+            $base    = rtrim(env('API_CMA_BOTZERO'), '/');
+            $client = new Client();
+            $headers = ['Content-Type' => 'application/json'];
+            $request = new Psr7Request('GET', "{$base}/cma/estArrAtCusLoc/{$cntr->cma_t_o}/{$cntr->cntr_number}/{$place->lat}/{$place->lon}", $headers);
+            $res = $client->sendAsync($request)->wait();
+            $respuesta = $res->getBody();
+            $r = json_decode($respuesta, true);
+            
+
+             // ---------- POST a n8n ----------
+             try {
+                $payload = [
+                    'function'   => __FUNCTION__, // te manda el nombre de la función actual
+                    'contenedor' => $cntr->cntr_number,
+                    'cma_t_o'    => $cntr->cma_t_o,
+                    'lat'        => $place->lat,
+                    'lon'        => $place->lon,
+                    'respuesta'  => $r, // lo que devolvió CMA
+                ];
+
+                $postRes = $client->post('https://n8n.rail.ar/webhook/reporte-cma', [
+                    'headers' => $headers,
+                    'json'    => $payload,
+                ]);
+
+                Log::info('Posteado a n8n: ' . $postRes->getBody());
+            } catch (\Exception $e) {
+                Log::error('Error enviando a n8n: ' . $e->getMessage());
+            }
+        }
+
+        /* ++++++++++++++ ACCION CMA +++++++++++++++ */
+        $result = $this->cmaChangeFlag($cntr->cntr_number, 3 );
+        /* ++++++++++++++ FIN ACCION CMA +++++++++++ */
+
 
         if ($qd->main_status != 'YENDO A DESCARGAR' && $qd->avisado == 1) {
 
