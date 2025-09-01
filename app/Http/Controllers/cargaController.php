@@ -512,8 +512,6 @@ class cargaController extends Controller
         return $booking->count();
     }
 
-
-
     public function issetTrader(Request $request)
     {
         $trader = $request->input('trader');
