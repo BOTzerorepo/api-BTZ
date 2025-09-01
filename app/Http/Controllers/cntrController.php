@@ -17,7 +17,7 @@ use GuzzleHttp\Client;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use GuzzleHttp\Psr7\Request as Psr7Request;
-
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class cntrController extends Controller
 {
@@ -309,47 +309,72 @@ class cntrController extends Controller
     }
 
     public function datosConfirmar($cntrId)
-    {
-        try {
-            // Obtener el CNTR
-            $cntr = cntr::whereNull('deleted_at')->findOrFail($cntrId);
+{
+    try {
+        // CNTR
+        $cntr = cntr::whereNull('deleted_at')->findOrFail($cntrId);
 
-            // Obtener el asign asociado al CNTR
-            $asign = asign::whereNull('deleted_at')
-                ->where('cntr_number', $cntr->cntr_number)
-                ->firstOrFail();
+        // Asignación
+        $asign = asign::whereNull('deleted_at')
+            ->where('cntr_number', $cntr->cntr_number)
+            ->firstOrFail();
 
-            // Obtener el transporte asociado a la asignación
-            $transport = Transport::whereNull('deleted_at')
-                ->where('razon_social', $asign->transport)
-                ->firstOrFail();
+        // TRANSPORTE (opcional)
+        $transport = null;
+        $transportAssigned = !empty(trim((string) $asign->transport));
 
-            $truck = truck::where('domain', $asign->truck)
-                ->firstOrFail();
-            // Obtener la carga asociada al CNTR
+        if ($transportAssigned) {
+            // match tolerante por razón social (si usás SoftDeletes, Eloquent ya filtra)
+            $transport = Transport::query()
+                ->whereRaw('LOWER(TRIM(razon_social)) = LOWER(TRIM(?))', [trim($asign->transport)])
+                ->first();
 
-            $carga = Carga::whereNull('deleted_at')
-                ->where('booking', $cntr->booking)
-                ->firstOrFail();
-
-            // Preparar la respuesta en formato JSON
-            $response = [
-                'cntr' => $cntr,
-                'asign' => $asign,
-                'transport' => $transport,
-                'carga' => $carga,
-                'truck' => $truck
-            ];
-
-            // Devolver la respuesta en formato JSON
-            return response()->json($response);
-        } catch (\Exception $e) {
-            // Manejar cualquier error que ocurra
-            return response()->json([
-                'error' => 'Error al obtener los datos: ' . $e->getMessage()
-            ], 500);
+            // si guardaste un ID en "transport", soportalo también como fallback
+            if (!$transport && is_numeric($asign->transport)) {
+                $transport = Transport::find((int) $asign->transport);
+            }
         }
+
+        // TRUCK (opcional)
+        $truck = null;
+        $truckAssigned = !empty(trim((string) $asign->truck));
+        if ($truckAssigned) {
+            $truck = truck::where('domain', $asign->truck)->first(); // sin firstOrFail()
+        }
+
+        // CARGA (requerida)
+        $carga = Carga::whereNull('deleted_at')
+            ->where('booking', $cntr->booking)
+            ->firstOrFail();
+
+        return response()->json([
+            'cntr'        => $cntr,
+            'asign'       => $asign,
+            'transport'   => $transport,        // null si no hay asignado o no matchea
+            'truck'       => $truck,            // null si no hay asignado
+            'carga'       => $carga,
+            // flags para el front
+            'meta' => [
+                'transport_assigned' => $transportAssigned,
+                'truck_assigned'     => $truckAssigned,
+                'transport_found'    => (bool) $transport,
+                'truck_found'        => (bool) $truck,
+            ],
+        ], 200);
+
+    } catch (ModelNotFoundException $e) {
+        return response()->json([
+            'error'   => 'No se encontraron datos requeridos',
+            'detalle' => $e->getMessage(),
+        ], 404);
+    } catch (\Throwable $e) {
+        Log::error('datosConfirmar error', ['e' => $e]);
+        return response()->json([
+            'error' => 'Error al obtener los datos',
+            'msg'   => $e->getMessage(),
+        ], 500);
     }
+}
 
     public function datosCntrNumber($cntrNumber)
     {
