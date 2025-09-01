@@ -31,7 +31,7 @@ class TransportController extends Controller
     public function index()
     {
         try {
-            $transportes = Transport::whereNull('deleted_at')->get();
+            $transportes = Transport::whereNull('deleted_at')->orderBy('razon_social', 'asc')->get();
             return response()->json([
                 'data' => $transportes,
                 'success' => true
@@ -48,7 +48,7 @@ class TransportController extends Controller
     {
         try {
             $company = $request->input('company');
-            $transportes = Transport::whereNull('deleted_at')->where('empresa','=', $company)->get();
+            $transportes = Transport::whereNull('deleted_at')->where('empresa','=', $company)->orderBy('razon_social', 'asc')->get();
             return response()->json([
                 'data' => $transportes,
                 'success' => true
@@ -64,7 +64,7 @@ class TransportController extends Controller
     
     public function indexTransporteCustomer($id_customer)
     {
-        $transportes = Transport::whereNull('deleted_at')->where('customer_id', '=', $id_customer)->get();
+        $transportes = Transport::whereNull('deleted_at')->where('customer_id', '=', $id_customer)->orderBy('razon_social', 'asc')->get();
 
         return $transportes;
     }
