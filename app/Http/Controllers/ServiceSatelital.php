@@ -1108,9 +1108,21 @@ class ServiceSatelital extends Controller
         
         } else {
 
-            Mail::to(['copia@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo3@botzero.com.ar'])
-                ->cc(['equipodemo2@botzero.com.ar', 'copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])
-                ->bcc($inboxEmail)->send(new PuntoInteresEntrada($contenedor, $punto));
+            if (!$cliente) {
+                // Logueás un warning para debug
+                Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+
+                // Podés definir un mail fallback para no perder la notificación
+                $clienteEmail = 'soporte@botzero.com.ar';
+            } else {
+                $clienteEmail = $cliente->email;
+            }
+           
+            $customer = DB::table('users')
+                ->where('username', '=', $carga->user)
+                ->value('email');
+            $toEmails = array_merge([$customer,$clienteEmail], (array) $toEmails);
+            Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new PuntoInteresEntrada($contenedor, $punto));
         }
         //ENTRADA
         if ($punto->accion_correo_customer_entrada) {
@@ -1206,9 +1218,20 @@ $cliente = DB::table('users')
             $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
             Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new PuntoInteresSalida($contenedor, $punto));
         } else {
-            Mail::to(['copia@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo3@botzero.com.ar'])
-                ->cc(['equipodemo2@botzero.com.ar', 'copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])
-                ->bcc($inboxEmail)->send(new PuntoInteresSalida($contenedor, $punto));
+            if (!$cliente) {
+                // Logueás un warning para debug
+                Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+
+                // Podés definir un mail fallback para no perder la notificación
+                $clienteEmail = 'soporte@botzero.com.ar';
+            } else {
+                $clienteEmail = $cliente->email;
+            }
+            $customer = DB::table('users')
+                ->where('username', '=', $carga->user)
+                ->value('email');
+            $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
+            Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new PuntoInteresSalida($contenedor, $punto));
         }
         //SALIDA
         if ($punto->accion_correo_customer_salida) {

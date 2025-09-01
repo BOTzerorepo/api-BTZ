@@ -148,7 +148,7 @@ class TransportController extends Controller
             $transporte->save();
             // Enviar correo
             try {
-                Mail::to('copia@botzero.com.ar')->send(new nuevoTranporte($transporte));
+                Mail::to('satlelitales@btz.ar')->send(new nuevoTranporte($transporte));
             } catch (\Exception $mailException) {
                 return response()->json([
                     'message' => 'Transporte creado, pero falló el envío de correo.',
@@ -407,9 +407,16 @@ class TransportController extends Controller
                         ->send(new transporteAsignado($datos, $date));
                 }
             } else {
-                Mail::to(['equipoDemo1@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo3@botzero.com.ar'])
-                    ->cc(['equipodemo2@botzero.com.ar', 'copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])
-                    ->bcc($inboxEmail)->send(new transporteAsignado($datos, $date));
+                $customer = DB::table('users')
+                ->where('username', '=', $carga->user)
+                ->value('email');
+            $toEmails = array_merge([$customer], (array) $toEmails);
+            Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new transporteAsignado($datos, $date));
+            // Enviar solo al correo del transporte
+            if ($transporteMail) {
+                Mail::to($transporteMail->email)
+                    ->send(new transporteAsignado($datos, $date));
+            }
             }
 
             DB::commit();
@@ -549,9 +556,11 @@ class TransportController extends Controller
                 $toEmails = array_merge([$customer], (array) $toEmails);
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new asignarUnidadTransporte($datos, $date));
             } else {
-                Mail::to(['equipoDemo1@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo3@botzero.com.ar'])
-                    ->cc(['equipodemo2@botzero.com.ar', 'copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])
-                    ->bcc($inboxEmail)->send(new asignarUnidadTransporte($datos, $date));
+                $customer = DB::table('users')
+                    ->where('username', '=', $carga->user)
+                    ->value('email');
+                $toEmails = array_merge([$customer], (array) $toEmails);
+                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new asignarUnidadTransporte($datos, $date));
             }
 
             DB::commit();
@@ -750,9 +759,12 @@ class TransportController extends Controller
                 $status->user_status = $asignMail->user;
                 $status->save();
             } else {
-                Mail::to(['equipoDemo1@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo3@botzero.com.ar'])
-                    ->cc(['equipodemo2@botzero.com.ar', 'copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])
-                    ->bcc($inboxEmail)->send(new cargaAsignada($datos, $date));
+                $customer = DB::table('users')
+                ->where('username', '=', $carga->user)
+                ->value('email');
+                $toEmails = array_merge([$customer], (array) $toEmails);
+
+                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaAsignada($datos, $date));
 
                 $logapi = new logapi();
                 $logapi->user = $asignMail->user;

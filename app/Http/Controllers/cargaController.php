@@ -688,7 +688,11 @@ class cargaController extends Controller
             } elseif ($sbx[0]->sandbox == 2) {
                 Mail::to(['customer@qa.botzero.com.ar', 'abel.mazzitelli@gmail.com'])->cc(['copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])->bcc($inboxEmail)->send(new UpdateCarga($modificacionesCntr, $modificacionesCarga, $carga));
             } else {
-                Mail::to(['equipoDemo1@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo2@botzero.com.ar'])->cc(['equipodemo2@botzero.com.ar', 'copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])->bcc($inboxEmail)->send(new UpdateCarga($modificacionesCntr, $modificacionesCarga, $carga));
+                $customer = DB::table('users')
+                    ->where('username', '=', $carga->user)
+                    ->value('email');
+                $toEmails = array_merge([$customer], (array) $toEmails);
+                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new UpdateCarga($modificacionesCntr, $modificacionesCarga, $carga));
             }
             return response()->json(['message' => 'Carga actualizada exitosamente.'], 200);
         } catch (ValidationException $e) {

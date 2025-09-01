@@ -123,7 +123,7 @@ class oceansInstructions extends Controller
         
         }else {
 
-            Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new envioIntructivoOceans($data));
+            Mail::to($mail)->bcc($inboxEmail)->send(new envioIntructivoOceans($data)); 
             
             $logApi = new logapi();
             $logApi->user = 'No Informa';

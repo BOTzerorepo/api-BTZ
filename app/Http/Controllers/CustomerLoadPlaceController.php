@@ -158,8 +158,7 @@ class CustomerLoadPlaceController extends Controller
                 $logApi->detalle = "envio email cargaCargando to: abel.mazzitelli@gmail.com";
                 $logApi->save();
             } else {
-
-                Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaCargando($datos));
+                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaCargando($datos));
 
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
@@ -261,7 +260,20 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->detalle = "envio email cargaCargando to: abel.mazzitelli@gmail.com";
                     $logApi->save();
                 } else {
-                    Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaCargando($datos));
+                    if (!$cliente) {
+                        // Logueás un warning para debug
+                        Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+        
+                        // Podés definir un mail fallback para no perder la notificación
+                        $clienteEmail = 'soporte@botzero.com.ar';
+                    } else {
+                        $clienteEmail = $cliente->email;
+                    }
+                    $customer = DB::table('users')
+                        ->where('username', '=', $carga->user)
+                        ->value('email');
+                    $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
+                    Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaCargando($datos));
 
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
@@ -462,7 +474,21 @@ class CustomerLoadPlaceController extends Controller
                 $logApi->detalle = "envio email cargaAduana to: 'copia@botzero.com.ar'";
                 $logApi->save();
             } else {
-                Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaAduana($datos));
+                if (!$cliente) {
+                    // Logueás un warning para debug
+                    Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+    
+                    // Podés definir un mail fallback para no perder la notificación
+                    $clienteEmail = 'soporte@botzero.com.ar';
+                } else {
+                    $clienteEmail = $cliente->email;
+                }
+                $customer = DB::table('users')
+                    ->where('username', '=', $carga->user)
+                    ->value('email');
+                $toEmails = array_merge([$customer,$clienteEmail], (array) $toEmails);
+
+                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaAduana($datos));
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
                 $logApi->detalle = "envio email cargaAduana to: 'copia@botzero.com.ar'";
@@ -561,8 +587,22 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->detalle = "envio email cargaAduana to: 'copia@botzero.com.ar'";
                     $logApi->save();
                 } else {
+                    if (!$cliente) {
+                        // Logueás un warning para debug
+                        Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+        
+                        // Podés definir un mail fallback para no perder la notificación
+                        $clienteEmail = 'soporte@botzero.com.ar';
+                    } else {
+                        $clienteEmail = $cliente->email;
+                    }
+                    $customer = DB::table('users')
+                        ->where('username', '=', $carga->user)
+                        ->value('email');
+                    $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
 
-                    Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaAduana($datos));
+                    Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaAduana($datos));
+
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaAduana to: 'copia@botzero.com.ar'";
@@ -724,8 +764,20 @@ class CustomerLoadPlaceController extends Controller
                 $logApi->detalle = "envio email Instructivo to: 'copia@botzero.com.ar'";
                 $logApi->save();
             } else {
+                if (!$cliente) {
+                    // Logueás un warning para debug
+                    Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+    
+                    // Podés definir un mail fallback para no perder la notificación
+                    $clienteEmail = 'soporte@botzero.com.ar';
+                } else {
+                    $clienteEmail = $cliente->email;
+                }
+                $customer = DB::table('users')
+                    ->where('username', '=', $carga->user)
+                    ->value('email');
+                $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
 
-                Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaDescarga($datos));
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
                 $logApi->detalle = "envio email Instructivo to: 'copia@botzero.com.ar'";
@@ -825,8 +877,20 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->detalle = "envio email Instructivo to: 'copia@botzero.com.ar'";
                     $logApi->save();
                 } else {
+                    if (!$cliente) {
+                        // Logueás un warning para debug
+                        Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+        
+                        // Podés definir un mail fallback para no perder la notificación
+                        $clienteEmail = 'soporte@botzero.com.ar';
+                    } else {
+                        $clienteEmail = $cliente->email;
+                    }
+                    $customer = DB::table('users')
+                        ->where('username', '=', $carga->user)
+                        ->value('email');
+                    $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
 
-                    Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaDescarga($datos));
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email Instructivo to: 'copia@botzero.com.ar'";
@@ -1024,7 +1088,22 @@ class CustomerLoadPlaceController extends Controller
                 $logApi->save();
             } else {
 
-                Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaFueraCargando($datos));
+                if (!$cliente) {
+                    // Logueás un warning para debug
+                    Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+    
+                    // Podés definir un mail fallback para no perder la notificación
+                    $clienteEmail = 'soporte@botzero.com.ar';
+                } else {
+                    $clienteEmail = $cliente->email;
+                }
+                $customer = DB::table('users')
+                    ->where('username', '=', $carga->user)
+                    ->value('email');
+                $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
+                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaFueraCargando($datos));
+
+
 
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
@@ -1115,7 +1194,21 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->detalle = "envio email cargaCargando to: abel.mazzitelli@gmail.com";
                     $logApi->save();
                 } else {
-                    Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaFueraCargando($datos));
+                    if (!$cliente) {
+                        // Logueás un warning para debug
+                        Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+        
+                        // Podés definir un mail fallback para no perder la notificación
+                        $clienteEmail = 'soporte@botzero.com.ar';
+                    } else {
+                        $clienteEmail = $cliente->email;
+                    }
+                    $customer = DB::table('users')
+                        ->where('username', '=', $carga->user)
+                        ->value('email');
+                    $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
+
+                    Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaFueraCargando($datos));
 
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
@@ -1289,7 +1382,21 @@ class CustomerLoadPlaceController extends Controller
                 $logApi->detalle = "envio email cargaAduana to: abel.mazzitelli@gmail.com";
                 $logApi->save();
             } else {
-                Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaFueraAduana($datos));
+                if (!$cliente) {
+                    // Logueás un warning para debug
+                    Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+    
+                    // Podés definir un mail fallback para no perder la notificación
+                    $clienteEmail = 'soporte@botzero.com.ar';
+                } else {
+                    $clienteEmail = $cliente->email;
+                }
+                $customer = DB::table('users')
+                    ->where('username', '=', $carga->user)
+                    ->value('email');
+                $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
+
+                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaFueraAduana($datos));
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
                 $logApi->detalle = "envio email cargaAduana to: 'copia@botzero.com.ar'";
@@ -1388,8 +1495,23 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->detalle = "envio email cargaAduana to: abel.mazzitelli@gmail.com";
                     $logApi->save();
                 } else {
+                    if (!$cliente) {
+                        // Logueás un warning para debug
+                        Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+        
+                        // Podés definir un mail fallback para no perder la notificación
+                        $clienteEmail = 'soporte@botzero.com.ar';
+                    } else {
+                        $clienteEmail = $cliente->email;
+                    }
+                   
+                    $customer = DB::table('users')
+                        ->where('username', '=', $carga->user)
+                        ->value('email');
+                    $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
 
-                    Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new cargaFueraAduana($datos));
+                    Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaFueraAduana($datos));
+
                     $logApi = new logapi();
                     $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaAduana to: 'copia@botzero.com.ar'";

@@ -117,7 +117,13 @@ class emailController extends Controller
             return 'ok';
         } else {
 
-            Mail::to(['equipoDemo1@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo3@botzero.com.ar'])->cc(['copia@botzero.com.ar'])->bcc($inboxEmail)->send(new cargaAsignada($data, $date));
+            $customer = DB::table('users')
+                ->where('username', '=', $carga->user)
+                ->value('email');
+            $toEmails = array_merge([$customer], (array) $toEmails);
+
+            Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaAsignada($data, $date));
+
 
             $logapi = new logapi();
             $logapi->user = $dAsign->user;
@@ -204,8 +210,21 @@ class emailController extends Controller
                 return 'ok';
             } else {
 
-                Mail::to(['equipoDemo1@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo2@botzero.com.ar'])->cc(['copia@botzero.com.ar'])->bcc($inboxEmail)
-                    ->send(new CargaConProblemas($datos, $statusArchivoPath));
+                if (!$cliente) {
+                    // Logueás un warning para debug
+                    Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+    
+                    // Podés definir un mail fallback para no perder la notificación
+                    $clienteEmail = 'soporte@botzero.com.ar';
+                } else {
+                    $clienteEmail = $cliente->email;
+                }
+                $customer = DB::table('users')
+                    ->where('username', '=', $carga->user)
+                    ->value('email');
+                $toEmails = array_merge([$customer,$clienteEmail], (array) $toEmails);
+
+                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new CargaConProblemas($datos, $statusArchivoPath));
                 return 'ok';
             }
         } elseif ($tipo == 'stacking') {
@@ -257,7 +276,20 @@ class emailController extends Controller
                     ->send(new IngresadoStacking($datos, $statusArchivoPath));
                 return 'ok';
             } else {
-                Mail::to(['equipoDemo1@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo2@botzero.com.ar'])->cc(['copia@botzero.com.ar'])->bcc($inboxEmail)
+                if (!$cliente) {
+                    // Logueás un warning para debug
+                    Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+    
+                    // Podés definir un mail fallback para no perder la notificación
+                    $clienteEmail = 'soporte@botzero.com.ar';
+                } else {
+                    $clienteEmail = $cliente->email;
+                }
+                $customer = DB::table('users')
+                    ->where('username', '=', $carga->user)
+                    ->value('email');
+                $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
+                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)
                     ->send(new IngresadoStacking($datos, $statusArchivoPath));
                 return 'ok';
             }
@@ -309,7 +341,20 @@ class emailController extends Controller
                     ->send(new cargaTerminada($datos, $statusArchivoPath));
                 return 'ok';
             } else {
-                Mail::to(['equipoDemo1@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo2@botzero.com.ar'])->cc(['copia@botzero.com.ar'])->bcc($inboxEmail)
+                if (!$cliente) {
+                    // Logueás un warning para debug
+                    Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+    
+                    // Podés definir un mail fallback para no perder la notificación
+                    $clienteEmail = 'soporte@botzero.com.ar';
+                } else {
+                    $clienteEmail = $cliente->email;
+                }
+                $customer = DB::table('users')
+                    ->where('username', '=', $carga->user)
+                    ->value('email');
+                $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
+                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)
                     ->send(new cargaTerminada($datos, $statusArchivoPath));
                 return 'ok';
             }
@@ -370,8 +415,23 @@ class emailController extends Controller
                 $logApi->save();
                 return 'ok';
             } else {
-                Mail::to(['equipoDemo1@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo2@botzero.com.ar'])->cc(['copia@botzero.com.ar'])->bcc($inboxEmail)
-                    ->send(new CamnioStatus($datos, $statusArchivoPath));
+                if (!$cliente) {
+                    // Logueás un warning para debug
+                    Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+    
+                    // Podés definir un mail fallback para no perder la notificación
+                    $clienteEmail = 'soporte@botzero.com.ar';
+                } else {
+                    $clienteEmail = $cliente->email;
+                }
+                
+                $customer = DB::table('users')
+                    ->where('username', '=', $carga->user)
+                    ->value('email');
+
+                $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
+               
+                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new CamnioStatus($datos, $statusArchivoPath));
                 $logApi = new logapi();
                 $logApi->user = $user;
                 $logApi->detalle = "+ Sandbox + envio email camnioStatus to: ['equipoDemo1@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo2@botzero.com.ar']";
@@ -492,7 +552,13 @@ class emailController extends Controller
             return 'ok';
         } else {
 
-            Mail::to(['equipoDemo1@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo2@botzero.com.ar'])->cc(['equipodemo2@botzero.com.ar', 'copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])->bcc($inboxEmail)->send(new avisoNewCarga($datos));
+            $customer = DB::table('users')
+                ->where('username', '=', $carga->user)
+                ->value('email');
+            $toEmails = array_merge([$customer], (array) $toEmails);
+
+            //Se envia el email al equipo de trafico y al customer que genero la carga. Copia a la gzarate
+            Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new avisoNewCarga($datos));
             $logApi = new logapi();
             $logApi->user = $user[0]->username;
             $logApi->detalle = "envio email to(['equipoDemo1@botzero.com.ar', 'equipodemo2@botzero.com.ar','equipodemo2@botzero.com.ar'])->cc(['equipodemo2@botzero.com.ar','copiaequipodemo5@botzero.com.ar','copiaequipodemo6@botzero.com.ar'])";

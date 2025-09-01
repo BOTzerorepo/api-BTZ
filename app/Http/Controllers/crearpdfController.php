@@ -907,7 +907,8 @@ class crearpdfController extends Controller
 
             } else{
 
-                Mail::to('copia@botzero.com.ar')->bcc($inboxEmail)->send(new envioInstructivo($data));
+                
+                Mail::to($mail)->bcc($inboxEmail)->send(new envioInstructivo($data));
 
                 $logApi = new logapi();
                 $logApi->user = 'No Informa';
