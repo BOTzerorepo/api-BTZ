@@ -23,6 +23,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use LDAP\Result;
 use Mockery\Undefined;
@@ -160,7 +161,7 @@ class ServiceSatelital extends Controller
             return $truck;
         }
     }
-
+    //MIGRAR A GO
     public function serviceSatelital()
     {
 
@@ -177,7 +178,6 @@ class ServiceSatelital extends Controller
             ->where('trucks.alta_aker', '!=', 0)
             ->get();
 
-        //return $todosMisCamiones;
 
 
         foreach ($todosMisCamiones as $camion) {
@@ -187,7 +187,6 @@ class ServiceSatelital extends Controller
                 'Content-Type' => 'application/json'
             ];
 
-            // TEST: E6HW19 - PRODUCCION: C2QC20
 
             if (env('APP_ENV') === 'production') {
                 $body = '{
@@ -285,6 +284,7 @@ class ServiceSatelital extends Controller
             }
         }
     }
+
     public function flota()
     {
 
@@ -626,8 +626,6 @@ class ServiceSatelital extends Controller
         return $camiones;
     }
 
-
-
     public function flotaId($domain)
     {
         $client = new Client();
@@ -701,6 +699,7 @@ class ServiceSatelital extends Controller
                 ->where('asign.truck', '=', $domain)
                 ->whereNotIn('cntr.main_status', ['TERMINADA', 'NO ASIGNED'])
                 ->whereNotNull('trucks.domain') // Aseguramos que la unión principal se mantenga
+                ->orderBy('carga.created_at', 'desc')
                 ->get();
 
 
@@ -782,15 +781,24 @@ class ServiceSatelital extends Controller
 
         return $camiones;
     }
+
+    //Migrar a GO
     public function revisarCoordenadas()
     {
         $detalleComparaciones = [];
 
-        // Obtener todas las asignaciones activas desde la tabla asign
-        $asignaciones = asign::whereNull('deleted_at')
-            ->whereNotNull('truck')
-            ->whereIn('booking', Carga::where('status', '!=', 'TERMINADA')->pluck('booking'))
+        $asignaciones = DB::table('asign as a')
+            ->join('cntr as c', 'a.cntr_number', '=', 'c.cntr_number') // Unir con la tabla cntr
+            ->join('cntr_interest_point as cip', 'c.id_cntr', '=', 'cip.cntr_id_cntr') // Unir con puntos de interés
+            ->whereNull('a.deleted_at')
+            ->whereNotNull('a.truck')
+            ->whereIn('a.booking', DB::table('carga')
+                ->where('status', '!=', 'TERMINADA')
+                ->pluck('booking'))
+            ->select('a.*', 'c.*') // Seleccionar columnas necesarias
+            ->distinct() // Evitar duplicados
             ->get();
+
 
         foreach ($asignaciones as $asignacion) {
             // Obtener los datos del truck y el contenedor a partir de la asignación
@@ -1034,20 +1042,72 @@ class ServiceSatelital extends Controller
             ->first();
         $punto = DB::table('interest_points')->where('id', $puntoActivoId)->first();
 
+        if ($contenedor->cma_t_o != null) {
+
+            $base    = rtrim(env('API_CMA_BOTZERO'), '/');
+            $client = new Client();
+            $headers = ['Content-Type' => 'application/json'];
+            $request = new Psr7Request('GET', "{$base}/cma/estArrAtCusLoc/{$contenedor->cma_t_o}/{$contenedor->cntr_number}/{$punto->latitude}/{$punto->longitude}", $headers);
+            $res = $client->sendAsync($request)->wait();
+            $respuesta = $res->getBody();
+            $r = json_decode($respuesta, true);
+            Log::info('Respuesta CMA - Est Arr At Cus Loc: ' . $respuesta);
+
+             // ---------- POST a n8n ----------
+             try {
+                $payload = [
+                    'function'   => __FUNCTION__, // te manda el nombre de la función actual
+                    'contenedor' => $contenedor->cntr_number,
+                    'cma_t_o'    => $contenedor->cma_t_o,
+                    'lat'        => $punto->latitude,
+                    'lon'        => $punto->longitude,
+                    'respuesta'  => $r, // lo que devolvió CMA
+                ];
+
+                $postRes = $client->post('https://n8n.rail.ar/webhook/reporte-cma', [
+                    'headers' => $headers,
+                    'json'    => $payload,
+                ]);
+
+                Log::info('Posteado a n8n: ' . $postRes->getBody());
+            } catch (\Exception $e) {
+                Log::error('Error enviando a n8n: ' . $e->getMessage());
+            }
+        }
+
         $sbx = DB::table('variables')->select('sandbox')->get();
         $inboxEmail = env('INBOX_EMAIL');
         $mailsTrafico = DB::table('particular_soft_configurations')->first();
         $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
         $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
         $carga = Carga::whereNull('deleted_at')->where('booking', '=', $contenedor->booking)->first();
+        $cliente = DB::table('users')
+        ->where('cliente_id', '=', $carga->client_id)
+        ->first();
+
+        
+       
 
         if ($sbx[0]->sandbox == 0) {
+            
+            if (!$cliente) {
+                // Logueás un warning para debug
+                Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+
+                // Podés definir un mail fallback para no perder la notificación
+                $clienteEmail = 'soporte@botzero.com.ar';
+            } else {
+                $clienteEmail = $cliente->email;
+            }
+           
             $customer = DB::table('users')
                 ->where('username', '=', $carga->user)
                 ->value('email');
-            $toEmails = array_merge([$customer], (array) $toEmails);
+            $toEmails = array_merge([$customer,$clienteEmail], (array) $toEmails);
             Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new PuntoInteresEntrada($contenedor, $punto));
+        
         } else {
+
             Mail::to(['copia@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo3@botzero.com.ar'])
                 ->cc(['equipodemo2@botzero.com.ar', 'copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])
                 ->bcc($inboxEmail)->send(new PuntoInteresEntrada($contenedor, $punto));
@@ -1077,16 +1137,49 @@ class ServiceSatelital extends Controller
     }
     public function ejecutarAccionSalida($puntoActivoId, $contenedorId)
     {
-
         // Obtener datos del contenedor desde la tabla 'cntr'
-
         $contenedor = DB::table('cntr')
             ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
             ->join('carga', 'cntr.booking', '=', 'carga.booking')
             ->where('cntr.id_cntr', $contenedorId)
             ->select('cntr.*', 'asign.*', 'carga.*')
             ->first();
+
         $punto = DB::table('interest_points')->where('id', $puntoActivoId)->first();
+
+        if ($contenedor->cma_t_o != null) {
+
+            $base    = rtrim(env('API_CMA_BOTZERO'), '/');
+            $client = new Client();
+            $headers = ['Content-Type' => 'application/json'];
+            $request = new Psr7Request('GET', "{$base}/cma/estArrAtCusLoc/{$contenedor->cma_t_o}/{$contenedor->cntr_number}/{$punto->latitude}/{$punto->longitude}", $headers);
+            $res = $client->sendAsync($request)->wait();
+            $respuesta = $res->getBody();
+            $r = json_decode($respuesta, true);
+            //Log::info('Respuesta CMA - Est Arr At Cus Loc: ' . $r);
+
+
+            // ---------- POST a n8n ----------
+            try {
+                $payload = [
+                    'function'   => __FUNCTION__, // te manda el nombre de la función actual
+                    'contenedor' => $contenedor->cntr_number,
+                    'cma_t_o'    => $contenedor->cma_t_o,
+                    'lat'        => $punto->latitude,
+                    'lon'        => $punto->longitude,
+                    'respuesta'  => $r, // lo que devolvió CMA
+                ];
+
+                $postRes = $client->post('https://n8n.rail.ar/webhook/reporte-cma', [
+                    'headers' => $headers,
+                    'json'    => $payload,
+                ]);
+
+                Log::info('Posteado a n8n: ' . $postRes->getBody());
+            } catch (\Exception $e) {
+                Log::error('Error enviando a n8n: ' . $e->getMessage());
+            }
+        }
 
         $sbx = DB::table('variables')->select('sandbox')->get();
         $inboxEmail = env('INBOX_EMAIL');
@@ -1094,12 +1187,23 @@ class ServiceSatelital extends Controller
         $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
         $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
         $carga = Carga::whereNull('deleted_at')->where('booking', '=', $contenedor->booking)->first();
-
+$cliente = DB::table('users')
+            ->where('cliente_id', '=', $carga->client_id)
+            ->first();
         if ($sbx[0]->sandbox == 0) {
+            if (!$cliente) {
+                // Logueás un warning para debug
+                Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+
+                // Podés definir un mail fallback para no perder la notificación
+                $clienteEmail = 'soporte@botzero.com.ar';
+            } else {
+                $clienteEmail = $cliente->email;
+            }
             $customer = DB::table('users')
                 ->where('username', '=', $carga->user)
                 ->value('email');
-            $toEmails = array_merge([$customer], (array) $toEmails);
+            $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
             Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new PuntoInteresSalida($contenedor, $punto));
         } else {
             Mail::to(['copia@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo3@botzero.com.ar'])

@@ -13,6 +13,9 @@ class Customer extends Model
         'tax_id',
         'contact_name',
         'contact_phone',
-        'contact_mail'
+        'contact_mail',
+        'company',
+        'created_at',
+        'updated_at'
     ];
 }

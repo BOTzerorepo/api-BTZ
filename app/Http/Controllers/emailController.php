@@ -22,6 +22,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response as HttpResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
 class emailController extends Controller
@@ -134,85 +135,6 @@ class emailController extends Controller
             return 'ok';
         }
     }
-    public function transporteAsignado($id)
-    {
-
-        $date = Carbon::now('-03:00');
-
-        try {
-            $asign = DB::table('asign')
-                ->select('asign.id', 'carga.*', 'cntr.cntr_type', 'carga.user as userC', 'asign.cntr_number', 'asign.booking', 'asign.transport', 'asign.transport_agent', 'asign.user', 'asign.company', 'atas.tax_id', 'transports.pais', 'cntr.confirmacion')
-                ->join('transports', 'asign.transport', '=', 'transports.razon_social')
-                ->leftJoin('atas', 'asign.transport_agent', '=', 'atas.razon_social')
-                ->join('carga', 'asign.booking', '=', 'carga.booking')
-                ->join('cntr', 'asign.cntr_number', '=', 'cntr.cntr_number')
-                ->where('asign.id', '=', $id)
-                ->get();
-
-            if ($asign->count() === 0) {
-
-                return 'Assignment not found'; // Handle the case where no assignment is found
-            }
-
-            $asign = $asign[0]; // Retrieve the first assignment
-
-            // Retrieve recipient's email
-            $to = DB::table('users')->select('email')->where('username', '=', $asign->userC)->first();
-
-            // Data to be sent in the email
-            $data = [
-                'cntr_number' => $asign->cntr_number,
-                'cntr_type' => $asign->cntr_type,
-                'booking' => $asign->booking,
-                'confirmacion' => $asign->confirmacion,
-                'transport' => $asign->transport,
-                'transport_agent' => $asign->transport_agent,
-                'user' => $asign->user,
-                'company' => $asign->company,
-                'transport_bandera' => $asign->pais,
-                'cuit_ata' => $asign->tax_id,
-                'ref_customer' => $asign->ref_customer,
-                'type' => $asign->type,
-                'trader' => $asign->trader,
-            ];
-
-            // Log API action
-            $logapi = new logapi();
-            $logapi->user = $asign->user;
-            $logapi->detalle = 'AsignaCarga';
-            $logapi->save();
-
-            // Retrieve sandbox status
-            $sbx = DB::table('variables')->select('sandbox')->first();
-            $inboxEmail = env('INBOX_EMAIL');
-            // Determine the recipient and log message based on sandbox status
-            $recipient = $to ? $to->email : 'copia@botzero.com.ar';
-            $logMessage = '+ Sandbox +' . ($sbx->sandbox == 0 ? '' : 'to: ' . $recipient) . 'AsignaUnidadTransporte-User:' . $asign->user . '|Transporte:' . $asign->transport . '| ATA:' . $asign->transport_agent . '| Bandera:' . $asign->pais . '| CUIT :' . $asign->tax_id;
-            if ($sbx->sandbox == 0) {
-                // Send email
-                Mail::to($to)->cc(['gzarate@totaltradegroup.com', 'lgonzalez@totaltradegroup.com'])->bcc($inboxEmail)->send(new transporteAsignado($data, $date));
-            } elseif ($sbx->sandbox == 2) {
-
-                Mail::to($to)->cc(['abel.mazzitelli@gmail.com'])->bcc($inboxEmail)->send(new transporteAsignado($data, $date));
-            } else {
-
-                Mail::to($to)->cc(['copia@botzero.com.ar'])->bcc($inboxEmail)->send(new transporteAsignado($data, $date));
-            }
-
-            // Log API action again with updated log message
-            $logapi = new logapi();
-            $logapi->user = $asign->user;
-            $logapi->detalle = $logMessage;
-            $logapi->save();
-
-            return 'ok'; // Return success message
-        } catch (\Exception $e) {
-            // Handle and log the error
-            $errorMessage = 'An error occurred: ' . $e->getMessage();
-            // Log the error here using your preferred logging mechanism
-            return $errorMessage; // Return error message
-        }
-    }
 
     public function cambiaStatus($cntr, $empresa, $booking, $user, $tipo, $statusArchivoPath)
     {
@@ -230,7 +152,9 @@ class emailController extends Controller
         $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
         $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
         $carga = Carga::whereNull('deleted_at')->where('booking', '=', $booking)->first();
-
+        $cliente = DB::table('users')
+        ->where('cliente_id', '=', $carga->client_id)
+        ->first();
         if ($tipo == 'problema') {
 
             $qd = DB::table('status')->select('status.id', 'status.status', 'cntr.cntr_type', 'carga.trader', 'carga.type', 'carga.ref_customer', 'cntr.confirmacion', 'asign.transport', 'asign.transport_agent', 'asign.truck', 'asign.truck_semi', 'asign.driver', 'drivers.documento')
@@ -262,10 +186,19 @@ class emailController extends Controller
             ];
 
             if ($sbx[0]->sandbox == 0) {
+                if (!$cliente) {
+                    // Logueás un warning para debug
+                    Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+    
+                    // Podés definir un mail fallback para no perder la notificación
+                    $clienteEmail = 'soporte@botzero.com.ar';
+                } else {
+                    $clienteEmail = $cliente->email;
+                }
                 $customer = DB::table('users')
                     ->where('username', '=', $carga->user)
                     ->value('email');
-                $toEmails = array_merge([$customer], (array) $toEmails);
+                $toEmails = array_merge([$customer,$clienteEmail], (array) $toEmails);
 
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new CargaConProblemas($datos, $statusArchivoPath));
                 return 'ok';
@@ -307,10 +240,19 @@ class emailController extends Controller
             ];
 
             if ($sbx[0]->sandbox == 0) {
+                if (!$cliente) {
+                    // Logueás un warning para debug
+                    Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+    
+                    // Podés definir un mail fallback para no perder la notificación
+                    $clienteEmail = 'soporte@botzero.com.ar';
+                } else {
+                    $clienteEmail = $cliente->email;
+                }
                 $customer = DB::table('users')
                     ->where('username', '=', $carga->user)
                     ->value('email');
-                $toEmails = array_merge([$customer], (array) $toEmails);
+                $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)
                     ->send(new IngresadoStacking($datos, $statusArchivoPath));
                 return 'ok';
@@ -350,10 +292,19 @@ class emailController extends Controller
             ];
 
             if ($sbx[0]->sandbox == 0) {
+                if (!$cliente) {
+                    // Logueás un warning para debug
+                    Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+    
+                    // Podés definir un mail fallback para no perder la notificación
+                    $clienteEmail = 'soporte@botzero.com.ar';
+                } else {
+                    $clienteEmail = $cliente->email;
+                }
                 $customer = DB::table('users')
                     ->where('username', '=', $carga->user)
                     ->value('email');
-                $toEmails = array_merge([$customer], (array) $toEmails);
+                $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)
                     ->send(new cargaTerminada($datos, $statusArchivoPath));
                 return 'ok';
@@ -395,12 +346,21 @@ class emailController extends Controller
             ];
 
             if ($sbx[0]->sandbox == 0) {
+                if (!$cliente) {
+                    // Logueás un warning para debug
+                    Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+    
+                    // Podés definir un mail fallback para no perder la notificación
+                    $clienteEmail = 'soporte@botzero.com.ar';
+                } else {
+                    $clienteEmail = $cliente->email;
+                }
                 
                 $customer = DB::table('users')
                     ->where('username', '=', $carga->user)
                     ->value('email');
 
-                $toEmails = array_merge([$customer], (array) $toEmails);
+                $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
                
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new CamnioStatus($datos, $statusArchivoPath));
         
@@ -509,6 +469,7 @@ class emailController extends Controller
         $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
 
         if ($sbx[0]->sandbox == 0) {
+            
             $customer = DB::table('users')
                 ->where('username', '=', $carga->user)
                 ->value('email');
