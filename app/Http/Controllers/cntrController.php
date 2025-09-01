@@ -141,54 +141,63 @@ class cntrController extends Controller
     public function update(Request $request, $id)
     {
         $this->validate($request, [
-            'cntr_number' => 'required|string|max:255',
-            'cntr_seal' => 'nullable|string|max:255',
-            'confirmacion' => 'required|boolean',
+            'cntr_number'   => 'required|string|max:255',
+            'cntr_seal'     => 'nullable|string|max:255',
+            'confirmacion'  => 'required|boolean',
         ]);
+    
+        // Tomo estos valores temprano para no depender luego
+        $newCntrNumber = $request->input('cntr_number');
+        $newSeal       = $request->input('cntr_seal');
+        $newConfirm    = (bool) $request->input('confirmacion');
 
-        DB::beginTransaction();
         try {
 
             $cntr = cntr::findOrFail($id);
             $cntrOld = $cntr->cntr_number;
 
-
-            $asign = DB::table('asign')->where('cntr_number', $cntr->cntr_number)->first();
+            $asign = DB::table('asign')->where('cntr_number',  $newCntrNumber )->first();
             
             $idCarga = DB::table('carga')->where('booking', $cntr->booking)->value('id');
 
-
-            $cntr->cntr_number = $request['cntr_number'];
-            $cntr->cntr_seal = $request['cntr_seal'];
-            $cntr->confirmacion = $request['confirmacion'];
+            $cntr->cntr_number = $newCntrNumber;
+            $cntr->cntr_seal =  $newSeal ;
+            $cntr->confirmacion = $newConfirm;
             $cntr->save();
 
+            $rowTO = DB::table('carga')
+                ->leftJoin('cntr', 'cntr.booking', '=', 'carga.booking')
+                ->whereNull('carga.deleted_at')
+                ->where('cntr.cntr_number', $cntr->cntr_number)
+                ->select('carga.cma_t_o')
+                ->first();
 
-            $issetTO = Carga::whereNull('carga.deleted_at')
-            ->leftJoin('cntr', 'cntr.booking', '=', 'carga.booking')
-            ->where('cntr.cntr_number', '=', $cntr->cntr_number)
-            ->get();
-            $tO = $issetTO[0]->cma_t_o;
-             // Llamar a la API externa si se encuentra el TO
+            $tO = $rowTO?->cma_t_o;
+            if (!empty($tO)) {
+                try {
+                    $client = new Client();
+                    $headers = ['Content-Type' => 'application/json'];
+    
+                    $urlBase = rtrim(env('API_CMA_BOTZERO'), '/');
+                    $guzzleRequest = new Psr7Request(
+                        'GET',
+                        "{$urlBase}/cma/estDepCustLoc/{$cntr->cntr_number}/{$tO}",
+                        $headers
+                    );
+    
+                    $res = $client->sendAsync($guzzleRequest)->wait();
+                    $respuesta = (string) $res->getBody();
+                    $data = json_decode($respuesta, true);
+                    Log::info('CMA estDepCustLoc OK', ['cntr' => $cntr->cntr_number, 'tO' => $tO, 'resp' => $data]);
+                } catch (\Throwable $e) {
+                    // No rompas la operación principal por un fallo externo
+                    Log::warning('CMA estDepCustLoc fallo', ['error' => $e->getMessage()]);
+                }
             
-            if($tO != null){
-                $client = new Client();
-                $headers = [
-                    'Content-Type' => 'application/json'
-                ];
+            }
 
-                $request = new Psr7Request(
-                    'GET',
-                    env('API_CMA_BOTZERO').'/cma/estDepCustLoc/'.$cntr->cntr_number.'/'.$tO,
-                    $headers
-                );
-                $res = $client->sendAsync($request)->wait();
-                $respuesta = $res->getBody();
-                $data = json_decode($respuesta, true);
-            } 
-
-            asign::where('cntr_number', $cntrOld)->update(['cntr_number' => $request['cntr_number']]);
-            statu::where('cntr_number', $cntrOld)->update(['cntr_number' => $request['cntr_number']]);
+            asign::where('cntr_number', $cntrOld)->update(['cntr_number' => $newCntrNumber]);
+            statu::where('cntr_number', $cntrOld)->update(['cntr_number' => $newCntrNumber]);
 
             //Eliminar el archivo intructivo y generar uno nuevo 
             if ($asign && $asign->file_instruction) {
