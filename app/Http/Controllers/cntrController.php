@@ -147,26 +147,31 @@ class cntrController extends Controller
         ]);
 
         DB::beginTransaction();
-
         try {
+
             $cntr = cntr::findOrFail($id);
             $cntrOld = $cntr->cntr_number;
 
+
             $asign = DB::table('asign')->where('cntr_number', $cntr->cntr_number)->first();
+            
             $idCarga = DB::table('carga')->where('booking', $cntr->booking)->value('id');
+
 
             $cntr->cntr_number = $request['cntr_number'];
             $cntr->cntr_seal = $request['cntr_seal'];
             $cntr->confirmacion = $request['confirmacion'];
             $cntr->save();
 
+
             $issetTO = Carga::whereNull('carga.deleted_at')
             ->leftJoin('cntr', 'cntr.booking', '=', 'carga.booking')
             ->where('cntr.cntr_number', '=', $cntr->cntr_number)
             ->get();
             $tO = $issetTO[0]->cma_t_o;
+             // Llamar a la API externa si se encuentra el TO
             
-            if($issetTO->count() == 1){
+            if($tO != null){
                 $client = new Client();
                 $headers = [
                     'Content-Type' => 'application/json'
@@ -179,7 +184,7 @@ class cntrController extends Controller
                 );
                 $res = $client->sendAsync($request)->wait();
                 $respuesta = $res->getBody();
-                $data = json_decode($respuesta, true);               
+                $data = json_decode($respuesta, true);
             } 
 
             asign::where('cntr_number', $cntrOld)->update(['cntr_number' => $request['cntr_number']]);
@@ -305,46 +310,47 @@ class cntrController extends Controller
     }
 
     public function datosConfirmar($cntrId)
-{
-    try {
-        // Obtener el CNTR
-        $cntr = cntr::whereNull('deleted_at')->findOrFail($cntrId);
+    {
+        try {
+            // Obtener el CNTR
+            $cntr = cntr::whereNull('deleted_at')->findOrFail($cntrId);
 
-        // Obtener el asign asociado al CNTR
-        $asign = asign::whereNull('deleted_at')
-            ->where('cntr_number', $cntr->cntr_number)
-            ->firstOrFail();
+            // Obtener el asign asociado al CNTR
+            $asign = asign::whereNull('deleted_at')
+                ->where('cntr_number', $cntr->cntr_number)
+                ->firstOrFail();
 
-        // Obtener el transporte asociado (puede no existir)
-        $transport = Transport::whereNull('deleted_at')
-            ->where('razon_social', $asign->transport)
-            ->first(); // 👈 cambio: puede devolver null
+            // Obtener el transporte asociado a la asignación
+            $transport = Transport::whereNull('deleted_at')
+                ->where('razon_social', $asign->transport)
+                ->firstOrFail();
 
-        // Obtener el camión asociado
-        $truck = truck::where('domain', $asign->truck)->first();
+            $truck = truck::where('domain', $asign->truck)
+                ->first();
+            // Obtener la carga asociada al CNTR
 
-        // Obtener la carga asociada al CNTR
-        $carga = Carga::whereNull('deleted_at')
-            ->where('booking', $cntr->booking)
-            ->firstOrFail();
+            $carga = Carga::whereNull('deleted_at')
+                ->where('booking', $cntr->booking)
+                ->firstOrFail();
 
-        // Preparar la respuesta en formato JSON
-        $response = [
-            'cntr'      => $cntr,
-            'asign'     => $asign,
-            'transport' => $transport, // 👈 si no existe, será null
-            'carga'     => $carga,
-            'truck'     => $truck,
-        ];
+            // Preparar la respuesta en formato JSON
+            $response = [
+                'cntr' => $cntr,
+                'asign' => $asign,
+                'transport' => $transport,
+                'carga' => $carga,
+                'truck' => $truck
+            ];
 
-        return response()->json($response);
-    } catch (\Exception $e) {
-        return response()->json([
-            'error' => 'Error al obtener los datos: ' . $e->getMessage()
-        ], 500);
+            // Devolver la respuesta en formato JSON
+            return response()->json($response);
+        } catch (\Exception $e) {
+            // Manejar cualquier error que ocurra
+            return response()->json([
+                'error' => 'Error al obtener los datos: ' . $e->getMessage()
+            ], 500);
+        }
     }
-}
-
 
     public function datosCntrNumber($cntrNumber)
     {
