@@ -218,7 +218,6 @@ class cntrController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
 
-
     }
 
     /**
@@ -326,7 +325,7 @@ class cntrController extends Controller
                 ->firstOrFail();
 
             $truck = truck::where('domain', $asign->truck)
-                ->first();
+                ->firstOrFail();
             // Obtener la carga asociada al CNTR
 
             $carga = Carga::whereNull('deleted_at')
