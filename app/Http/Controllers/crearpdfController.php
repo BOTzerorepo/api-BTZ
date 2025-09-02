@@ -89,7 +89,7 @@ public function carga($cntr_number)
 
     // Si ya existe archivo, redirigís como antes
     if (!is_null($file)) {
-        return redirect('https://botzero.tech/ttl/views/view_instructivos.php');
+        return redirect( env('FRONT_URL').'/views/view_instructivos.php');
     }
 
     // Traigo datos completos para armar instructivo

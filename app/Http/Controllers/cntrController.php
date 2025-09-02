@@ -201,7 +201,7 @@ class cntrController extends Controller
 
             //Eliminar el archivo intructivo y generar uno nuevo 
             if ($asign && $asign->file_instruction) {
-                $dirPath = base_path('public/instructivos/' . $asign->booking . '/' . $cntrOld);
+                $dirPath = base_path('public/storage/instructivos/' . $asign->booking . '/' . $cntrOld);
 
                 $this->deleteDirectory($dirPath);
 

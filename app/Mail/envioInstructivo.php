@@ -33,7 +33,7 @@ class envioInstructivo extends Mailable
         $datos = $this->datos;
         return $this->view('mails.CargaEnvioInstructivo')
         ->subject('Instructivo de Viaje.'.'[ '.$datos['cntr_number'].' ]')
-        ->attach(public_path() . '/' .'instructivos/'.$datos['booking'].'/'.$datos['cntr_number'].'/'.'instructivo_'.$datos['booking'].'_'.$datos['cntr_number'].'.pdf');
+        ->attach(public_path() . '/storage/' .'instructivos/'.$datos['booking'].'/'.$datos['cntr_number'].'/'.'instructivo_'.$datos['booking'].'_'.$datos['cntr_number'].'.pdf');
        //esto busca en la carpeta public.    
     }
 }
