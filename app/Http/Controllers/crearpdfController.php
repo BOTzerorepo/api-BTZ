@@ -23,7 +23,7 @@ class crearpdfController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    private function buildPdfPaths(string $booking, string $cntr): array
+    private function buildPdfPath(string $booking, string $cntr): array
 {
     // Sanitizar (ajustá a tu gusto)
     $bookingSafe = preg_replace('/[^A-Za-z0-9_\-]/', '_', $booking);
