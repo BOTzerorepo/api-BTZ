@@ -33,6 +33,6 @@ class envioIntructivoOceans extends Mailable
         $datos = $this->datos;
         return $this->view('mails.CargaEnvioInstructivoOceans')
         ->subject('Instructivo de Viaje ExporMaritima.'.'[ '.$datos['cntr_number'].' ]')
-        ->attach(public_path() . '/' .'instructivos/'.$datos['booking'].'/'.$datos['cntr_number'].'/'.'ORDEN DE TRABAJO EXPO MARITIMO ' . $datos['booking'] . '_' . $datos['cntr_number'] . '.pdf');
+        ->attach(public_path() . '/storage/' .'instructivos/'.$datos['booking'].'/'.$datos['cntr_number'].'/'.'ORDEN DE TRABAJO EXPO MARITIMO ' . $datos['booking'] . '_' . $datos['cntr_number'] . '.pdf');
     }
 }
