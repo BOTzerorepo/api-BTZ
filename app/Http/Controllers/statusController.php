@@ -147,13 +147,13 @@ class statusController extends Controller
     {
         // Convertir la cadena de IDs separados por comas en un array
         $idArray = explode(',', $ids);
-    
+
         // Buscar los transportes cuyos IDs estén en la lista
         $transportes = Transport::whereIn('id', $idArray)->get();
-    
+
         // Crear un array para almacenar las razones sociales
         $rzTransportes = $transportes->pluck('razon_social')->toArray();
-    
+
         // Realizar la consulta de las cargas activas para todos los transportes
         $cargasActivas = DB::table('cntr')
             ->join('carga', 'cntr.booking', '=', 'carga.booking')
@@ -161,9 +161,9 @@ class statusController extends Controller
             ->leftJoin('status', 'status.cntr_number', '=', 'cntr.cntr_number')
             ->leftJoin('trucks', 'trucks.domain', '=', 'asign.truck')
             ->whereIn('asign.transport', $rzTransportes) // Filtrar por las razones sociales de los transportes
-        ->whereNull('carga.deleted_at') 
+            ->whereNull('carga.deleted_at')
             ->where('cntr.main_status', '!=', 'TERMINADA')
-        ->select(
+            ->select(
                 'cntr.id_cntr',
                 'carga.ref_customer',
                 'cntr.booking',
@@ -197,7 +197,7 @@ class statusController extends Controller
                 'asign.file_instruction'
             )
             ->get();
-    
+
         return $cargasActivas;
     }
 
@@ -289,7 +289,11 @@ class statusController extends Controller
                 $response = $emailController->cambiaStatus($cntr, $empresa, $booking, $user, $tipo, $statusArchivoPath);
                 if ($response == 'ok') {
 
-                    $cntrModel = cntr::where('cntr_number', $cntr)->firstOrFail();
+
+                    $cntrModel = cntr::where('booking', $booking)
+                        ->where('cntr_number', $cntr)
+                        ->orderByDesc('id_cntr')
+                        ->firstOrFail();
                     $cntrModel->main_status = $statusGral;
                     $cntrModel->status_cntr = $description;
                     $cntrModel->save();
@@ -347,7 +351,11 @@ class statusController extends Controller
                 if ($response == 'ok') {
 
                     // si todo esta ok, Acualizamos el estado del CNTR
-                    $cntrModel = cntr::where('cntr_number', $cntr)->firstOrFail();
+
+                    $cntrModel = cntr::where('booking', $booking)
+                        ->where('cntr_number', $cntr)
+                        ->orderByDesc('id_cntr')
+                        ->firstOrFail();
                     $cntrModel->main_status = $statusGral;
                     $cntrModel->status_cntr = $description;
                     $cntrModel->save();
@@ -411,7 +419,11 @@ class statusController extends Controller
                 if ($response == 'ok') {
 
                     // si todo esta ok, Acualizamos el estado del CNTR
-                    $cntrModel = cntr::where('cntr_number', $cntr)->firstOrFail();
+
+                    $cntrModel = cntr::where('booking', $booking)
+                        ->where('cntr_number', $cntr)
+                        ->orderByDesc('id_cntr')
+                        ->firstOrFail();
                     $cntrModel->main_status = $statusGral;
                     $cntrModel->status_cntr = $description;
                     $cntrModel->save();
@@ -467,7 +479,10 @@ class statusController extends Controller
                 if ($response == 'ok') {
 
                     // si todo esta ok, Acualizamos el estado del CNTR
-                    $cntrModel = cntr::where('cntr_number', $cntr)->firstOrFail();
+                    $cntrModel = cntr::where('booking', $booking)
+                        ->where('cntr_number', $cntr)
+                        ->orderByDesc('id_cntr')
+                        ->firstOrFail();
                     $cntrModel->main_status = $statusGral;
                     $cntrModel->status_cntr = $description;
                     $cntrModel->save();
