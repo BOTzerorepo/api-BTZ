@@ -23,12 +23,22 @@ class instructivosController extends Controller
 
         if ($user->permiso == 'Traffic') {
 
-            $instructivos = DB::table('asign')->where('file_instruction', '!=', null)->select('asign.*', 'cntr.confirmacion')->join('cntr', 'cntr.cntr_number', 'asign.cntr_number')->where('asign.company', '=', $user->empresa)->orderBy('asign.created_at', 'desc')->get();
+            $instructivos = DB::table('asign')->where('file_instruction', '!=', null)->select('asign.*', 'cntr.confirmacion')
+            ->join('cntr', function ($join) {
+                $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
+                     ->where('cntr.main_status', '!=', 'TERMINADA');
+            })
+            ->where('asign.company', '=', $user->empresa)->orderBy('asign.created_at', 'desc')->get();
             return $instructivos;
         } else {
 
 
-            $instructivos = DB::table('asign')->where('file_instruction', '!=', null)->select('asign.*', 'cntr.confirmacion')->join('cntr', 'cntr.cntr_number', 'asign.cntr_number')->where('asign.company', '=', $user->empresa)->orderBy('asign.created_at', 'desc')->get();
+            $instructivos = DB::table('asign')->where('file_instruction', '!=', null)->select('asign.*', 'cntr.confirmacion')
+            ->join('cntr', function ($join) {
+                $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
+                     ->where('cntr.main_status', '!=', 'TERMINADA');
+            })
+            ->where('asign.company', '=', $user->empresa)->orderBy('asign.created_at', 'desc')->get();
             return $instructivos;
         }
     }
@@ -38,7 +48,12 @@ class instructivosController extends Controller
         $transportIds = explode(',', $transport);
         $razonSocialList = Transport::whereIn('id', $transportIds)->pluck('razon_social');
 
-        $instructivos = DB::table('asign')->where('file_instruction', '!=', null)->select('asign.*', 'cntr.confirmacion')->join('cntr', 'cntr.cntr_number', 'asign.cntr_number')->whereIn('asign.transport', $razonSocialList)->orderBy('asign.created_at', 'desc')->get();
+        $instructivos = DB::table('asign')->where('file_instruction', '!=', null)->select('asign.*', 'cntr.confirmacion')
+        ->join('cntr', function ($join) {
+            $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
+                 ->where('cntr.main_status', '!=', 'TERMINADA');
+        })
+        ->whereIn('asign.transport', $razonSocialList)->orderBy('asign.created_at', 'desc')->get();
         return $instructivos;
     }
 

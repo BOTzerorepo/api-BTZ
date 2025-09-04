@@ -1050,7 +1050,10 @@ class ServiceSatelital extends Controller
         // Obtener datos del contenedor desde la tabla 'cntr'
 
         $contenedor = DB::table('cntr')
-            ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+           ->join('asign', function ($join) {
+                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
+                             ->where('cntr.main_status', '!=', 'TERMINADA');
+                    })
             ->join('carga', 'cntr.booking', '=', 'carga.booking')
             ->where('cntr.id_cntr', $contenedorId)
             ->select('cntr.*', 'asign.*', 'carga.*')
@@ -1166,7 +1169,10 @@ class ServiceSatelital extends Controller
     {
         // Obtener datos del contenedor desde la tabla 'cntr'
         $contenedor = DB::table('cntr')
-            ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+           ->join('asign', function ($join) {
+                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
+                             ->where('cntr.main_status', '!=', 'TERMINADA');
+                    })
             ->join('carga', 'cntr.booking', '=', 'carga.booking')
             ->where('cntr.id_cntr', $contenedorId)
             ->select('cntr.*', 'asign.*', 'carga.*')
