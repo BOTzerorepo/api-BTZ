@@ -44,10 +44,6 @@ class cargaController extends Controller
                         $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
                              ->where('cntr.main_status', '!=', 'TERMINADA');
                     })
-                    ->join('asign', function ($join) {
-                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
-                             ->where('cntr.main_status', '!=', 'TERMINADA');
-                    })
                     ->select('carga.*',  'cntr.*', 'asign.driver', 'asign.transport')
                     ->whereNull('cntr.deleted_at')
                     ->whereNull('asign.deleted_at')
