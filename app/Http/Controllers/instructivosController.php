@@ -140,7 +140,7 @@ class instructivosController extends Controller
             return response()->json(['status' => 'error', 'message' => 'El instructivo ya no existe en el registro.'], 404);
         }
 
-        $filePath = base_path('public/storage/instructivos/' . $asign->booking . '/' . $asign->cntr_number . '/' . $asign->file_instruction);
+        $filePath = base_path('public/instructivos/' . $asign->booking . '/' . $asign->cntr_number . '/' . $asign->file_instruction);
 
         if (file_exists($filePath)) {
             try {
