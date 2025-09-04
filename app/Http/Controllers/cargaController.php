@@ -40,10 +40,8 @@ class cargaController extends Controller
 
             if ($user->permiso == 'Traffic' || $user->permiso == 'Master') {
                 $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
-                   ->join('asign', function ($join) {
-                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
-                             ->where('cntr.main_status', '!=', 'TERMINADA');
-                    })
+                ->join('cntr', 'cntr.booking', '=', 'carga.booking')
+                   ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                     ->select('carga.*',  'cntr.*', 'asign.driver', 'asign.transport')
                     ->whereNull('cntr.deleted_at')
                     ->whereNull('asign.deleted_at')
@@ -55,10 +53,7 @@ class cargaController extends Controller
             } elseif ($user->permiso == 'Transport') {
                 $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                     ->join('cntr', 'cntr.booking', '=', 'carga.booking')
-                   ->join('asign', function ($join) {
-                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
-                             ->where('cntr.main_status', '!=', 'TERMINADA');
-                    })
+                    ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                     ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
                     ->whereNull('cntr.deleted_at')
                     ->whereNull('asign.deleted_at')
@@ -70,10 +65,7 @@ class cargaController extends Controller
             } elseif ($user->permiso == 'ClienteEmpresa') {
                 $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                     ->join('cntr', 'cntr.booking', '=', 'carga.booking')
-                   ->join('asign', function ($join) {
-                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
-                             ->where('cntr.main_status', '!=', 'TERMINADA');
-                    })
+                    ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                     ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
                     ->whereBetween('carga.load_date', [$empiezaSemana, $terminaSemana])
                     ->where('carga.status', '!=', 'TERMINADA')
@@ -100,10 +92,7 @@ class cargaController extends Controller
             } else {
                 $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                     ->join('cntr', 'cntr.booking', '=', 'carga.booking')
-                   ->join('asign', function ($join) {
-                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
-                             ->where('cntr.main_status', '!=', 'TERMINADA');
-                    })
+                    ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                     ->select('carga.*',  'cntr.*', 'asign.driver', 'asign.transport')
                     ->whereNull('cntr.deleted_at')
                     ->whereNull('asign.deleted_at')
@@ -141,10 +130,7 @@ class cargaController extends Controller
             if ($user->permiso == 'Traffic' || $user->permiso == 'Master') {
                 $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                     ->join('cntr', 'cntr.booking', '=', 'carga.booking')
-                   ->join('asign', function ($join) {
-                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
-                             ->where('cntr.main_status', '!=', 'TERMINADA');
-                    })
+                    ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                     ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
                     ->where('carga.load_date', "<", $empiezaSemana)
                     ->where('carga.empresa', '=', $user->empresa)
@@ -156,10 +142,7 @@ class cargaController extends Controller
             } elseif ($user->permiso == 'Transport') {
                 $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                     ->join('cntr', 'cntr.booking', '=', 'carga.booking')
-                   ->join('asign', function ($join) {
-                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
-                             ->where('cntr.main_status', '!=', 'TERMINADA');
-                    })
+                    ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                     ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
                     ->where('carga.load_date', "<", $empiezaSemana)
                     ->where('carga.status', '!=', 'TERMINADA')
@@ -171,10 +154,7 @@ class cargaController extends Controller
             } elseif ($user->permiso == 'ClienteEmpresa') {
                 $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                     ->join('cntr', 'cntr.booking', '=', 'carga.booking')
-                   ->join('asign', function ($join) {
-                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
-                             ->where('cntr.main_status', '!=', 'TERMINADA');
-                    })
+                    ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                     ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
                     ->where('carga.load_date', "<", $empiezaSemana)
                     ->where('carga.status', '!=', 'TERMINADA')
@@ -201,10 +181,7 @@ class cargaController extends Controller
             } else {
                 $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                     ->join('cntr', 'cntr.booking', '=', 'carga.booking')
-                   ->join('asign', function ($join) {
-                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
-                             ->where('cntr.main_status', '!=', 'TERMINADA');
-                    })
+                    ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                     ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
                     ->where('carga.load_date', "<", $empiezaSemana)
                     ->where('carga.empresa', '=', $user->empresa)
@@ -242,10 +219,7 @@ class cargaController extends Controller
             if ($user->permiso == 'Traffic' || $user->permiso == 'Master') {
                 $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                     ->join('cntr', 'cntr.booking', '=', 'carga.booking')
-                   ->join('asign', function ($join) {
-                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
-                             ->where('cntr.main_status', '!=', 'TERMINADA');
-                    })
+                    ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                     ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
                     ->where('carga.load_date', ">", $terminaSemana)
                     ->where('carga.status', '!=', 'TERMINADA')
@@ -256,10 +230,7 @@ class cargaController extends Controller
             } elseif ($user->permiso == 'Transport') {
                 $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                     ->join('cntr', 'cntr.booking', '=', 'carga.booking')
-                   ->join('asign', function ($join) {
-                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
-                             ->where('cntr.main_status', '!=', 'TERMINADA');
-                    })
+                    ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                     ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
                     ->whereNull('cntr.deleted_at')
                     ->whereNull('asign.deleted_at')
@@ -271,10 +242,7 @@ class cargaController extends Controller
             } elseif ($user->permiso == 'ClienteEmpresa') {
                 $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                     ->join('cntr', 'cntr.booking', '=', 'carga.booking')
-                   ->join('asign', function ($join) {
-                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
-                             ->where('cntr.main_status', '!=', 'TERMINADA');
-                    })
+                    ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                     ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
                     ->where('carga.load_date', ">", $terminaSemana)
                     ->where('carga.status', '!=', 'TERMINADA')
@@ -301,10 +269,7 @@ class cargaController extends Controller
             } else {
                 $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                     ->join('cntr', 'cntr.booking', '=', 'carga.booking')
-                   ->join('asign', function ($join) {
-                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
-                             ->where('cntr.main_status', '!=', 'TERMINADA');
-                    })
+                    ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                     ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
                     ->where('carga.load_date', ">", $terminaSemana)
                     ->where('carga.status', '!=', 'TERMINADA')
@@ -340,10 +305,7 @@ class cargaController extends Controller
 
             $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
-               ->join('asign', function ($join) {
-                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
-                             ->where('cntr.main_status', '!=', 'TERMINADA');
-                    })
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                 ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
                 ->where('carga.status', '=', 'TERMINADA')
                 ->where('carga.empresa', '=', $user->empresa)
@@ -354,10 +316,7 @@ class cargaController extends Controller
 
             $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
-               ->join('asign', function ($join) {
-                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
-                             ->where('cntr.main_status', '!=', 'TERMINADA');
-                    })
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                 ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
                 ->where('carga.status', '=', 'TERMINADA')
                 ->where(function ($q) use ($user) {
@@ -383,10 +342,7 @@ class cargaController extends Controller
 
             $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
-               ->join('asign', function ($join) {
-                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
-                             ->where('cntr.main_status', '!=', 'TERMINADA');
-                    })
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                 ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
                 ->where('carga.status', '=', 'TERMINADA')
                 ->where('carga.empresa', '=', $user->empresa)
@@ -406,10 +362,7 @@ class cargaController extends Controller
 
         $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
             ->join('cntr', 'cntr.booking', '=', 'carga.booking')
-           ->join('asign', function ($join) {
-                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
-                             ->where('cntr.main_status', '!=', 'TERMINADA');
-                    })
+            ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
             ->select('carga.ref_customer', 'carga.booking', 'carga.shipper', 'carga.commodity', 'carga.type', 'carga.load_place', 'carga.unload_place', 'carga.load_date', 'carga.cut_off_fis', 'carga.custom_place',  'carga.custom_agent', 'carga.custom_place_impo', 'carga.custom_agent_impo', 'cntr.cntr_number', 'cntr.cntr_type', 'cntr.main_status', 'cntr.out_usd', 'cntr.observation_out', 'asign.driver', 'asign.transport', 'asign.truck', 'asign.truck_semi')
             ->where('cntr.main_status', '=', 'TERMINADA')
             ->whereIn('asign.transport', $razonSocialList)
@@ -439,10 +392,7 @@ class cargaController extends Controller
 
             $cargaPorId = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
-               ->join('asign', function ($join) {
-                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
-                             ->where('cntr.main_status', '!=', 'TERMINADA');
-                    })
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                 ->leftjoin('trucks', 'trucks.domain', '=', 'asign.truck')
                 ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport', 'asign.truck', 'asign.truck_semi', 'asign.file_instruction', 'trucks.alta_aker')
                 ->where('carga.empresa', '=', $user->empresa)
@@ -456,10 +406,7 @@ class cargaController extends Controller
 
             $cargaPorId = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
-               ->join('asign', function ($join) {
-                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
-                             ->where('cntr.main_status', '!=', 'TERMINADA');
-                    })
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                 ->leftjoin('trucks', 'trucks.domain', '=', 'asign.truck')
                 ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport', 'asign.truck', 'asign.truck_semi', 'asign.file_instruction', 'trucks.alta_aker')
                 ->where('carga.empresa', '=', $user->empresa)
@@ -1465,10 +1412,7 @@ class cargaController extends Controller
         if ($user->permiso == 'Traffic' || $user->permiso == 'Master') {
             $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
-               ->join('asign', function ($join) {
-                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
-                             ->where('cntr.main_status', '!=', 'TERMINADA');
-                    })
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                 ->select('carga.*',  'cntr.*', 'asign.driver', 'asign.transport')
                 ->whereNull('cntr.deleted_at')
                 ->whereNull('asign.deleted_at')
@@ -1480,10 +1424,7 @@ class cargaController extends Controller
 
             $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
-               ->join('asign', function ($join) {
-                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
-                             ->where('cntr.main_status', '!=', 'TERMINADA');
-                    })
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                 ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
                 ->whereNull('cntr.deleted_at')
                 ->whereNull('asign.deleted_at')
@@ -1494,10 +1435,7 @@ class cargaController extends Controller
         } else {
             $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
                 ->join('cntr', 'cntr.booking', '=', 'carga.booking')
-               ->join('asign', function ($join) {
-                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
-                             ->where('cntr.main_status', '!=', 'TERMINADA');
-                    })
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                 ->select('carga.*',  'cntr.*', 'asign.driver', 'asign.transport')
                 ->whereNull('cntr.deleted_at')
                 ->whereNull('asign.deleted_at')
