@@ -95,10 +95,7 @@ public function carga($cntr_number)
     // Traigo datos completos para armar instructivo
     $respuesta_file = DB::table('carga')
         ->join('cntr', 'carga.booking', '=', 'cntr.booking')
-       ->join('asign', function ($join) {
-                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
-                             ->where('cntr.main_status', '!=', 'TERMINADA');
-                    })
+        ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
         ->leftJoin('customer_load_places', 'customer_load_places.description', '=', 'carga.load_place')
         ->leftJoin('customer_unload_places', 'customer_unload_places.description', '=', 'carga.unload_place')
         ->leftJoin('razon_social', 'asign.sub_empresa', '=', 'razon_social.title')
@@ -530,10 +527,7 @@ public function carga($cntr_number)
 
             $respuesta_file = DB::table('carga')
                 ->join('cntr', 'carga.booking', '=', 'cntr.booking')
-               ->join('asign', function ($join) {
-                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
-                             ->where('cntr.main_status', '!=', 'TERMINADA');
-                    })
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                 ->join('customer_load_places', 'customer_load_places.description', '=', 'carga.load_place')
                 ->where('cntr.cntr_number', '=', $cntr_number)
                 ->distinct()

@@ -147,23 +147,23 @@ class statusController extends Controller
     {
         // Convertir la cadena de IDs separados por comas en un array
         $idArray = explode(',', $ids);
-
+    
         // Buscar los transportes cuyos IDs estén en la lista
         $transportes = Transport::whereIn('id', $idArray)->get();
-
+    
         // Crear un array para almacenar las razones sociales
         $rzTransportes = $transportes->pluck('razon_social')->toArray();
-
+    
         // Realizar la consulta de las cargas activas para todos los transportes
         $cargasActivas = DB::table('cntr')
             ->join('carga', 'cntr.booking', '=', 'carga.booking')
             ->leftJoin('asign', 'asign.cntr_number', '=', 'cntr.cntr_number')
             ->leftJoin('status', 'status.cntr_number', '=', 'cntr.cntr_number')
             ->leftJoin('trucks', 'trucks.domain', '=', 'asign.truck')
-            ->whereIn('asign.transport', $rzTransportes)
-            ->whereNull('carga.deleted_at')
+            ->whereIn('asign.transport', $rzTransportes) // Filtrar por las razones sociales de los transportes
+        ->whereNull('carga.deleted_at') 
             ->where('cntr.main_status', '!=', 'TERMINADA')
-            ->select(
+        ->select(
                 'cntr.id_cntr',
                 'carga.ref_customer',
                 'cntr.booking',
@@ -197,7 +197,7 @@ class statusController extends Controller
                 'asign.file_instruction'
             )
             ->get();
-
+    
         return $cargasActivas;
     }
 
