@@ -39,10 +39,7 @@ class emailController extends Controller
             ->join('trucks', 'trucks.domain', '=', 'asign.truck')
             ->join('carga', 'asign.booking', '=', 'carga.booking')
             ->join('trailers', 'trailers.domain', '=', 'asign.truck_semi')
-            ->join('cntr', function ($join) {
-                $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
-                     ->where('cntr.main_status', '!=', 'TERMINADA');
-            })
+            ->join('cntr', 'cntr.cntr_number', '=', 'asign.cntr_number')
             ->where('asign.id', '=', $id)->get();
 
         $dAsign = $asign[0];
