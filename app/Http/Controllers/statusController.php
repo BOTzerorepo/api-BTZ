@@ -479,7 +479,6 @@ class statusController extends Controller
                     $cntrModel->main_status = $statusGral;
                     $cntrModel->status_cntr = $description;
                     $cntrModel->save();
-                    return $cntrModel;
             
                     // Luego revisamos el status de los demás contenedores de la Carga. 
                     // Buscar todos los registros Cntr asociados a la booking
