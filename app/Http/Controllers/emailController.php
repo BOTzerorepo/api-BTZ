@@ -39,7 +39,10 @@ class emailController extends Controller
             ->join('trucks', 'trucks.domain', '=', 'asign.truck')
             ->join('carga', 'asign.booking', '=', 'carga.booking')
             ->join('trailers', 'trailers.domain', '=', 'asign.truck_semi')
-            ->join('cntr', 'cntr.cntr_number', '=', 'asign.cntr_number')
+            ->join('cntr', function ($join) {
+                $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
+                    ->where('cntr.main_status', '!=', 'TERMINADA');
+            })
             ->where('asign.id', '=', $id)->get();
 
         $dAsign = $asign[0];
@@ -159,15 +162,12 @@ class emailController extends Controller
         $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
         $carga = Carga::whereNull('deleted_at')->where('booking', '=', $booking)->first();
         $cliente = DB::table('users')
-        ->where('cliente_id', '=', $carga->client_id)
-        ->first();
+            ->where('cliente_id', '=', $carga->client_id)
+            ->first();
         if ($tipo == 'problema') {
 
             $qd = DB::table('status')->select('status.id', 'status.status', 'cntr.cntr_type', 'carga.trader', 'carga.type', 'carga.ref_customer', 'cntr.confirmacion', 'asign.transport', 'asign.transport_agent', 'asign.truck', 'asign.truck_semi', 'asign.driver', 'drivers.documento')
-                ->join('cntr', function ($join) {
-                    $join->on('cntr.cntr_number', '=', 'status.cntr_number')
-                         ->where('cntr.main_status', '!=', 'TERMINADA');
-                })
+                ->join('cntr', 'cntr.cntr_number', '=', 'status.cntr_number')
                 ->join('carga', 'carga.booking', '=', 'cntr.booking')
                 ->leftJoin('asign', 'asign.cntr_number', '=', 'status.cntr_number')
                 ->leftJoin('drivers', 'drivers.nombre', '=', 'asign.driver')
@@ -198,7 +198,7 @@ class emailController extends Controller
                 if (!$cliente) {
                     // Logueás un warning para debug
                     Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-    
+
                     // Podés definir un mail fallback para no perder la notificación
                     $clienteEmail = 'soporte@botzero.com.ar';
                 } else {
@@ -207,7 +207,7 @@ class emailController extends Controller
                 $customer = DB::table('users')
                     ->where('username', '=', $carga->user)
                     ->value('email');
-                $toEmails = array_merge([$customer,$clienteEmail], (array) $toEmails);
+                $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
 
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new CargaConProblemas($datos, $statusArchivoPath));
                 return 'ok';
@@ -216,7 +216,7 @@ class emailController extends Controller
                 if (!$cliente) {
                     // Logueás un warning para debug
                     Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-    
+
                     // Podés definir un mail fallback para no perder la notificación
                     $clienteEmail = 'soporte@botzero.com.ar';
                 } else {
@@ -225,7 +225,7 @@ class emailController extends Controller
                 $customer = DB::table('users')
                     ->where('username', '=', $carga->user)
                     ->value('email');
-                $toEmails = array_merge([$customer,$clienteEmail], (array) $toEmails);
+                $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
 
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new CargaConProblemas($datos, $statusArchivoPath));
                 return 'ok';
@@ -233,10 +233,7 @@ class emailController extends Controller
         } elseif ($tipo == 'stacking') {
 
             $qd = DB::table('status')->select('status.main_status', 'status.id', 'status.status', 'cntr.cntr_type', 'carga.trader', 'carga.type', 'carga.ref_customer', 'cntr.confirmacion', 'asign.transport', 'asign.transport_agent', 'asign.truck', 'asign.truck_semi', 'asign.driver', 'drivers.documento')
-                ->join('cntr', function ($join) {
-                    $join->on('cntr.cntr_number', '=', 'status.cntr_number')
-                         ->where('cntr.main_status', '!=', 'TERMINADA');
-                })
+                ->join('cntr', 'cntr.cntr_number', '=', 'status.cntr_number')
                 ->join('carga', 'carga.booking', '=', 'cntr.booking')
                 ->leftJoin('asign', 'asign.cntr_number', '=', 'status.cntr_number')
                 ->leftJoin('drivers', 'drivers.nombre', '=', 'asign.driver')
@@ -268,7 +265,7 @@ class emailController extends Controller
                 if (!$cliente) {
                     // Logueás un warning para debug
                     Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-    
+
                     // Podés definir un mail fallback para no perder la notificación
                     $clienteEmail = 'soporte@botzero.com.ar';
                 } else {
@@ -285,7 +282,7 @@ class emailController extends Controller
                 if (!$cliente) {
                     // Logueás un warning para debug
                     Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-    
+
                     // Podés definir un mail fallback para no perder la notificación
                     $clienteEmail = 'soporte@botzero.com.ar';
                 } else {
@@ -302,10 +299,7 @@ class emailController extends Controller
         } elseif ($tipo == 'terminada') {
 
             $qd = DB::table('status')->select('status.id', 'status.status', 'cntr.cntr_type', 'carga.trader', 'carga.type', 'carga.ref_customer', 'cntr.confirmacion', 'asign.transport', 'asign.transport_agent', 'asign.truck', 'asign.truck_semi', 'asign.driver', 'drivers.documento')
-                ->join('cntr', function ($join) {
-                    $join->on('cntr.cntr_number', '=', 'status.cntr_number')
-                         ->where('cntr.main_status', '!=', 'TERMINADA');
-                })
+                ->join('cntr', 'cntr.cntr_number', '=', 'status.cntr_number')
                 ->join('carga', 'carga.booking', '=', 'cntr.booking')
                 ->leftJoin('asign', 'asign.cntr_number', '=', 'status.cntr_number')
                 ->leftJoin('drivers', 'drivers.nombre', '=', 'asign.driver')
@@ -336,7 +330,7 @@ class emailController extends Controller
                 if (!$cliente) {
                     // Logueás un warning para debug
                     Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-    
+
                     // Podés definir un mail fallback para no perder la notificación
                     $clienteEmail = 'soporte@botzero.com.ar';
                 } else {
@@ -353,7 +347,7 @@ class emailController extends Controller
                 if (!$cliente) {
                     // Logueás un warning para debug
                     Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-    
+
                     // Podés definir un mail fallback para no perder la notificación
                     $clienteEmail = 'soporte@botzero.com.ar';
                 } else {
@@ -369,59 +363,75 @@ class emailController extends Controller
             }
         } else {
 
-            $qd = DB::table('status')->select('status.main_status', 'status.id', 'status.status', 'cntr.cntr_type', 'carga.trader', 'carga.type', 'carga.ref_customer', 'cntr.confirmacion', 'asign.transport', 'asign.transport_agent', 'asign.truck', 'asign.truck_semi', 'asign.driver', 'drivers.documento')
-                ->join('cntr', 'cntr.cntr_number', '=', 'status.cntr_number')
-                ->join('cntr', function ($join) {
-                    $join->on('cntr.cntr_number', '=', 'status.cntr_number')
-                         ->where('cntr.main_status', '!=', 'TERMINADA');
-                })
-                ->join('carga', 'carga.booking', '=', 'cntr.booking')
-                ->leftJoin('asign', 'asign.cntr_number', '=', 'status.cntr_number')
-                ->leftJoin('drivers', 'drivers.nombre', '=', 'asign.driver')
-                ->where('status.cntr_number', '=', $cntr)->latest('status.id')->first();
-            $description = $qd->status;
-            $status = $qd->main_status;
+            $qd = DB::table('status')
+  ->join('cntr', function ($j) {
+      $j->on('cntr.cntr_number', '=', 'status.cntr_number')
+        ->where('cntr.main_status', '<>', 'TERMINADA');
+  })
+  ->join('carga', 'carga.booking', '=', 'cntr.booking')
+  ->leftJoin('asign', function ($j) {
+      $j->on('asign.cntr_number', '=', 'status.cntr_number')
+        ->on('asign.booking', '=', 'cntr.booking'); // evita mezclar bookings
+  })
+  ->leftJoin('drivers', 'drivers.nombre', '=', 'asign.driver')
+  ->where('status.cntr_number', $cntr)           // usa tu variable $cntr
+  // ->where('carga.booking', $booking)          // (opcional) aún más seguro
+  ->orderByDesc('status.id')
+  ->first([ // <-- antes era get([...])
+    'status.main_status','status.id','status.status',
+    'cntr.cntr_type','carga.trader','carga.type','carga.ref_customer',
+    'cntr.confirmacion','asign.transport','asign.transport_agent',
+    'asign.truck','asign.truck_semi','asign.driver','drivers.documento',
+  ]);
 
-            $datos = [
-                'cntr' => $cntr,
-                'description' =>  $description,
-                'confirmacion' => $qd->confirmacion,
-                'user' => $user,
-                'empresa' => $empresa,
-                'booking' => $booking,
-                'date' => $date,
-                'status' => $status,
-                'cntr_type' => $qd->cntr_type,
-                'trader' => $qd->trader,
-                'type' => $qd->type,
-                'ref_customer' => $qd->ref_customer,
-                'transport' => $qd->transport,
-                'transport_agent' => $qd->transport_agent,
-                'driver' => $qd->driver,
-                'truck' => $qd->truck,
-                'truck_semi' => $qd->truck_semi,
-                'documento' => $qd->documento,
-            ];
+if (!$qd) {
+    // no hay status para ese contenedor (y booking)
+    throw new \RuntimeException('No se encontró status para el contenedor indicado.');
+}
+
+$description = $qd->status;
+$status      = $qd->main_status;
+
+$datos = [
+    'cntr'            => $cntr,
+    'description'     => $description,
+    'confirmacion'    => $qd->confirmacion,
+    'user'            => $user,
+    'empresa'         => $empresa,
+    'booking'         => $booking,
+    'date'            => $date,
+    'status'          => $status,
+    'cntr_type'       => $qd->cntr_type,
+    'trader'          => $qd->trader,
+    'type'            => $qd->type,
+    'ref_customer'    => $qd->ref_customer,
+    'transport'       => $qd->transport,
+    'transport_agent' => $qd->transport_agent,
+    'driver'          => $qd->driver,
+    'truck'           => $qd->truck,
+    'truck_semi'      => $qd->truck_semi,
+    'documento'       => $qd->documento,
+];
 
             if ($sbx[0]->sandbox == 0) {
                 if (!$cliente) {
                     // Logueás un warning para debug
                     Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-    
+
                     // Podés definir un mail fallback para no perder la notificación
                     $clienteEmail = 'soporte@botzero.com.ar';
                 } else {
                     $clienteEmail = $cliente->email;
                 }
-                
+
                 $customer = DB::table('users')
                     ->where('username', '=', $carga->user)
                     ->value('email');
 
                 $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
-               
+
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new CamnioStatus($datos, $statusArchivoPath));
-        
+
                 $logApi = new logapi();
                 $logApi->user = $user;
                 $logApi->detalle = "envio email camnioStatus to:" . implode(', ', $toEmails);
@@ -431,19 +441,19 @@ class emailController extends Controller
                 if (!$cliente) {
                     // Logueás un warning para debug
                     Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-    
+
                     // Podés definir un mail fallback para no perder la notificación
                     $clienteEmail = 'soporte@botzero.com.ar';
                 } else {
                     $clienteEmail = $cliente->email;
                 }
-                
+
                 $customer = DB::table('users')
                     ->where('username', '=', $carga->user)
                     ->value('email');
 
                 $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
-               
+
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new CamnioStatus($datos, $statusArchivoPath));
                 $logApi = new logapi();
                 $logApi->user = $user;
@@ -542,7 +552,7 @@ class emailController extends Controller
         $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
 
         if ($sbx[0]->sandbox == 0) {
-            
+
             $customer = DB::table('users')
                 ->where('username', '=', $carga->user)
                 ->value('email');
