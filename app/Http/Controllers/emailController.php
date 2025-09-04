@@ -167,7 +167,10 @@ class emailController extends Controller
         if ($tipo == 'problema') {
 
             $qd = DB::table('status')->select('status.id', 'status.status', 'cntr.cntr_type', 'carga.trader', 'carga.type', 'carga.ref_customer', 'cntr.confirmacion', 'asign.transport', 'asign.transport_agent', 'asign.truck', 'asign.truck_semi', 'asign.driver', 'drivers.documento')
-                ->join('cntr', 'cntr.cntr_number', '=', 'status.cntr_number')
+                ->join('cntr', function ($join) {
+                    $join->on('cntr.cntr_number', '=', 'status.cntr_number')
+                         ->where('cntr.main_status', '!=', 'TERMINADA');
+                })
                 ->join('carga', 'carga.booking', '=', 'cntr.booking')
                 ->leftJoin('asign', 'asign.cntr_number', '=', 'status.cntr_number')
                 ->leftJoin('drivers', 'drivers.nombre', '=', 'asign.driver')
@@ -233,7 +236,10 @@ class emailController extends Controller
         } elseif ($tipo == 'stacking') {
 
             $qd = DB::table('status')->select('status.main_status', 'status.id', 'status.status', 'cntr.cntr_type', 'carga.trader', 'carga.type', 'carga.ref_customer', 'cntr.confirmacion', 'asign.transport', 'asign.transport_agent', 'asign.truck', 'asign.truck_semi', 'asign.driver', 'drivers.documento')
-                ->join('cntr', 'cntr.cntr_number', '=', 'status.cntr_number')
+                ->join('cntr', function ($join) {
+                    $join->on('cntr.cntr_number', '=', 'status.cntr_number')
+                         ->where('cntr.main_status', '!=', 'TERMINADA');
+                })
                 ->join('carga', 'carga.booking', '=', 'cntr.booking')
                 ->leftJoin('asign', 'asign.cntr_number', '=', 'status.cntr_number')
                 ->leftJoin('drivers', 'drivers.nombre', '=', 'asign.driver')
@@ -299,7 +305,10 @@ class emailController extends Controller
         } elseif ($tipo == 'terminada') {
 
             $qd = DB::table('status')->select('status.id', 'status.status', 'cntr.cntr_type', 'carga.trader', 'carga.type', 'carga.ref_customer', 'cntr.confirmacion', 'asign.transport', 'asign.transport_agent', 'asign.truck', 'asign.truck_semi', 'asign.driver', 'drivers.documento')
-                ->join('cntr', 'cntr.cntr_number', '=', 'status.cntr_number')
+                ->join('cntr', function ($join) {
+                    $join->on('cntr.cntr_number', '=', 'status.cntr_number')
+                         ->where('cntr.main_status', '!=', 'TERMINADA');
+                })
                 ->join('carga', 'carga.booking', '=', 'cntr.booking')
                 ->leftJoin('asign', 'asign.cntr_number', '=', 'status.cntr_number')
                 ->leftJoin('drivers', 'drivers.nombre', '=', 'asign.driver')
@@ -365,6 +374,10 @@ class emailController extends Controller
 
             $qd = DB::table('status')->select('status.main_status', 'status.id', 'status.status', 'cntr.cntr_type', 'carga.trader', 'carga.type', 'carga.ref_customer', 'cntr.confirmacion', 'asign.transport', 'asign.transport_agent', 'asign.truck', 'asign.truck_semi', 'asign.driver', 'drivers.documento')
                 ->join('cntr', 'cntr.cntr_number', '=', 'status.cntr_number')
+                ->join('cntr', function ($join) {
+                    $join->on('cntr.cntr_number', '=', 'status.cntr_number')
+                         ->where('cntr.main_status', '!=', 'TERMINADA');
+                })
                 ->join('carga', 'carga.booking', '=', 'cntr.booking')
                 ->leftJoin('asign', 'asign.cntr_number', '=', 'status.cntr_number')
                 ->leftJoin('drivers', 'drivers.nombre', '=', 'asign.driver')

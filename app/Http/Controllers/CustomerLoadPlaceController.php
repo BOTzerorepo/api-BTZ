@@ -47,7 +47,10 @@ class CustomerLoadPlaceController extends Controller
                 'customer_unload_places.longitud  as lonU'
             )
             ->join('cntr', 'carga.booking', '=', 'cntr.booking')
-            ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+           ->join('asign', function ($join) {
+                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
+                             ->where('cntr.main_status', '!=', 'TERMINADA');
+                    })
             ->join('aduanas', 'aduanas.description', '=', 'carga.custom_place')
             ->join('customer_load_places', 'customer_load_places.description', '=', 'carga.load_place')
             ->join('customer_unload_places', 'customer_unload_places.description', '=', 'carga.unload_place')
@@ -627,7 +630,10 @@ class CustomerLoadPlaceController extends Controller
         $qc = DB::table('cntr')->select('cntr_number', 'booking', 'confirmacion')->where('id_cntr', '=', $idTrip)->get();
         $cntr = $qc[0];
         $contenedor = DB::table('cntr')
-        ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+       ->join('asign', function ($join) {
+                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
+                             ->where('cntr.main_status', '!=', 'TERMINADA');
+                    })
         ->join('carga', 'cntr.booking', '=', 'carga.booking')
         ->where('cntr.id_cntr', $idTrip)
         ->select('cntr.*', 'asign.*', 'carga.*')

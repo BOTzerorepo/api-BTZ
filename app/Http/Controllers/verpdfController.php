@@ -46,7 +46,10 @@ class verpdfController extends Controller
             // sino está generado el Instrtructivo lo creamos. 
             $respuesta_file = DB::table('carga')
                 ->join('cntr', 'carga.booking', '=', 'cntr.booking')
-                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+               ->join('asign', function ($join) {
+                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
+                             ->where('cntr.main_status', '!=', 'TERMINADA');
+                    })
                 ->leftJoin('customer_load_places', 'customer_load_places.description', '=', 'carga.load_place')
                 ->leftJoin('customer_unload_places', 'customer_unload_places.description', '=', 'carga.unload_place')
                 ->leftJoin('razon_social', 'asign.sub_empresa', '=', 'razon_social.title')
