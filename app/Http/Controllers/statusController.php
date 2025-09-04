@@ -98,7 +98,7 @@ class statusController extends Controller
 
     public function indexActiveCompany(Request $request)
     {
-        $company = '$request->input('company')';
+        $company = $request->input('company');
         $cargasActivas = DB::table('cntr')
             ->join('carga', 'cntr.booking', '=', 'carga.booking')
             ->join('asign', 'asign.cntr_number', '=', 'cntr.cntr_number')
