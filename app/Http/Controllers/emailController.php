@@ -364,54 +364,64 @@ class emailController extends Controller
         } else {
 
             $qd = DB::table('status')
-  ->join('cntr', function ($j) {
-      $j->on('cntr.cntr_number', '=', 'status.cntr_number')
-        ->where('cntr.main_status', '<>', 'TERMINADA');
-  })
-  ->join('carga', 'carga.booking', '=', 'cntr.booking')
-  ->leftJoin('asign', function ($j) {
-      $j->on('asign.cntr_number', '=', 'status.cntr_number')
-        ->on('asign.booking', '=', 'cntr.booking'); // evita mezclar bookings
-  })
-  ->leftJoin('drivers', 'drivers.nombre', '=', 'asign.driver')
-  ->where('status.cntr_number', $cntr)           // usa tu variable $cntr
-  // ->where('carga.booking', $booking)          // (opcional) aún más seguro
-  ->orderByDesc('status.id')
-  ->first([ // <-- antes era get([...])
-    'status.main_status','status.id','status.status',
-    'cntr.cntr_type','carga.trader','carga.type','carga.ref_customer',
-    'cntr.confirmacion','asign.transport','asign.transport_agent',
-    'asign.truck','asign.truck_semi','asign.driver','drivers.documento',
-  ]);
+                ->join('cntr', function ($j) {
+                    $j->on('cntr.cntr_number', '=', 'status.cntr_number')
+                        ->where('cntr.main_status', '<>', 'TERMINADA');
+                })
+                ->join('carga', 'carga.booking', '=', 'cntr.booking')
+                ->leftJoin('asign', function ($j) {
+                    $j->on('asign.cntr_number', '=', 'status.cntr_number')
+                        ->on('asign.booking', '=', 'cntr.booking'); // evita mezclar bookings
+                })
+                ->leftJoin('drivers', 'drivers.nombre', '=', 'asign.driver')
+                ->where('status.cntr_number', $cntr)           // usa tu variable $cntr
+                // ->where('carga.booking', $booking)          // (opcional) aún más seguro
+                ->orderByDesc('status.id')
+                ->first([ // <-- antes era get([...])
+                    'status.main_status',
+                    'status.id',
+                    'status.status',
+                    'cntr.cntr_type',
+                    'carga.trader',
+                    'carga.type',
+                    'carga.ref_customer',
+                    'cntr.confirmacion',
+                    'asign.transport',
+                    'asign.transport_agent',
+                    'asign.truck',
+                    'asign.truck_semi',
+                    'asign.driver',
+                    'drivers.documento',
+                ]);
 
-if (!$qd) {
-    // no hay status para ese contenedor (y booking)
-    throw new \RuntimeException('No se encontró status para el contenedor indicado.');
-}
+            if (!$qd) {
+                // no hay status para ese contenedor (y booking)
+                throw new \RuntimeException('No se encontró status para el contenedor indicado.');
+            }
 
-$description = $qd->status;
-$status      = $qd->main_status;
+            $description = $qd->status;
+            $status      = $qd->main_status;
 
-$datos = [
-    'cntr'            => $cntr,
-    'description'     => $description,
-    'confirmacion'    => $qd->confirmacion,
-    'user'            => $user,
-    'empresa'         => $empresa,
-    'booking'         => $booking,
-    'date'            => $date,
-    'status'          => $status,
-    'cntr_type'       => $qd->cntr_type,
-    'trader'          => $qd->trader,
-    'type'            => $qd->type,
-    'ref_customer'    => $qd->ref_customer,
-    'transport'       => $qd->transport,
-    'transport_agent' => $qd->transport_agent,
-    'driver'          => $qd->driver,
-    'truck'           => $qd->truck,
-    'truck_semi'      => $qd->truck_semi,
-    'documento'       => $qd->documento,
-];
+            $datos = [
+                'cntr'            => $cntr,
+                'description'     => $description,
+                'confirmacion'    => $qd->confirmacion,
+                'user'            => $user,
+                'empresa'         => $empresa,
+                'booking'         => $booking,
+                'date'            => $date,
+                'status'          => $status,
+                'cntr_type'       => $qd->cntr_type,
+                'trader'          => $qd->trader,
+                'type'            => $qd->type,
+                'ref_customer'    => $qd->ref_customer,
+                'transport'       => $qd->transport,
+                'transport_agent' => $qd->transport_agent,
+                'driver'          => $qd->driver,
+                'truck'           => $qd->truck,
+                'truck_semi'      => $qd->truck_semi,
+                'documento'       => $qd->documento,
+            ];
 
             if ($sbx[0]->sandbox == 0) {
                 if (!$cliente) {

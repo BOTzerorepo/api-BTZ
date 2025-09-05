@@ -167,18 +167,33 @@ class ServiceSatelital extends Controller
 
         $todosMisCamiones = DB::table('trucks')
             ->join('asign', 'trucks.domain', '=', 'asign.truck')
-            ->join('cntr', 'cntr.cntr_number', '=', 'asign.cntr_number')
+            ->join('cntr', function ($join) {
+                $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
+                    ->where('cntr.main_status', '!=', 'TERMINADA');
+            })
             ->join('carga', 'carga.booking', '=', 'cntr.booking')
             ->leftJoin('aduanas', 'aduanas.description', '=', 'carga.custom_place')
             ->join('customer_load_places', 'customer_load_places.description', '=', 'carga.load_place')
             ->join('customer_unload_places', 'customer_unload_places.description', '=', 'carga.unload_place')
-            ->select('cntr.id_cntr as IdTrip', 'carga.id as idCarga', 'trucks.id', 'trucks.id_satelital', 'trucks.domain', 'customer_load_places.description as LugarCarga', 'customer_load_places.latitud as CargaLat', 'customer_load_places.longitud as CargaLng', 'aduanas.description as LugarAduana', 'aduanas.lat as aduanaLat', 'aduanas.lon as aduanaLon', 'customer_unload_places.description as lugarDescarga', 'customer_unload_places.latitud as descargaLat', 'customer_unload_places.longitud as descargaLon')
-            ->where('carga.deleted_at', '=', null)
-            ->where('cntr.main_status', '!=', 'TERMINADA')
+            ->select(
+                'cntr.id_cntr as IdTrip',
+                'carga.id as idCarga',
+                'trucks.id',
+                'trucks.id_satelital',
+                'trucks.domain',
+                'customer_load_places.description as LugarCarga',
+                'customer_load_places.latitud as CargaLat',
+                'customer_load_places.longitud as CargaLng',
+                'aduanas.description as LugarAduana',
+                'aduanas.lat as aduanaLat',
+                'aduanas.lon as aduanaLon',
+                'customer_unload_places.description as lugarDescarga',
+                'customer_unload_places.latitud as descargaLat',
+                'customer_unload_places.longitud as descargaLon'
+            )
+            ->whereNull('carga.deleted_at')
             ->where('trucks.alta_aker', '!=', 0)
             ->get();
-
-
 
         foreach ($todosMisCamiones as $camion) {
 
@@ -1035,16 +1050,12 @@ class ServiceSatelital extends Controller
         // Obtener datos del contenedor desde la tabla 'cntr'
 
         $contenedor = DB::table('cntr')
-           ->join('asign', function ($join) {
-                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
-                             ->where('cntr.main_status', '!=', 'TERMINADA');
-                    })
+            ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
             ->join('carga', 'cntr.booking', '=', 'carga.booking')
             ->where('cntr.id_cntr', $contenedorId)
             ->select('cntr.*', 'asign.*', 'carga.*')
             ->first();
         $punto = DB::table('interest_points')->where('id', $puntoActivoId)->first();
-
         if ($contenedor->cma_t_o != null) {
 
             $base    = rtrim(env('API_CMA_BOTZERO'), '/');
@@ -1056,8 +1067,8 @@ class ServiceSatelital extends Controller
             $r = json_decode($respuesta, true);
             Log::info('Respuesta CMA - Est Arr At Cus Loc: ' . $respuesta);
 
-             // ---------- POST a n8n ----------
-             try {
+            // ---------- POST a n8n ----------
+            try {
                 $payload = [
                     'function'   => __FUNCTION__, // te manda el nombre de la función actual
                     'contenedor' => $contenedor->cntr_number,
@@ -1085,14 +1096,14 @@ class ServiceSatelital extends Controller
         $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
         $carga = Carga::whereNull('deleted_at')->where('booking', '=', $contenedor->booking)->first();
         $cliente = DB::table('users')
-        ->where('cliente_id', '=', $carga->client_id)
-        ->first();
+            ->where('cliente_id', '=', $carga->client_id)
+            ->first();
 
-        
-       
+
+
 
         if ($sbx[0]->sandbox == 0) {
-            
+
             if (!$cliente) {
                 // Logueás un warning para debug
                 Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
@@ -1102,13 +1113,12 @@ class ServiceSatelital extends Controller
             } else {
                 $clienteEmail = $cliente->email;
             }
-           
+
             $customer = DB::table('users')
                 ->where('username', '=', $carga->user)
                 ->value('email');
-            $toEmails = array_merge([$customer,$clienteEmail], (array) $toEmails);
+            $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
             Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new PuntoInteresEntrada($contenedor, $punto));
-        
         } else {
 
             if (!$cliente) {
@@ -1120,11 +1130,11 @@ class ServiceSatelital extends Controller
             } else {
                 $clienteEmail = $cliente->email;
             }
-           
+
             $customer = DB::table('users')
                 ->where('username', '=', $carga->user)
                 ->value('email');
-            $toEmails = array_merge([$customer,$clienteEmail], (array) $toEmails);
+            $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
             Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new PuntoInteresEntrada($contenedor, $punto));
         }
         //ENTRADA
@@ -1154,10 +1164,7 @@ class ServiceSatelital extends Controller
     {
         // Obtener datos del contenedor desde la tabla 'cntr'
         $contenedor = DB::table('cntr')
-           ->join('asign', function ($join) {
-                        $join->on('cntr.cntr_number', '=', 'asign.cntr_number')
-                             ->where('cntr.main_status', '!=', 'TERMINADA');
-                    })
+            ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
             ->join('carga', 'cntr.booking', '=', 'carga.booking')
             ->where('cntr.id_cntr', $contenedorId)
             ->select('cntr.*', 'asign.*', 'carga.*')
@@ -1205,7 +1212,7 @@ class ServiceSatelital extends Controller
         $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
         $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
         $carga = Carga::whereNull('deleted_at')->where('booking', '=', $contenedor->booking)->first();
-$cliente = DB::table('users')
+        $cliente = DB::table('users')
             ->where('cliente_id', '=', $carga->client_id)
             ->first();
         if ($sbx[0]->sandbox == 0) {

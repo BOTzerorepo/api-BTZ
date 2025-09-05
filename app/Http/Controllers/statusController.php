@@ -20,6 +20,7 @@ use App\Mail\cargaTerminada;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Transport;
+use Illuminate\Http\UploadedFile;
 
 
 use function GuzzleHttp\json_encode;
@@ -261,25 +262,57 @@ class statusController extends Controller
             // Guarda el modelo para obtener el ID
             $status->save();
 
-            if ($request->hasFile('statusArchivo')) {
-
+            if ($request->hasFile('statusArchivo') && $request->file('statusArchivo') instanceof UploadedFile) {
                 $statusArchivo = $request->file('statusArchivo');
-                $folder = 'status/'. $idCarga;
             
-                // Genera un nombre único basado en el idCarga y statusGral
-                $nombreArchivo =  $status->id . '.' . $statusArchivo->getClientOriginalExtension();
-                // Almacena el archivo en storage/app/public/status/idCarga/
-                Storage::disk('public')->putFileAs($folder, $statusArchivo, $nombreArchivo);
-                // Resto del código si es necesario
-                // Después de guardar el archivo
-                $statusArchivoPath = $folder . '/' . $nombreArchivo;
-                $status->documento = $idCarga . '/' .$nombreArchivo;
-                $status->extension = $statusArchivo->getClientOriginalExtension();
-               
-
-            }else{
-                $statusArchivoPath = null;
+                // valida básico (ajustá según tu caso)
+                $request->validate([
+                    'statusArchivo' => 'file|max:10240', // 10MB
+                ]);
+            
+                $idCarga = (string)$idCarga; // por las dudas
+                $folder = "status/{$idCarga}";
+            
+                // Nombre determinístico por id status + extensión “real”
+                $ext = $statusArchivo->extension() ?: $statusArchivo->getClientOriginalExtension() ?: 'bin';
+                $nombreArchivo = $status->id . '.' . $ext;
+            
+                try {
+                    // Asegurá que el folder exista en el disco 'public'
+                    if (!Storage::disk('public')->exists($folder)) {
+                        Storage::disk('public')->makeDirectory($folder);
+                    }
+            
+                    // Guardar usando el helper del UploadedFile (más simple)
+                    // Guarda en storage/app/public/status/{idCarga}/{nombreArchivo}
+                    $savedPath = $statusArchivo->storeAs($folder, $nombreArchivo, 'public');
+                    // $savedPath == "status/{idCarga}/{archivo.ext}"
+            
+                    if (!$savedPath) {
+                        Log::error('No se pudo almacenar el archivo', [
+                            'folder' => $folder,
+                            'nombre' => $nombreArchivo,
+                        ]);
+                        return response('No se pudo guardar el archivo.', 500);
+                    }
+            
+                    // Guardá en DB un path consistente (relativo al disco 'public')
+                    $status->documento = $savedPath;            // <- antes ponías "$idCarga/$nombreArchivo" (faltaba "status/")
+                    $status->extension = $ext;
+            
+                } catch (\Throwable $e) {
+                    Log::error('Error subiendo statusArchivo', [
+                        'folder' => $folder,
+                        'nombre' => $nombreArchivo,
+                        'ex' => $e->getMessage(),
+                    ]);
+                    return response('Error subiendo el archivo.', 500);
+                }
+            } else {
+                $status->documento = null; // o mantené el valor anterior si corresponde
+                $status->extension = null;
             }
+            
             $status->save();
 
         
@@ -470,7 +503,7 @@ class statusController extends Controller
                 // Crear una instancia del controlador
                 $emailController = new emailController();
                 // Llamar directamente a la función mailStatus
-                $response = $emailController->cambiaStatus($cntr, $empresa, $booking, $user, $tipo, $statusArchivoPath);
+                $response = $emailController->cambiaStatus($cntr, $empresa, $booking, $user, $tipo, $savedPath );
 
                 if ($response == 'ok') {
                 
@@ -524,9 +557,6 @@ class statusController extends Controller
         }
     }
 
-   
-
-
     public function obtenerDocumentosCarga($booking)
     {
         $carga = Carga::where('booking', $booking)->first();
@@ -564,13 +594,6 @@ class statusController extends Controller
         }
     }
 
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function showLast($id)
     {
         try {
@@ -607,39 +630,5 @@ class statusController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
     }
 }
