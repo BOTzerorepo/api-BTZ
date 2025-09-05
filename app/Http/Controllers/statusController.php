@@ -325,7 +325,7 @@ class statusController extends Controller
 
                 $emailController = new emailController();
                 // Llamar directamente a la función mailStatus
-                $response = $emailController->cambiaStatus($cntr, $empresa, $booking, $user, $tipo, $statusArchivoPath);
+                $response = $emailController->cambiaStatus($cntr, $empresa, $booking, $user, $tipo, $savedPath);
                 if ($response == 'ok') {
 
                     $cntrModel = cntr::where('cntr_number', $cntr)->firstOrFail();
@@ -382,7 +382,7 @@ class statusController extends Controller
                 // Crear una instancia del controlador
                 $emailController = new emailController();
                 // Llamar directamente a la función mailStatus
-                $response = $emailController->cambiaStatus($cntr, $empresa, $booking, $user, $tipo, $statusArchivoPath);
+                $response = $emailController->cambiaStatus($cntr, $empresa, $booking, $user, $tipo, $savedPath);
 
                 if ($response == 'ok') {
 
@@ -447,7 +447,7 @@ class statusController extends Controller
                 // Crear una instancia del controlador
                 $emailController = new emailController();
                 // Llamar directamente a la función mailStatus
-                $response = $emailController->cambiaStatus($cntr, $empresa, $booking, $user, $tipo, $statusArchivoPath);
+                $response = $emailController->cambiaStatus($cntr, $empresa, $booking, $user, $tipo, $savedPath);
 
                 if ($response == 'ok') {
 
