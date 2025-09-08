@@ -200,7 +200,6 @@ class cntrController extends Controller
             asign::where('cntr_number', $cntrOld)->update(['cntr_number' => $newCntrNumber]);
             Log::info("Asign actualizada de $cntrOld a $newCntrNumber");
             Log::info("Esto es asign $asign");
-            Log::info("Esto es asign-file $asign->file_instruction");
 
             statu::where('cntr_number', $cntrOld)->update(['cntr_number' => $newCntrNumber]);
 
