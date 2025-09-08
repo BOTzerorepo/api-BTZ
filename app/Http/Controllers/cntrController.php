@@ -204,7 +204,7 @@ class cntrController extends Controller
             statu::where('cntr_number', $cntrOld)->update(['cntr_number' => $newCntrNumber]);
 
             //Eliminar el archivo intructivo y generar uno nuevo 
-            if ($asign && $asign->file_instruction) {
+            if ($changeAsign) {
                 /* $dirPath = base_path('public/storage/instructivos/' . $asign->booking . '/' . $cntrOld);
                 Log::info("Eliminando directorio de instructivo: $dirPath");
 
