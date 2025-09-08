@@ -17,6 +17,7 @@ use GuzzleHttp\Client;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use GuzzleHttp\Psr7\Request as Psr7Request;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class cntrController extends Controller
@@ -198,6 +199,9 @@ class cntrController extends Controller
 
             asign::where('cntr_number', $cntrOld)->update(['cntr_number' => $newCntrNumber]);
             Log::info("Asign actualizada de $cntrOld a $newCntrNumber");
+            Log::info("Esto es asign $asign");
+            Log::info("Esto es asign-file $asign->file_instruction");
+
             statu::where('cntr_number', $cntrOld)->update(['cntr_number' => $newCntrNumber]);
 
             //Eliminar el archivo intructivo y generar uno nuevo 
