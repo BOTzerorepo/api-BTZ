@@ -197,20 +197,25 @@ class cntrController extends Controller
             }
 
             asign::where('cntr_number', $cntrOld)->update(['cntr_number' => $newCntrNumber]);
+            Log::info("Asign actualizada de $cntrOld a $newCntrNumber");
             statu::where('cntr_number', $cntrOld)->update(['cntr_number' => $newCntrNumber]);
 
             //Eliminar el archivo intructivo y generar uno nuevo 
             if ($asign && $asign->file_instruction) {
                 $dirPath = base_path('public/storage/instructivos/' . $asign->booking . '/' . $cntrOld);
+                Log::info("Eliminando directorio de instructivo: $dirPath");
 
                 $this->deleteDirectory($dirPath);
 
                 DB::table('asign')->where('cntr_number', $request['cntr_number'])->update(['file_instruction' => null]);
+                Log::info("Instructivo eliminado en base de datos para CNTR: " . $request['cntr_number']);
                 // Llamar a la función carga() del controlador crearpdfController
                 DB::commit();
                 try {
                     $crearpdfController = app(crearpdfController::class);
                     $crearpdfController->carga($request['cntr_number']);
+                    
+                    Log::info("Instructivo regenerado para CNTR: " . $request['cntr_number']);
                 } catch (\Exception $e) {
                     DB::rollBack();
                     Log::error('Error al ejecutar el método carga en crearpdfController: ' . $e->getMessage());
