@@ -197,18 +197,18 @@ class cntrController extends Controller
             
             }
 
-            asign::where('cntr_number', $cntrOld)->update(['cntr_number' => $newCntrNumber]);
+            $changeAsign = asign::where('cntr_number', $cntrOld)->update(['cntr_number' => $newCntrNumber]);
             Log::info("Asign actualizada de $cntrOld a $newCntrNumber");
-            Log::info("Esto es asign $asign");
+            Log::info("Esto es asign $changeAsign");
 
             statu::where('cntr_number', $cntrOld)->update(['cntr_number' => $newCntrNumber]);
 
             //Eliminar el archivo intructivo y generar uno nuevo 
             if ($asign && $asign->file_instruction) {
-                $dirPath = base_path('public/storage/instructivos/' . $asign->booking . '/' . $cntrOld);
+                /* $dirPath = base_path('public/storage/instructivos/' . $asign->booking . '/' . $cntrOld);
                 Log::info("Eliminando directorio de instructivo: $dirPath");
 
-                $this->deleteDirectory($dirPath);
+                $this->deleteDirectory($dirPath); */
 
                 DB::table('asign')->where('cntr_number', $request['cntr_number'])->update(['file_instruction' => null]);
                 Log::info("Instructivo eliminado en base de datos para CNTR: " . $request['cntr_number']);
