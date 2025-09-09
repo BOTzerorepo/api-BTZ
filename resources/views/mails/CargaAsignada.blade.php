@@ -640,7 +640,7 @@
                                                                                                                         align="center"
                                                                                                                         alt="Designed with BEE"
                                                                                                                         class="icon"
-                                                                                                                        src="{{ asset('image/joinLogisticsRevolution.gif') }}"
+                                                                                                                        src="https://btz.ar/logo_mails.png"
                                                                                                                         style="display: block; height: auto; margin: 0 auto; border: 0;" /></a>
 
                                                                                                             </td>

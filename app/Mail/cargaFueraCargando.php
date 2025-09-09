@@ -22,7 +22,7 @@ class cargaFueraCargando extends Mailable
     public function __construct($datos)
     {
         $this->datos = $datos;
-        $this->subject = '[ AUTOMATICO ] Carga fuera de Zona de Carga. Viaje: '.$datos['cntr'];
+        $this->subject = 'Carga fuera de Zona de Carga. Viaje: '.$datos['cntr'];
     }
 
     /**

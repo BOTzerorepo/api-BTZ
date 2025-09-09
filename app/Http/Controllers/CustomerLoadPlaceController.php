@@ -74,7 +74,7 @@ class CustomerLoadPlaceController extends Controller
 
         if ($qd->main_status != 'CARGANDO') {
             DB::table('status')->insert([
-                'status' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts del Lugar de Carga.',
+                'status' => 'Camión se encuentra en un radio de 50 mts del Lugar de Carga.',
                 'main_status' => 'CARGANDO',
                 'cntr_number' => $cntr->cntr_number,
                 'user_status' => 'AUTOMATICO',
@@ -83,7 +83,7 @@ class CustomerLoadPlaceController extends Controller
                 ->where('cntr_number', $cntr->cntr_number)
                 ->update([
                     'main_status' => 'CARGANDO',
-                    'status_cntr' => '[AUTOMATICO] Camión se encuentra en un radio de 200 mts del Lugar de Carga.'
+                    'status_cntr' => 'Camión se encuentra en un radio de 200 mts del Lugar de Carga.'
                 ]);
 
 
@@ -177,7 +177,7 @@ class CustomerLoadPlaceController extends Controller
             if ($qd->avisado == 0) {
 
                 DB::table('status')->insert([
-                    'status' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts del Lugar de Carga.',
+                    'status' => 'Camión se encuentra en un radio de 50 mts del Lugar de Carga.',
                     'main_status' => 'CARGANDO',
                     'cntr_number' => $cntr->cntr_number,
                     'user_status' => 'AUTOMATICO',
@@ -187,7 +187,7 @@ class CustomerLoadPlaceController extends Controller
                     ->where('cntr_number', $cntr->cntr_number)
                     ->update([
                         'main_status' => 'CARGANDO',
-                        'status_cntr' => '[AUTOMATICO] Camión se encuentra en un radio de 200 mts del Lugar de Carga.'
+                        'status_cntr' => 'Camión se encuentra en un radio de 200 mts del Lugar de Carga.'
                     ]);
                 $cntrs = cntr::where('booking', $cntr->booking)->get();
                 // Obtener el status del primer registro
@@ -356,7 +356,6 @@ class CustomerLoadPlaceController extends Controller
         ->join('carga', 'cntr.booking', '=', 'carga.booking')
         ->where('id_cntr', '=', $idTrip)->get();
         $cntr = $qc[0];
-
         // cual es el ultimo status.
         $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
         $description = $qd->status;
@@ -393,7 +392,7 @@ class CustomerLoadPlaceController extends Controller
         if ($qd->main_status != 'EN ADUANA') {
 
             DB::table('status')->insert([
-                'status' => '[AUTOMATICO] Camión se encuentra en un radio de 200 mts de la aduana Asignada.',
+                'status' => ' Camión se encuentra en un radio de 200 mts de la aduana Asignada.',
                 'main_status' => 'EN ADUANA',
                 'cntr_number' => $cntr->cntr_number,
                 'user_status' => 'AUTOMATICO',
@@ -403,7 +402,7 @@ class CustomerLoadPlaceController extends Controller
                 ->where('cntr_number', $cntr->cntr_number)
                 ->update([
                     'main_status' => 'EN ADUANA',
-                    'status_cntr' => '[AUTOMATICO] Camión se encuentra en un radio de 200 mts de la Aduana asignada.'
+                    'status_cntr' => 'Camión se encuentra en un radio de 200 mts de la Aduana asignada.'
                 ]);
             $cntrs = cntr::where('booking', $cntr->booking)->get();
             // Obtener el status del primer registro
@@ -506,7 +505,7 @@ class CustomerLoadPlaceController extends Controller
             if ($qd->avisado == 0) {
 
                 DB::table('status')->insert([
-                    'status' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts de la aduana Asignada.',
+                    'status' => ' Camión se encuentra en un radio de 50 mts de la aduana Asignada.',
                     'main_status' => 'EN ADUANA',
                     'cntr_number' => $cntr->cntr_number,
                     'user_status' => 'AUTOMATICO',
@@ -516,7 +515,7 @@ class CustomerLoadPlaceController extends Controller
                     ->where('cntr_number', $cntr->cntr_number)
                     ->update([
                         'main_status' => 'EN ADUANA',
-                        'status_cntr' => '[AUTOMATICO] Camión se encuentra en un radio de 200 mts de la Aduana asignada.'
+                        'status_cntr' => 'Camión se encuentra en un radio de 200 mts de la Aduana asignada.'
                     ]);
                 $cntrs = cntr::where('booking', $cntr->booking)->get();
                 // Obtener el status del primer registro
@@ -680,7 +679,7 @@ class CustomerLoadPlaceController extends Controller
         if ($qd->main_status != 'STACKING') {
 
             DB::table('status')->insert([
-                'status' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts del Lugar de Descarga.',
+                'status' => 'Camión se encuentra en un radio de 50 mts del Lugar de Descarga.',
                 'main_status' => 'STACKING',
                 'cntr_number' => $cntr->cntr_number,
                 'user_status' => 'AUTOMATICO',
@@ -690,7 +689,7 @@ class CustomerLoadPlaceController extends Controller
                 ->where('cntr_number', $cntr->cntr_number)
                 ->update([
                     'main_status' => 'STACKING',
-                    'status_cntr' => '[AUTOMATICO] Camión se encuentra en un radio de 200 mts del Lugar de Descarga.'
+                    'status_cntr' => 'Camión se encuentra en un radio de 200 mts del Lugar de Descarga.'
                 ]);
             $cntrs = cntr::where('booking', $cntr->booking)->get();
             // Obtener el status del primer registro
@@ -794,7 +793,7 @@ class CustomerLoadPlaceController extends Controller
             if ($qd->avisado == 0) {
 
                 DB::table('status')->insert([
-                    'status' => '[AUTOMATICO] Camión se encuentra en un radio de 50 mts del Lugar de Descarga.',
+                    'status' => 'Camión se encuentra en un radio de 50 mts del Lugar de Descarga.',
                     'main_status' => 'STACKING',
                     'cntr_number' => $cntr->cntr_number,
                     'user_status' => 'AUTOMATICO',
@@ -804,7 +803,7 @@ class CustomerLoadPlaceController extends Controller
                     ->where('cntr_number', $cntr->cntr_number)
                     ->update([
                         'main_status' => 'STACKING',
-                        'status_cntr' => '[AUTOMATICO] Camión se encuentra en un radio de 200 mts del Lugar de Descarga.'
+                        'status_cntr' => 'Camión se encuentra en un radio de 200 mts del Lugar de Descarga.'
                     ]);
                 $cntrs = cntr::where('booking', $cntr->booking)->get();
                 // Obtener el status del primer registro
@@ -1020,7 +1019,7 @@ class CustomerLoadPlaceController extends Controller
         if ($qd->main_status != 'SALIENDO CARGAR' && $qd->avisado == 1) {
 
             DB::table('status')->insert([
-                'status' => '[AUTOMATICO] El camión ha salido del área de carga y se encuentra a más de 200 metros del lugar.',
+                'status' => 'El camión ha salido del área de carga y se encuentra a más de 200 metros del lugar.',
                 'main_status' => 'SALIENDO CARGAR',
                 'cntr_number' => $cntr->cntr_number,
                 'user_status' => 'AUTOMATICO',
@@ -1029,7 +1028,7 @@ class CustomerLoadPlaceController extends Controller
                 ->where('cntr_number', $cntr->cntr_number)
                 ->update([
                     'main_status' => 'SALIENDO CARGAR',
-                    'status_cntr' => '[AUTOMATICO] El camión ha salido del área de carga y se encuentra a más de 200 metros del lugar.'
+                    'status_cntr' => 'El camión ha salido del área de carga y se encuentra a más de 200 metros del lugar.'
                 ]);
 
             $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
@@ -1123,7 +1122,7 @@ class CustomerLoadPlaceController extends Controller
             if ($qd->avisado == 0) {
 
                 DB::table('status')->insert([
-                    'status' => '[AUTOMATICO] El camión ha salido del área de carga y se encuentra a más de 200 metros del lugar.',
+                    'status' => 'El camión ha salido del área de carga y se encuentra a más de 200 metros del lugar.',
                     'main_status' => 'SALIENDO CARGAR',
                     'cntr_number' => $cntr->cntr_number,
                     'user_status' => 'AUTOMATICO',
@@ -1133,7 +1132,7 @@ class CustomerLoadPlaceController extends Controller
                     ->where('cntr_number', $cntr->cntr_number)
                     ->update([
                         'main_status' => 'SALIENDO CARGAR',
-                        'status_cntr' => '[AUTOMATICO] El camión ha salido del área de carga y se encuentra a más de 200 metros del lugar.'
+                        'status_cntr' => 'El camión ha salido del área de carga y se encuentra a más de 200 metros del lugar.'
                     ]);
 
                 $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
@@ -1302,7 +1301,7 @@ class CustomerLoadPlaceController extends Controller
         if ($qd->main_status != 'YENDO A DESCARGAR' && $qd->avisado == 1) {
 
             DB::table('status')->insert([
-                'status' => '[AUTOMATICO] El camión ha salido de la aduana asignada y se encuentra a más de 200 metros del lugar.',
+                'status' => 'El camión ha salido de la aduana asignada y se encuentra a más de 200 metros del lugar.',
                 'main_status' => 'YENDO A DESCARGAR',
                 'cntr_number' => $cntr->cntr_number,
                 'user_status' => 'AUTOMATICO',
@@ -1312,7 +1311,7 @@ class CustomerLoadPlaceController extends Controller
                 ->where('cntr_number', $cntr->cntr_number)
                 ->update([
                     'main_status' => 'YENDO A DESCARGAR',
-                    'status_cntr' => '[AUTOMATICO] El camión ha salido de la aduana asignada y se encuentra a más de 200 metros del lugar.'
+                    'status_cntr' => 'El camión ha salido de la aduana asignada y se encuentra a más de 200 metros del lugar.'
                 ]);
             $cntrs = cntr::where('booking', $cntr->booking)->get();
             // Obtener el status del primer registro
@@ -1414,7 +1413,7 @@ class CustomerLoadPlaceController extends Controller
             if ($qd->avisado == 0) {
 
                 DB::table('status')->insert([
-                    'status' => '[AUTOMATICO] El camión ha salido de la aduana asignada y se encuentra a más de 200 metros del lugar.',
+                    'status' => 'El camión ha salido de la aduana asignada y se encuentra a más de 200 metros del lugar.',
                     'main_status' => 'YENDO A DESCARGAR',
                     'cntr_number' => $cntr->cntr_number,
                     'user_status' => 'AUTOMATICO',
@@ -1424,7 +1423,7 @@ class CustomerLoadPlaceController extends Controller
                     ->where('cntr_number', $cntr->cntr_number)
                     ->update([
                         'main_status' => 'YENDO A DESCARGAR',
-                        'status_cntr' => '[AUTOMATICO] El camión ha salido de la aduana asignada y se encuentra a más de 200 metros del lugar.'
+                        'status_cntr' => 'El camión ha salido de la aduana asignada y se encuentra a más de 200 metros del lugar.'
                     ]);
                 $cntrs = cntr::where('booking', $cntr->booking)->get();
                 // Obtener el status del primer registro

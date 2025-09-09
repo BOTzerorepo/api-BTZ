@@ -22,7 +22,7 @@ class cargaFueraAduana extends Mailable
     public function __construct($datos)
     {
         $this->datos = $datos;
-        $this->subject = '[ AUTOMATICO ] Carga fuera de Zona de Aduana. Viaje: '.$datos['cntr'];
+        $this->subject = 'Carga fuera de Zona de Aduana. Viaje: '.$datos['cntr'];
     }
 
     /**

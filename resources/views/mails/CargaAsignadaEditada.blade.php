@@ -542,24 +542,17 @@
                                                                                 <!--<![endif]-->
                                                                                 <tr>
                                                                                     <td
-                                                                                        style="vertical-align: middle; text-align: center; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 6px;">
-                                                                                        <a href="https://www.designedwithbee.com/"
-                                                                                            style="text-decoration: none;"
-                                                                                            target="_blank"><img
-                                                                                                align="center"
-                                                                                                alt="Designed with BEE"
-                                                                                                class="icon" height="32"
-                                                                                                src="images/bee.png"
-                                                                                                style="display: block; height: auto; margin: 0 auto; border: 0;"
-                                                                                                width="34" /></a>
-                                                                                    </td>
-                                                                                    <td
-                                                                                        style="font-family: Lato, Tahoma, Verdana, Segoe, sans-serif; font-size: 15px; color: #9d9d9d; vertical-align: middle; letter-spacing: undefined; text-align: center;">
-                                                                                        <a href="https://www.designedwithbee.com/"
-                                                                                            style="color: #9d9d9d; text-decoration: none;"
-                                                                                            target="_blank">Designed
-                                                                                            with BEE</a>
-                                                                                    </td>
+                                                                                                                style="vertical-align: middle; text-align: center; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 6px;">
+                                                                                                                <a href="https://botzero.tech"
+                                                                                                                    style="text-decoration: none;"
+                                                                                                                    target="_blank"><img
+                                                                                                                        align="center"
+                                                                                                                        alt="Designed with BEE"
+                                                                                                                        class="icon"
+                                                                                                                        src="https://btz.ar/logo_mails.png"
+                                                                                                                        style="display: block; height: auto; margin: 0 auto; border: 0;" /></a>
+
+                                                                                                            </td>
                                                                                 </tr>
                                                                             </table>
                                                                         </td>

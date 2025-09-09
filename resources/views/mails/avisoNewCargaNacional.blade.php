@@ -574,17 +574,17 @@
                                                                                 <!--<![endif]-->
                                                                                 <tr>
                                                                                     <td
-                                                                                        style="vertical-align: middle; text-align: center; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 6px;">
-                                                                                        <a href="https://botzero.tech"
-                                                                                            style="text-decoration: none;"
-                                                                                            target="_blank"><img
-                                                                                                align="center"
-                                                                                                alt="Designed with BEE"
-                                                                                                class="icon"
-                                                                                                src="{{asset('image/joinLogisticsRevolution.gif')}}"
-                                                                                                style="display: block; height: auto; margin: 0 auto; border: 0;"
-                                                                                                 /></a>
-                                                                                    </td>
+                                                                                    style="vertical-align: middle; text-align: center; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 6px;">
+                                                                                    <a href="https://botzero.tech"
+                                                                                        style="text-decoration: none;"
+                                                                                        target="_blank"><img
+                                                                                            align="center"
+                                                                                            alt="Designed with BEE"
+                                                                                            class="icon"
+                                                                                            src="https://btz.ar/logo_mails.png"
+                                                                                            style="display: block; height: auto; margin: 0 auto; border: 0;" /></a>
+
+                                                                                </td>
                                                                                     
                                                                                 </tr>
                                                                             </table>
