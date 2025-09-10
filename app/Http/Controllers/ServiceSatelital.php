@@ -679,7 +679,10 @@ class ServiceSatelital extends Controller
                 ->leftJoin('carga', 'cntr.booking', '=', 'carga.booking')
                 ->leftJoin('customer_load_places', 'carga.load_place', '=', 'customer_load_places.description')
                 ->leftJoin('customer_unload_places', 'carga.unload_place', '=', 'customer_unload_places.description')
-                ->leftJoin('aduanas', 'carga.custom_place', '=', 'aduanas.description')
+                ->leftJoin('aduanas', function ($j) {
+                    $j->on('aduanas.description', '=', 'carga.custom_place')
+                      ->orOn('aduanas.description', '=', 'carga.custom_place_impo');
+                })
                 ->select(
                     'cntr.cntr_number as contenedor',
                     'cntr.cntr_type as tipoContenedor',
