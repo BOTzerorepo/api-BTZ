@@ -261,6 +261,8 @@ class statusController extends Controller
                   
             // Guarda el modelo para obtener el ID
             $status->save();
+            $savedPath = null;
+            $ext = null;
 
             if ($request->hasFile('statusArchivo') && $request->file('statusArchivo') instanceof UploadedFile) {
                 $statusArchivo = $request->file('statusArchivo');
