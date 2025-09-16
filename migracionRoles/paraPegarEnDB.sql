@@ -41,4 +41,15 @@ INSERT INTO `model_has_roles` (`role_id`, `model_type`, `model_id`) VALUES
 (5, 'App\\Models\\User', 110),
 (5, 'App\\Models\\User', 111);
 
-
+const dbConfig = {
+  host: process.env.DB_HOST || "193.203.175.171",
+  port: Number.parseInt(process.env.DB_PORT || "3306"),
+  user: process.env.DB_USER || "u101685278_chat_ttl",
+  password: process.env.DB_PASSWORD || "Rail2025$",
+  database: process.env.DB_NAME || "u101685278_chat_ttl",
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
+  acquireTimeout: 60000,
+  timeout: 60000,
+}
