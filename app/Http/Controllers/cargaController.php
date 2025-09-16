@@ -40,8 +40,8 @@ class cargaController extends Controller
 
             if ($user->permiso == 'Traffic' || $user->permiso == 'Master') {
                 $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
-                ->join('cntr', 'cntr.booking', '=', 'carga.booking')
-                   ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+                    ->join('cntr', 'cntr.booking', '=', 'carga.booking')
+                    ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
                     ->select('carga.*',  'cntr.*', 'asign.driver', 'asign.transport')
                     ->whereNull('cntr.deleted_at')
                     ->whereNull('asign.deleted_at')
@@ -125,50 +125,56 @@ class cargaController extends Controller
         try {
 
             $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
-            ->join('cntr', 'cntr.booking', '=', 'carga.booking')
-            ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
-            ->join('customer_load_places', 'customer_load_places.description', '=', 'carga.load_place')
-            ->join('customer_unload_places', 'customer_unload_places.description', '=', 'carga.unload_place')
-        
-            // Aduanas: puede venir por custom_place o por custom_place_impo
-            ->leftJoin('aduanas as adu_exp',  'adu_exp.description',  '=', 'carga.custom_place')
-            ->leftJoin('aduanas as adu_impo', 'adu_impo.description', '=', 'carga.custom_place_impo')
-        
-            ->select(
-                'carga.id','carga.booking','carga.load_date','carga.ref_customer','carga.cma_t_o',
-                'cntr.id_cntr','cntr.cntr_number',
-                'asign.driver','asign.transport',
-                'customer_load_places.description as clp_description',
-                'customer_load_places.latitud as clp_latitud',
-                'customer_load_places.longitud as clp_longitud',
-                'customer_unload_places.description as cup_description',
-                'customer_unload_places.latitud as cup_latitud',
-                'customer_unload_places.longitud as cup_longitud',
-        
-                // Campos combinados de aduana (prefiere IMPO si existe)
-                DB::raw('COALESCE(adu_impo.description, adu_exp.description) as aduana_description'),
-                DB::raw('COALESCE(adu_impo.lat,        adu_exp.lat)        as aduana_lat'),
-                DB::raw('COALESCE(adu_impo.lon,        adu_exp.lon)        as aduana_lon')
-                // agrega más columnas que necesites (provincia, país, etc.) con el mismo esquema
-            )
-            ->whereNull('cntr.deleted_at')
-            ->whereNull('asign.deleted_at')
-            ->where('cntr.cntr_number', $cntr)
-            ->orderBy('carga.load_date', 'ASC')
-            ->get();
-        
-        // OJO: pluck('id_cntr') => filtrá por id, no por número
-        $cntrs = Cntr::whereIn('id_cntr', $todasLasCargasDeEstaSemana->pluck('id_cntr'))
-            ->with('interestPointsCntr')   // eager load de los puntos con su pivot
-            ->get()
-            ->keyBy('cntr_number');    // lo indexás por número si te queda cómodo
-        
-        // si necesitás devolver sólo los cntrs con sus puntos:
-        
-        // (opcional) adjuntar a cada carga:
-        $todasLasCargasDeEstaSemana->each(function ($carga) use ($cntrs) {
-            $carga->cntrs = $cntrs->get($carga->cntr_number);
-        });
+                ->join('cntr', 'cntr.booking', '=', 'carga.booking')
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+                ->join('customer_load_places', 'customer_load_places.description', '=', 'carga.load_place')
+                ->join('customer_unload_places', 'customer_unload_places.description', '=', 'carga.unload_place')
+
+                // Aduanas: puede venir por custom_place o por custom_place_impo
+                ->leftJoin('aduanas as adu_exp',  'adu_exp.description',  '=', 'carga.custom_place')
+                ->leftJoin('aduanas as adu_impo', 'adu_impo.description', '=', 'carga.custom_place_impo')
+
+                ->select(
+                    'carga.id',
+                    'carga.booking',
+                    'carga.load_date',
+                    'carga.ref_customer',
+                    'carga.cma_t_o',
+                    'cntr.id_cntr',
+                    'cntr.cntr_number',
+                    'asign.driver',
+                    'asign.transport',
+                    'customer_load_places.description as clp_description',
+                    'customer_load_places.latitud as clp_latitud',
+                    'customer_load_places.longitud as clp_longitud',
+                    'customer_unload_places.description as cup_description',
+                    'customer_unload_places.latitud as cup_latitud',
+                    'customer_unload_places.longitud as cup_longitud',
+
+                    // Campos combinados de aduana (prefiere IMPO si existe)
+                    DB::raw('COALESCE(adu_impo.description, adu_exp.description) as aduana_description'),
+                    DB::raw('COALESCE(adu_impo.lat,        adu_exp.lat)        as aduana_lat'),
+                    DB::raw('COALESCE(adu_impo.lon,        adu_exp.lon)        as aduana_lon')
+                    // agrega más columnas que necesites (provincia, país, etc.) con el mismo esquema
+                )
+                ->whereNull('cntr.deleted_at')
+                ->whereNull('asign.deleted_at')
+                ->where('cntr.cntr_number', $cntr)
+                ->orderBy('carga.load_date', 'ASC')
+                ->get();
+
+            // OJO: pluck('id_cntr') => filtrá por id, no por número
+            $cntrs = Cntr::whereIn('id_cntr', $todasLasCargasDeEstaSemana->pluck('id_cntr'))
+                ->with('interestPointsCntr')   // eager load de los puntos con su pivot
+                ->get()
+                ->keyBy('cntr_number');    // lo indexás por número si te queda cómodo
+
+            // si necesitás devolver sólo los cntrs con sus puntos:
+
+            // (opcional) adjuntar a cada carga:
+            $todasLasCargasDeEstaSemana->each(function ($carga) use ($cntrs) {
+                $carga->cntrs = $cntrs->get($carga->cntr_number);
+            });
 
             return response()->json($todasLasCargasDeEstaSemana, 200);
         } catch (ModelNotFoundException $e) {
@@ -605,7 +611,7 @@ class cargaController extends Controller
                 'custom_agent' => 'nullable|string',
                 'custom_agent_impo' => 'nullable|string',
                 'custom_place' => 'nullable|string',
-                'custom_place_impo' => 'nullable|string', 
+                'custom_place_impo' => 'nullable|string',
                 'load_place' => 'nullable|string',
                 'unload_place' => 'nullable|string',
                 'final_point' => 'nullable|string',
@@ -633,7 +639,7 @@ class cargaController extends Controller
                 'rf_venti' => 'nullable|numeric',
                 'cntr_type' => 'nullable|string',
                 'retiro_place' => 'nullable|string ',
-                'q_viajes' => 'nullable|integer', 
+                'q_viajes' => 'nullable|integer',
             ]);
 
             // Buscar la carga y actualizarla
@@ -646,7 +652,7 @@ class cargaController extends Controller
                 'custom_agent' => $validatedData['custom_agent'],
                 'custom_agent_impo' => $validatedData['custom_agent_impo'],
                 'custom_place' => $validatedData['custom_place'],
-                'custom_place_impo' => $validatedData['custom_place_impo'], 
+                'custom_place_impo' => $validatedData['custom_place_impo'],
                 'load_place' => $validatedData['load_place'],
                 'unload_place' => $validatedData['unload_place'],
                 'final_point' => $validatedData['final_point'],
@@ -671,7 +677,7 @@ class cargaController extends Controller
                 'obs_imo' => $validatedData['obs_imo'],
                 'rf_tem' => $validatedData['rf_tem'],
                 'rf_humedad' => $validatedData['rf_humedad'],
-                'rf_venti' => $validatedData['rf_venti'], 
+                'rf_venti' => $validatedData['rf_venti'],
             ]);
 
             $changes = $carga->getChanges(); // Obtener los datos que fueron modificados
@@ -679,29 +685,27 @@ class cargaController extends Controller
             if ($request->has('load_date')) {
 
                 $cntrs = DB::table('cntr')->where('booking', $carga->booking)->get();
-                
+
                 foreach ($cntrs as $cntr) {
-                   
+
                     $tO = $validatedData['cma_t_o'];
                     if ($tO != null) {
-                    // Actualizar la fecha de carga en cada CNTR relacionado
-                    $client = new Client();
-                    $headers = [
-                        'Content-Type' => 'application/json'
-                    ];
+                        // Actualizar la fecha de carga en cada CNTR relacionado
+                        $client = new Client();
+                        $headers = [
+                            'Content-Type' => 'application/json'
+                        ];
 
-                    $request = new Psr7Request(
-                        'GET',
-                        env('API_CMA_BOTZERO').'/cma/estDepCustLoc/'.$cntr->cntr_number.'/'.$validatedData['cma_t_o'],
-                        $headers
-                    );
-                    $res = $client->sendAsync($request)->wait();
-                    $respuesta = $res->getBody();
-                    $data = json_decode($respuesta, true);   
+                        $request = new Psr7Request(
+                            'GET',
+                            env('API_CMA_BOTZERO') . '/cma/estDepCustLoc/' . $cntr->cntr_number . '/' . $validatedData['cma_t_o'],
+                            $headers
+                        );
+                        $res = $client->sendAsync($request)->wait();
+                        $respuesta = $res->getBody();
+                        $data = json_decode($respuesta, true);
                     }
                 }
-                    
-                 
             }
             // Buscar el CNTR relacionado y actualizarlo
             $cntr = cntr::where('booking', $carga->booking)->firstOrFail();
@@ -1063,31 +1067,52 @@ class cargaController extends Controller
         }
     }
 
-    public function getForTO($cma_t_o, $cntr_number){
+    public function getForTO($cma_t_o, $cntr_number)
+    {
 
         $cargaPorId = Carga::whereNull('carga.deleted_at')
             ->leftjoin('cntr', 'cntr.booking', '=', 'carga.booking')
             ->leftjoin('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
             ->leftjoin('trucks', 'trucks.domain', '=', 'asign.truck')
             ->leftJoin('customer_load_places', 'carga.load_place', '=', 'customer_load_places.description')
-            ->select('carga.booking','carga.cma_t_o','carga.load_date','carga.unload_place','carga.load_place','carga.ref_customer', 
-            'cntr.cntr_number','cntr.retiro_place','cntr.retiro_place','cntr.status_cntr','cntr.main_status','asign.driver', 'asign.transport', 'asign.truck', 'asign.truck_semi', 'asign.file_instruction', 'trucks.alta_aker','customer_load_places.latitud','customer_load_places.longitud','customer_load_places.country','customer_load_places.city',)
+            ->select(
+                'carga.booking',
+                'carga.cma_t_o',
+                'carga.load_date',
+                'carga.unload_place',
+                'carga.load_place',
+                'carga.ref_customer',
+                'cntr.cntr_number',
+                'cntr.retiro_place',
+                'cntr.retiro_place',
+                'cntr.status_cntr',
+                'cntr.main_status',
+                'asign.driver',
+                'asign.transport',
+                'asign.truck',
+                'asign.truck_semi',
+                'asign.file_instruction',
+                'trucks.alta_aker',
+                'customer_load_places.latitud',
+                'customer_load_places.longitud',
+                'customer_load_places.country',
+                'customer_load_places.city',
+            )
             ->where('carga.cma_t_o', '=', $cma_t_o)
             ->where('cntr.cntr_number', '=', $cntr_number)
             ->orderBy('carga.load_date', 'DESC')->get();
 
         return $cargaPorId;
-
     }
-    public function issetTo($cntr_number){
+    public function issetTo($cntr_number)
+    {
 
-        
+
         $booking = Carga::whereNull('carga.deleted_at')
             ->leftJoin('cntr', 'cntr.booking', '=', 'carga.booking')
             ->where('cntr.cntr_number', '=', $cntr_number)
             ->get();
         return $booking->count();
-
     }
 
     /*public function getNotificationsWithProblems(Request $request)
@@ -1517,4 +1542,3 @@ class cargaController extends Controller
         return $todasLasCargasDeEstaSemana;
     }
 }
-
