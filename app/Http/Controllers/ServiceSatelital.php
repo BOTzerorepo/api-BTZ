@@ -259,7 +259,7 @@ class ServiceSatelital extends Controller
                 $d3 = $this->calcularDistancia($posicionLat, $posicionLon, $camion->descargaLat, $camion->descargaLon); // Distancia al lugar de Descarga
                 //return [$d, $d2, $d3];
                 // Si está dentro del rango de 200 metros, realizar las acciones actuales
-                if ($d <= 200) { // Dentro del rango de Carga
+                if ($d <= 500) { // Dentro del rango de Carga
                     $clientCarga = new Client();
                     $requestCarga = new Psr7Request('GET', env('APP_URL') . '/api/accionLugarDeCarga/' . $IdTrip);
                     $resCarga = $clientCarga->sendAsync($requestCarga)->wait();
@@ -271,7 +271,7 @@ class ServiceSatelital extends Controller
                     $resAduana = $clientAduana->sendAsync($requestAduana)->wait();
                 }
 
-                if ($d3 <= 200) { // Dentro del rango de Descarga
+                if ($d3 <= 500) { // Dentro del rango de Descarga
                     $clientDescarga = new Client();
                     $requestDescarga = new Psr7Request('GET', env('APP_URL') . '/api/accionLugarDescarga/' . $IdTrip);
                     $resDescarga = $clientDescarga->sendAsync($requestDescarga)->wait();
