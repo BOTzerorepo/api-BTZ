@@ -928,11 +928,13 @@ class CustomerLoadPlaceController extends Controller
             ->where('c.booking', $cntr->booking)
             ->select('c.cma_t_o', 'clp.latitud', 'clp.longitud')
             ->first();
-
         if (!$place || empty($place->cma_t_o)) {
             Log::warning('CMA: sin cma_t_o para booking ' . ($cntr->booking ?? 'N/D'));
             // NO retornamos: simplemente no se envían eventos CMA y continuás con el resto del método
         } else {
+
+            Log::info('-----| CARGA CMA | ------');
+
             $cma_t_o = $place->cma_t_o;
             $lat     = $place->latitud;
             $lon     = $place->longitud;
@@ -960,6 +962,8 @@ class CustomerLoadPlaceController extends Controller
                     } else {
                         $cmaResults['steps'][$label] = $data;
                     }
+                    Log::info('-----| CARGA CMA | Status: ok ------');
+
                 } catch (\Throwable $e) {
                     Log::error("CMA Exception {$label}: " . $e->getMessage());
                     $cmaResults['errors'][] = ['step' => $label, 'exception' => $e->getMessage()];
