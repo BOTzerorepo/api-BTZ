@@ -126,6 +126,8 @@ Route::middleware('jwt.verify', 'permission:ver_cargas')->group(function () {
  
 });
  Route::get('/allCargoLastWeek/{user}', 'App\Http\Controllers\cargaController@loadLastWeek');
+ Route::get('/loadForCntr/{cntr}', 'App\Http\Controllers\cargaController@loadForCntr');
+
   Route::get('/allCargoThisWeek/{user}', 'App\Http\Controllers\cargaController@loadThisWeek');
   Route::get('/allCargoNextWeek/{user}', 'App\Http\Controllers\cargaController@loadNextWeek');
 
