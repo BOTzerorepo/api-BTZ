@@ -720,10 +720,13 @@ class ServiceSatelital extends Controller
                 ->get();
 
 
+                log::info($unidad->array());
 
             if ($unidad->isNotEmpty()) { // Verificar si se encontraron camiones
 
                 $camion = $unidad[0];
+
+                log::info($camion->array());
 
                 $truck['model'] = $camion->model;
                 $truck['domain'] = $camion->domain;
