@@ -146,7 +146,7 @@ class cntrController extends Controller
             'cntr_seal'     => 'nullable|string|max:255',
             'confirmacion'  => 'required|boolean',
         ]);
-    
+
         // Tomo estos valores temprano para no depender luego
         $newCntrNumber = $request->input('cntr_number');
         $newSeal       = $request->input('cntr_seal');
@@ -157,45 +157,20 @@ class cntrController extends Controller
             $cntr = cntr::findOrFail($id);
             $cntrOld = $cntr->cntr_number;
 
-            $asign = DB::table('asign')->where('cntr_number',  $newCntrNumber )->first();
-            
+            $asign = DB::table('asign')->where('cntr_number',  $newCntrNumber)->first();
+
             $idCarga = DB::table('carga')->where('booking', $cntr->booking)->value('id');
 
             $cntr->cntr_number = $newCntrNumber;
-            $cntr->cntr_seal =  $newSeal ;
+            $cntr->cntr_seal =  $newSeal;
             $cntr->confirmacion = $newConfirm;
             $cntr->save();
 
-            $rowTO = DB::table('carga')
-                ->leftJoin('cntr', 'cntr.booking', '=', 'carga.booking')
-                ->whereNull('carga.deleted_at')
-                ->where('cntr.cntr_number', $cntr->cntr_number)
-                ->select('carga.cma_t_o')
-                ->first();
 
-            $tO = $rowTO?->cma_t_o;
-            if (!empty($tO)) {
-                try {
-                    $client = new Client();
-                    $headers = ['Content-Type' => 'application/json'];
-    
-                    $urlBase = rtrim(env('API_CMA_BOTZERO'), '/');
-                    $guzzleRequest = new Psr7Request(
-                        'GET',
-                        "{$urlBase}/cma/estDepCustLoc/{$cntr->cntr_number}/{$tO}",
-                        $headers
-                    );
-    
-                    $res = $client->sendAsync($guzzleRequest)->wait();
-                    $respuesta = (string) $res->getBody();
-                    $data = json_decode($respuesta, true);
-                    Log::info('CMA estDepCustLoc OK', ['cntr' => $cntr->cntr_number, 'tO' => $tO, 'resp' => $data]);
-                } catch (\Throwable $e) {
-                    // No rompas la operación principal por un fallo externo
-                    Log::warning('CMA estDepCustLoc fallo', ['error' => $e->getMessage()]);
-                }
-            
-            }
+
+
+
+
 
             $changeAsign = asign::where('cntr_number', $cntrOld)->update(['cntr_number' => $newCntrNumber]);
             Log::info("Asign actualizada de $cntrOld a $newCntrNumber");
@@ -217,7 +192,7 @@ class cntrController extends Controller
                 try {
                     $crearpdfController = app(crearpdfController::class);
                     $crearpdfController->carga($request['cntr_number']);
-                    
+
                     Log::info("Instructivo regenerado para CNTR: " . $request['cntr_number']);
                 } catch (\Exception $e) {
                     DB::rollBack();
@@ -234,7 +209,6 @@ class cntrController extends Controller
             DB::rollBack();
             return response()->json(['error' => $e->getMessage()], 500);
         }
-
     }
 
     /**
@@ -273,7 +247,7 @@ class cntrController extends Controller
 
     public function issetCntr($cntr)
     {
-        $cntrCount = cntr::where('cntr_number', $cntr)->where('main_status','!=','TERMINADA')->get();
+        $cntrCount = cntr::where('cntr_number', $cntr)->where('main_status', '!=', 'TERMINADA')->get();
         $asignCount = asign::where('cntr_number', $cntr)->get();
 
         $count = $cntrCount->count() + $asignCount->count();
@@ -326,72 +300,71 @@ class cntrController extends Controller
     }
 
     public function datosConfirmar($cntrId)
-{
-    try {
-        // CNTR
-        $cntr = cntr::whereNull('deleted_at')->findOrFail($cntrId);
+    {
+        try {
+            // CNTR
+            $cntr = cntr::whereNull('deleted_at')->findOrFail($cntrId);
 
-        // Asignación
-        $asign = asign::whereNull('deleted_at')
-            ->where('cntr_number', $cntr->cntr_number)
-            ->firstOrFail();
+            // Asignación
+            $asign = asign::whereNull('deleted_at')
+                ->where('cntr_number', $cntr->cntr_number)
+                ->firstOrFail();
 
-        // TRANSPORTE (opcional)
-        $transport = null;
-        $transportAssigned = !empty(trim((string) $asign->transport));
+            // TRANSPORTE (opcional)
+            $transport = null;
+            $transportAssigned = !empty(trim((string) $asign->transport));
 
-        if ($transportAssigned) {
-            // match tolerante por razón social (si usás SoftDeletes, Eloquent ya filtra)
-            $transport = Transport::query()
-                ->whereRaw('LOWER(TRIM(razon_social)) = LOWER(TRIM(?))', [trim($asign->transport)])
-                ->first();
+            if ($transportAssigned) {
+                // match tolerante por razón social (si usás SoftDeletes, Eloquent ya filtra)
+                $transport = Transport::query()
+                    ->whereRaw('LOWER(TRIM(razon_social)) = LOWER(TRIM(?))', [trim($asign->transport)])
+                    ->first();
 
-            // si guardaste un ID en "transport", soportalo también como fallback
-            if (!$transport && is_numeric($asign->transport)) {
-                $transport = Transport::find((int) $asign->transport);
+                // si guardaste un ID en "transport", soportalo también como fallback
+                if (!$transport && is_numeric($asign->transport)) {
+                    $transport = Transport::find((int) $asign->transport);
+                }
             }
+
+            // TRUCK (opcional)
+            $truck = null;
+            $truckAssigned = !empty(trim((string) $asign->truck));
+            if ($truckAssigned) {
+                $truck = truck::where('domain', $asign->truck)->first(); // sin firstOrFail()
+            }
+
+            // CARGA (requerida)
+            $carga = Carga::whereNull('deleted_at')
+                ->where('booking', $cntr->booking)
+                ->firstOrFail();
+
+            return response()->json([
+                'cntr'        => $cntr,
+                'asign'       => $asign,
+                'transport'   => $transport,        // null si no hay asignado o no matchea
+                'truck'       => $truck,            // null si no hay asignado
+                'carga'       => $carga,
+                // flags para el front
+                'meta' => [
+                    'transport_assigned' => $transportAssigned,
+                    'truck_assigned'     => $truckAssigned,
+                    'transport_found'    => (bool) $transport,
+                    'truck_found'        => (bool) $truck,
+                ],
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error'   => 'No se encontraron datos requeridos',
+                'detalle' => $e->getMessage(),
+            ], 404);
+        } catch (\Throwable $e) {
+            Log::error('datosConfirmar error', ['e' => $e]);
+            return response()->json([
+                'error' => 'Error al obtener los datos',
+                'msg'   => $e->getMessage(),
+            ], 500);
         }
-
-        // TRUCK (opcional)
-        $truck = null;
-        $truckAssigned = !empty(trim((string) $asign->truck));
-        if ($truckAssigned) {
-            $truck = truck::where('domain', $asign->truck)->first(); // sin firstOrFail()
-        }
-
-        // CARGA (requerida)
-        $carga = Carga::whereNull('deleted_at')
-            ->where('booking', $cntr->booking)
-            ->firstOrFail();
-
-        return response()->json([
-            'cntr'        => $cntr,
-            'asign'       => $asign,
-            'transport'   => $transport,        // null si no hay asignado o no matchea
-            'truck'       => $truck,            // null si no hay asignado
-            'carga'       => $carga,
-            // flags para el front
-            'meta' => [
-                'transport_assigned' => $transportAssigned,
-                'truck_assigned'     => $truckAssigned,
-                'transport_found'    => (bool) $transport,
-                'truck_found'        => (bool) $truck,
-            ],
-        ], 200);
-
-    } catch (ModelNotFoundException $e) {
-        return response()->json([
-            'error'   => 'No se encontraron datos requeridos',
-            'detalle' => $e->getMessage(),
-        ], 404);
-    } catch (\Throwable $e) {
-        Log::error('datosConfirmar error', ['e' => $e]);
-        return response()->json([
-            'error' => 'Error al obtener los datos',
-            'msg'   => $e->getMessage(),
-        ], 500);
     }
-}
 
     public function datosCntrNumber($cntrNumber)
     {
@@ -455,21 +428,21 @@ class cntrController extends Controller
 
             $user = $request->input('user');
             $company = null;
-            
+
             if ($user) {
                 $userObj = DB::table('users')
-                ->where('users.username', $user)
-                ->first();
+                    ->where('users.username', $user)
+                    ->first();
                 if ($userObj) {
-                    $company = $userObj->empresa; 
+                    $company = $userObj->empresa;
                 }
             } else {
-                $company = $request->input('company'); 
+                $company = $request->input('company');
             }
-        
+
             $counts = [];
             $detalles = [];
-           
+
 
             foreach ($estados as $estado) {
                 if ($estado === 'NO ASIGNADA') {

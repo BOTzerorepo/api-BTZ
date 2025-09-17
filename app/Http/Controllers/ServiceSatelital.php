@@ -35,10 +35,6 @@ use function PHPUnit\Framework\returnSelf;
 
 class ServiceSatelital extends Controller
 {
-    public function servicePrueba()
-    {
-        return env('APP_URL') . env('APP_NAME');
-    }
     public function reviewDomains()
     {
 
@@ -271,7 +267,7 @@ class ServiceSatelital extends Controller
                     $resAduana = $clientAduana->sendAsync($requestAduana)->wait();
                 }
 
-                if ($d3 <= 100) { // Dentro del rango de Descarga
+                if ($d3 <= 200) { // Dentro del rango de Descarga
                     $clientDescarga = new Client();
                     $requestDescarga = new Psr7Request('GET', env('APP_URL') . '/api/accionLugarDescarga/' . $IdTrip);
                     $resDescarga = $clientDescarga->sendAsync($requestDescarga)->wait();
@@ -285,13 +281,16 @@ class ServiceSatelital extends Controller
                 $description = $qd->main_status;
 
                 // Si está fuera del rango de 1000 metros, realizar una acción
-                if ($d > 200 && $description === "CARGANDO") { // Fuera del rango de Carga
+                if ($d > 400 && ($description === "YENDO A CARGAR" || $description === "CARGANDO")) { // Fuera del rango de Carga
+                    log::info('accionFueraLugarDeCarga para el Cntr id: '. $IdTrip );
                     $clientCarga = new Client();
                     $requestCarga = new Psr7Request('GET', env('APP_URL') . '/api/accionFueraLugarDeCarga/' . $IdTrip);
                     $resCarga = $clientCarga->sendAsync($requestCarga)->wait();
                 }
 
                 if ($d2 > 200 && $description === "EN ADUANA") { // Fuera del rango de Aduana
+                    log::info('accionFueraLugarAduana para el Cntr id: '. $IdTrip );
+
                     $clientAduana = new Client();
                     $requestAduana = new Psr7Request('GET', env('APP_URL') . '/api/accionFueraLugarAduana/' . $IdTrip);
                     $resAduana = $clientAduana->sendAsync($requestAduana)->wait();

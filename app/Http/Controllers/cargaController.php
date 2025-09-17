@@ -682,31 +682,7 @@ class cargaController extends Controller
 
             $changes = $carga->getChanges(); // Obtener los datos que fueron modificados
 
-            if ($request->has('load_date')) {
-
-                $cntrs = DB::table('cntr')->where('booking', $carga->booking)->get();
-
-                foreach ($cntrs as $cntr) {
-
-                    $tO = $validatedData['cma_t_o'];
-                    if ($tO != null) {
-                        // Actualizar la fecha de carga en cada CNTR relacionado
-                        $client = new Client();
-                        $headers = [
-                            'Content-Type' => 'application/json'
-                        ];
-
-                        $request = new Psr7Request(
-                            'GET',
-                            env('API_CMA_BOTZERO') . '/cma/estDepCustLoc/' . $cntr->cntr_number . '/' . $validatedData['cma_t_o'],
-                            $headers
-                        );
-                        $res = $client->sendAsync($request)->wait();
-                        $respuesta = $res->getBody();
-                        $data = json_decode($respuesta, true);
-                    }
-                }
-            }
+            
             // Buscar el CNTR relacionado y actualizarlo
             $cntr = cntr::where('booking', $carga->booking)->firstOrFail();
             $cntrOriginal = $cntr->getOriginal();

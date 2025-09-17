@@ -126,15 +126,15 @@ class CustomerLoadPlaceController extends Controller
             $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
 
             $cliente = DB::table('users')
-            ->where('cliente_id', '=', $carga->client_id)
-            ->first();
-    
+                ->where('cliente_id', '=', $carga->client_id)
+                ->first();
+
             if ($sbx[0]->sandbox == 0) {
 
                 if (!$cliente) {
                     // Logueás un warning para debug
                     Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-    
+
                     // Podés definir un mail fallback para no perder la notificación
                     $clienteEmail = 'soporte@botzero.com.ar';
                 } else {
@@ -143,7 +143,7 @@ class CustomerLoadPlaceController extends Controller
                 $customer = DB::table('users')
                     ->where('username', '=', $carga->user)
                     ->value('email');
-                $toEmails = array_merge([$customer,$clienteEmail], (array) $toEmails);
+                $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
 
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaCargando($datos));
                 $logApi = new logapi();
@@ -227,15 +227,15 @@ class CustomerLoadPlaceController extends Controller
                 $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
                 $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
                 $cliente = DB::table('users')
-        ->where('cliente_id', '=', $carga->client_id)
-        ->first();
+                    ->where('cliente_id', '=', $carga->client_id)
+                    ->first();
 
                 if ($sbx[0]->sandbox == 0) {
 
                     if (!$cliente) {
                         // Logueás un warning para debug
                         Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-        
+
                         // Podés definir un mail fallback para no perder la notificación
                         $clienteEmail = 'soporte@botzero.com.ar';
                     } else {
@@ -263,7 +263,7 @@ class CustomerLoadPlaceController extends Controller
                     if (!$cliente) {
                         // Logueás un warning para debug
                         Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-        
+
                         // Podés definir un mail fallback para no perder la notificación
                         $clienteEmail = 'soporte@botzero.com.ar';
                     } else {
@@ -300,7 +300,7 @@ class CustomerLoadPlaceController extends Controller
             Log::error('CMA: API_CMA_BOTZERO no configurado');
             return ['ok' => false, 'http' => 500, 'error' => 'API_CMA_BOTZERO no configurado'];
         }
-       
+
 
         $url     = "{$base}/cma/changeFlag/{$flag}/{$cntrNumber}";
         $headers = ['Content-Type' => 'application/json'];
@@ -326,8 +326,8 @@ class CustomerLoadPlaceController extends Controller
             Log::error("CMA Exception changeFlag({$flag}) {$cntrNumber}: {$e->getMessage()}");
             return ['ok' => false, 'http' => 500, 'error' => $e->getMessage()];
         }
-         // ---------- POST a n8n ----------
-         try {
+        // ---------- POST a n8n ----------
+        try {
             $payload = [
                 'function'   => __FUNCTION__, // te manda el nombre de la función actual
                 'contenedor' => $contenedor->cntr_number,
@@ -352,43 +352,42 @@ class CustomerLoadPlaceController extends Controller
     {
 
         $date = Carbon::now('-03:00');
-        $qc = DB::table('cntr')->select('cntr.cntr_number', 'cntr.booking', 'cntr.confirmacion','carga.cma_t_o')
-        ->join('carga', 'cntr.booking', '=', 'carga.booking')
-        ->where('id_cntr', '=', $idTrip)->get();
+        $qc = DB::table('cntr')->select('cntr.cntr_number', 'cntr.booking', 'cntr.confirmacion', 'carga.cma_t_o')
+            ->join('carga', 'cntr.booking', '=', 'carga.booking')
+            ->where('id_cntr', '=', $idTrip)->get();
         $cntr = $qc[0];
         // cual es el ultimo status.
         $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
         $description = $qd->status;
 
-        if( $cntr->cma_t_o != null){
-             /* ++++++++++++++ ACCION CMA +++++++++++++++ */
-        $result = $this->cmaChangeFlag($cntr->cntr_number, 2);
-        // ---------- POST a n8n ----------
-        $client  = new Client(['http_errors' => false, 'timeout' => 30]);
-        $headers = ['Content-Type' => 'application/json'];
-        try {
-           $payload = [
-               'function'   => __FUNCTION__, // te manda el nombre de la función actual
-               'contenedor' => $cntr->cntr_number,
-               'cma_t_o'    => $cntr->cma_t_o,
-               'lat'        => 'FLAG 2 - EN ADUANA',
-               'lon'        => 'FLAG 2 - EN ADUANA',
-               'respuesta'  => 'alguna', // lo que devolvió CMA
-           ];
+        if ($cntr->cma_t_o != null) {
+            /* ++++++++++++++ ACCION CMA +++++++++++++++ */
+            $result = $this->cmaChangeFlag($cntr->cntr_number, 2);
+            // ---------- POST a n8n ----------
+            $client  = new Client(['http_errors' => false, 'timeout' => 30]);
+            $headers = ['Content-Type' => 'application/json'];
+            try {
+                $payload = [
+                    'function'   => __FUNCTION__, // te manda el nombre de la función actual
+                    'contenedor' => $cntr->cntr_number,
+                    'cma_t_o'    => $cntr->cma_t_o,
+                    'lat'        => 'FLAG 2 - EN ADUANA',
+                    'lon'        => 'FLAG 2 - EN ADUANA',
+                    'respuesta'  => 'alguna', // lo que devolvió CMA
+                ];
 
-           $postRes = $client->post('https://n8n.rail.ar/webhook/reporte-cma', [
-               'headers' => $headers,
-               'json'    => $payload,
-           ]);
+                $postRes = $client->post('https://n8n.rail.ar/webhook/reporte-cma', [
+                    'headers' => $headers,
+                    'json'    => $payload,
+                ]);
 
-           Log::info('Posteado a n8n: ' . $postRes->getBody());
-       } catch (\Exception $e) {
-           Log::error('Error enviando a n8n: ' . $e->getMessage());
-       }
-       /* ++++++++++++++ FIN ACCION CMA +++++++++++ */
-
+                Log::info('Posteado a n8n: ' . $postRes->getBody());
+            } catch (\Exception $e) {
+                Log::error('Error enviando a n8n: ' . $e->getMessage());
+            }
+            /* ++++++++++++++ FIN ACCION CMA +++++++++++ */
         }
-       
+
         if ($qd->main_status != 'EN ADUANA') {
 
             DB::table('status')->insert([
@@ -441,15 +440,15 @@ class CustomerLoadPlaceController extends Controller
             $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
             $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
             $cliente = DB::table('users')
-        ->where('cliente_id', '=', $carga->client_id)
-        ->first();
+                ->where('cliente_id', '=', $carga->client_id)
+                ->first();
 
             if ($sbx[0]->sandbox == 0) {
 
                 if (!$cliente) {
                     // Logueás un warning para debug
                     Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-    
+
                     // Podés definir un mail fallback para no perder la notificación
                     $clienteEmail = 'soporte@botzero.com.ar';
                 } else {
@@ -458,7 +457,7 @@ class CustomerLoadPlaceController extends Controller
                 $customer = DB::table('users')
                     ->where('username', '=', $carga->user)
                     ->value('email');
-                $toEmails = array_merge([$customer,$clienteEmail], (array) $toEmails);
+                $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
 
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaAduana($datos));
                 $logApi = new logapi();
@@ -476,7 +475,7 @@ class CustomerLoadPlaceController extends Controller
                 if (!$cliente) {
                     // Logueás un warning para debug
                     Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-    
+
                     // Podés definir un mail fallback para no perder la notificación
                     $clienteEmail = 'soporte@botzero.com.ar';
                 } else {
@@ -485,7 +484,7 @@ class CustomerLoadPlaceController extends Controller
                 $customer = DB::table('users')
                     ->where('username', '=', $carga->user)
                     ->value('email');
-                $toEmails = array_merge([$customer,$clienteEmail], (array) $toEmails);
+                $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
 
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaAduana($datos));
                 $logApi = new logapi();
@@ -554,15 +553,15 @@ class CustomerLoadPlaceController extends Controller
                 $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
                 $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
                 $cliente = DB::table('users')
-        ->where('cliente_id', '=', $carga->client_id)
-        ->first();
+                    ->where('cliente_id', '=', $carga->client_id)
+                    ->first();
 
 
                 if ($sbx[0]->sandbox == 0) {
                     if (!$cliente) {
                         // Logueás un warning para debug
                         Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-        
+
                         // Podés definir un mail fallback para no perder la notificación
                         $clienteEmail = 'soporte@botzero.com.ar';
                     } else {
@@ -589,7 +588,7 @@ class CustomerLoadPlaceController extends Controller
                     if (!$cliente) {
                         // Logueás un warning para debug
                         Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-        
+
                         // Podés definir un mail fallback para no perder la notificación
                         $clienteEmail = 'soporte@botzero.com.ar';
                     } else {
@@ -621,24 +620,24 @@ class CustomerLoadPlaceController extends Controller
     public function accionLugarDescarga($idTrip)
     {
 
-       
+
         $date = Carbon::now('-03:00');
         $qc = DB::table('cntr')->select('cntr_number', 'booking', 'confirmacion')->where('id_cntr', '=', $idTrip)->get();
         $cntr = $qc[0];
         $contenedor = DB::table('cntr')
-        ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
-        ->join('carga', 'cntr.booking', '=', 'carga.booking')
-        ->where('cntr.id_cntr', $idTrip)
-        ->select('cntr.*', 'asign.*', 'carga.*')
-        ->first();
+            ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+            ->join('carga', 'cntr.booking', '=', 'carga.booking')
+            ->where('cntr.id_cntr', $idTrip)
+            ->select('cntr.*', 'asign.*', 'carga.*')
+            ->first();
 
         // cual es el ultimo status.
         $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
         $description = $qd->status;
 
 
-         /* Aca falta CMA-CGM */
-         if ($contenedor->cma_t_o != null) {
+        /* Aca falta CMA-CGM */
+        if ($contenedor->cma_t_o != null) {
 
             $base    = rtrim(env('API_CMA_BOTZERO'), '/');
             $client = new Client();
@@ -649,8 +648,8 @@ class CustomerLoadPlaceController extends Controller
             $r = json_decode($respuesta, true);
             Log::info('Respuesta CMA - Act Arr At Cus Loc: ' . $respuesta);
 
-             // ---------- POST a n8n ----------
-             try {
+            // ---------- POST a n8n ----------
+            try {
                 $payload = [
                     'function'   => __FUNCTION__, // te manda el nombre de la función actual
                     'contenedor' => $contenedor->cntr_number,
@@ -674,7 +673,7 @@ class CustomerLoadPlaceController extends Controller
 
 
 
-         /* FIN CMA-CGM */
+        /* FIN CMA-CGM */
 
         if ($qd->main_status != 'STACKING') {
 
@@ -719,9 +718,9 @@ class CustomerLoadPlaceController extends Controller
                 'booking' => $cntr->booking,
                 'date' => $date
             ];
-       
 
-           
+
+
 
 
             //Enviar mail
@@ -732,14 +731,14 @@ class CustomerLoadPlaceController extends Controller
             $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
             $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
             $cliente = DB::table('users')
-            ->where('cliente_id', '=', $carga->client_id)
-            ->first();
+                ->where('cliente_id', '=', $carga->client_id)
+                ->first();
 
             if ($sbx[0]->sandbox == 0) {
                 if (!$cliente) {
                     // Logueás un warning para debug
                     Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-    
+
                     // Podés definir un mail fallback para no perder la notificación
                     $clienteEmail = 'soporte@botzero.com.ar';
                 } else {
@@ -766,7 +765,7 @@ class CustomerLoadPlaceController extends Controller
                 if (!$cliente) {
                     // Logueás un warning para debug
                     Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-    
+
                     // Podés definir un mail fallback para no perder la notificación
                     $clienteEmail = 'soporte@botzero.com.ar';
                 } else {
@@ -834,8 +833,8 @@ class CustomerLoadPlaceController extends Controller
                     'date' => $date
                 ];
 
-                
-        
+
+
 
                 //Enviar mail
                 $sbx = DB::table('variables')->select('sandbox')->get();
@@ -845,15 +844,15 @@ class CustomerLoadPlaceController extends Controller
                 $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
                 $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
                 $cliente = DB::table('users')
-                ->where('cliente_id', '=', $carga->client_id)
-                ->first();
-        
+                    ->where('cliente_id', '=', $carga->client_id)
+                    ->first();
+
 
                 if ($sbx[0]->sandbox == 0) {
                     if (!$cliente) {
                         // Logueás un warning para debug
                         Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-        
+
                         // Podés definir un mail fallback para no perder la notificación
                         $clienteEmail = 'soporte@botzero.com.ar';
                     } else {
@@ -879,7 +878,7 @@ class CustomerLoadPlaceController extends Controller
                     if (!$cliente) {
                         // Logueás un warning para debug
                         Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-        
+
                         // Podés definir un mail fallback para no perder la notificación
                         $clienteEmail = 'soporte@botzero.com.ar';
                     } else {
@@ -908,7 +907,6 @@ class CustomerLoadPlaceController extends Controller
 
     public function accionFueraLugarDeCarga($idTrip)
     {
-        
 
         $date = Carbon::now('-03:00');
         $qc = DB::table('cntr')->select('cntr_number', 'booking', 'confirmacion')->where('id_cntr', '=', $idTrip)->get();
@@ -916,8 +914,6 @@ class CustomerLoadPlaceController extends Controller
         // cual es el ultimo status.
         $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
         $description = $qd->status;
-
-
 
         /* ++++++++++++++++++++++++++ ACCION CMA (no corta el flujo) +++++++++++++++++++++++++++ */
 
@@ -930,7 +926,6 @@ class CustomerLoadPlaceController extends Controller
             ->first();
         if (!$place || empty($place->cma_t_o)) {
             Log::warning('CMA: sin cma_t_o para booking ' . ($cntr->booking ?? 'N/D'));
-            // NO retornamos: simplemente no se envían eventos CMA y continuás con el resto del método
         } else {
 
             Log::info('-----| CARGA CMA | ------');
@@ -949,6 +944,7 @@ class CustomerLoadPlaceController extends Controller
 
             // Helper para enviar y loguear sin cortar
             $send = function (string $label, string $url) use ($client, $headers, &$cmaResults) {
+                log::info('Usamos:' . $label);
                 try {
                     $req   = new Psr7Request('GET', $url, $headers);
                     $res   = $client->send($req);
@@ -961,9 +957,8 @@ class CustomerLoadPlaceController extends Controller
                         $cmaResults['errors'][] = ['step' => $label, 'status' => $status, 'body' => $body];
                     } else {
                         $cmaResults['steps'][$label] = $data;
+                        Log::info('-----| CARGA CMA | Status: ok ------' . $cmaResults['steps'][$label] = $data);
                     }
-                    Log::info('-----| CARGA CMA | Status: ok ------');
-
                 } catch (\Throwable $e) {
                     Log::error("CMA Exception {$label}: " . $e->getMessage());
                     $cmaResults['errors'][] = ['step' => $label, 'exception' => $e->getMessage()];
@@ -987,15 +982,15 @@ class CustomerLoadPlaceController extends Controller
                 'changeFlag1',
                 "{$base}/cma/changeFlag/1/{$cntr->cntr_number}"
             );
-             // ---------- POST a n8n ----------
-             try {
+            // ---------- POST a n8n ----------
+            try {
                 $payload = [
                     'function'   => __FUNCTION__, // te manda el nombre de la función actual
                     'contenedor' => $cntr->cntr_number,
                     'cma_t_o'    => $cma_t_o,
                     'lat'        => $lat,
                     'lon'        => $lon,
-                    
+
                     'respuesta'  => 'varias', // lo que devolvió CMA
                 ];
 
@@ -1059,13 +1054,13 @@ class CustomerLoadPlaceController extends Controller
             $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
             $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
             $cliente = DB::table('users')
-            ->where('cliente_id', '=', $carga->client_id)
-            ->first();
+                ->where('cliente_id', '=', $carga->client_id)
+                ->first();
             if ($sbx[0]->sandbox == 0) {
                 if (!$cliente) {
                     // Logueás un warning para debug
                     Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-    
+
                     // Podés definir un mail fallback para no perder la notificación
                     $clienteEmail = 'soporte@botzero.com.ar';
                 } else {
@@ -1094,7 +1089,7 @@ class CustomerLoadPlaceController extends Controller
                 if (!$cliente) {
                     // Logueás un warning para debug
                     Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-    
+
                     // Podés definir un mail fallback para no perder la notificación
                     $clienteEmail = 'soporte@botzero.com.ar';
                 } else {
@@ -1163,15 +1158,15 @@ class CustomerLoadPlaceController extends Controller
                 $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
                 $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
                 $cliente = DB::table('users')
-        ->where('cliente_id', '=', $carga->client_id)
-        ->first();
+                    ->where('cliente_id', '=', $carga->client_id)
+                    ->first();
 
 
                 if ($sbx[0]->sandbox == 0) {
                     if (!$cliente) {
                         // Logueás un warning para debug
                         Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-        
+
                         // Podés definir un mail fallback para no perder la notificación
                         $clienteEmail = 'soporte@botzero.com.ar';
                     } else {
@@ -1200,7 +1195,7 @@ class CustomerLoadPlaceController extends Controller
                     if (!$cliente) {
                         // Logueás un warning para debug
                         Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-        
+
                         // Podés definir un mail fallback para no perder la notificación
                         $clienteEmail = 'soporte@botzero.com.ar';
                     } else {
@@ -1235,13 +1230,13 @@ class CustomerLoadPlaceController extends Controller
     public function accionFueraLugarAduana($idTrip)
     {
 
-        
+
         $date = Carbon::now('-03:00');
         $cntr = DB::table('cntr')->select('cntr_number', 'booking', 'confirmacion')
-        ->join('carga', 'cntr.booking', '=', 'carga.booking')
-        ->select('cntr.cntr_number', 'cntr.booking', 'cntr.confirmacion', 'carga.cma_t_o')
-        ->where('cntr.id_cntr', '=', $idTrip)
-        ->first();
+            ->join('carga', 'cntr.booking', '=', 'carga.booking')
+            ->select('cntr.cntr_number', 'cntr.booking', 'cntr.confirmacion', 'carga.cma_t_o')
+            ->where('cntr.id_cntr', '=', $idTrip)
+            ->first();
 
 
         // cual es el ultimo status.
@@ -1253,17 +1248,17 @@ class CustomerLoadPlaceController extends Controller
 
 
             $place = DB::table('carga as c')
-            ->join('aduanas as ad', 'c.custom_place', '=', 'ad.description')
-            ->where('c.booking', $cntr->booking)
-            ->select('c.cma_t_o', 'ad.lat', 'ad.lon')
-            ->first();
-            if (!$place){
-
-                $place = DB::table('carga as c')
-                ->join('aduanas as ad', 'c.custom_place_impo', '=', 'ad.description')
+                ->join('aduanas as ad', 'c.custom_place', '=', 'ad.description')
                 ->where('c.booking', $cntr->booking)
                 ->select('c.cma_t_o', 'ad.lat', 'ad.lon')
                 ->first();
+            if (!$place) {
+
+                $place = DB::table('carga as c')
+                    ->join('aduanas as ad', 'c.custom_place_impo', '=', 'ad.description')
+                    ->where('c.booking', $cntr->booking)
+                    ->select('c.cma_t_o', 'ad.lat', 'ad.lon')
+                    ->first();
             }
 
             $base    = rtrim(env('API_CMA_BOTZERO'), '/');
@@ -1273,10 +1268,10 @@ class CustomerLoadPlaceController extends Controller
             $res = $client->sendAsync($request)->wait();
             $respuesta = $res->getBody();
             $r = json_decode($respuesta, true);
-            
 
-             // ---------- POST a n8n ----------
-             try {
+
+            // ---------- POST a n8n ----------
+            try {
                 $payload = [
                     'function'   => __FUNCTION__, // te manda el nombre de la función actual
                     'contenedor' => $cntr->cntr_number,
@@ -1298,7 +1293,7 @@ class CustomerLoadPlaceController extends Controller
         }
 
         /* ++++++++++++++ ACCION CMA +++++++++++++++ */
-        $result = $this->cmaChangeFlag($cntr->cntr_number, 3 );
+        $result = $this->cmaChangeFlag($cntr->cntr_number, 3);
         /* ++++++++++++++ FIN ACCION CMA +++++++++++ */
 
 
@@ -1354,14 +1349,14 @@ class CustomerLoadPlaceController extends Controller
             $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
             $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
             $cliente = DB::table('users')
-            ->where('cliente_id', '=', $carga->client_id)
-            ->first();
-    
+                ->where('cliente_id', '=', $carga->client_id)
+                ->first();
+
             if ($sbx[0]->sandbox == 0) {
                 if (!$cliente) {
                     // Logueás un warning para debug
                     Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-    
+
                     // Podés definir un mail fallback para no perder la notificación
                     $clienteEmail = 'soporte@botzero.com.ar';
                 } else {
@@ -1388,7 +1383,7 @@ class CustomerLoadPlaceController extends Controller
                 if (!$cliente) {
                     // Logueás un warning para debug
                     Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-    
+
                     // Podés definir un mail fallback para no perder la notificación
                     $clienteEmail = 'soporte@botzero.com.ar';
                 } else {
@@ -1466,20 +1461,20 @@ class CustomerLoadPlaceController extends Controller
                 $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
                 $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
                 $cliente = DB::table('users')
-        ->where('cliente_id', '=', $carga->client_id)
-        ->first();
+                    ->where('cliente_id', '=', $carga->client_id)
+                    ->first();
 
                 if ($sbx[0]->sandbox == 0) {
                     if (!$cliente) {
                         // Logueás un warning para debug
                         Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-        
+
                         // Podés definir un mail fallback para no perder la notificación
                         $clienteEmail = 'soporte@botzero.com.ar';
                     } else {
                         $clienteEmail = $cliente->email;
                     }
-                   
+
                     $customer = DB::table('users')
                         ->where('username', '=', $carga->user)
                         ->value('email');
@@ -1501,13 +1496,13 @@ class CustomerLoadPlaceController extends Controller
                     if (!$cliente) {
                         // Logueás un warning para debug
                         Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-        
+
                         // Podés definir un mail fallback para no perder la notificación
                         $clienteEmail = 'soporte@botzero.com.ar';
                     } else {
                         $clienteEmail = $cliente->email;
                     }
-                   
+
                     $customer = DB::table('users')
                         ->where('username', '=', $carga->user)
                         ->value('email');

@@ -21,7 +21,8 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Transport;
 use Illuminate\Http\UploadedFile;
-
+use GuzzleHttp\Psr7\Request as Psr7Request;
+use GuzzleHttp\Client;
 
 use function GuzzleHttp\json_encode;
 
@@ -317,12 +318,38 @@ class statusController extends Controller
             
             $status->save();
 
-        
-            //------------GENERAL--------------------
+            if ($statusGral == "YENDO A CARGAR") {
+
+                $tO = DB::table('cntr')
+                ->select('carga.cma_t_o')
+                ->join('carga', 'cntr_number.booking','=','carga.booking')
+                ->where('cntr_number', $cntr)->first();
+
+                    if ($tO['cma_t_o'] != null) {
+                        // Actualizar la fecha de carga en cada CNTR relacionado
+                        $client = new Client();
+                        $headers = [
+                            'Content-Type' => 'application/json'
+                        ];
+
+                        $request = new Psr7Request(
+                            'GET',
+                            env('API_CMA_BOTZERO') . '/cma/estDepCustLoc/' . $cntr->cntr_number . '/' . $tO['cma_t_o'],
+                            $headers
+                        );
+                        $res = $client->sendAsync($request)->wait();
+                        $respuesta = $res->getBody();
+                        $data = json_decode($respuesta, true);
+                    }
+                }            
+           //------------GENERAL--------------------
             if ($statusGral == "TERMINADA") {
 
 
                 // ACTUALIZA STATUS
+
+                // Cambiar Bandera en cargas de CMA
+
                 $tipo = 'terminada';
 
                 $emailController = new emailController();
