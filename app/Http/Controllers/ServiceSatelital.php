@@ -725,7 +725,7 @@ class ServiceSatelital extends Controller
 
                 $camion = $unidad[0];
 
-                log::info($camion->array());
+                log::info('tenemos este camion:' . $camion);
 
                 $truck['model'] = $camion->model;
                 $truck['domain'] = $camion->domain;
