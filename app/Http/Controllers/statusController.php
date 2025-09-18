@@ -318,30 +318,7 @@ class statusController extends Controller
             
             $status->save();
 
-            if ($statusGral == "YENDO A CARGAR") {
-
-                $tO = DB::table('cntr')
-                ->select('carga.cma_t_o')
-                ->join('carga', 'cntr.booking','=','carga.booking')
-                ->where('cntr.cntr_number', $cntr)->first();
-
-                    if ($tO['cma_t_o'] != null) {
-                        // Actualizar la fecha de carga en cada CNTR relacionado
-                        $client = new Client();
-                        $headers = [
-                            'Content-Type' => 'application/json'
-                        ];
-
-                        $request = new Psr7Request(
-                            'GET',
-                            env('API_CMA_BOTZERO') . '/cma/estDepCustLoc/' . $cntr->cntr_number . '/' . $tO['cma_t_o'],
-                            $headers
-                        );
-                        $res = $client->sendAsync($request)->wait();
-                        $respuesta = $res->getBody();
-                        $data = json_decode($respuesta, true);
-                    }
-                }            
+                   
            //------------GENERAL--------------------
             if ($statusGral == "TERMINADA") {
 
@@ -526,6 +503,30 @@ class statusController extends Controller
                     return response()->json(['errores' => 'Algo salió mal, por favor vuelta a intentar la acción.', 'id' => $idCarga], 500);
                 }
             }else {
+                if ($statusGral == "YENDO A CARGAR") {
+
+                    $tO = DB::table('cntr')
+                    ->select('carga.cma_t_o')
+                    ->join('carga', 'cntr.booking','=','carga.booking')
+                    ->where('cntr.cntr_number', $cntr)->first();
+    
+                        if ($tO['cma_t_o'] != null) {
+                            // Actualizar la fecha de carga en cada CNTR relacionado
+                            $client = new Client();
+                            $headers = [
+                                'Content-Type' => 'application/json'
+                            ];
+    
+                            $request = new Psr7Request(
+                                'GET',
+                                env('API_CMA_BOTZERO') . '/cma/estDepCustLoc/' . $cntr->cntr_number . '/' . $tO['cma_t_o'],
+                                $headers
+                            );
+                            $res = $client->sendAsync($request)->wait();
+                            $respuesta = $res->getBody();
+                            $data = json_decode($respuesta, true);
+                        }
+                    }     
                 // Insertamos Status en la tabla de Status         
                 $tipo = 'cambio';
                 // ENVIAMOS MAIL
