@@ -322,8 +322,8 @@ class statusController extends Controller
 
                 $tO = DB::table('cntr')
                 ->select('carga.cma_t_o')
-                ->join('carga', 'cntr_number.booking','=','carga.booking')
-                ->where('cntr_number', $cntr)->first();
+                ->join('carga', 'cntr.booking','=','carga.booking')
+                ->where('cntr.cntr_number', $cntr)->first();
 
                     if ($tO['cma_t_o'] != null) {
                         // Actualizar la fecha de carga en cada CNTR relacionado
