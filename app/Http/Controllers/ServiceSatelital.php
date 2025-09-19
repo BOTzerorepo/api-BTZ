@@ -299,7 +299,7 @@ class ServiceSatelital extends Controller
                 $distAduana   = $this->distIfCoords($posicionLat, $posicionLon, $this->toFloat($camion->aduanaLat),   $this->toFloat($camion->aduanaLon));
                 $distDescarga = $this->distIfCoords($posicionLat, $posicionLon, $this->toFloat($camion->descargaLat), $this->toFloat($camion->descargaLon));
 
-                Log::info('Calculoó las distancias' . $distCarga . ' - '.  $distAduana . ' - '.$distDescarga . ' - ID: '. $IdTrip);
+                Log::info('Calculoó las distancias' . $distCarga . ' - ' .  $distAduana . ' - ' . $distDescarga . ' - ID: ' . $IdTrip);
 
                 // === 5) Obtener cntr y último status (ANTES de usar $cntr/$description) ===
                 $cntr = DB::table('cntr')
@@ -1158,237 +1158,312 @@ class ServiceSatelital extends Controller
     //Migrar a GO
     public function revisarCoordenadas()
     {
+        set_time_limit(120);
+        Log::info('revisarCoordenadas: start-----------------------');
+
+        $AKerApiUrl  = 'https://app.akercontrol.com/ws/v2/servicios';
+        $AKerApiCode = 'E6HW19';
+        $AKerPhone   = '2612128105';
+
+        // Histéresis: si el POI no define OUT en DB, usar factor para salida (p. ej., 1.5x o +50 m)
+        $POI_EXIT_FACTOR = 1.5;
+
+        $http = new Client([
+            'timeout'         => 7,
+            'connect_timeout' => 3,
+            'http_errors'     => false,
+        ]);
+
         $detalleComparaciones = [];
 
-        $asignaciones = DB::table('asign as a')
-            ->join('cntr as c', 'a.cntr_number', '=', 'c.cntr_number') // Unir con la tabla cntr
-            ->join('cntr_interest_point as cip', 'c.id_cntr', '=', 'cip.cntr_id_cntr') // Unir con puntos de interés
+        // 1) (truck, contenedor) únicos con POIs y carga activa
+        $items = DB::table('asign as a')
+            ->join('cntr as c', 'a.cntr_number', '=', 'c.cntr_number')
+            ->join('cntr_interest_point as cip', 'c.id_cntr', '=', 'cip.cntr_id_cntr')
             ->whereNull('a.deleted_at')
             ->whereNotNull('a.truck')
-            ->whereIn('a.booking', DB::table('carga')
-                ->where('status', '!=', 'TERMINADA')
-                ->pluck('booking'))
-            ->select('a.*', 'c.*') // Seleccionar columnas necesarias
-            ->distinct() // Evitar duplicados
+            ->where('c.main_status', '!=', 'TERMINADA')
+            ->select([
+                'a.truck as domain',
+                'c.id_cntr as cntr_id',
+                'c.cntr_number',
+                'c.main_status',
+            ])
+            ->distinct()
             ->get();
 
+        if ($items->isEmpty()) {
+            Log::info('revisarCoordenadas: no hay items activos con POIs');
+            return $detalleComparaciones;
+        }
 
-        foreach ($asignaciones as $asignacion) {
-            // Obtener los datos del truck y el contenedor a partir de la asignación
-            $truckDomain = $asignacion->truck;  // Dominio del truck
-            $cntrNumber = $asignacion->cntr_number;    // Número del contenedor
+        foreach ($items as $item) {
+            
+        Log::info('Domain: '. json_encode($item->domain) .' - '. json_encode($item->cntr_number));
 
-            // Obtener los datos del contenedor desde la tabla cntr
-            $contenedor = DB::table('cntr')->where('cntr_number', $cntrNumber)->first();
+            $domain     = $item->domain;
+            $cntrId     = $item->cntr_id;
+            $cntrNumber = $item->cntr_number;
+            $statusNow  = $item->main_status;
 
-            if (!$contenedor || !$truckDomain) {
-                continue; // Si no se encuentra el contenedor o el dominio del truck, se omite esta asignación
-            }
+            // 2) Posición Aker
+            $payload = [
+                'patentes' => [$domain],
+                'cercania' => true,
+                'domicilio' => false,
+                'apiCode'  => $AKerApiCode,
+                'phone'    => $AKerPhone,
+            ];
 
-            // Realizar una solicitud a la API para obtener las coordenadas del truck
-            $client = new Client();
-            $headers = ['Content-Type' => 'application/json'];
-            $body = json_encode([
-                "patentes" => [$truckDomain],
-                "cercania" => true,
-                "domicilio" => false,
-                "apiCode" => "E6HW19",
-                "phone" => "2612128105"
-            ]);
+            try {
+                $res = $http->post($AKerApiUrl, ['json' => $payload, 'headers' => ['Accept' => 'application/json']]);
+                if ($res->getStatusCode() < 200 || $res->getStatusCode() >= 300) {
+                    Log::warning("revisarCoordenadas: HTTP {$res->getStatusCode()} consultando Aker para {$domain}");
+                    continue;
+                }
 
-            $request = new Psr7Request('GET', 'https://app.akercontrol.com/ws/v2/servicios', $headers, $body);
-            $res = $client->sendAsync($request)->wait();
-            $respuesta = $res->getBody();
-            $r = json_decode($respuesta, true);
+                $body = json_decode((string)$res->getBody(), true);
+                if (!is_array($body) || !isset($body['data'][$domain])) {
+                    Log::warning("revisarCoordenadas: respuesta inválida Aker para {$domain}");
+                    continue;
+                }
 
-            /*$r = [
-                'data' => [ 
-                    $truckDomain => [
-                        'ult_latitud' => -32.843325941231974,
-                        'ult_longitud' => -70.12031486495702
-                    ]       
-                ] 
-            ];*/
+                $lat = $this->toFloat($body['data'][$domain]['ult_latitud'] ?? null);
+                $lng = $this->toFloat($body['data'][$domain]['ult_longitud'] ?? null);
+                if ($lat === null || $lng === null) {
+                    Log::warning("revisarCoordenadas: coordenadas vacías para {$domain}");
+                    continue;
+                }
 
-            // Verificar si la solicitud fue exitosa y si hay coordenadas disponibles
-            if (isset($r['data'])) {
-                $datos = $r['data'][$truckDomain];  // Obtener las coordenadas del truck
-                $latitud = $datos['ult_latitud'];
-                $longitud = $datos['ult_longitud'];
+                // 3) POIs del contenedor en orden (SIN radius_out)
+                $pois = DB::table('cntr_interest_point as cip')
+                    ->join('interest_points as ip', 'cip.interest_point_id', '=', 'ip.id')
+                    ->where('cip.cntr_id_cntr', $cntrId)
+                    ->orderBy('cip.order', 'asc')
+                    ->get([
+                        'cip.id as cip_id',
+                        'cip.order',
+                        'cip.activo',
+                        'ip.id as ip_id',
+                        'ip.description as ip_desc',
+                        'ip.type as ip_type',
+                        'ip.latitude as ip_lat',
+                        'ip.longitude as ip_lng',
+                        'ip.radius as ip_radius_in', // radio de entrada
+                        'ip.status_transition as ip_status',
+                    ]);
 
-                // Obtener los puntos de interés asociados al CNTR, ordenados por el campo "order"
-                $puntosDeInteres = DB::table('cntr_interest_point')
-                    ->join('interest_points', 'cntr_interest_point.interest_point_id', '=', 'interest_points.id')
-                    ->where('cntr_interest_point.cntr_id_cntr', $contenedor->id_cntr)
-                    ->select(
-                        'cntr_interest_point.order',
-                        'cntr_interest_point.cntr_id_cntr',
-                        'cntr_interest_point.interest_point_id',
-                        'cntr_interest_point.activo',
-                        'cntr_interest_point.id as cntr_interest_point_id',
-                        'interest_points.id as interest_point_id',
-                        'interest_points.latitude',
-                        'interest_points.type',
-                        'interest_points.status_transition',
-                        'interest_points.longitude',
-                        'interest_points.radius',
-                        'interest_points.description',
-                        // Acciones al entrar
-                        'interest_points.accion_correo_customer_entrada',
-                        'interest_points.accion_correo_cliente_entrada',
-                        'interest_points.accion_notificacion_customer_entrada',
-                        'interest_points.accion_notificacion_cliente_entrada',
-                        // Acciones al salir
-                        'interest_points.accion_correo_customer_salida',
-                        'interest_points.accion_correo_cliente_salida',
-                        'interest_points.accion_notificacion_customer_salida',
-                        'interest_points.accion_notificacion_cliente_salida'
-                    )
-                    ->orderBy('cntr_interest_point.order', 'asc') // Ordenar por el campo "order"
-                    ->get();
+                if ($pois->isEmpty()) continue;
 
-                // Identificar el punto de interés activo
-                // Filtrar puntos activos (activo no es 0) y ordenarlos por "order" en forma descendente
-                $puntoActivo = $puntosDeInteres
-                    ->filter(function ($punto) {
-                        return $punto->activo !== 0; // Filtrar puntos activos
-                    })
-                    ->sortByDesc('order') // Ordenar por el campo "order" en forma descendente
-                    ->first(); // Obtener el primer resultado de la lista filtrada y ordenada
+                // Activo = último con activo != 0
+                $activePoi = $pois->filter(fn($p) => (int)$p->activo !== 0)
+                    ->sortByDesc('order')
+                    ->first();
 
-                if ($puntoActivo) {
-                    // Calcular la distancia con el punto activo
-                    $distanciaPuntoActivo = $this->calcularDistancia($latitud, $longitud, $puntoActivo->latitude, $puntoActivo->longitude);
+                $dist = function ($aLat, $aLng, $bLat, $bLng) {
+                    return $this->distIfCoords($aLat, $aLng, $this->toFloat($bLat), $this->toFloat($bLng));
+                };
+                     Log::info('Dist: '. json_encode($dist));
 
-                    // Si la distancia es mayor al radio, significa que el camión ha salido
-                    if ($distanciaPuntoActivo > $puntoActivo->radius && $contenedor->main_status === $puntoActivo->status_transition) {
-                        // 1. Verificar si el estado es 1 (ya se envió el correo de entrada)
-                        if ($puntoActivo->activo === 1) {
-                            // 2. Realizar las acciones de salida del punto de interés activo
-                            if ($puntoActivo->type != "proceso") {
-                                $this->ejecutarAccionSalida($puntoActivo->interest_point_id, $contenedor->id_cntr);
+
+                // 4) EXIT del activo (histéresis OUT calculado) si status coincide
+                if ($activePoi) {
+                    $dActive   = $dist($lat, $lng, $activePoi->ip_lat, $activePoi->ip_lng);
+                    $radiusIn  = max(0.0, (float)$activePoi->ip_radius_in);
+                    $radiusOut = $this->resolveRadiusOut($radiusIn, null, $POI_EXIT_FACTOR); // no hay radius_out en DB
+
+                    if ($dActive !== null && $dActive > $radiusOut && $statusNow === $activePoi->ip_status) {
+                        if ((int)$activePoi->activo === 1) {
+                            if (strtolower((string)$activePoi->ip_type) !== 'proceso') {
+                                $this->ejecutarAccionSalida($activePoi->ip_id, $cntrId);
                             }
-                            // 3. Marcar el punto de interés activo como 2 (se envió correo de salida)
-                            DB::table('cntr_interest_point')
-                                ->where('id', $puntoActivo->cntr_interest_point_id)
-                                ->update(['activo' => 2]);
+                            DB::table('cntr_interest_point')->where('id', $activePoi->cip_id)->update(['activo' => 2]);
 
-                            // Guardar el detalle de la salida
-                            $detalleComparacion = [
-                                'cntr_id' => $contenedor->id_cntr,
-                                'truck_domain' => $truckDomain,
-                                'punto_de_interes_id' => $puntoActivo->description,
-                                'distancia' => $distanciaPuntoActivo,
-                                'accion' => 'salida'
+                            $this->logGeoAction([
+                                'trip_id'          => (int)$cntrId,
+                                'cntr_number'      => $cntrNumber,
+                                'domain'           => $domain,
+                                'action_type'      => 'EXIT',
+                                'point_type'       => 'POI',
+                                'distance_m'       => $dActive,
+                                'threshold_m'      => (int)$radiusOut,
+                                'event_lat'        => $this->toFloat($activePoi->ip_lat),
+                                'event_lng'        => $this->toFloat($activePoi->ip_lng),
+                                'position_lat'     => $lat,
+                                'position_lng'     => $lng,
+                                'status_at_moment' => $statusNow,
+                                'meta' => [
+                                    'poi_id'   => (int)$activePoi->ip_id,
+                                    'poi_desc' => $activePoi->ip_desc,
+                                    'order'    => (int)$activePoi->order,
+                                    'kind'     => $activePoi->ip_type,
+                                ],
+                            ]);
+
+                            $detalleComparaciones[] = [
+                                'cntr_id'          => $cntrId,
+                                'truck_domain'     => $domain,
+                                'punto_de_interes' => $activePoi->ip_desc,
+                                'distancia'        => $dActive,
+                                'accion'           => 'salida',
                             ];
-                            $detalleComparaciones[] = $detalleComparacion;
 
-                            // Desactivar el punto activo
-                            $puntoActivo = null;
+                            $activePoi = null; // dejó de estar activo
                         }
                     }
-                } else {
-                    // Si no hay un punto activo, buscar el primer punto de interés
-                    $puntoInteresInicial = $puntosDeInteres->firstWhere('order', 1);
+                }
 
-                    if ($puntoInteresInicial) {
-                        // Calcular la distancia al punto inicial
-                        $distancia = $this->calcularDistancia($latitud, $longitud, $puntoInteresInicial->latitude, $puntoInteresInicial->longitude);
+                // 5) ENTER inicial (order=1) si no hay activo
+                if (!$activePoi) {
+                    $firstPoi = $pois->firstWhere('order', 1);
+                    if ($firstPoi) {
+                        $dFirst   = $dist($lat, $lng, $firstPoi->ip_lat, $firstPoi->ip_lng);
+                        $radiusIn = max(0.0, (float)$firstPoi->ip_radius_in);
 
-                        // Si está dentro del radio del primer punto, marcarlo como activo
-                        if ($distancia <= $puntoInteresInicial->radius && $contenedor->main_status === $puntoInteresInicial->status_transition) {
-                            // 1. Verificar si el estado es 0 (no se ha enviado ningún correo)
-                            if ($puntoInteresInicial->activo === 0) {
-                                // 2. Realizar las acciones de entrada del punto inicial
-                                $this->ejecutarAccionEntrada($puntoInteresInicial->interest_point_id, $contenedor->id_cntr);
+                        if ($dFirst !== null && $dFirst <= $radiusIn && $statusNow === $firstPoi->ip_status) {
+                            if ((int)$firstPoi->activo === 0) {
+                                $this->ejecutarAccionEntrada($firstPoi->ip_id, $cntrId);
+                                DB::table('cntr_interest_point')->where('id', $firstPoi->cip_id)->update(['activo' => 1]);
 
-                                // 3. Marcar el punto de interés como 1 (se envió correo de entrada)
-                                DB::table('cntr_interest_point')
-                                    ->where('id', $puntoInteresInicial->cntr_interest_point_id)
-                                    ->update(['activo' => 1]);
+                                $this->logGeoAction([
+                                    'trip_id'          => (int)$cntrId,
+                                    'cntr_number'      => $cntrNumber,
+                                    'domain'           => $domain,
+                                    'action_type'      => 'ENTER',
+                                    'point_type'       => 'POI',
+                                    'distance_m'       => $dFirst,
+                                    'threshold_m'      => (int)$radiusIn,
+                                    'event_lat'        => $this->toFloat($firstPoi->ip_lat),
+                                    'event_lng'        => $this->toFloat($firstPoi->ip_lng),
+                                    'position_lat'     => $lat,
+                                    'position_lng'     => $lng,
+                                    'status_at_moment' => $statusNow,
+                                    'meta' => [
+                                        'poi_id'   => (int)$firstPoi->ip_id,
+                                        'poi_desc' => $firstPoi->ip_desc,
+                                        'order'    => (int)$firstPoi->order,
+                                        'kind'     => $firstPoi->ip_type,
+                                    ],
+                                ]);
 
-                                // Guardar el detalle de la entrada
-                                $detalleComparacion = [
-                                    'cntr_id' => $contenedor->id_cntr,
-                                    'truck_domain' => $truckDomain,
-                                    'punto_de_interes_id' => $puntoInteresInicial->description,
-                                    'distancia' => $distancia,
-                                    'accion' => 'entrada'
+                                $detalleComparaciones[] = [
+                                    'cntr_id'          => $cntrId,
+                                    'truck_domain'     => $domain,
+                                    'punto_de_interes' => $firstPoi->ip_desc,
+                                    'distancia'        => $dFirst,
+                                    'accion'           => 'entrada',
                                 ];
-                                $detalleComparaciones[] = $detalleComparacion;
 
-                                // Marcar como punto activo
-                                $puntoActivo = $puntoInteresInicial;
+                                $activePoi = $firstPoi;
                             }
                         }
                     }
                 }
 
-                // Si hay un nuevo punto activo, buscar el siguiente punto en orden
-                if ($puntoActivo) {
+                // 6) Transición activo → siguiente
+                if ($activePoi) {
+                    $idx = $pois->search(fn($p) => (int)$p->cip_id === (int)$activePoi->cip_id);
+                    $nextPoi = $pois->get($idx + 1);
+                    if ($nextPoi) {
+                        $dNext    = $dist($lat, $lng, $nextPoi->ip_lat, $nextPoi->ip_lng);
+                        $radiusIn = max(0.0, (float)$nextPoi->ip_radius_in);
 
-                    $indicePuntoActivo = $puntosDeInteres->search(function ($punto) use ($puntoActivo) {
-                        return $punto->cntr_interest_point_id === $puntoActivo->cntr_interest_point_id;
-                    });
+                        if ($dNext !== null && $dNext <= $radiusIn && $statusNow === $nextPoi->ip_status) {
+                            DB::transaction(function () use ($activePoi, $nextPoi, $cntrId, $cntrNumber, $domain, $lat, $lng, $dNext, $radiusIn, $statusNow, &$detalleComparaciones) {
+                                // EXIT del activo si aún no está en 2
+                                if ((int)$activePoi->activo !== 2) {
+                                    if (strtolower((string)$activePoi->ip_type) !== 'proceso') {
+                                        $this->ejecutarAccionSalida($activePoi->ip_id, $cntrId);
+                                    }
+                                    DB::table('cntr_interest_point')->where('id', $activePoi->cip_id)->update(['activo' => 2]);
 
-                    // Obtener el siguiente punto de interés en la lista
-                    $siguientePunto = $puntosDeInteres->get($indicePuntoActivo + 1);
+                                    $this->logGeoAction([
+                                        'trip_id'          => (int)$cntrId,
+                                        'cntr_number'      => $cntrNumber,
+                                        'domain'           => $domain,
+                                        'action_type'      => 'EXIT',
+                                        'point_type'       => 'POI',
+                                        'distance_m'       => null,
+                                        'threshold_m'      => null,
+                                        'event_lat'        => $this->toFloat($activePoi->ip_lat),
+                                        'event_lng'        => $this->toFloat($activePoi->ip_lng),
+                                        'position_lat'     => $lat,
+                                        'position_lng'     => $lng,
+                                        'status_at_moment' => $statusNow,
+                                        'meta' => [
+                                            'poi_id'   => (int)$activePoi->ip_id,
+                                            'poi_desc' => $activePoi->ip_desc,
+                                            'order'    => (int)$activePoi->order,
+                                            'kind'     => $activePoi->ip_type,
+                                        ],
+                                    ]);
 
-                    if ($siguientePunto) {
-                        // Calcular la distancia con el siguiente punto de interés
-                        $distanciaSiguiente = $this->calcularDistancia($latitud, $longitud, $siguientePunto->latitude, $siguientePunto->longitude);
-
-                        // Si está dentro del radio del siguiente punto
-                        if ($distanciaSiguiente <= $siguientePunto->radius && $contenedor->main_status === $siguientePunto->status_transition) {
-                            // Si el punto activo NO tiene el estado 2, se ejecuta la acción de salida
-                            if ($puntoActivo->activo !== 2) {
-                                // 1. Realizar las acciones de salida del punto activo
-                                if ($puntoActivo->type != "proceso") {
-                                    $this->ejecutarAccionSalida($puntoActivo->interest_point_id, $contenedor->id_cntr);
+                                    $detalleComparaciones[] = [
+                                        'cntr_id'          => $cntrId,
+                                        'truck_domain'     => $domain,
+                                        'punto_de_interes' => $activePoi->ip_desc,
+                                        'distancia'        => null,
+                                        'accion'           => 'salida',
+                                    ];
                                 }
-                                // 2. Marcar el punto activo como 2 (se envió correo de salida)
-                                DB::table('cntr_interest_point')
-                                    ->where('id', $puntoActivo->cntr_interest_point_id)
-                                    ->update(['activo' => 2]);
 
-                                // Guardar el detalle de la salida
-                                $detalleComparacionSalida = [
-                                    'cntr_id' => $contenedor->id_cntr,
-                                    'truck_domain' => $truckDomain,
-                                    'punto_de_interes_id' => $puntoActivo->description,
-                                    'distancia' => $distanciaPuntoActivo,
-                                    'accion' => 'salida'
-                                ];
-                                $detalleComparaciones[] = $detalleComparacionSalida;
-                            }
+                                // ENTER del siguiente si estaba en 0
+                                if ((int)$nextPoi->activo === 0) {
+                                    $this->ejecutarAccionEntrada($nextPoi->ip_id, $cntrId);
+                                    DB::table('cntr_interest_point')->where('id', $nextPoi->cip_id)->update(['activo' => 1]);
 
-                            // Verificar el estado del siguiente punto (debe ser 0 para enviar correo de entrada)
-                            if ($siguientePunto->activo === 0 && $contenedor->main_status == $siguientePunto->status_transition) {
-                                // 4. Realizar las acciones de entrada en el siguiente punto
-                                $this->ejecutarAccionEntrada($siguientePunto->interest_point_id, $contenedor->id_cntr);
+                                    $this->logGeoAction([
+                                        'trip_id'          => (int)$cntrId,
+                                        'cntr_number'      => $cntrNumber,
+                                        'domain'           => $domain,
+                                        'action_type'      => 'ENTER',
+                                        'point_type'       => 'POI',
+                                        'distance_m'       => $dNext,
+                                        'threshold_m'      => (int)$radiusIn,
+                                        'event_lat'        => $this->toFloat($nextPoi->ip_lat),
+                                        'event_lng'        => $this->toFloat($nextPoi->ip_lng),
+                                        'position_lat'     => $lat,
+                                        'position_lng'     => $lng,
+                                        'status_at_moment' => $statusNow,
+                                        'meta' => [
+                                            'poi_id'   => (int)$nextPoi->ip_id,
+                                            'poi_desc' => $nextPoi->ip_desc,
+                                            'order'    => (int)$nextPoi->order,
+                                            'kind'     => $nextPoi->ip_type,
+                                        ],
+                                    ]);
 
-                                // 5. Marcar el siguiente punto como 1 (se envió correo de entrada)
-                                DB::table('cntr_interest_point')
-                                    ->where('id', $siguientePunto->cntr_interest_point_id)
-                                    ->update(['activo' => 1]);
-
-                                // Guardar el detalle de la entrada
-                                $detalleComparacionEntrada = [
-                                    'cntr_id' => $contenedor->id_cntr,
-                                    'truck_domain' => $truckDomain,
-                                    'punto_de_interes_id' => $siguientePunto->description,
-                                    'distancia' => $distanciaSiguiente,
-                                    'accion' => 'entrada'
-                                ];
-                                $detalleComparaciones[] = $detalleComparacionEntrada;
-                            }
+                                    $detalleComparaciones[] = [
+                                        'cntr_id'          => $cntrId,
+                                        'truck_domain'     => $domain,
+                                        'punto_de_interes' => $nextPoi->ip_desc,
+                                        'distancia'        => $dNext,
+                                        'accion'           => 'entrada',
+                                    ];
+                                }
+                            });
                         }
                     }
                 }
+            } catch (GuzzleException $e) {
+                Log::error("revisarCoordenadas: error HTTP {$domain}: " . $e->getMessage());
+                continue;
+            } catch (\Throwable $e) {
+                Log::error("revisarCoordenadas: error inesperado {$domain}: " . $e->getMessage());
+                continue;
             }
         }
-        return $detalleComparaciones; // Retorna los detalles de comparación si es necesario
+        Log::info('Detalle comparación: ' . json_encode($detalleComparaciones));
+
+        return $detalleComparaciones;
     }
+    private function resolveRadiusOut(float $radiusIn, ?float $radiusOut, float $factor = 1.5): float
+    {
+        $radiusIn  = max(0.0, $radiusIn);
+        $radiusOut = $radiusOut !== null ? (float)$radiusOut : 0.0;
+        return $radiusOut > 0.0 ? $radiusOut : max($radiusIn * $factor, $radiusIn + 50.0);
+    }
+
     public function calcularDistancia($latitud1, $longitud1, $latitud2, $longitud2)
     {
         // Normaliza: acepta strings con coma/punto, espacios, etc.
