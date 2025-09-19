@@ -510,7 +510,7 @@ class statusController extends Controller
                     ->join('carga', 'cntr.booking','=','carga.booking')
                     ->where('cntr.cntr_number', $cntr)->first();
     
-                        if ($tO['cma_t_o'] != null) {
+                        if ($tO && !empty($tO->cma_t_o)) {
                             // Actualizar la fecha de carga en cada CNTR relacionado
                             $client = new Client();
                             $headers = [
