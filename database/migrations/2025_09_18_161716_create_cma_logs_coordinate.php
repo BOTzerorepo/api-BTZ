@@ -16,22 +16,17 @@ return new class extends Migration
         Schema::create('cma_logs_coordinate', function (Blueprint $table) {
             $table->id();
             $table->string('patente');
-            // ojo: mejor precisión típica
             $table->decimal('lat', 10, 8)->nullable();
-            // renombrá "long" a "longitude" si podés (ver nota más abajo)
-            $table->decimal('longitude', 11, 8)->nullable();
-
+            $table->decimal('longitude', 11, 8)->nullable(); // si aún se llama 'long', dejalo y renombrás luego
             $table->string('transportOrder');
             $table->string('equipmentReference')->nullable();
             $table->string('carrierBookingReference')->nullable();
-            // "hora" parece fecha/hora -> timestamp
             $table->timestamp('hora')->nullable();
-
             $table->timestamps();
-
-            // Índices sugeridos
-            $table->index(['patente', 'hora']);
-            $table->index(['equipmentReference', 'carrierBookingReference']);
+        
+            // ÍNDICES con nombres cortos
+            $table->index(['patente', 'hora'], 'clc_patente_hora_idx');
+            $table->index(['equipmentReference', 'carrierBookingReference'], 'clc_eqref_cbr_idx');
         });
     }
 

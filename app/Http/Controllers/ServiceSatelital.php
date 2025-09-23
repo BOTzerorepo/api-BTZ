@@ -163,7 +163,7 @@ class ServiceSatelital extends Controller
     public function serviceSatelital()
     {
         set_time_limit(120);
-        Log::info('ingresó');
+        Log::info('Comenzo Satelital');
 
         // === Configurables ===
         $AKerApiUrl     = 'https://app.akercontrol.com/ws/v2/servicios';
@@ -179,7 +179,7 @@ class ServiceSatelital extends Controller
         $THRESHOLD_ADUANA_OUT   = 200; // fuera de rango aduana
 
         $STATUS_FOR_POINT = [
-            'CARGA'    => ['YENDO A CARGAR', 'CARGANDO'],
+            'CARGA'    => ['YENDO A CARGAR', 'CARGANDO','ASIGNADA'],
             'ADUANA'   => ['YENDO A ADUANA', 'EN ADUANA'],
             'DESCARGA' => ['YENDO A DESCARGAR', 'DESCARGANDO', 'EN DESTINO'],
         ];
@@ -238,7 +238,7 @@ class ServiceSatelital extends Controller
         }
 
         foreach ($camiones as $camion) {
-            Log::info('ingresó a la llamada de aker');
+            Log::info('ingresó a la llamada de aker: ' . $camion->domain);
 
             // === 2) Llamada a AKER ===
             $payload = [
@@ -293,14 +293,21 @@ class ServiceSatelital extends Controller
                 }
 
                 $IdTrip = $camion->IdTrip;
+                Log::info('Camion llevando carga coon ID: ' . $IdTrip);
+
+
 
                 // === 4) Calcular distancias ===
                 $distCarga    = $this->distIfCoords($posicionLat, $posicionLon, $this->toFloat($camion->CargaLat),    $this->toFloat($camion->CargaLng));
+                Log::info('Está a : ' . $distCarga . 'del Lugar de Carga');
+
+
                 $distAduana   = $this->distIfCoords($posicionLat, $posicionLon, $this->toFloat($camion->aduanaLat),   $this->toFloat($camion->aduanaLon));
+                Log::info('Está a : ' . $distAduana . 'del Lugar de Aduana');
+
                 $distDescarga = $this->distIfCoords($posicionLat, $posicionLon, $this->toFloat($camion->descargaLat), $this->toFloat($camion->descargaLon));
-
-                Log::info('Calculoó las distancias' . $distCarga . ' - ' .  $distAduana . ' - ' . $distDescarga . ' - ID: ' . $IdTrip);
-
+                Log::info('Está a : ' . $distDescarga . 'del Lugar de Descarga');
+                
                 // === 5) Obtener cntr y último status (ANTES de usar $cntr/$description) ===
                 $cntr = DB::table('cntr')
                     ->select('cntr_number', 'booking', 'confirmacion')
@@ -318,6 +325,7 @@ class ServiceSatelital extends Controller
                     ->orderByDesc('id')
                     ->first();
 
+                Log::info('Ultimo estado del contenedor: ' . ($lastStatus->main_status ?? 'N/A'));
 
                 $description = $lastStatus->main_status ?? null;
 
@@ -326,18 +334,24 @@ class ServiceSatelital extends Controller
                 Log::info('Empezó a probar las distacias con los lugares');
                 // helpers de estado por punto
                 $isInsideCarga    = ($distCarga    !== null && $distCarga    <= $THRESHOLD_CARGA_IN);
+                Log::info('Está dentro del umbral de carga? ' . ($isInsideCarga ? 'SI' : 'NO'));
                 $isInsideAduana   = ($distAduana   !== null && $distAduana   <= $THRESHOLD_ADUANA_IN);
+                Log::info('Está dentro del umbral de carga? ' . ($isInsideCarga ? 'SI' : 'NO'));
                 $isInsideDescarga = ($distDescarga !== null && $distDescarga <= $THRESHOLD_DESCARGA_IN);
-
+                Log::info('Está dentro del umbral de carga? ' . ($isInsideCarga ? 'SI' : 'NO'));
 
                 // último log por punto
                 $lastCarga    = GeoActionLog::where('trip_id', $IdTrip)->where('point_type', 'CARGA')->orderByDesc('id')->first();
+                Log::info('Último log de carga: ' . ($lastCarga->action_type ?? 'N/A'));
                 $lastAduana   = GeoActionLog::where('trip_id', $IdTrip)->where('point_type', 'ADUANA')->orderByDesc('id')->first();
+                Log::info('Último log de aduana: ' . ($lastAduana->action_type ?? 'N/A'));
                 $lastDescarga = GeoActionLog::where('trip_id', $IdTrip)->where('point_type', 'DESCARGA')->orderByDesc('id')->first();
+                Log::info('Último log de descarga: ' . ($lastDescarga->action_type ?? 'N/A'));
 
                 // ======== CARGA ========
                 if ($isInsideCarga && (($lastCarga->action_type ?? null) !== 'ENTER') && $canTrigger($description, 'CARGA')) {
                     // ENTER CARGA (solo al cruzar el umbral hacia adentro)
+                    Log::info('Está entrando al lugar de carga');
                     $this->logGeoAction([
                         'trip_id' => $IdTrip,
                         'cntr_number' => $cntr->cntr_number,
@@ -360,6 +374,7 @@ class ServiceSatelital extends Controller
                     && (($lastCarga->action_type ?? null) === 'ENTER')
                     && in_array($description, ['YENDO A CARGAR', 'CARGANDO'], true)
                 ) {
+                    Log::info('Está saliendo del lugar de carga');
 
                     $this->logGeoAction([
                         'trip_id' => $IdTrip,
@@ -381,6 +396,7 @@ class ServiceSatelital extends Controller
 
                 // ======== ADUANA ========
                 if ($isInsideAduana && (($lastAduana->action_type ?? null) !== 'ENTER') && $canTrigger($description, 'ADUANA')) {
+                    Log::info('Está entrando al lugar de aduana');
                     $this->logGeoAction([
                         'trip_id' => $IdTrip,
                         'cntr_number' => $cntr->cntr_number,
@@ -403,6 +419,7 @@ class ServiceSatelital extends Controller
                     && $description === 'EN ADUANA'
                 ) {
 
+                    Log::info('Está saliendo del lugar de aduana');
                     $this->logGeoAction([
                         'trip_id' => $IdTrip,
                         'cntr_number' => $cntr->cntr_number,
@@ -426,6 +443,7 @@ class ServiceSatelital extends Controller
 
                 // ======== DESCARGA ========
                 if ($isInsideDescarga && (($lastDescarga->action_type ?? null) !== 'ENTER') && $canTrigger($description, 'DESCARGA')) {
+                    Log::info('Está entrando al lugar de descarga');
                     $this->logGeoAction([
                         'trip_id' => $IdTrip,
                         'cntr_number' => $cntr->cntr_number,
@@ -446,6 +464,7 @@ class ServiceSatelital extends Controller
                 if ((!$isInsideDescarga && ($distDescarga !== null && $distDescarga > $THRESHOLD_DESCARGA_IN))
                     && (($lastDescarga->action_type ?? null) === 'ENTER')
                 ) {
+                    Log::info('Está saliendo del lugar de descarga');
                     // si querés manejar EXIT Descarga, agregalo similar a los otros
                 }
             } catch (GuzzleException $e) {
@@ -1260,19 +1279,24 @@ class ServiceSatelital extends Controller
                     ->sortByDesc('order')
                     ->first();
 
+                Log::info('Active POI: '. json_encode($activePoi));
+
                 $dist = function ($aLat, $aLng, $bLat, $bLng) {
                     return $this->distIfCoords($aLat, $aLng, $this->toFloat($bLat), $this->toFloat($bLng));
                 };
-                     Log::info('Dist: '. json_encode($dist));
+                Log::info('Dist: '. json_encode($dist));
 
 
                 // 4) EXIT del activo (histéresis OUT calculado) si status coincide
                 if ($activePoi) {
+                    Log::info('Active POI inside: '. json_encode($activePoi));
+
                     $dActive   = $dist($lat, $lng, $activePoi->ip_lat, $activePoi->ip_lng);
                     $radiusIn  = max(0.0, (float)$activePoi->ip_radius_in);
                     $radiusOut = $this->resolveRadiusOut($radiusIn, null, $POI_EXIT_FACTOR); // no hay radius_out en DB
 
                     if ($dActive !== null && $dActive > $radiusOut && $statusNow === $activePoi->ip_status) {
+                        Log::info('Active POI outside: '. json_encode($activePoi));
                         if ((int)$activePoi->activo === 1) {
                             if (strtolower((string)$activePoi->ip_type) !== 'proceso') {
                                 $this->ejecutarAccionSalida($activePoi->ip_id, $cntrId);
@@ -1315,6 +1339,7 @@ class ServiceSatelital extends Controller
 
                 // 5) ENTER inicial (order=1) si no hay activo
                 if (!$activePoi) {
+                    Log::info('No active POI, checking first POI for ENTER: '. json_encode($activePoi));
                     $firstPoi = $pois->firstWhere('order', 1);
                     if ($firstPoi) {
                         $dFirst   = $dist($lat, $lng, $firstPoi->ip_lat, $firstPoi->ip_lng);
@@ -1362,6 +1387,7 @@ class ServiceSatelital extends Controller
 
                 // 6) Transición activo → siguiente
                 if ($activePoi) {
+                    Log::info('Active POI for transition to next: '. json_encode($activePoi));
                     $idx = $pois->search(fn($p) => (int)$p->cip_id === (int)$activePoi->cip_id);
                     $nextPoi = $pois->get($idx + 1);
                     if ($nextPoi) {
