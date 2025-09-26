@@ -1778,4 +1778,18 @@ class ServiceSatelital extends Controller
             Log::error('logGeoAction error: ' . $e->getMessage(), ['args' => $args]);
         }
     }
+    private function fireEndpoint(Client $http, string $url, string $tag, int $IdTrip): void
+{
+    try {
+        $res = $http->get($url, ['http_errors' => false, 'timeout' => 10, 'connect_timeout' => 5]);
+        $code = $res->getStatusCode();
+        if ($code < 200 || $code >= 300) {
+            Log::warning("{$tag}: HTTP {$code} para IdTrip={$IdTrip} url={$url}");
+        } else {
+            Log::info("{$tag}: OK para IdTrip={$IdTrip}");
+        }
+    } catch (\Throwable $e) {
+        Log::error("{$tag}: error para IdTrip={$IdTrip}: ".$e->getMessage());
+    }
+}
 }
