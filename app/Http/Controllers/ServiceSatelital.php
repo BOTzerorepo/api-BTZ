@@ -363,19 +363,13 @@ class ServiceSatelital extends Controller
                         'status_at_moment' => $description,
                         'meta' => ['source' => 'aker'],
                     ]);
-                    $response = $http->get("{$appUrl}/api/accionLugarDeCarga/{$IdTrip}");
-                    if ($response->getStatusCode() === 200) {
-                        Log::info("Pedido GET exitoso para IdTrip={$IdTrip}");
-                    } else {
-                        Log::warning("Error en el pedido GET para IdTrip={$IdTrip}, código: " . $response->getStatusCode());
-                    }
+                    $this->fireEndpoint($http, "{$appUrl}/api/accionLugarDeCarga/{$IdTrip}", "accionLugarDeCarga", $IdTrip);
                     
+                }else{
+                    Log::info('No está entrando al lugar de carga');
                 }
                 // EXIT CARGA: solo si veníamos de ENTER y ahora estamos fuera (usar umbral OUT para histéresis)
-                if ((!$isInsideCarga && ($distCarga !== null && $distCarga > $THRESHOLD_CARGA_OUT))
-                    && (($lastCarga->action_type ?? null) === 'ENTER')
-                    && in_array($description, ['YENDO A CARGAR', 'CARGANDO'], true)
-                ) {
+                if ((!$isInsideCarga && ($distCarga !== null && $distCarga > $THRESHOLD_CARGA_OUT)) && (($lastCarga->action_type ?? null) === 'ENTER') && in_array($description, ['YENDO A CARGAR', 'CARGANDO'], true)) {
                     Log::info('Está saliendo del lugar de carga');
 
                     $this->logGeoAction([
@@ -394,6 +388,8 @@ class ServiceSatelital extends Controller
                         'meta' => ['source' => 'aker'],
                     ]);
                     $this->fireEndpoint($http, "{$appUrl}/api/accionFueraLugarDeCarga/{$IdTrip}", "accionFueraLugarDeCarga", $IdTrip);
+                }else{
+                    Log::info('No está saliendo del lugar de carga');
                 }
 
                 // ======== ADUANA ========
