@@ -336,9 +336,9 @@ class ServiceSatelital extends Controller
                 $isInsideCarga    = ($distCarga    !== null && $distCarga    <= $THRESHOLD_CARGA_IN);
                 Log::info('Está dentro del umbral de carga? ' . ($isInsideCarga ? 'SI' : 'NO'));
                 $isInsideAduana   = ($distAduana   !== null && $distAduana   <= $THRESHOLD_ADUANA_IN);
-                Log::info('Está dentro del umbral de carga? ' . ($isInsideCarga ? 'SI' : 'NO'));
+                Log::info('Está dentro del umbral de carga? ' . ($isInsideAduana ? 'SI' : 'NO'));
                 $isInsideDescarga = ($distDescarga !== null && $distDescarga <= $THRESHOLD_DESCARGA_IN);
-                Log::info('Está dentro del umbral de carga? ' . ($isInsideCarga ? 'SI' : 'NO'));
+                Log::info('Está dentro del umbral de carga? ' . ($isInsideDescarga ? 'SI' : 'NO'));
 
                 // último log por punto
                 $lastCarga    = GeoActionLog::where('trip_id', $IdTrip)->where('point_type', 'CARGA')->orderByDesc('id')->first();
@@ -478,7 +478,6 @@ class ServiceSatelital extends Controller
             // usleep(120000); // opcional anti ráfaga
         }
     }
-
     private function toFloat($value): ?float
     {
         if ($value === null || $value === '') return null;
@@ -1577,7 +1576,6 @@ class ServiceSatelital extends Controller
         $cliente = DB::table('users')
             ->where('cliente_id', '=', $carga->client_id)
             ->first();
-
 
 
 

@@ -71,8 +71,10 @@ class CustomerLoadPlaceController extends Controller
         $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
         $description = $qd->status;
 
+        Log::info('El ultimo status del contenedor ' . $cntr->cntr_number . ' es: ' . $qd->main_status);
 
         if ($qd->main_status != 'CARGANDO') {
+            Log::info('El status es distinto a CARGANDO, se procede a cambiarlo y enviar mail.');
             DB::table('status')->insert([
                 'status' => 'Camión se encuentra en un radio de 50 mts del Lugar de Carga.',
                 'main_status' => 'CARGANDO',
@@ -136,7 +138,7 @@ class CustomerLoadPlaceController extends Controller
                     Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
 
                     // Podés definir un mail fallback para no perder la notificación
-                    $clienteEmail = 'soporte@botzero.com.ar';
+                    $clienteEmail = 'soporte@rail.ar';
                 } else {
                     $clienteEmail = $cliente->email;
                 }
@@ -295,6 +297,8 @@ class CustomerLoadPlaceController extends Controller
     }
     private function cmaChangeFlag(string $cntrNumber, int $flag = 1, int $timeout = 30): array
     {
+        Log::info("CMA: Cambiando flag a {$flag} para contenedor {$cntrNumber}");
+
         $base = rtrim(env('API_CMA_BOTZERO'), '/');
         if (!$base) {
             Log::error('CMA: API_CMA_BOTZERO no configurado');
@@ -313,10 +317,10 @@ class CustomerLoadPlaceController extends Controller
             $code  = $res->getStatusCode();
             $body  = (string) $res->getBody();
             $data  = json_decode($body, true);
-
+            $return = $data;
             if (!is_array($data) || (($data['ok'] ?? false) !== true)) {
                 $status = $data['http'] ?? $code;
-                Log::alert("CMA Error changeFlag({$flag}) {$cntrNumber}: {$status}", ['body' => $body]);
+                Log::alert("CMA Error changeFlag ({$flag}) {$cntrNumber}: {$status}", ['body' => $body]);
                 return ['ok' => false, 'http' => $status, 'data' => $data ?? $body];
             }
 
@@ -347,8 +351,7 @@ class CustomerLoadPlaceController extends Controller
             Log::error('Error enviando a n8n: ' . $e->getMessage());
         }
     }
-
-    public function accionLugarAduana($idTrip)
+    public function accionLugarAduana($idTrip) // OK
     {
 
         $date = Carbon::now('-03:00');
@@ -361,31 +364,7 @@ class CustomerLoadPlaceController extends Controller
         $description = $qd->status;
 
         if ($cntr->cma_t_o != null) {
-            /* ++++++++++++++ ACCION CMA +++++++++++++++ */
             $result = $this->cmaChangeFlag($cntr->cntr_number, 2);
-            // ---------- POST a n8n ----------
-            $client  = new Client(['http_errors' => false, 'timeout' => 30]);
-            $headers = ['Content-Type' => 'application/json'];
-            try {
-                $payload = [
-                    'function'   => __FUNCTION__, // te manda el nombre de la función actual
-                    'contenedor' => $cntr->cntr_number,
-                    'cma_t_o'    => $cntr->cma_t_o,
-                    'lat'        => 'FLAG 2 - EN ADUANA',
-                    'lon'        => 'FLAG 2 - EN ADUANA',
-                    'respuesta'  => 'alguna', // lo que devolvió CMA
-                ];
-
-                $postRes = $client->post('https://n8n.rail.ar/webhook/reporte-cma', [
-                    'headers' => $headers,
-                    'json'    => $payload,
-                ]);
-
-                Log::info('Posteado a n8n: ' . $postRes->getBody());
-            } catch (\Exception $e) {
-                Log::error('Error enviando a n8n: ' . $e->getMessage());
-            }
-            /* ++++++++++++++ FIN ACCION CMA +++++++++++ */
         }
 
         if ($qd->main_status != 'EN ADUANA') {
@@ -617,7 +596,7 @@ class CustomerLoadPlaceController extends Controller
         }
         return 'ERROR: algo anduvo mal.';
     }
-    public function accionLugarDescarga($idTrip)
+    public function accionLugarDescarga($idTrip) // OK
     {
 
 
@@ -632,11 +611,10 @@ class CustomerLoadPlaceController extends Controller
             ->first();
 
         // cual es el ultimo status.
-        $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
+        $qd  = DB::table('status')->where('cntr_number', '=', $contenedor->cntr_number)->latest('id')->first();
         $description = $qd->status;
 
 
-        /* Aca falta CMA-CGM */
         if ($contenedor->cma_t_o != null) {
 
             $base    = rtrim(env('API_CMA_BOTZERO'), '/');
@@ -648,33 +626,7 @@ class CustomerLoadPlaceController extends Controller
             $r = json_decode($respuesta, true);
             Log::info('Respuesta CMA - Act Arr At Cus Loc: ' . $respuesta);
 
-            // ---------- POST a n8n ----------
-            try {
-                $payload = [
-                    'function'   => __FUNCTION__, // te manda el nombre de la función actual
-                    'contenedor' => $contenedor->cntr_number,
-                    'cma_t_o'    => $contenedor->cma_t_o,
-                    'lat'        => 'LUGAR DE DESCARGA',
-                    'lon'        => 'LUGAR DE DESCARGA',
-                    'respuesta'  => $r, // lo que devolvió CMA
-                ];
-
-                $postRes = $client->post('https://n8n.rail.ar/webhook/reporte-cma', [
-                    'headers' => $headers,
-                    'json'    => $payload,
-                ]);
-
-                Log::info('Posteado a n8n: ' . $postRes->getBody());
-            } catch (\Exception $e) {
-                Log::error('Error enviando a n8n: ' . $e->getMessage());
-            }
         }
-
-
-
-
-        /* FIN CMA-CGM */
-
         if ($qd->main_status != 'STACKING') {
 
             DB::table('status')->insert([
@@ -718,11 +670,7 @@ class CustomerLoadPlaceController extends Controller
                 'booking' => $cntr->booking,
                 'date' => $date
             ];
-
-
-
-
-
+            
             //Enviar mail
             $sbx = DB::table('variables')->select('sandbox')->get();
             $inboxEmail = env('INBOX_EMAIL');
@@ -903,11 +851,10 @@ class CustomerLoadPlaceController extends Controller
             return 'No ser realizó ninguna acción: El Status estaba cambiado y el usuario notificado.';
         }
         return 'ERROR: algo anduvo mal.';
-    }
-
-    public function accionFueraLugarDeCarga($idTrip)
+    } 
+    public function accionFueraLugarDeCarga($idTrip) //ok
     {
-
+       
         $date = Carbon::now('-03:00');
         $qc = DB::table('cntr')->select('cntr_number', 'booking', 'confirmacion')->where('id_cntr', '=', $idTrip)->get();
         $cntr = $qc[0];
@@ -924,6 +871,7 @@ class CustomerLoadPlaceController extends Controller
             ->where('c.booking', $cntr->booking)
             ->select('c.cma_t_o', 'clp.latitud', 'clp.longitud')
             ->first();
+
         if (!$place || empty($place->cma_t_o)) {
             Log::warning('CMA: sin cma_t_o para booking ' . ($cntr->booking ?? 'N/D'));
         } else {
@@ -950,6 +898,7 @@ class CustomerLoadPlaceController extends Controller
                     $res   = $client->send($req);
                     $body  = (string) $res->getBody();
                     $data  = json_decode($body, true);
+                    return $data;
 
                     if (!is_array($data) || (($data['ok'] ?? false) !== true)) {
                         $status = $data['http'] ?? $res->getStatusCode();
@@ -982,28 +931,7 @@ class CustomerLoadPlaceController extends Controller
                 'changeFlag1',
                 "{$base}/cma/changeFlag/1/{$cntr->cntr_number}"
             );
-            // ---------- POST a n8n ----------
-            try {
-                $payload = [
-                    'function'   => __FUNCTION__, // te manda el nombre de la función actual
-                    'contenedor' => $cntr->cntr_number,
-                    'cma_t_o'    => $cma_t_o,
-                    'lat'        => $lat,
-                    'lon'        => $lon,
-
-                    'respuesta'  => 'varias', // lo que devolvió CMA
-                ];
-
-                $postRes = $client->post('https://n8n.rail.ar/webhook/reporte-cma', [
-                    'headers' => $headers,
-                    'json'    => $payload,
-                ]);
-
-                Log::info('Posteado a n8n: ' . $postRes->getBody());
-            } catch (\Exception $e) {
-                Log::error('Error enviando a n8n: ' . $e->getMessage());
-            }
-
+            
             // Si querés un resumen en logs al final del bloque:
             if (!empty($cmaResults['errors'])) {
                 Log::warning('CMA finalizado con errores', $cmaResults['errors']);
@@ -1225,11 +1153,9 @@ class CustomerLoadPlaceController extends Controller
             return 'No ser realizó ninguna acción: El Status estaba cambiado y el usuario notificado.';
         }
         return 'ERROR: algo anduvo mal.';
-    }
-
-    public function accionFueraLugarAduana($idTrip)
+    } 
+    public function accionFueraLugarAduana($idTrip) //ok
     {
-
 
         $date = Carbon::now('-03:00');
         $cntr = DB::table('cntr')->select('cntr_number', 'booking', 'confirmacion')
@@ -1243,9 +1169,7 @@ class CustomerLoadPlaceController extends Controller
         $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
         $description = $qd->status;
 
-
         if ($cntr->cma_t_o != null) {
-
 
             $place = DB::table('carga as c')
                 ->join('aduanas as ad', 'c.custom_place', '=', 'ad.description')
@@ -1269,32 +1193,16 @@ class CustomerLoadPlaceController extends Controller
             $respuesta = $res->getBody();
             $r = json_decode($respuesta, true);
 
+            Log::info('CMA - Est Arr At Cus Loc: ' . $respuesta);
+           // ++++++++++++++ ACCION CMA +++++++++++++++ */
+        $result = $this->cmaChangeFlag($cntr->cntr_number, 3);
+        Log::info('CMA - Change Flag 3: ' . json_encode($result));  
+        /* ++++++++++++++ FIN ACCION CMA +++++++++++ */
 
-            // ---------- POST a n8n ----------
-            try {
-                $payload = [
-                    'function'   => __FUNCTION__, // te manda el nombre de la función actual
-                    'contenedor' => $cntr->cntr_number,
-                    'cma_t_o'    => $cntr->cma_t_o,
-                    'lat'        => $place->lat,
-                    'lon'        => $place->lon,
-                    'respuesta'  => $r, // lo que devolvió CMA
-                ];
-
-                $postRes = $client->post('https://n8n.rail.ar/webhook/reporte-cma', [
-                    'headers' => $headers,
-                    'json'    => $payload,
-                ]);
-
-                Log::info('Posteado a n8n: ' . $postRes->getBody());
-            } catch (\Exception $e) {
-                Log::error('Error enviando a n8n: ' . $e->getMessage());
-            }
+            
         }
 
-        /* ++++++++++++++ ACCION CMA +++++++++++++++ */
-        $result = $this->cmaChangeFlag($cntr->cntr_number, 3);
-        /* ++++++++++++++ FIN ACCION CMA +++++++++++ */
+        
 
 
         if ($qd->main_status != 'YENDO A DESCARGAR' && $qd->avisado == 1) {
@@ -1526,12 +1434,6 @@ class CustomerLoadPlaceController extends Controller
         }
         return 'ERROR: algo anduvo mal.';
     }
-
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         try {
@@ -1564,7 +1466,6 @@ class CustomerLoadPlaceController extends Controller
             ], 500);
         }
     }
-
     public function issetLugarDeCarga(Request $request)
     {
         $description = $request->input('loadplace');
@@ -1577,23 +1478,6 @@ class CustomerLoadPlaceController extends Controller
         $unloadPlace = DB::table('customer_unload_places')->where('description', '=', $description)->count();
         return $unloadPlace;
     }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         try {
@@ -1625,37 +1509,15 @@ class CustomerLoadPlaceController extends Controller
             ], 500);
         }
     }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\CustomerLoadPlace  $customerLoadPlace
-     * @return \Illuminate\Http\Response
-     */
     public function show($id)
     {
         $customerLoadPlace = DB::table('customer_load_places')->where('id', '=', $id)->get();
         return $customerLoadPlace;
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\CustomerLoadPlace  $customerLoadPlace
-     * @return \Illuminate\Http\Response
-     */
     public function edit(CustomerLoadPlace $customerLoadPlace)
     {
         //
     }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\CustomerLoadPlace  $customerLoadPlace
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request,  $id)
     {
         try {
@@ -1686,13 +1548,6 @@ class CustomerLoadPlaceController extends Controller
             ], 500);
         }
     }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\CustomerLoadPlace  $customerLoadPlace
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         try {
