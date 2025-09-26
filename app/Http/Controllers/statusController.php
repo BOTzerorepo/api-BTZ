@@ -506,10 +506,10 @@ class statusController extends Controller
                 if ($statusGral == "YENDO A CARGAR") {
 
                     $tO = DB::table('cntr')
-                    ->select('carga.cma_t_o')
+                    ->select('carga.cma_t_o','cntr.cntr_number')
                     ->join('carga', 'cntr.booking','=','carga.booking')
                     ->where('cntr.cntr_number', $cntr)->first();
-    
+                    
                         if ($tO && !empty($tO->cma_t_o)) {
                             // Actualizar la fecha de carga en cada CNTR relacionado
                             $client = new Client();
@@ -519,7 +519,7 @@ class statusController extends Controller
     
                             $request = new Psr7Request(
                                 'GET',
-                                env('API_CMA_BOTZERO') . '/cma/estDepCustLoc/' . $cntr->cntr_number . '/' . $tO['cma_t_o'],
+                                env('API_CMA_BOTZERO') . '/cma/estDepCustLoc/' . $cntr . '/' . $tO['cma_t_o'],
                                 $headers
                             );
                             $res = $client->sendAsync($request)->wait();
