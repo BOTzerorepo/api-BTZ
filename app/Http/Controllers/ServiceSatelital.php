@@ -179,7 +179,7 @@ class ServiceSatelital extends Controller
         $THRESHOLD_ADUANA_OUT   = 200; // fuera de rango aduana
 
         $STATUS_FOR_POINT = [
-            'CARGA'    => ['YENDO A CARGAR', 'CARGANDO','ASIGNADA'],
+            'CARGA'    => ['YENDO A CARGAR', 'CARGANDO', 'ASIGNADA'],
             'ADUANA'   => ['YENDO A ADUANA', 'EN ADUANA'],
             'DESCARGA' => ['YENDO A DESCARGAR', 'DESCARGANDO', 'EN DESTINO'],
         ];
@@ -345,7 +345,7 @@ class ServiceSatelital extends Controller
                 Log::info('Último log de descarga: ' . ($lastDescarga->action_type ?? 'N/A'));
 
                 // ======== CARGA ========
-                if ($isInsideCarga && (($lastCarga->action_type ?? null) !== 'ENTER')) {
+                if ($isInsideCarga && (($lastCarga->action_type ?? null) !== 'ENTER') && in_array($description, ['YENDO A CARGAR', 'CARGANDO', 'ASIGNADA'], true)) {
                     // ENTER CARGA (solo al cruzar el umbral hacia adentro)
                     Log::info('Está entrando al lugar de carga');
                     $this->logGeoAction([
@@ -369,7 +369,7 @@ class ServiceSatelital extends Controller
                     Log::info('No está entrando al lugar de carga');
                 }
                 // EXIT CARGA: solo si veníamos de ENTER y ahora estamos fuera (usar umbral OUT para histéresis)
-                if ((!$isInsideCarga && ($distCarga !== null && $distCarga > $THRESHOLD_CARGA_OUT)) && (($lastCarga->action_type ?? null) === 'ENTER') && in_array($description, ['YENDO A CARGAR', 'CARGANDO'], true)) {
+                if ((!$isInsideCarga && ($distCarga !== null && $distCarga > $THRESHOLD_CARGA_OUT)) && (($lastCarga->action_type ?? null) === 'ENTER') && in_array($description, ['YENDO A CARGAR', 'CARGANDO', 'ASIGNADA'], true)) {
                     Log::info('Está saliendo del lugar de carga');
 
                     $this->logGeoAction([
