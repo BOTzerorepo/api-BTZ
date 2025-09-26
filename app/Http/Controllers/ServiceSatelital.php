@@ -190,11 +190,7 @@ class ServiceSatelital extends Controller
         $appUrl = rtrim(env('APP_URL'), '/');
 
         // === Cliente HTTP ===
-        $http = new Client([
-            'timeout'         => 7,
-            'connect_timeout' => 3,
-            'http_errors'     => false,
-        ]);
+        $http = new Client();
 
         // === 1) Viajes activos con camión satelital ===
         $camiones = DB::table('trucks')
