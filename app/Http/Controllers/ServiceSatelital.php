@@ -171,7 +171,7 @@ class ServiceSatelital extends Controller
         $AKerPhone      = '2612128105';
 
         // Umbrales en metros
-        $THRESHOLD_CARGA_IN     = 100;
+        $THRESHOLD_CARGA_IN     = 200;
         $THRESHOLD_ADUANA_IN    = 200;
         $THRESHOLD_DESCARGA_IN  = 200;
 
