@@ -345,7 +345,7 @@ class ServiceSatelital extends Controller
                 Log::info('Último log de descarga: ' . ($lastDescarga->action_type ?? 'N/A'));
 
                 // ======== CARGA ========
-                if ($isInsideCarga && (($lastCarga->action_type ?? null) !== 'ENTER') && $canTrigger($description, 'CARGA')) {
+                if ($isInsideCarga && (($lastCarga->action_type ?? null) !== 'ENTER')) {
                     // ENTER CARGA (solo al cruzar el umbral hacia adentro)
                     Log::info('Está entrando al lugar de carga');
                     $this->logGeoAction([
