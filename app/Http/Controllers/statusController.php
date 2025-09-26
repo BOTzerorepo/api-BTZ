@@ -505,12 +505,17 @@ class statusController extends Controller
             }else {
                 if ($statusGral == "YENDO A CARGAR") {
 
+                   
+                   
+
                     $tO = DB::table('cntr')
-                    ->select('carga.cma_t_o','cntr.cntr_number')
-                    ->join('carga', 'cntr.booking','=','carga.booking')
-                    ->where('cntr.cntr_number', $cntr)->first();
-                    
-                        if ($tO && !empty($tO->cma_t_o)) {
+                        ->select('carga.cma_t_o', 'cntr.cntr_number')
+                        ->join('carga', 'cntr.booking', '=', 'carga.booking')
+                        ->where('cntr.cntr_number', $cntr)
+                        ->first();
+
+                        $valor = json_decode(\json_encode($tO->cma_t_o), true);
+                        if (!empty($valor)) {
                             // Actualizar la fecha de carga en cada CNTR relacionado
                             $client = new Client();
                             $headers = [
@@ -519,12 +524,13 @@ class statusController extends Controller
     
                             $request = new Psr7Request(
                                 'GET',
-                                env('API_CMA_BOTZERO') . '/cma/estDepCustLoc/' . $cntr . '/' . $tO['cma_t_o'],
+                                env('API_CMA_BOTZERO') . '/cma/estDepCustLoc/' . $cntr . '/' . $valor,
                                 $headers
                             );
                             $res = $client->sendAsync($request)->wait();
                             $respuesta = $res->getBody();
                             $data = json_decode($respuesta, true);
+
                         }
                     }     
                 // Insertamos Status en la tabla de Status         
