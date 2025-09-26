@@ -367,7 +367,13 @@ class ServiceSatelital extends Controller
                         'status_at_moment' => $description,
                         'meta' => ['source' => 'aker'],
                     ]);
-                    $this->fireEndpoint($http, "{$appUrl}/api/accionLugarDeCarga/{$IdTrip}", "accionLugarDeCarga", $IdTrip);
+                    $response = $http->get("{$appUrl}/api/accionLugarDeCarga/{$IdTrip}");
+                    if ($response->getStatusCode() === 200) {
+                        Log::info("Pedido GET exitoso para IdTrip={$IdTrip}");
+                    } else {
+                        Log::warning("Error en el pedido GET para IdTrip={$IdTrip}, código: " . $response->getStatusCode());
+                    }
+                    
                 }
                 // EXIT CARGA: solo si veníamos de ENTER y ahora estamos fuera (usar umbral OUT para histéresis)
                 if ((!$isInsideCarga && ($distCarga !== null && $distCarga > $THRESHOLD_CARGA_OUT))
@@ -459,7 +465,9 @@ class ServiceSatelital extends Controller
                         'status_at_moment' => $description,
                         'meta' => ['source' => 'aker'],
                     ]);
-                    $this->fireEndpoint($http, "{$appUrl}/api/accionLugarDescarga/{$IdTrip}", "accionLugarDescarga", $IdTrip);
+                    
+                        $this->fireEndpoint($http, "{$appUrl}/api/accionLugarDescarga/{$IdTrip}", "accionLugarDescarga", $IdTrip);
+                    
                 }
                 if ((!$isInsideDescarga && ($distDescarga !== null && $distDescarga > $THRESHOLD_DESCARGA_IN))
                     && (($lastDescarga->action_type ?? null) === 'ENTER')
@@ -1756,7 +1764,7 @@ class ServiceSatelital extends Controller
         // event_lat, event_lng,
         // position_lat, position_lng,
         // status_at_moment (opcional), aker_time (opcional), meta (opcional)
-
+        log::info('logGeoAction: ' . json_encode($args));
         try {
             GeoActionLog::create([
                 'trip_id'          => $args['trip_id'],
@@ -1779,7 +1787,7 @@ class ServiceSatelital extends Controller
         }
     }
     private function fireEndpoint(Client $http, string $url, string $tag, int $IdTrip): void
-{
+{   log::info("{$tag}: llamando a {$url} para IdTrip={$IdTrip}");
     try {
         $res = $http->get($url, ['http_errors' => false, 'timeout' => 10, 'connect_timeout' => 5]);
         $code = $res->getStatusCode();

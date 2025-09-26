@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:v="urn:schemas-microsoft-com:vml">
-
 <head>
     <title></title>
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
@@ -101,7 +100,6 @@
         }
     </style>
 </head>
-
 <body style="background-color: #F5F5F5; margin: 0; padding: 0; -webkit-text-size-adjust: none; text-size-adjust: none;">
     <table border="0" cellpadding="0" cellspacing="0" class="nl-container" role="presentation"
         style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #F5F5F5;" width="100%">
@@ -137,8 +135,8 @@
                         <tbody>
                             <tr>
                                 <td>
-                                    <table align="center" border="0" cellpadding="0" cellspacing="0" class="row-content"
-                                        role="presentation"
+                                    <table align="center" border="0" cellpadding="0" cellspacing="0"
+                                        class="row-content" role="presentation"
                                         style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #FFFFFF; color: #333; width: 650px;"
                                         width="650">
                                         <tbody>
@@ -156,7 +154,7 @@
                                                                 style="padding-top:30px;width:100%;padding-right:0px;padding-left:0px;padding-bottom:25px;">
                                                                 <div style="line-height:10px"><img alt="Image"
                                                                         class="fullMobileWidth big"
-                                                                        src="https://botzero.ar/public/image/logoBotZero.svg"
+                                                                        src="https://btz.ar/ttg_mails.svg"
                                                                         style="display: block; height: auto; border: 0; width: 240px; max-width: 100%;margin: auto;"
                                                                         title="Image" width="195" /></div>
                                                             </td>
