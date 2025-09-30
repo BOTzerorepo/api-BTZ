@@ -180,9 +180,11 @@ class ServiceSatelital extends Controller
 
         $STATUS_FOR_POINT = [
             'CARGA'    => ['YENDO A CARGAR', 'CARGANDO', 'ASIGNADA'],
-            'ADUANA'   => ['YENDO A ADUANA', 'EN ADUANA'],
-            'DESCARGA' => ['YENDO A DESCARGAR', 'DESCARGANDO', 'EN DESTINO'],
+            'ADUANA'   => ['YENDO A DESCARGAR', 'EN ADUANA', 'SALIENDO CARGAR'],
+            'DESCARGA' => ['EN ADUANA', 'STACKING'],
         ];
+
+
         $canTrigger = function (?string $desc, string $point) use ($STATUS_FOR_POINT): bool {
             return $desc !== null && in_array($desc, $STATUS_FOR_POINT[$point] ?? [], true);
         };
@@ -200,7 +202,9 @@ class ServiceSatelital extends Controller
                     ->where('cntr.main_status', '!=', 'TERMINADA');
             })
             ->join('carga', 'carga.booking', '=', 'cntr.booking')
-            ->leftJoin('aduanas', 'aduanas.description', '=', 'carga.custom_place')
+            // Aduana: puede venir de custom_place_impo o de custom_place
+            ->leftJoin('aduanas as a_impo', 'a_impo.description', '=', 'carga.custom_place_impo')
+            ->leftJoin('aduanas as a_exp',  'a_exp.description',  '=', 'carga.custom_place')
             ->join('customer_load_places', 'customer_load_places.description', '=', 'carga.load_place')
             ->join('customer_unload_places', 'customer_unload_places.description', '=', 'carga.unload_place')
             ->whereNull('carga.deleted_at')
@@ -216,9 +220,10 @@ class ServiceSatelital extends Controller
                 'customer_load_places.latitud as CargaLat',
                 'customer_load_places.longitud as CargaLng',
 
-                'aduanas.description as LugarAduana',
-                'aduanas.lat as aduanaLat',
-                'aduanas.lon as aduanaLon',
+                // Elegir primero IMPO si existe; si no, usar EXP
+                DB::raw('COALESCE(a_impo.description, a_exp.description) as LugarAduana'),
+                DB::raw('COALESCE(a_impo.lat,        a_exp.lat)        as aduanaLat'),
+                DB::raw('COALESCE(a_impo.lon,        a_exp.lon)        as aduanaLon'),
 
                 'customer_unload_places.description as lugarDescarga',
                 'customer_unload_places.latitud as descargaLat',
@@ -228,13 +233,15 @@ class ServiceSatelital extends Controller
             ->values();
 
 
+
         if ($camiones->isEmpty()) {
             Log::info('serviceSatelital: No hay camiones activos con alta_aker != 0.');
             return;
         }
 
         foreach ($camiones as $camion) {
-            Log::info('ingresó a la llamada de aker: ' . $camion->domain);
+
+            Log::info('ingresó a la llamada de aker: ' . $camion->domain . ' con ID de viaje: ' . $camion->IdTrip);
 
             // === 2) Llamada a AKER ===
             $payload = [
@@ -277,7 +284,7 @@ class ServiceSatelital extends Controller
 
                 // === 3) Persistir posición ===
                 try {
-                    Log::info('Guardo Posicion ');
+
                     $positionDB = new Position();
                     $positionDB->dominio = $camion->domain;
                     $positionDB->lat     = $posicionLat;
@@ -289,21 +296,19 @@ class ServiceSatelital extends Controller
                 }
 
                 $IdTrip = $camion->IdTrip;
-                Log::info('Camion llevando carga coon ID: ' . $IdTrip);
-
-
 
                 // === 4) Calcular distancias ===
                 $distCarga    = $this->distIfCoords($posicionLat, $posicionLon, $this->toFloat($camion->CargaLat),    $this->toFloat($camion->CargaLng));
                 Log::info('Está a : ' . $distCarga . 'del Lugar de Carga');
-
-
                 $distAduana   = $this->distIfCoords($posicionLat, $posicionLon, $this->toFloat($camion->aduanaLat),   $this->toFloat($camion->aduanaLon));
                 Log::info('Está a : ' . $distAduana . 'del Lugar de Aduana');
-
                 $distDescarga = $this->distIfCoords($posicionLat, $posicionLon, $this->toFloat($camion->descargaLat), $this->toFloat($camion->descargaLon));
                 Log::info('Está a : ' . $distDescarga . 'del Lugar de Descarga');
-                
+
+                // === 4.1) Flags de existencia de POIs ===
+                $hasAduana   = $this->toFloat($camion->aduanaLat)   !== null && $this->toFloat($camion->aduanaLon)   !== null;
+                $hasDescarga = $this->toFloat($camion->descargaLat) !== null && $this->toFloat($camion->descargaLon) !== null;
+
                 // === 5) Obtener cntr y último status (ANTES de usar $cntr/$description) ===
                 $cntr = DB::table('cntr')
                     ->select('cntr_number', 'booking', 'confirmacion')
@@ -329,9 +334,9 @@ class ServiceSatelital extends Controller
                 // === 6) Acciones ENTER (dentro de rango) ===
                 Log::info('Empezó a probar las distacias con los lugares');
                 // helpers de estado por punto
-                $isInsideCarga    = ($distCarga    !== null && $distCarga    <= $THRESHOLD_CARGA_IN);
+                $isInsideCarga    = ($distCarga    !== null && $distCarga <= $THRESHOLD_CARGA_IN);
                 Log::info('Está dentro del umbral de carga? ' . ($isInsideCarga ? 'SI' : 'NO'));
-                $isInsideAduana   = ($distAduana   !== null && $distAduana   <= $THRESHOLD_ADUANA_IN);
+                $isInsideAduana   = ($distAduana   !== null && $distAduana <= $THRESHOLD_ADUANA_IN);
                 Log::info('Está dentro del umbral de carga? ' . ($isInsideAduana ? 'SI' : 'NO'));
                 $isInsideDescarga = ($distDescarga !== null && $distDescarga <= $THRESHOLD_DESCARGA_IN);
                 Log::info('Está dentro del umbral de carga? ' . ($isInsideDescarga ? 'SI' : 'NO'));
@@ -364,8 +369,7 @@ class ServiceSatelital extends Controller
                         'meta' => ['source' => 'aker'],
                     ]);
                     $this->fireEndpoint($http, "{$appUrl}/api/accionLugarDeCarga/{$IdTrip}", "accionLugarDeCarga", $IdTrip);
-                    
-                }else{
+                } else {
                     Log::info('No está entrando al lugar de carga');
                 }
                 // EXIT CARGA: solo si veníamos de ENTER y ahora estamos fuera (usar umbral OUT para histéresis)
@@ -388,7 +392,60 @@ class ServiceSatelital extends Controller
                         'meta' => ['source' => 'aker'],
                     ]);
                     $this->fireEndpoint($http, "{$appUrl}/api/accionFueraLugarDeCarga/{$IdTrip}", "accionFueraLugarDeCarga", $IdTrip);
-                }else{
+                    // ==== TRANSICIÓN DE ESTADO TRAS EXIT CARGA ====
+                    try {
+                        // 1) Decidir próximo estado de negocio
+                        $nextStatus = $hasAduana ? 'YENDO A ADUANA' : 'YENDO A DESCARGAR';
+
+                        // 2) Leer último status real
+                        $lastStatusRow = DB::table('status')
+                            ->where('cntr_number', $cntr->cntr_number)
+                            ->orderByDesc('id')
+                            ->first();
+
+                        $currentStatus = $lastStatusRow->main_status ?? null;
+
+                        // 3) Cooldown: evitar repetir durante N minutos desde el ÚLTIMO EXIT CARGA
+                        //    (Si ya tenés created_at, usalo. Si no, podés usar el id del GeoActionLog recién creado.)
+                        $lastExitCarga = DB::table('geo_action_logs')
+                            ->where('trip_id', $IdTrip)
+                            ->where('point_type', 'CARGA')
+                            ->where('action_type', 'EXIT')
+                            ->orderByDesc('id')
+                            ->first();
+
+                        $cooldownMin = 10; // ajustable
+                        $canUpdateByCooldown = true;
+                        if ($lastExitCarga && isset($lastExitCarga->created_at)) {
+                            $elapsed = now()->diffInMinutes(\Illuminate\Support\Carbon::parse($lastExitCarga->created_at));
+                            $canUpdateByCooldown = ($elapsed >= $cooldownMin);
+                        }
+
+                        // 4) Anti-duplicado + whitelist de estados desde los que permitís saltar
+                        $allowedFrom = ['YENDO A CARGAR', 'CARGANDO', 'ASIGNADA', 'SALIENDO CARGAR'];
+                        $shouldUpdate =
+                            $canUpdateByCooldown &&
+                            in_array($currentStatus, $allowedFrom, true) &&
+                            $currentStatus !== $nextStatus;
+
+                        if ($shouldUpdate) {
+                            // Inserta un NUEVO status (no sobreescribas el histórico)
+                            DB::table('status')->insert([
+                                'cntr_number'   => $cntr->cntr_number,
+                                'main_status'   => $nextStatus,
+                                'description'   => 'Cambio automático por salida de CARGA (GPS)',
+                                'created_at'    => now(),
+                                'updated_at'    => now(),
+                            ]);
+
+                            Log::info("Auto-estado: {$cntr->cntr_number} pasó de {$currentStatus} a {$nextStatus} (EXIT CARGA).");
+                        } else {
+                            Log::info("Auto-estado: no se actualiza (cooldown/duplicado/no permitido). current={$currentStatus}, next={$nextStatus}");
+                        }
+                    } catch (\Throwable $e) {
+                        Log::error("Auto-estado: error al transicionar tras EXIT CARGA para {$cntr->cntr_number}: " . $e->getMessage());
+                    }
+                } else {
                     Log::info('No está saliendo del lugar de carga');
                 }
 
@@ -457,9 +514,8 @@ class ServiceSatelital extends Controller
                         'status_at_moment' => $description,
                         'meta' => ['source' => 'aker'],
                     ]);
-                    
-                        $this->fireEndpoint($http, "{$appUrl}/api/accionLugarDescarga/{$IdTrip}", "accionLugarDescarga", $IdTrip);
-                    
+
+                    $this->fireEndpoint($http, "{$appUrl}/api/accionLugarDescarga/{$IdTrip}", "accionLugarDescarga", $IdTrip);
                 }
                 if ((!$isInsideDescarga && ($distDescarga !== null && $distDescarga > $THRESHOLD_DESCARGA_IN))
                     && (($lastDescarga->action_type ?? null) === 'ENTER')
@@ -1216,8 +1272,8 @@ class ServiceSatelital extends Controller
         }
 
         foreach ($items as $item) {
-            
-        Log::info('Domain: '. json_encode($item->domain) .' - '. json_encode($item->cntr_number));
+
+            Log::info('Domain: ' . json_encode($item->domain) . ' - ' . json_encode($item->cntr_number));
 
             $domain     = $item->domain;
             $cntrId     = $item->cntr_id;
@@ -1278,24 +1334,24 @@ class ServiceSatelital extends Controller
                     ->sortByDesc('order')
                     ->first();
 
-                Log::info('Active POI: '. json_encode($activePoi));
+                Log::info('Active POI: ' . json_encode($activePoi));
 
                 $dist = function ($aLat, $aLng, $bLat, $bLng) {
                     return $this->distIfCoords($aLat, $aLng, $this->toFloat($bLat), $this->toFloat($bLng));
                 };
-                Log::info('Dist: '. json_encode($dist));
+                Log::info('Dist: ' . json_encode($dist));
 
 
                 // 4) EXIT del activo (histéresis OUT calculado) si status coincide
                 if ($activePoi) {
-                    Log::info('Active POI inside: '. json_encode($activePoi));
+                    Log::info('Active POI inside: ' . json_encode($activePoi));
 
                     $dActive   = $dist($lat, $lng, $activePoi->ip_lat, $activePoi->ip_lng);
                     $radiusIn  = max(0.0, (float)$activePoi->ip_radius_in);
                     $radiusOut = $this->resolveRadiusOut($radiusIn, null, $POI_EXIT_FACTOR); // no hay radius_out en DB
 
                     if ($dActive !== null && $dActive > $radiusOut && $statusNow === $activePoi->ip_status) {
-                        Log::info('Active POI outside: '. json_encode($activePoi));
+                        Log::info('Active POI outside: ' . json_encode($activePoi));
                         if ((int)$activePoi->activo === 1) {
                             if (strtolower((string)$activePoi->ip_type) !== 'proceso') {
                                 $this->ejecutarAccionSalida($activePoi->ip_id, $cntrId);
@@ -1338,7 +1394,7 @@ class ServiceSatelital extends Controller
 
                 // 5) ENTER inicial (order=1) si no hay activo
                 if (!$activePoi) {
-                    Log::info('No active POI, checking first POI for ENTER: '. json_encode($activePoi));
+                    Log::info('No active POI, checking first POI for ENTER: ' . json_encode($activePoi));
                     $firstPoi = $pois->firstWhere('order', 1);
                     if ($firstPoi) {
                         $dFirst   = $dist($lat, $lng, $firstPoi->ip_lat, $firstPoi->ip_lng);
@@ -1386,7 +1442,7 @@ class ServiceSatelital extends Controller
 
                 // 6) Transición activo → siguiente
                 if ($activePoi) {
-                    Log::info('Active POI for transition to next: '. json_encode($activePoi));
+                    Log::info('Active POI for transition to next: ' . json_encode($activePoi));
                     $idx = $pois->search(fn($p) => (int)$p->cip_id === (int)$activePoi->cip_id);
                     $nextPoi = $pois->get($idx + 1);
                     if ($nextPoi) {
@@ -1779,17 +1835,18 @@ class ServiceSatelital extends Controller
         }
     }
     private function fireEndpoint(Client $http, string $url, string $tag, int $IdTrip): void
-{   log::info("{$tag}: llamando a {$url} para IdTrip={$IdTrip}");
-    try {
-        $res = $http->get($url, ['http_errors' => false, 'timeout' => 10, 'connect_timeout' => 5]);
-        $code = $res->getStatusCode();
-        if ($code < 200 || $code >= 300) {
-            Log::warning("{$tag}: HTTP {$code} para IdTrip={$IdTrip} url={$url}");
-        } else {
-            Log::info("{$tag}: OK para IdTrip={$IdTrip}");
+    {
+        log::info("{$tag}: llamando a {$url} para IdTrip={$IdTrip}");
+        try {
+            $res = $http->get($url, ['http_errors' => false, 'timeout' => 10, 'connect_timeout' => 5]);
+            $code = $res->getStatusCode();
+            if ($code < 200 || $code >= 300) {
+                Log::warning("{$tag}: HTTP {$code} para IdTrip={$IdTrip} url={$url}");
+            } else {
+                Log::info("{$tag}: OK para IdTrip={$IdTrip}");
+            }
+        } catch (\Throwable $e) {
+            Log::error("{$tag}: error para IdTrip={$IdTrip}: " . $e->getMessage());
         }
-    } catch (\Throwable $e) {
-        Log::error("{$tag}: error para IdTrip={$IdTrip}: ".$e->getMessage());
     }
-}
 }
