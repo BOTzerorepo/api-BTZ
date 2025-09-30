@@ -1242,11 +1242,7 @@ class ServiceSatelital extends Controller
         // Histéresis: si el POI no define OUT en DB, usar factor para salida (p. ej., 1.5x o +50 m)
         $POI_EXIT_FACTOR = 1.5;
 
-        $http = new Client([
-            'timeout'         => 7,
-            'connect_timeout' => 3,
-            'http_errors'     => false,
-        ]);
+        $http = new Client();
 
         $detalleComparaciones = [];
 
