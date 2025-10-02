@@ -95,6 +95,8 @@ class TrailerController extends Controller
                 'year' => $request['year'],
                 'user_id' => $customerId->id,
                 'fletero_id' => $request['id_fletero'],
+                'genset' => $request['genset'],
+
                 'transport_id' => $idTranport,
                 'customer_id' => $request['customer_id']
             ]);
@@ -186,6 +188,7 @@ class TrailerController extends Controller
                 'chasis' => $request['chasis'],
                 'poliza' => $request['poliza'],
                 'vto_poliza' => $request['vto_poliza'],
+                'genset' => $request['genset'],
                 'year' => $request['year'],
                 'user_id' => $customerId->id,
                 'transport_id' => $idTranport,

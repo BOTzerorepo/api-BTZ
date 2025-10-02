@@ -21,6 +21,7 @@ class trailer extends Model implements AuditableContract
         'user_id',
         'transport_id',
         'fletero_id',
+        'genset',
         'customer_id',
     ];
 
