@@ -33,7 +33,7 @@ class emailController extends Controller
 
         $date = Carbon::now('-03:00');
         $asign = DB::table('asign')
-            ->select('asign.*', 'cntr.cntr_type', 'carga.trader', 'carga.ref_customer', 'carga.type', 'carga.user as userC', 'transports.Direccion', 'transports.paut', 'transports.CUIT', 'transports.permiso', 'transports.vto_permiso', 'drivers.documento', 'trucks.model', 'trucks.model', 'trucks.year', 'trucks.chasis', 'trucks.poliza', 'trucks.vto_poliza', 'trailers.domain as semi_domain', 'trailers.poliza as semi_poliza', 'trailers.vto_poliza as semi_vto_poliza', 'cntr.confirmacion')
+            ->select('asign.*', 'cntr.cntr_type', 'carga.trader', 'carga.ref_customer', 'carga.type', 'carga.user as userC', 'transports.Direccion', 'transports.paut', 'transports.CUIT', 'transports.permiso', 'transports.vto_permiso', 'drivers.documento', 'trucks.model', 'trucks.model', 'trucks.year', 'trucks.chasis', 'trucks.poliza', 'trucks.vto_poliza', 'trailers.domain as semi_domain', 'trailers.poliza as semi_poliza', 'trailers.vto_poliza as semi_vto_poliza','trailers.semi_genset', 'cntr.confirmacion')
             ->join('transports', 'asign.transport', '=', 'transports.razon_social')
             ->join('drivers', 'drivers.nombre', '=', 'asign.driver')
             ->join('trucks', 'trucks.domain', '=', 'asign.truck')
@@ -75,6 +75,7 @@ class emailController extends Controller
             'truck_vto_poliza' => $dAsign->vto_poliza,
             'truck_semi' => $dAsign->truck_semi,
             'truck_semi_poliza' => $dAsign->semi_poliza,
+            'truck_semi_genset' => $dAsign->semi_genset,
             'truck_semi_vto_poliza' => $dAsign->semi_vto_poliza,
             'cntr_number' => $dAsign->cntr_number,
             'booking' => $dAsign->booking,
@@ -510,6 +511,8 @@ class emailController extends Controller
                 'carga.tara',
                 'carga.tara_string',
                 'carga.bl_hbl',
+                'carga.cma_t_o',
+
             )
             ->join('cntr', 'carga.booking', '=', 'cntr.booking')->where('carga.id', '=', $idCarga)->get();
         $cantidad = $qcarga->count();
@@ -552,6 +555,8 @@ class emailController extends Controller
             'senasa_string' => $carga->senasa_string,
             'tara' => $carga->tara,
             'tara_string' => $carga->tara_string,
+            'cma_t_o' => $carga->cma_t_o,
+
         ];
 
         $sbx = DB::table('variables')->select('sandbox')->get();
