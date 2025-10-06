@@ -62,7 +62,7 @@
               <h1 class="h1">Estado de la carga</h1>
               <h2 class="h2" style="margin-top:6px;">
                 @if( $datos['confirmacion'] != 0) 
-                  <strong>Carga {{ $datos['cntr_number'] }} para el {{ $datos['booking'] }}</strong>
+                  <strong>Carga {{ $datos['cntr_number'] - $dato['cntr_seal']}} para el {{ $datos['booking'] }}</strong>
                 @else
                   <strong>Carga CNTR SIN CONFIRMAR para el {{ $datos['booking'] }}</strong>
                 @endif
