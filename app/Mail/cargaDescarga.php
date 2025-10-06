@@ -21,7 +21,9 @@ class cargaDescarga extends Mailable
     public function __construct($datos)
     {
         $this->datos = $datos;
-        $this->subject = '[ AUTOMATICO ] Carga en Zona de Descarga. Viaje: '.$datos['cntr'];
+        //$this->subject = '[ AUTOMATICO ] Carga en Zona de Descarga. Viaje: '.$datos['cntr'];
+        $this->subject = 'STATUS // ' . $datos['ref_customer'] . ' - ' . $datos['type'] . ' - ' . $datos['trader'] . ' - 1 * ' . $datos['cntr_type'] . '// BKG: ' . $datos['booking'] . '.';
+
     }
     /**
      * Build the message
