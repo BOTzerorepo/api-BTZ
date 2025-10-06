@@ -1,688 +1,200 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:v="urn:schemas-microsoft-com:vml">
-
+<html lang="es">
 <head>
-    <title></title>
-    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <!--[if mso]><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch><o:AllowPNG/></o:OfficeDocumentSettings></xml><![endif]-->
-    <!--[if !mso]><!-->
-    <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css" />
-    <!--<![endif]-->
-    <style>
-        * {
-            box-sizing: border-box;
-        }
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Nueva Impo Terrestre</title>
+  <meta name="x-preheader" content="Nueva Impo Terrestre para {{ $datos['trader'] ?? 'cliente' }} — detalles y estado."/>
 
-        body {
-            margin: 0;
-            padding: 0;
-        }
-
-        a[x-apple-data-detectors] {
-            color: inherit !important;
-            text-decoration: inherit !important;
-        }
-
-        #MessageViewBody a {
-            color: inherit;
-            text-decoration: none;
-        }
-
-        p {
-            line-height: inherit
-        }
-
-        .desktop_hide,
-        .desktop_hide table {
-            mso-hide: all;
-            display: none;
-            max-height: 0px;
-            overflow: hidden;
-        }
-
-        @media (max-width:670px) {
-            .desktop_hide table.icons-inner {
-                display: inline-block !important;
-            }
-
-            .icons-inner {
-                text-align: center;
-            }
-
-            .icons-inner td {
-                margin: 0 auto;
-            }
-
-            .fullMobileWidth,
-            .row-content {
-                width: 100% !important;
-            }
-
-            .image_block img.big,
-            td.content_blocks {
-                width: auto !important;
-            }
-
-            .column .border,
-            .mobile_hide {
-                display: none;
-            }
-
-            table {
-                table-layout: fixed !important;
-            }
-
-            .stack .column {
-                width: 100%;
-                display: block;
-            }
-
-            .mobile_hide {
-                min-height: 0;
-                max-height: 0;
-                max-width: 0;
-                overflow: hidden;
-                font-size: 0px;
-            }
-
-            .desktop_hide,
-            .desktop_hide table {
-                display: table !important;
-                max-height: none !important;
-            }
-
-            .row-11 .column-1 {
-                border-top: 18px solid #FFFFFF;
-                border-right: 25px solid #FFFFFF;
-                border-bottom: 18px solid #FFFFFF;
-                border-left: 25px solid #FFFFFF;
-            }
-        }
-    </style>
+  <style>
+    body{margin:0;padding:0;background:#F5F5F5;-webkit-text-size-adjust:none;text-size-adjust:none}
+    table{border-collapse:collapse}
+    img{border:0;display:block;margin:0 auto;max-width:100%;height:auto}
+    a{text-decoration:none;color:inherit}
+    .wrapper{width:100%;background:#F5F5F5}
+    .container{width:100%;max-width:650px;margin:0 auto;background:#FFFFFF}
+    .p-24{padding:24px}
+    .p-16{padding:16px}
+    .center{text-align:center}
+    .h1{font-size:22px;line-height:1.3;color:#1f2937;margin:8px 0}
+    .h2{font-size:18px;line-height:1.35;color:#374151;margin:0 0 8px}
+    .lead{font-size:14px;line-height:1.6;color:#374151;margin:0 0 12px}
+    .tag{display:inline-block;background:#fdfdfd;color:#2a688b;font-size:12px;padding:4px 8px;border-radius:4px}
+    .muted{color:#6b7280;font-size:12px}
+    .hr{height:1px;background:#E5E7EB;border:0;margin:16px 0}
+    .table{width:100%}
+    .tdk{width:38%;vertical-align:top;padding:8px 10px;background:#FFFFFF}
+    .tdv{width:62%;vertical-align:top;padding:8px 10px;background:#FFFFFF}
+    .row-alt .tdk,.row-alt .tdv{background:#FAFAFA}
+    .footer{font-size:12px;color:#9CA3AF}
+    @media (max-width:670px){.p-24{padding:16px}.h1{font-size:20px}.h2{font-size:16px}}
+  </style>
 </head>
+<body>
+  <!-- Preheader oculto -->
+  <span style="display:none !important;visibility:hidden;opacity:0;color:transparent;height:0;width:0;overflow:hidden;">
+    {{ 'Nueva Impo Terrestre para ' . ($datos['trader'] ?? 'cliente') . ' — detalles y estado.' }}
+  </span>
 
-<body style="background-color: #F5F5F5; margin: 0; padding: 0; -webkit-text-size-adjust: none; text-size-adjust: none;">
-    <table border="0" cellpadding="0" cellspacing="0" class="nl-container" role="presentation"
-        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #F5F5F5;" width="100%">
-        <tbody>
-            <tr>
-                <td>
-                    <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-1"
-                        role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <table align="center" border="0" cellpadding="0" cellspacing="0"
-                                        class="row-content stack" role="presentation"
-                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000000; width: 650px;"
-                                        width="650">
-                                        <tbody>
-                                            <tr>
-                                                <td class="column column-1"
-                                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top; padding-top: 5px; padding-bottom: 5px; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"
-                                                    width="100%">
-                                                    <div class="spacer_block"
-                                                        style="height:30px;line-height:30px;font-size:1px;"> </div>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-2"
-                        role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <table align="center" border="0" cellpadding="0" cellspacing="0"
-                                        class="row-content"
-                                        role="presentation"
-                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;  color: #333; width: 650px;"
-                                        width="650">
-                                        <tbody>
-                                            <tr>
-                                                <td>
-                                                    <table align="center" border="0" cellpadding="0" cellspacing="0"
-                                                        class="row-content"
-                                                        role="presentation"
-                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #333; width: 650px;"
-                                                        width="650">
-                                                        <tbody>
-                                                            <tr>
+  <table class="wrapper" role="presentation" width="100%" cellpadding="0" cellspacing="0">
+    <tr><td style="height:24px;"></td></tr>
 
-                                                                <td class="column column-1"
-                                                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top; padding-left: 25px; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"
-                                                                    width="50%">
-                                                                    <table border="0" cellpadding="0"
-                                                                        cellspacing="0"
-                                                                        class="image_block" role="presentation"
-                                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-                                                                        width="100%">
-                                                                        <tr>
-                                                                            <td>
-                                                                                <div style="line-height:10px"><img
-                                                                                        alt="Image"
-                                                                                        class="fullMobileWidth big"
+    <!-- Header / Logo -->
+    <tr>
+      <td>
+        <table role="presentation" class="container" width="100%">
+          <tr>
+            <td class="center p-24">
+              <!-- Si preferís el recurso local, podés usar: {{ asset('image/CorreoAutomaticoTrans.png') }} -->
+              <img src="https://btz.ar/ttg_mails.svg" alt="BOTzero" width="240"/>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
 
-                                                                                        src="{{ asset('image/CorreoAutomaticoTrans.png') }}"
+    <!-- Hero unificado -->
+    <tr>
+      <td>
+        <table role="presentation" class="container" width="100%">
+          <tr>
+            <!-- Branding: fondo acorde al branding -->
+            <td class="center p-16" style="background:#e0e0e0;">
+              <!-- Status principal (una sola .tag para no duplicar) -->
+              <div class="tag">{{ $datos['status'] }}</div>
 
-                                                                                        style="display: block; height: auto; border: 0; ; max-width: 100%;margin: auto;"
-                                                                                        title="Image" width="495" />
-                                                                                </div>
+              @if ($datos['status'] == 'ASIGNADA')
+                <div class="tag">Unidad Asignada</div>
+                <h1 class="h1">La carga ya tiene asignación de unidad.</h1>
 
-                                                                            </td>
-                                                                        </tr>
-                                                                    </table>
-                                                                </td>
+              @elseif ($datos['status'] == 'YENDO A CARGAR')
+                <h1 class="h1">La unidad se está dirigiendo {{$datos['load_place']}}</h1>
 
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+              @elseif ($datos['status'] == 'CARGANDO')
+                <h1 class="h1">La unidad se encuentra en {{$datos['load_place']}}</h1>
 
-                    <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-3"
-                        role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;margin-top: 20px;"
-                        width="100%">
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <table align="center" border="0" cellpadding="0" cellspacing="0"
-                                        class="row-content stack" role="presentation"
-                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #d6d9f0; background-image:url('{{ asset('image/AlertasMails/status.png') }}'); background-position: top center; background-repeat: no-repeat; color: #000000; width: 650px;"
-                                        width="650">
+              @elseif ($datos['status'] == 'EN ADUANA')
+                @if( $datos['custom_place_impo'] != null )
 
-                                        <tbody>
-                                            <tr>
-                                                <td class="column column-1"
-                                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top; padding-top: 55px; padding-bottom: 60px; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"
-                                                    width="100%">
-                                                    <table border="0" cellpadding="0" cellspacing="0"
-                                                        class="text_block"
-                                                        role="presentation"
-                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;margin-top: 20px;"
-                                                        width="100%">
-                                                        <tr>
-                                                            <td
-                                                                style="padding-bottom:5px;padding-left:15px;padding-right:10px;padding-top:20px;">
-                                                                <div style="font-family: sans-serif">
-                                                                    <div class="txtTinyMce-wrapper"
-                                                                        style="font-size: 12px; font-family: Lato, Tahoma, Verdana, Segoe, sans-serif; mso-line-height-alt: 14.399999999999999px; color: #052d3d; line-height: 1.2;">
-                                                                        <p
-                                                                            style="margin: 0; font-size: 14px; text-align: center;">
-                                                                            <span style="font-size:25px;"><strong><span
-                                                                                        style="font-size:28px; color:white;">CARGA
-                                                                                        {{ $datos['status'] }} </strong></span>
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                    <table border="0" cellpadding="0" cellspacing="0"
-                                                        class="text_block"
-                                                        role="presentation"
-                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"
-                                                        width="100%">
-                                                        <tr>
-                                                            <td
-                                                                style="padding-bottom:10px;padding-left:10px;padding-right:10px;">
-                                                                <div style="font-family: sans-serif">
-                                                                    <div class="txtTinyMce-wrapper"
-                                                                        style="font-size: 12px; font-family: Lato, Tahoma, Verdana, Segoe, sans-serif; mso-line-height-alt: 14.399999999999999px; color: white; line-height: 1.2;">
-                                                                        <p
-                                                                            style="margin-top: 25px; font-size: 14px; text-align: center;">
-                                                                            <span style="font-size:22px;"><strong><span
-                                                                                        style="font-size:22px;">
-                                                                                      @if( $datos['confirmacion'] != 0) 
-                                                                                        Carga {{ $datos['cntr'] }} para el {{ $datos['booking'] }}
-                                                                                        @else
-                                                                                        Carga CNTR SIN CONFIRMAR para el {{ $datos['booking'] }}
-                                                                                        @endif
-                                                                                    </span></strong></span>
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-4"
-                        role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <table align="center" border="0" cellpadding="0" cellspacing="0"
-                                        class="row-content stack" role="presentation"
-                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #FFFFFF; color: #000000; width: 650px;"
-                                        width="650">
-                                        <tbody>
-                                            <tr>
-                                                <td class="column column-1"
-                                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top; padding-top: 15px; padding-bottom: 5px; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"
-                                                    width="100%">
-                                                    <table border="0" cellpadding="10" cellspacing="0"
-                                                        class="text_block" role="presentation"
-                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"
-                                                        width="100%">
-                                                        <tr>
-                                                            <td>
-                                                                <div style="font-family: sans-serif">
-                                                                    <div class="txtTinyMce-wrapper"
-                                                                        style="font-size: 12px; font-family: Lato, Tahoma, Verdana, Segoe, sans-serif; mso-line-height-alt: 14.399999999999999px; color: #052d3d; line-height: 1.2;">
-                                                                        <p
-                                                                            style="margin: 0; text-align: center; font-size: 12px;">
-                                                                            <span
-                                                                                style="font-size:20px;">Detalle:</span>
-                                                                        </p>
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-11"
-                        role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <table align="center" border="0" cellpadding="0" cellspacing="0"
-                                        class="row-content stack" role="presentation"
-                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #F0F0F0; color: #000000; width: 650px;"
-                                        width="650">
-                                        <tbody>
-                                            <tr>
-                                                <td class="column column-1"
-                                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top;"
-                                                    width="100%">
-                                                    <table border="0" cellpadding="0" cellspacing="0"
-                                                        role="presentation"
-                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-                                                        width="100%">
-                                                        <tr>
-                                                            <td class="border" colspan="3"
-                                                                style="font-size:7px;height:18px;background-color:#FFFFFF"
-                                                                width="100%"> </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="border"
-                                                                style="width:25px;background-color:#FFFFFF"> </td>
-                                                            <td class="content_blocks"
-                                                                style="padding-left:35px;padding-right:35px;padding-top:0px;padding-bottom:0px;width:600px;">
-                                                                <table border="0" cellpadding="0" cellspacing="0"
-                                                                    class="text_block" role="presentation"
-                                                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"
-                                                                    width="100%">
-                                                                    <tr>
-                                                                        <td
-                                                                            style="padding-bottom:10px;padding-left:15px;padding-right:15px;padding-top:30px;">
-                                                                            <div style="font-family: sans-serif">
-                                                                                <div class="txtTinyMce-wrapper"
-                                                                                    style="font-size: 12px; font-family: Lato, Tahoma, Verdana, Segoe, sans-serif; mso-line-height-alt: 14.399999999999999px; color: #052d3d; line-height: 1.2;">
-                                                                                    <p
-                                                                                        style="margin: 0; font-size: 12px; text-align: center;">
-                                                                                        <span style="font-size:34px;">
-                                                                                            <span
-                                                                                                style="color:#4caf50;font-size:34px;">
-                                                                                                <strong>
-                                                                                                    <span style="font-size:34px;">
-                                                                                                    @if( $datos['confirmacion'] != 0) 
-                                                                                        {{ $datos['cntr'] }}
-                                                                                        @else
-                                                                                        SIN CONFIRMAR
-                                                                                        @endif
-                                                                                            </span>
-                                                                                            </strong>
-                                                                                        </span>
-                                                                                    </p>
-                                                                                    <p
-                                                                                        style="margin: 0; font-size: 12px; text-align: center;">
-                                                                                        <span
-                                                                                            style="font-size:20px; color: gray; text-align: center;">
-                                                                                            {{ $datos['booking'] }}
-                                                                                        </span>
-                                                                                        </span>
-                                                                                    </p>
-                                                                                </div>
-                                                                            </div>
-                                                                        </td>
-                                                                    </tr>
-                                                                </table>
-                                                                <table border="0" cellpadding="0" cellspacing="0"
-                                                                    class="text_block" role="presentation"
-                                                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;"
-                                                                    width="100%">
-                                                                    <tr>
-                                                                        <td style="padding-bottom:35px;padding-left:10px;padding-right:10px;">
-                                                                            <div style="font-family: sans-serif">
-                                                                                <div class="txtTinyMce-wrapper"
-                                                                                    style="font-size: 12px; font-family: Lato, Tahoma, Verdana, Segoe, sans-serif; mso-line-height-alt: 18px; color: #787878; line-height: 1.5;">
-                                                                                    <p style="margin: 2%; font-size: 14px; text-align: center; mso-line-height-alt: 27px;">
-                                                                                        <span style="font-size:18px;">
-                                                                                            Datos del Transporte: <br>
-                                                                                            @if(!empty($datos['transport']))
-                                                                                                <span style="color:gray;font-size:14px;">
-                                                                                                    <strong>
-                                                                                                        Transporte: {{ $datos['transport'] }}
-                                                                                                    </strong>
-                                                                                                </span>
-                                                                                                <br/>
-                                                                                            @endif
-                                                                                            @if(!empty($datos['transport_agent']))
-                                                                                                <span style="color:gray;font-size:14px;">
-                                                                                                    <strong>
-                                                                                                        ATA: {{ $datos['transport_agent'] }}
-                                                                                                    </strong>
-                                                                                                </span>
-                                                                                                <br/>
-                                                                                            @endif
-                                                                                            @if(!empty($datos['driver']))
-                                                                                                <span style="color:gray;font-size:14px;">
-                                                                                                    <strong>
-                                                                                                        Chofer:{{ $datos['driver'] }}
-                                                                                                    </strong>
-                                                                                                </span>
-                                                                                                <br/>
-                                                                                            @endif
-                                                                                            @if(!empty($datos['documento']))
-                                                                                                <span style="color:gray;font-size:14px;">
-                                                                                                    <strong>
-                                                                                                        DNI: {{ $datos['documento'] }}
-                                                                                                    </strong>
-                                                                                                </span>
-                                                                                                <br/>
-                                                                                            @endif
-                                                                                            @if(!empty($datos['truck']))
-                                                                                                <span style="color:gray;font-size:14px;">
-                                                                                                    <strong>
-                                                                                                        Camion: {{ $datos['truck'] }}
-                                                                                                    </strong>
-                                                                                                </span>
-                                                                                                <br/>
-                                                                                            @endif
-                                                                                            @if(!empty($datos['truck_semi']))
-                                                                                                <span style="color:gray;font-size:14px;">
-                                                                                                    <strong>
-                                                                                                        Semi: {{ $datos['truck_semi'] }}
-                                                                                                    </strong>
-                                                                                                </span>
-                                                                                                <br/>
-                                                                                            @endif
-                                                                                        </span>
-                                                                                    </p>
-                                                                                    @if(!empty($datos['description']))
-                                                                                        <p style="margin: 2%; font-size: 14px; text-align: center; mso-line-height-alt: 27px;">
-                                                                                            <span style="font-size:18px;">
-                                                                                                Descripción: {{ $datos['description'] }}
-                                                                                            </span>
-                                                                                            <br/>
-                                                                                        </p>
-                                                                                    @endif
-                                                                                    <p style="margin: 2%; font-size: 14px; text-align: center; mso-line-height-alt: 27px;">
-                                                                                        <span style="font-size:15px;">
-                                                                                            Status Informado por: <br>
-                                                                                            <span style="color:#2190e3;font-size:18px;">
-                                                                                                <strong>
-                                                                                                    {{ $datos['user'] }}
-                                                                                                </strong>
-                                                                                            </span>
-                                                                                            <br/>
-                                                                                            <strong style="font-size:10px;">Created at: {{ $datos['date'] }}</strong>
-                                                                                        </span>
-                                                                                    </p>
-                                                                                </div>
-                                                                            </div>
-                                                                        </td>
-                                                                    </tr>
-                                                                </table>
-                                                            </td>
-                                                            <td class="border"
-                                                                style="width:25px;background-color:#FFFFFF"> </td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td class="border" colspan="3"
-                                                                style="font-size:7px;height:18px;background-color:#FFFFFF"
-                                                                width="100%"> </td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    {{-- <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-10"
-                        role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <table align="center" border="0" cellpadding="0" cellspacing="0"
-                                        class="row-content stack" role="presentation"
-                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; background-color: #FFFFFF; color: #000000; width: 650px;"
-                                        width="650">
-                                        <tbody>
-                                            <tr>
-                                                <td class="column column-1"
-                                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top; padding-top: 0px; padding-bottom: 20px; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"
-                                                    width="100%">
-                                                    <table border="0" cellpadding="0" cellspacing="0"
-                                                        class="button_block" role="presentation"
-                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-                                                        width="100%">
-                                                        <tr>
-                                                            <td
-                                                                style="padding-bottom:10px;padding-left:10px;padding-right:10px;padding-top:30px;text-align:center;">
-                                                                <div align="center">
-                                                                    <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="#" style="height:46px;width:307px;v-text-anchor:middle;" arcsize="33%" stroke="false" fillcolor="#fc7318"><w:anchorlock/><v:textbox inset="0px,0px,0px,0px"><center style="color:#ffffff; font-family:Tahoma, Verdana, sans-serif; font-size:18px"><![endif]--><a
-                                                                        href="#"
-                                                                        style="text-decoration:none;display:inline-block;color:#ffffff;background-color:#fc7318;border-radius:15px;width:auto;border-top:1px solid #fc7318;font-weight:undefined;border-right:1px solid #fc7318;border-bottom:1px solid #fc7318;border-left:1px solid #fc7318;padding-top:5px;padding-bottom:5px;font-family:Lato, Tahoma, Verdana, Segoe, sans-serif;text-align:center;mso-border-alt:none;word-break:keep-all;"
-                                                                        target="_blank"><span
-                                                                            style="padding-left:20px;padding-right:20px;font-size:18px;display:inline-block;letter-spacing:normal;"><span
-                                                                                style="font-size: 16px; line-height: 2; word-break: break-word; mso-line-height-alt: 32px;"><span
-                                                                                    data-mce-style="font-size: 18px; line-height: 36px;"
-                                                                                    style="font-size: 18px; line-height: 36px;"><strong>IR
-                                                                                        A LA
-                                                                                        CARGA </strong></span></span></span></a>
-                                                                    <!--[if mso]></center></v:textbox></v:roundrect><![endif]-->
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table> --}}
-                    <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-14"
-                        role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <table align="center" border="0" cellpadding="0" cellspacing="0"
-                                        class="row-content stack" role="presentation"
-                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000000; width: 650px;"
-                                        width="650">
-                                        <tbody>
-                                            <tr>
-                                                <td class="column column-1"
-                                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top; padding-top: 5px; padding-bottom: 5px; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"
-                                                    width="100%">
-                                                    <table border="0" cellpadding="0" cellspacing="0"
-                                                        class="icons_block" role="presentation"
-                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-                                                        width="100%">
-                                                        <tr>
-                                                            <td
-                                                                style="vertical-align: middle; color: #9d9d9d; font-family: inherit; font-size: 15px; padding-bottom: 5px; padding-top: 5px; text-align: center;">
-                                                                <table cellpadding="0" cellspacing="0"
-                                                                    role="presentation"
-                                                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-                                                                    width="100%">
-                                                                    <tr>
-                                                                        <td
-                                                                            style="vertical-align: middle; text-align: center;">
-                                                                            <!--[if vml]><table align="left" cellpadding="0" cellspacing="0" role="presentation" style="display:inline-block;padding-left:0px;padding-right:0px;mso-table-lspace: 0pt;mso-table-rspace: 0pt;"><![endif]-->
-                                                                            <!--[if !vml]><!-->
-                                                                            <table cellpadding="0"
-                                                                                cellspacing="0"
-                                                                                role="presentation"
-                                                                                style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-                                                                                width="100%">
-                                                                                <tr>
-                                                                                    <td
-                                                                                        style="vertical-align: middle; text-align: center;">
-                                                                                        <!--[if vml]><table align="left" cellpadding="0" cellspacing="0" role="presentation" style="display:inline-block;padding-left:0px;padding-right:0px;mso-table-lspace: 0pt;mso-table-rspace: 0pt;"><![endif]-->
-                                                                                        <!--[if !vml]><!-->
-                                                                                        <table
-                                                                                            cellpadding="0"
-                                                                                            cellspacing="0"
-                                                                                            class="icons-inner"
-                                                                                            role="presentation"
-                                                                                            style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; display: inline-block; margin-right: -4px; padding-left: 0px; padding-right: 0px;">
-                                                                                            <!--<![endif]-->
-                                                                                          
-                                                                                        </table>
-                                                                                    </td>
-                                                                                </tr>
-                                                                            </table>
-                                                                        </td>
-                                                                    </tr>
-                                                                </table>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <table align="center" border="0" cellpadding="0" cellspacing="0" class="row row-14"
-                        role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;" width="100%">
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <table align="center" border="0" cellpadding="0" cellspacing="0"
-                                        class="row-content stack" role="presentation"
-                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; color: #000000; width: 650px;"
-                                        width="650">
-                                        <tbody>
-                                            <tr>
-                                                <td class="column column-1"
-                                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top; padding-top: 5px; padding-bottom: 5px; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;"
-                                                    width="100%">
-                                                    <table border="0" cellpadding="0" cellspacing="0"
-                                                        class="icons_block" role="presentation"
-                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-                                                        width="100%">
-                                                        <tr>
-                                                            <td
-                                                                style="vertical-align: middle; color: #9d9d9d; font-family: inherit; font-size: 15px; padding-bottom: 5px; padding-top: 5px; text-align: center;">
-                                                                <table cellpadding="0" cellspacing="0"
-                                                                    role="presentation"
-                                                                    style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-                                                                    width="100%">
-                                                                    <tr>
-                                                                        <td
-                                                                            style="vertical-align: middle; text-align: center;">
-                                                                            <!--[if vml]><table align="left" cellpadding="0" cellspacing="0" role="presentation" style="display:inline-block;padding-left:0px;padding-right:0px;mso-table-lspace: 0pt;mso-table-rspace: 0pt;"><![endif]-->
-                                                                            <!--[if !vml]><!-->
-                                                                            <table border="0" cellpadding="0"
-                                                                                cellspacing="0"
-                                                                                class="icons_block"
-                                                                                role="presentation"
-                                                                                style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-                                                                                width="100%">
-                                                                                <tr>
-                                                                                    <td
-                                                                                        style="vertical-align: middle; color: #9d9d9d; font-family: inherit; font-size: 15px; padding-bottom: 5px; padding-top: 5px; text-align: center;">
-                                                                                        <table cellpadding="0"
-                                                                                            cellspacing="0"
-                                                                                            role="presentation"
-                                                                                            style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;"
-                                                                                            width="100%">
-                                                                                            <tr>
-                                                                                                <td
-                                                                                                    style="vertical-align: middle; text-align: center;">
-                                                                                                    <!--[if vml]><table align="left" cellpadding="0" cellspacing="0" role="presentation" style="display:inline-block;padding-left:0px;padding-right:0px;mso-table-lspace: 0pt;mso-table-rspace: 0pt;"><![endif]-->
-                                                                                                    <!--[if !vml]><!-->
-                                                                                                    <table
-                                                                                                        cellpadding="0"
-                                                                                                        cellspacing="0"
-                                                                                                        class="icons-inner"
-                                                                                                        role="presentation"
-                                                                                                        style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; display: inline-block; margin-right: -4px; padding-left: 0px; padding-right: 0px;">
-                                                                                                        <!--<![endif]-->
-                                                                                                        <tr>
-                                                                                                            <td
-                                                                                                            style="vertical-align: middle; text-align: center; padding-top: 5px; padding-bottom: 5px; padding-left: 5px; padding-right: 6px;">
-                                                                                                            <a href="https://botzero.tech"
-                                                                                                                style="text-decoration: none;"
-                                                                                                                target="_blank"><img
-                                                                                                                    align="center"
-                                                                                                                    alt="Designed with BEE"
-                                                                                                                    class="icon"
-                                                                                                                    src="https://btz.ar/logo_mails.png"
-                                                                                                                    style="display: block; height: auto; margin: 0 auto; border: 0;" /></a>
+                <h1 class="h1">La unidad se encuentra en {{$datos['custom_place_impo']}}</h1>
+                @elseif( $datos['custom_place'] != null )
+                <h1 class="h1">La unidad se encuentra en {{$datos['custom_place']}}</h1>
+                @else
+                <h1 class="h1">No está infomarda la aduana</h1>
+                @endif
 
-                                                                                                        </td>
+                
 
-                                                                                                        </tr>
-                                                                                                    </table>
-                                                                                                </td>
-                                                                                            </tr>
-                                                                                        </table>
-                                                                                    </td>
-                                                                                </tr>
-                                                                            </table>
-                                                                        </td>
-                                                                    </tr>
-                                                                </table>
-                                                            </td>
-                                                        </tr>
-                                                    </table>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </td>
-            </tr>
-        </tbody>
-    </table><!-- End -->
+
+              @elseif ($datos['status'] == 'YENDO A DESCARGAR')
+                <div class="tag">Unidad Camino a Descarga</div>
+                <h1 class="h1">La unidad está en camino a {{$datos['unload_place']}}</h1>
+                <p class="lead center">Estaremos informando más detalle en el transcurso.</p>
+
+              @elseif ($datos['status'] == 'STACKING')
+                <div class="tag">Unidad en Puerto</div>
+                <h1 class="h1">La unidad está en {{$datos['unload_place']}}</h1>
+
+              @elseif ($datos['status'] == 'CON PROBLEMA')
+                <div class="tag" style="color:#b91c1c;">Unidad con Problemas</div>
+                <h1 class="h1" style="color:#ef6c00;">{{$datos['description']}}</h1>
+
+              @elseif ($datos['status'] == 'SALIENDO CARGAR')
+                <div class="tag">Saliendo del Lugar de Carga</div>
+                <h1 class="h1">La unidad está saliendo de {{$datos['load_place']}}</h1>
+
+              @elseif ($datos['status'] == 'TERMINADA')
+                <h1 class="h1">Servicio Finalizado.</h1>
+              @endif
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <!-- Intro / Detalle -->
+    <tr>
+      <td>
+        <table role="presentation" class="container" width="100%">
+          <tr>
+            <td class="p-24">
+              <h2 class="h2" style="margin-top:0;">Detalle</h2>
+              <table class="table" role="presentation" cellpadding="0" cellspacing="0">
+                <tr><td class="tdk">Descripción</td><td class="tdv">{{ $datos['description'] ?? '-' }}</td></tr>
+                <tr class="row-alt"><td class="tdk">Booking</td><td class="tdv">{{ $datos['booking'] ?? '-' }}</td></tr>
+                <tr>
+                  <td class="tdk">Contenedor</td>
+                  <td class="tdv">
+                    @if( $datos['confirmacion'] != 0) 
+                      {{ $datos['cntr'] }}
+                    @else
+                      CNTR SIN CONFIRMAR
+                    @endif
+                  </td>
+                </tr>
+              </table>
+
+              <hr class="hr"/>
+
+              <!-- Datos del Transporte (opcional, como en otras plantillas) -->
+              @if(!empty($datos['transport']) || !empty($datos['transport_agent']) || !empty($datos['driver']) || !empty($datos['documento']) || !empty($datos['truck']) || !empty($datos['truck_semi']))
+              <h2 class="h2">Datos del Transporte</h2>
+              <table class="table" role="presentation" cellpadding="0" cellspacing="0">
+                @if(!empty($datos['transport']))
+                  <tr><td class="tdk">Transporte</td><td class="tdv">{{ $datos['transport'] }}</td></tr>
+                @endif
+                @if(!empty($datos['transport_agent']))
+                  <tr class="row-alt"><td class="tdk">ATA</td><td class="tdv">{{ $datos['transport_agent'] }}</td></tr>
+                @endif
+                @if(!empty($datos['driver']))
+                  <tr><td class="tdk">Chofer</td><td class="tdv">{{ $datos['driver'] }}</td></tr>
+                @endif
+                @if(!empty($datos['documento']))
+                  <tr class="row-alt"><td class="tdk">DNI</td><td class="tdv">{{ $datos['documento'] }}</td></tr>
+                @endif
+                @if(!empty($datos['truck']))
+                  <tr><td class="tdk">Camión</td><td class="tdv">{{ $datos['truck'] }}</td></tr>
+                @endif
+                @if(!empty($datos['truck_semi']))
+                  <tr class="row-alt"><td class="tdk">Semi</td><td class="tdv">{{ $datos['truck_semi'] }}</td></tr>
+                @endif
+              </table>
+
+              <hr class="hr"/>
+              @endif
+
+              <!-- Pie de status (como en las otras) -->
+              <p class="center muted" style="margin:8px 0 0;">
+                Status informado por<br/>
+                <span style="font-size:14px;color:#2190e3;"><strong>{{ $datos['user'] ?? '-' }}</strong></span><br/>
+                <span class="muted">Created at: {{ $datos['date'] ?? '-' }}</span>
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+
+    <!-- Footer unificado -->
+    <tr>
+      <td>
+        <table role="presentation" class="container" width="100%">
+          <tr>
+            <td class="center p-16">
+              <p class="muted" style="margin:0 0 8px;">
+                Tecnología programada por <strong>RailCode</strong> para <strong>BOTzero</strong>: Software de Logística.
+              </p>
+              <a href="https://botzero.tech" target="_blank">
+                <img src="https://btz.ar/logo_mails.png" alt="BOTzero" width="120"/>
+              </a>
+              <p class="footer" style="margin:8px 0 0;">Rail | BOTzero</p>
+              <p class="footer" style="margin:4px 0 0;">Este es un mensaje automático. No responder a este correo.</p>
+            </td>
+          </tr>
+          <tr><td style="height:24px;"></td></tr>
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
-
 </html>
