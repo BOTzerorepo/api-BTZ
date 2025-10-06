@@ -9,7 +9,6 @@ use App\Mail\cargaAsignadaEditada;
 use App\Mail\CargaConProblemas;
 use App\Mail\cargaTerminada;
 use App\Mail\IngresadoStacking;
-use App\Mail\pruebaMail;
 use App\Mail\transporteAsignado;
 use App\Models\empresa;
 use App\Models\particularSoftConfiguration;
@@ -28,12 +27,12 @@ use Illuminate\Support\Facades\Mail;
 class emailController extends Controller
 {
 
-    public function cargaAsignada($id)
+    public function cargaAsignada($id) // FALTA ACOMODAR TODO
     {
 
         $date = Carbon::now('-03:00');
         $asign = DB::table('asign')
-            ->select('asign.*', 'cntr.cntr_type', 'carga.trader', 'carga.ref_customer', 'carga.type', 'carga.user as userC', 'transports.Direccion', 'transports.paut', 'transports.CUIT', 'transports.permiso', 'transports.vto_permiso', 'drivers.documento', 'trucks.model', 'trucks.model', 'trucks.year', 'trucks.chasis', 'trucks.poliza', 'trucks.vto_poliza', 'trailers.domain as semi_domain', 'trailers.poliza as semi_poliza', 'trailers.vto_poliza as semi_vto_poliza','trailers.semi_genset', 'cntr.confirmacion')
+            ->select('asign.*', 'cntr.cntr_type', 'carga.trader', 'carga.ref_customer', 'carga.type', 'carga.user as userC', 'transports.Direccion', 'transports.paut', 'transports.CUIT', 'transports.permiso', 'transports.vto_permiso', 'drivers.documento', 'trucks.model', 'trucks.model', 'trucks.year', 'trucks.chasis', 'trucks.poliza', 'trucks.vto_poliza', 'trailers.domain as semi_domain', 'trailers.poliza as semi_poliza', 'trailers.vto_poliza as semi_vto_poliza', 'trailers.semi_genset', 'cntr.confirmacion', 'cntr.cntr_seal')
             ->join('transports', 'asign.transport', '=', 'transports.razon_social')
             ->join('drivers', 'drivers.nombre', '=', 'asign.driver')
             ->join('trucks', 'trucks.domain', '=', 'asign.truck')
@@ -86,6 +85,8 @@ class emailController extends Controller
             'trader' => $dAsign->trader,
             'cntr_type' => $dAsign->cntr_type,
             'booking' => $dAsign->booking,
+            'cntr_seal' => $dAsign->cntr_seal,
+
         ];
 
         //Enviar mail
@@ -146,7 +147,7 @@ class emailController extends Controller
         }
     }
 
-    public function cambiaStatus($cntr, $empresa, $booking, $user, $tipo, $statusArchivoPath)
+    public function cambiaStatus($cntr, $empresa, $booking, $user, $tipo, $statusArchivoPath) //TRABAJANDO
     {
 
         $logapi = new logapi();
@@ -167,7 +168,11 @@ class emailController extends Controller
             ->first();
         if ($tipo == 'problema') {
 
-            $qd = DB::table('status')->select('status.id', 'status.status', 'cntr.cntr_type', 'carga.trader', 'carga.type', 'carga.ref_customer', 'cntr.confirmacion', 'asign.transport', 'asign.transport_agent', 'asign.truck', 'asign.truck_semi', 'asign.driver', 'drivers.documento')
+            $qd = DB::table('status')
+                ->select('status.id', 'status.status', 'cntr.cntr_type', 'carga.trader', 'carga.type', 'carga.load_place',
+                'carga.unload_place',
+                'carga.custom_place',
+                'carga.custom_place_impo','carga.ref_customer', 'cntr.confirmacion', 'asign.transport', 'asign.transport_agent', 'asign.truck', 'asign.truck_semi', 'asign.driver', 'drivers.documento')
                 ->join('cntr', 'cntr.cntr_number', '=', 'status.cntr_number')
                 ->join('carga', 'carga.booking', '=', 'cntr.booking')
                 ->leftJoin('asign', 'asign.cntr_number', '=', 'status.cntr_number')
@@ -184,6 +189,10 @@ class emailController extends Controller
                 'date' => $date,
                 'status' => 'con Problema',
                 'cntr_type' => $qd->cntr_type,
+                'load_place'        => $qd->load_place,
+                'unload_place'      => $qd->unload_place,
+                'custom_place'      => $qd->custom_place,
+                'custom_place_impo' => $qd->custom_place_impo,
                 'trader' => $qd->trader,
                 'type' => $qd->type,
                 'ref_customer' => $qd->ref_customer,
@@ -233,7 +242,14 @@ class emailController extends Controller
             }
         } elseif ($tipo == 'stacking') {
 
-            $qd = DB::table('status')->select('status.main_status', 'status.id', 'status.status', 'cntr.cntr_type', 'carga.trader', 'carga.type', 'carga.ref_customer', 'cntr.confirmacion', 'asign.transport', 'asign.transport_agent', 'asign.truck', 'asign.truck_semi', 'asign.driver', 'drivers.documento')
+            $qd = DB::table('status')
+                ->select('status.main_status', 'status.id', 'status.status', 'cntr.cntr_type', 
+                'carga.trader', 'carga.type', 'carga.ref_customer', 
+                'carga.load_place',
+                    'carga.unload_place',
+                    'carga.custom_place',
+                    'carga.custom_place_impo',
+                'cntr.confirmacion', 'asign.transport', 'asign.transport_agent', 'asign.truck', 'asign.truck_semi', 'asign.driver', 'drivers.documento')
                 ->join('cntr', 'cntr.cntr_number', '=', 'status.cntr_number')
                 ->join('carga', 'carga.booking', '=', 'cntr.booking')
                 ->leftJoin('asign', 'asign.cntr_number', '=', 'status.cntr_number')
@@ -249,6 +265,10 @@ class emailController extends Controller
                 'user' => $user,
                 'empresa' => $empresa,
                 'booking' => $booking,
+                'load_place'        => $qd->load_place,
+                'unload_place'      => $qd->unload_place,
+                'custom_place'      => $qd->custom_place,
+                'custom_place_impo' => $qd->custom_place_impo,
                 'date' => $date,
                 'cntr_type' => $qd->cntr_type,
                 'trader' => $qd->trader,
@@ -299,7 +319,13 @@ class emailController extends Controller
             }
         } elseif ($tipo == 'terminada') {
 
-            $qd = DB::table('status')->select('status.id', 'status.status', 'cntr.cntr_type', 'carga.trader', 'carga.type', 'carga.ref_customer', 'cntr.confirmacion', 'asign.transport', 'asign.transport_agent', 'asign.truck', 'asign.truck_semi', 'asign.driver', 'drivers.documento')
+            $qd = DB::table('status')
+                ->select('status.id', 'status.status', 'cntr.cntr_type', 
+                'carga.trader', 'carga.type', 'carga.ref_customer', 
+                'carga.load_place',
+                    'carga.unload_place',
+                    'carga.custom_place',
+                    'carga.custom_place_impo','cntr.confirmacion', 'asign.transport', 'asign.transport_agent', 'asign.truck', 'asign.truck_semi', 'asign.driver', 'drivers.documento')
                 ->join('cntr', 'cntr.cntr_number', '=', 'status.cntr_number')
                 ->join('carga', 'carga.booking', '=', 'cntr.booking')
                 ->leftJoin('asign', 'asign.cntr_number', '=', 'status.cntr_number')
@@ -325,6 +351,10 @@ class emailController extends Controller
                 'truck' => $qd->truck,
                 'truck_semi' => $qd->truck_semi,
                 'documento' => $qd->documento,
+                'load_place'        => $qd->load_place,
+                'unload_place'      => $qd->unload_place,
+                'custom_place'      => $qd->custom_place,
+                'custom_place_impo' => $qd->custom_place_impo,
             ];
 
             if ($sbx[0]->sandbox == 0) {
@@ -386,6 +416,10 @@ class emailController extends Controller
                     'carga.trader',
                     'carga.type',
                     'carga.ref_customer',
+                    'carga.load_place',
+                    'carga.unload_place',
+                    'carga.custom_place',
+                    'carga.custom_place_impo',
                     'cntr.confirmacion',
                     'asign.transport',
                     'asign.transport_agent',
@@ -404,24 +438,32 @@ class emailController extends Controller
             $status      = $qd->main_status;
 
             $datos = [
-                'cntr'            => $cntr,
-                'description'     => $description,
-                'confirmacion'    => $qd->confirmacion,
-                'user'            => $user,
-                'empresa'         => $empresa,
-                'booking'         => $booking,
-                'date'            => $date,
-                'status'          => $status,
-                'cntr_type'       => $qd->cntr_type,
-                'trader'          => $qd->trader,
-                'type'            => $qd->type,
-                'ref_customer'    => $qd->ref_customer,
-                'transport'       => $qd->transport,
-                'transport_agent' => $qd->transport_agent,
-                'driver'          => $qd->driver,
-                'truck'           => $qd->truck,
-                'truck_semi'      => $qd->truck_semi,
-                'documento'       => $qd->documento,
+                'cntr'              => $cntr,
+                'description'       => $description,
+                'confirmacion'      => $qd->confirmacion,
+                'user'              => $user,
+                'empresa'           => $empresa,
+                'booking'           => $booking,
+                'date'              => $date,
+                'status'            => $status,
+                'load_place'        => $qd->load_place,
+                'unload_place'      => $qd->unload_place,
+                'custom_place'      => $qd->custom_place,
+                'custom_place_impo' => $qd->custom_place_impo,
+                'cntr_type'         => $qd->cntr_type,
+                'trader'            => $qd->trader,
+                'type'              => $qd->type,
+                'ref_customer'      => $qd->ref_customer,
+                'transport'         => $qd->transport,
+                'transport_agent'   => $qd->transport_agent,
+                'driver'            => $qd->driver,
+                'truck'             => $qd->truck,
+                'truck_semi'        => $qd->truck_semi,
+                'documento'         => $qd->documento,
+                'load_place'        => $qd->load_place,
+                'unload_place'      => $qd->unload_place,
+                'custom_place'      => $qd->custom_place,
+                'custom_place_impo' => $qd->custom_place_impo,
             ];
 
             if ($sbx[0]->sandbox == 0) {
@@ -475,7 +517,7 @@ class emailController extends Controller
         }
     }
 
-    public function avisoNuevaCarga($idCarga, $user)
+    public function avisoNuevaCarga($idCarga, $user) //OK
     {
 
         $user = DB::table('users')->join('particular_soft_configurations', 'users.configCompany', '=', 'particular_soft_configurations.name')->where('users.username', '=', $user)->get();
@@ -603,13 +645,5 @@ class emailController extends Controller
             $logApi->save();
             return 'ok';
         }
-
-        /*   return view('mails.avisoNewCarga')->with('datos',$datos); */
-        /* $mail = Mail::to(['ddicarlo@totaltradegroup.com', 'rquero@totaltradegroup.com','cs.auxiliar@totaltradegroup.com'])->cc(['gzarate@totaltradegroup.com', 'fzgaib@totaltradegroup.com'])->bcc('traficottl@botzero.ar')->send(new avisoNewCarga($datos)); 
-        return 'ok'; */
-        /* Por ahora hay que setear a mano!
-        Para futuros hay que ver la formad enviar de acuerdo a un seteo dentro de la configuracion. 
-        Tiene que enviar todo en la misma cadena. 
-        */
     }
 }

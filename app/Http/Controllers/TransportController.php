@@ -493,7 +493,7 @@ class TransportController extends Controller
             //DATOS PARA ENVIAR MAIL
             $date = Carbon::now('-03:00');
             $asignMail = DB::table('asign')
-                ->select('asign.*', 'cntr.cntr_type', 'carga.trader', 'carga.ref_customer', 'carga.type', 'carga.user as userC', 'transports.Direccion', 'transports.paut', 'transports.CUIT', 'transports.permiso', 'transports.vto_permiso', 'drivers.documento', 'trucks.model', 'trucks.model', 'trucks.year', 'trucks.chasis', 'trucks.poliza', 'trucks.vto_poliza', 'trailers.domain as semi_domain', 'trailers.poliza as semi_poliza', 'trailers.vto_poliza as semi_vto_poliza', 'cntr.confirmacion')
+                ->select('asign.*', 'cntr.cntr_type', 'carga.trader', 'carga.ref_customer', 'carga.type', 'carga.user as userC', 'transports.Direccion', 'transports.paut', 'transports.CUIT', 'transports.permiso', 'transports.vto_permiso', 'drivers.documento', 'trucks.model', 'trucks.model', 'trucks.year', 'trucks.chasis', 'trucks.poliza', 'trucks.vto_poliza', 'trailers.domain as semi_domain', 'trailers.poliza as semi_poliza', 'trailers.vto_poliza as semi_vto_poliza', 'trailers.genset as semi_genset', 'cntr.confirmacion')
                 ->join('transports', 'asign.transport', '=', 'transports.razon_social')
                 ->join('drivers', 'drivers.nombre', '=', 'asign.driver')
                 ->join('trucks', 'trucks.domain', '=', 'asign.truck')
@@ -530,6 +530,7 @@ class TransportController extends Controller
                 'truck_semi' => $asignMail->truck_semi,
                 'truck_semi_poliza' => $asignMail->semi_poliza,
                 'truck_semi_vto_poliza' => $asignMail->semi_vto_poliza,
+                'truck_semi_genset' => $asignMail->semi_genset,
                 'cntr_number' => $asignMail->cntr_number,
                 'booking' => $asignMail->booking,
                 'user' => $asignMail->user,
@@ -667,7 +668,9 @@ class TransportController extends Controller
                     'trailers.domain as semi_domain',
                     'trailers.poliza as semi_poliza',
                     'trailers.vto_poliza as semi_vto_poliza',
-                    'cntr.confirmacion'
+                    'trailers.genset as semi_genset',
+                    'cntr.confirmacion',
+                    'cntr.cntr_seal'
                 )
                 ->join('transports', 'asign.transport', '=', 'transports.razon_social')
                 ->join('drivers', 'drivers.nombre', '=', 'asign.driver')
@@ -719,6 +722,7 @@ class TransportController extends Controller
                 'truck_semi' => $asignMail->truck_semi,
                 'truck_semi_poliza' => $asignMail->semi_poliza,
                 'truck_semi_vto_poliza' => $asignMail->semi_vto_poliza,
+                'truck_semi_genset' => $asignMail->semi_genset,
                 'cntr_number' => $asignMail->cntr_number,
                 'booking' => $asignMail->booking,
                 'user' => $asignMail->user,
@@ -728,6 +732,8 @@ class TransportController extends Controller
                 'trader' => $asignMail->trader,
                 'cntr_type' => $asignMail->cntr_type,
                 'booking' => $asignMail->booking,
+                'cntr_seal' => $asignMail->cntr_seal,
+
             ];
             
             //Enviar mail

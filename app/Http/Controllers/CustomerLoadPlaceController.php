@@ -65,7 +65,10 @@ class CustomerLoadPlaceController extends Controller
     public function accionLugarDeCarga($idTrip)
     {
         $date = Carbon::now('-03:00');
-        $qc = DB::table('cntr')->select('cntr_number', 'booking', 'confirmacion')->where('id_cntr', '=', $idTrip)->get();
+        $qc = DB::table('cntr')->select('cntr_number', 'booking', 'confirmacion')
+        ->select('cntr.cntr_number', 'cntr.booking', 'cntr.confirmacion', 'carga.load_place', 'carga.type', 'carga.trader', 'carga.ref_customer', 'cntr.cntr_type')
+        ->join('carga', 'carga.booking', '=', 'cntr.booking')
+        ->where('id_cntr', '=', $idTrip)->get();
         $cntr = $qc[0];
         // cual es el ultimo status.
         $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
@@ -116,7 +119,12 @@ class CustomerLoadPlaceController extends Controller
                 'user' => $qd->user_status,
                 'empresa' => $empresa,
                 'booking' => $cntr->booking,
-                'date' => $date
+                'date' => $date,
+                'load_place' => $cntr->load_place,
+                'type' => $cntr->type,
+                'trader' => $cntr->trader,
+                'ref_customer' => $cntr->ref_customer,
+                'cntr_type' => $cntr->cntr_type
             ];
 
             //Enviar mail
@@ -218,7 +226,13 @@ class CustomerLoadPlaceController extends Controller
                     'user' => $qd->user_status,
                     'empresa' => $empresa,
                     'booking' => $cntr->booking,
-                    'date' => $date
+                    'date' => $date,
+                    'load_place' => $cntr->load_place,
+                    'type' => $cntr->type,
+                    'trader' => $cntr->trader,
+                    'ref_customer' => $cntr->ref_customer,
+                    'cntr_type' => $cntr->cntr_type
+
                 ];
 
                 //Enviar mail
@@ -355,7 +369,7 @@ class CustomerLoadPlaceController extends Controller
     {
 
         $date = Carbon::now('-03:00');
-        $qc = DB::table('cntr')->select('cntr.cntr_number', 'cntr.booking', 'cntr.confirmacion', 'carga.cma_t_o')
+        $qc = DB::table('cntr')->select('cntr.cntr_number', 'cntr.booking', 'cntr.confirmacion', 'carga.cma_t_o', 'carga.custom_place', 'carga.ref_customer', 'carga.type', 'carga.trader', 'cntr.cntr_type', 'carga.custom_place_impo')
             ->join('carga', 'cntr.booking', '=', 'carga.booking')
             ->where('id_cntr', '=', $idTrip)->get();
         $cntr = $qc[0];
@@ -408,7 +422,13 @@ class CustomerLoadPlaceController extends Controller
                 'user' => $qd->user_status,
                 'empresa' => $empresa,
                 'booking' => $cntr->booking,
-                'date' => $date
+                'date' => $date,
+                'custom_place' => $cntr->custom_place,
+                'custom_place_impo' => $cntr->custom_place_impo,
+                'ref_customer' => $cntr->ref_customer,
+                'type' => $cntr->type,
+                'trader' => $cntr->trader,
+                'cntr_type' => $cntr->cntr_type
             ];
 
             //Enviar mail
@@ -521,7 +541,13 @@ class CustomerLoadPlaceController extends Controller
                     'user' => $qd->user_status,
                     'empresa' => $empresa,
                     'booking' => $cntr->booking,
-                    'date' => $date
+                    'date' => $date,
+                    'custom_place' => $cntr->custom_place,
+                    'custom_place_impo' => $cntr->custom_place_impo,
+                    'ref_customer' => $cntr->ref_customer,
+                    'type' => $cntr->type,
+                    'trader' => $cntr->trader,
+                    'cntr_type' => $cntr->cntr_type
                 ];
 
                 //Enviar mail
@@ -603,6 +629,7 @@ class CustomerLoadPlaceController extends Controller
         $date = Carbon::now('-03:00');
         $qc = DB::table('cntr')->select('cntr_number', 'booking', 'confirmacion')->where('id_cntr', '=', $idTrip)->get();
         $cntr = $qc[0];
+
         $contenedor = DB::table('cntr')
             ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
             ->join('carga', 'cntr.booking', '=', 'carga.booking')
@@ -668,7 +695,8 @@ class CustomerLoadPlaceController extends Controller
                 'user' => $qd->user_status,
                 'empresa' => $empresa,
                 'booking' => $cntr->booking,
-                'date' => $date
+                'date' => $date,
+                'unload_place' => $contenedor->unload_place,
             ];
             
             //Enviar mail
@@ -778,7 +806,13 @@ class CustomerLoadPlaceController extends Controller
                     'user' => $qd->user_status,
                     'empresa' => $empresa,
                     'booking' => $cntr->booking,
-                    'date' => $date
+                    'date' => $date,
+                    'unload_place' => $contenedor->unload_place,
+                    'type' => $contenedor->type,
+                    'trader' => $contenedor->trader,
+                    'ref_customer' => $contenedor->ref_customer,
+                    'cntr_type' => $contenedor->cntr_type
+
                 ];
 
 
@@ -856,7 +890,11 @@ class CustomerLoadPlaceController extends Controller
     {
        
         $date = Carbon::now('-03:00');
-        $qc = DB::table('cntr')->select('cntr_number', 'booking', 'confirmacion')->where('id_cntr', '=', $idTrip)->get();
+        $qc = DB::table('cntr')
+        ->select('cntr.cntr_number', 'cntr.booking', 'cntr.confirmacion', 'carga.load_place','carga.ref_customer','carga.type','carga.trader','cntr.cntr_type')
+        ->join('carga', 'cntr.booking', '=', 'carga.booking')
+        ->where('id_cntr', '=', $idTrip)
+        ->get();
         $cntr = $qc[0];
         // cual es el ultimo status.
         $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
@@ -971,7 +1009,12 @@ class CustomerLoadPlaceController extends Controller
                 'user' => $qd->user_status,
                 'empresa' => $empresa,
                 'booking' => $cntr->booking,
-                'date' => $date
+                'date' => $date,
+                'load_place' => $cntr->load_place,
+                'type' => $cntr->type,
+                'trader' => $cntr->trader,
+                'ref_customer' => $cntr->ref_customer,
+                'cntr_type' => $cntr->cntr_type 
             ];
 
             //Enviar mail
@@ -1075,7 +1118,12 @@ class CustomerLoadPlaceController extends Controller
                     'user' => $qd->user_status,
                     'empresa' => $empresa,
                     'booking' => $cntr->booking,
-                    'date' => $date
+                    'date' => $date,
+                    'load_place' => $cntr->load_place,
+                    'type' => $cntr->type,
+                    'trader' => $cntr->trader,
+                    'ref_customer' => $cntr->ref_customer,
+                    'cntr_type' => $cntr->cntr_type
                 ];
 
                 //Enviar mail
@@ -1160,10 +1208,12 @@ class CustomerLoadPlaceController extends Controller
         $date = Carbon::now('-03:00');
         $cntr = DB::table('cntr')->select('cntr_number', 'booking', 'confirmacion')
             ->join('carga', 'cntr.booking', '=', 'carga.booking')
-            ->select('cntr.cntr_number', 'cntr.booking', 'cntr.confirmacion', 'carga.cma_t_o')
+            ->select('cntr.cntr_number', 'cntr.booking', 'cntr.confirmacion', 'carga.cma_t_o','carga.custom_place','carga.custom_place_impo','carga.ref_customer','carga.type','carga.trader','cntr.cntr_type')
             ->where('cntr.id_cntr', '=', $idTrip)
             ->first();
-
+        
+        
+        
 
         // cual es el ultimo status.
         $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
@@ -1246,7 +1296,13 @@ class CustomerLoadPlaceController extends Controller
                 'user' => $qd->user_status,
                 'empresa' => $empresa,
                 'booking' => $cntr->booking,
-                'date' => $date
+                'date' => $date,
+                'custom_place' => $cntr->custom_place,
+                'custom_place_impo' => $cntr->custom_place_impo,
+                'ref_customer' => $cntr->ref_customer,
+                'type' => $cntr->type,
+                'trader' => $cntr->trader,
+                'cntr_type' => $cntr->cntr_type
             ];
 
             //Enviar mail
@@ -1358,7 +1414,15 @@ class CustomerLoadPlaceController extends Controller
                     'user' => $qd->user_status,
                     'empresa' => $empresa,
                     'booking' => $cntr->booking,
-                    'date' => $date
+                    'date' => $date,
+                    'custom_place' => $cntr->custom_place,
+                    'custom_place_impo' => $cntr->custom_place_impo,
+                    'type' => $cntr->type,
+                    'trader' => $cntr->trader,
+                    'ref_customer' => $cntr->ref_customer,
+                    'cntr_type' => $cntr->cntr_type
+
+                    
                 ];
 
                 //Enviar mail
