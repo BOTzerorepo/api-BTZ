@@ -61,31 +61,30 @@
             <!-- Branding: fondo acorde al branding -->
             <td class="center p-16" style="background:#e0e0e0;">
               <!-- Status principal (una sola .tag para no duplicar) -->
-              <div class="tag">{{ $datos['status'] }}</div>
+              
 
               @if ($datos['status'] == 'ASIGNADA')
                 <div class="tag">Unidad Asignada</div>
                 <h1 class="h1">La carga ya tiene asignación de unidad.</h1>
 
               @elseif ($datos['status'] == 'YENDO A CARGAR')
+              <div class="tag">{{ $datos['status'] }}</div>
                 <h1 class="h1">La unidad se está dirigiendo {{$datos['load_place']}}</h1>
 
               @elseif ($datos['status'] == 'CARGANDO')
+              <div class="tag">{{ $datos['status'] }}</div>
                 <h1 class="h1">La unidad se encuentra en {{$datos['load_place']}}</h1>
 
               @elseif ($datos['status'] == 'EN ADUANA')
                 @if( $datos['custom_place_impo'] != null )
-
+                <div class="tag">{{ $datos['status'] }}</div>
                 <h1 class="h1">La unidad se encuentra en {{$datos['custom_place_impo']}}</h1>
                 @elseif( $datos['custom_place'] != null )
+                <div class="tag">{{ $datos['status'] }}</div>
                 <h1 class="h1">La unidad se encuentra en {{$datos['custom_place']}}</h1>
                 @else
                 <h1 class="h1">No está infomarda la aduana</h1>
                 @endif
-
-                
-
-
               @elseif ($datos['status'] == 'YENDO A DESCARGAR')
                 <div class="tag">Unidad Camino a Descarga</div>
                 <h1 class="h1">La unidad está en camino a {{$datos['unload_place']}}</h1>
@@ -104,6 +103,7 @@
                 <h1 class="h1">La unidad está saliendo de {{$datos['load_place']}}</h1>
 
               @elseif ($datos['status'] == 'TERMINADA')
+              <div class="tag">{{ $datos['status'] }}</div>
                 <h1 class="h1">Servicio Finalizado.</h1>
               @endif
             </td>

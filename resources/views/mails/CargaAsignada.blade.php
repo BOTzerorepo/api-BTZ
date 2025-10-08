@@ -59,7 +59,6 @@
           <tr>
              <td class="center p-16" style="background:#e0e0e0;">
               <div class="tag">Asignación de unidad</div>
-              <h1 class="h1">Estado de la carga</h1>
               <h2 class="h2" style="margin-top:6px;">
                 @if( $datos['confirmacion'] != 0) 
                   <strong>Carga {{ $datos['cntr_number'] - $dato['cntr_seal']}} para el {{ $datos['booking'] }}</strong>

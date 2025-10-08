@@ -496,7 +496,7 @@ class emailController extends Controller
                     Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
 
                     // Podés definir un mail fallback para no perder la notificación
-                    $clienteEmail = 'soporte@botzero.com.ar';
+                    $clienteEmail = 'satelitales@btz.ar';
                 } else {
                     $clienteEmail = $cliente->email;
                 }

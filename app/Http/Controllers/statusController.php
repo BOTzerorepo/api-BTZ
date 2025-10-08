@@ -444,7 +444,7 @@ class statusController extends Controller
                     DB::rollBack();
                     return response()->json(['errores' => 'Algo salió mal, por favor vuelta a intentar la acción.', 'id' => $idCarga], 500);
                 }
-            }elseif ($statusGral == "STACKING") {
+            } elseif ($statusGral == "STACKING") {
                 // si la carga está en Staking, Actualizamos el Status en la tabla Status
 
                 $tipo = 'stacking';
@@ -502,12 +502,10 @@ class statusController extends Controller
                     DB::rollBack();
                     return response()->json(['errores' => 'Algo salió mal, por favor vuelta a intentar la acción.', 'id' => $idCarga], 500);
                 }
-            }else {
+            } else {
+
                 if ($statusGral == "YENDO A CARGAR") {
-
-                   
-                   
-
+                    
                     $tO = DB::table('cntr')
                         ->select('carga.cma_t_o', 'cntr.cntr_number')
                         ->join('carga', 'cntr.booking', '=', 'carga.booking')
@@ -515,6 +513,7 @@ class statusController extends Controller
                         ->first();
 
                         $valor = json_decode(\json_encode($tO->cma_t_o), true);
+                        
                         if (!empty($valor)) {
                             // Actualizar la fecha de carga en cada CNTR relacionado
                             $client = new Client();

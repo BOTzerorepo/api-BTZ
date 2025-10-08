@@ -896,10 +896,9 @@ class ServiceSatelital extends Controller
         }
         return $camiones;
     }
-    public function flotaClient($id)
+    public function flotaCliente($id)
     {
 
-        $transport = Transport::find($id);
         $curl = curl_init();
 
         // TEST: E6HW19 - PRODUCCION: C2QC20
@@ -984,7 +983,7 @@ class ServiceSatelital extends Controller
                         'transports.*'
                     )
                     ->where('trucks.domain', '=', $dato->patente)
-                    ->where('asign.transport', '=', $transport->razon_social)
+                    ->where('carga.cliente_id', '=', $id)
                     ->whereNotIn('cntr.main_status', ['TERMINADA', 'NO ASIGNED'])
                     ->get();
 
