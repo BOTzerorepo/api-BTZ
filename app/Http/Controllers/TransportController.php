@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class TransportController extends Controller
 {
@@ -396,11 +397,13 @@ class TransportController extends Controller
             $carga = Carga::whereNull('deleted_at')->where('booking', '=', $asign->booking)->first();
 
             if ($sbx[0]->sandbox == 0) {
+
                 $customer = DB::table('users')
                     ->where('username', '=', $carga->user)
                     ->value('email');
                 $toEmails = array_merge([$customer], (array) $toEmails);
-                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new transporteAsignado($datos, $date));
+               $mailCustomer =  Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new transporteAsignado($datos, $date));
+               Log::info('Mail enviado a: ' . implode(', ', $toEmails) . ' | CC: ' . implode(', ', $ccEmails) . ' | BCC: ' . $inboxEmail);
                 // Enviar solo al correo del transporte
                 if ($transporteMail) {
                     Mail::to($transporteMail->email)
