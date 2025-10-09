@@ -404,6 +404,7 @@ class TransportController extends Controller
                 // Enviar solo al correo del transporte
                 if ($transporteMail) {
                     Mail::to($transporteMail->email)
+                        ->bcc($inboxEmail)
                         ->send(new transporteAsignado($datos, $date));
                 }
             } else {
@@ -415,6 +416,7 @@ class TransportController extends Controller
             // Enviar solo al correo del transporte
             if ($transporteMail) {
                 Mail::to($transporteMail->email)
+                    ->bcc($inboxEmail)
                     ->send(new transporteAsignado($datos, $date));
             }
             }

@@ -113,24 +113,6 @@ class cntrController extends Controller
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
 
     private function deleteDirectory($dir)
     {
@@ -165,12 +147,6 @@ class cntrController extends Controller
             $cntr->cntr_seal =  $newSeal;
             $cntr->confirmacion = $newConfirm;
             $cntr->save();
-
-
-
-
-
-
 
             $changeAsign = asign::where('cntr_number', $cntrOld)->update(['cntr_number' => $newCntrNumber]);
             Log::info("Asign actualizada de $cntrOld a $newCntrNumber");
@@ -514,7 +490,6 @@ class cntrController extends Controller
             ], 500);
         }
     }
-
 
     public function storeCalifications(Request $request)
     {
