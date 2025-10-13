@@ -169,19 +169,7 @@ class TransportController extends Controller
             ], 500);
         }
     }
-    function parseEmailList($value): array
-    {
-        if (!$value) return [];
-        if (is_array($value)) $value = implode(',', $value);
-        $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
-        $arr = array_map('trim', explode(',', $normalized));
-        $arr = array_filter($arr, fn($e) => filter_var($e, FILTER_VALIDATE_EMAIL));
-        return array_values(array_unique($arr));
-    }
-    function pushIfEmail(&$arr, $email): void
-    {
-        if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) $arr[] = trim($email);
-    }
+
 
     /**
      * Display the specified resource.
@@ -345,6 +333,19 @@ class TransportController extends Controller
         ], 200);
     }
 
+    public function parseEmailList($value): array
+    {
+        if (!$value) return [];
+        if (is_array($value)) $value = implode(',', $value);
+        $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
+        $arr = array_map('trim', explode(',', $normalized));
+        $arr = array_filter($arr, fn($e) => filter_var($e, FILTER_VALIDATE_EMAIL));
+        return array_values(array_unique($arr));
+    }
+    public function pushIfEmail(&$arr, $email): void
+    {
+        if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) $arr[] = trim($email);
+    }
     public function transporteAsignado(Request $request, $cntrId)
     {
         DB::beginTransaction();
@@ -409,11 +410,12 @@ class TransportController extends Controller
             $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
             $carga = Carga::whereNull('deleted_at')->where('booking', '=', $asign->booking)->first();
 
+
             if ($sbx[0]->sandbox == 0) {
 
                 // --- 1) Traer customer (por username) y cliente (por client_id) ---
                 $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
-                $clienteUser  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first(); 
+                $clienteUser  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
 
                 // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
                 $to = [];
@@ -595,6 +597,20 @@ class TransportController extends Controller
             $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
             $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
             $carga = Carga::whereNull('deleted_at')->where('booking', '=', $asign->booking)->first();
+
+            function parseEmailList($value): array
+            {
+                if (!$value) return [];
+                if (is_array($value)) $value = implode(',', $value);
+                $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
+                $arr = array_map('trim', explode(',', $normalized));
+                $arr = array_filter($arr, fn($e) => filter_var($e, FILTER_VALIDATE_EMAIL));
+                return array_values(array_unique($arr));
+            }
+            function pushIfEmail(&$arr, $email): void
+            {
+                if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) $arr[] = trim($email);
+            }
 
             if ($sbx[0]->sandbox == 0) {
 
@@ -882,7 +898,6 @@ class TransportController extends Controller
                 $status->save();
 
                 return 'ok';
-
             } else {
                 return 'ok';
             }

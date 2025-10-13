@@ -108,6 +108,19 @@ class emailController extends Controller
         $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
         $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
         $carga = Carga::whereNull('deleted_at')->where('booking', '=', $dAsign->booking)->first();
+        function parseEmailList($value): array
+            {
+                if (!$value) return [];
+                if (is_array($value)) $value = implode(',', $value);
+                $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
+                $arr = array_map('trim', explode(',', $normalized));
+                $arr = array_filter($arr, fn($e) => filter_var($e, FILTER_VALIDATE_EMAIL));
+                return array_values(array_unique($arr));
+            }
+            function pushIfEmail(&$arr, $email): void
+            {
+                if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) $arr[] = trim($email);
+            }
 
         if ($sbx[0]->sandbox == 0) {
 
@@ -264,6 +277,19 @@ class emailController extends Controller
                 'truck_semi' => $qd->truck_semi,
                 'documento' => $qd->documento,
             ];
+            function parseEmailList($value): array
+            {
+                if (!$value) return [];
+                if (is_array($value)) $value = implode(',', $value);
+                $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
+                $arr = array_map('trim', explode(',', $normalized));
+                $arr = array_filter($arr, fn($e) => filter_var($e, FILTER_VALIDATE_EMAIL));
+                return array_values(array_unique($arr));
+            }
+            function pushIfEmail(&$arr, $email): void
+            {
+                if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) $arr[] = trim($email);
+            }
 
             if ($sbx[0]->sandbox == 0) {
 
@@ -377,6 +403,19 @@ class emailController extends Controller
                 'truck_semi' => $qd->truck_semi,
                 'documento' => $qd->documento,
             ];
+            function parseEmailList($value): array
+            {
+                if (!$value) return [];
+                if (is_array($value)) $value = implode(',', $value);
+                $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
+                $arr = array_map('trim', explode(',', $normalized));
+                $arr = array_filter($arr, fn($e) => filter_var($e, FILTER_VALIDATE_EMAIL));
+                return array_values(array_unique($arr));
+            }
+            function pushIfEmail(&$arr, $email): void
+            {
+                if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) $arr[] = trim($email);
+            }
 
             if ($sbx[0]->sandbox == 0) {
                 // --- 1) Traer customer (por username) y cliente (por client_id) ---
@@ -483,6 +522,19 @@ class emailController extends Controller
                 'custom_place'      => $qd->custom_place,
                 'custom_place_impo' => $qd->custom_place_impo,
             ];
+            function parseEmailList($value): array
+            {
+                if (!$value) return [];
+                if (is_array($value)) $value = implode(',', $value);
+                $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
+                $arr = array_map('trim', explode(',', $normalized));
+                $arr = array_filter($arr, fn($e) => filter_var($e, FILTER_VALIDATE_EMAIL));
+                return array_values(array_unique($arr));
+            }
+            function pushIfEmail(&$arr, $email): void
+            {
+                if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) $arr[] = trim($email);
+            }
 
             if ($sbx[0]->sandbox == 0) {
                 // --- 1) Traer customer (por username) y cliente (por client_id) ---
@@ -610,6 +662,19 @@ class emailController extends Controller
                 'custom_place'      => $qd->custom_place,
                 'custom_place_impo' => $qd->custom_place_impo,
             ];
+            function parseEmailList($value): array
+            {
+                if (!$value) return [];
+                if (is_array($value)) $value = implode(',', $value);
+                $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
+                $arr = array_map('trim', explode(',', $normalized));
+                $arr = array_filter($arr, fn($e) => filter_var($e, FILTER_VALIDATE_EMAIL));
+                return array_values(array_unique($arr));
+            }
+            function pushIfEmail(&$arr, $email): void
+            {
+                if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) $arr[] = trim($email);
+            }
 
             if ($sbx[0]->sandbox == 0) {
                // --- 1) Traer customer (por username) y cliente (por client_id) ---

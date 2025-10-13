@@ -1641,6 +1641,20 @@ class ServiceSatelital extends Controller
             ->where('cliente_id', '=', $carga->client_id)
             ->first(); */
 
+            function parseEmailList($value): array
+            {
+                if (!$value) return [];
+                if (is_array($value)) $value = implode(',', $value);
+                $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
+                $arr = array_map('trim', explode(',', $normalized));
+                $arr = array_filter($arr, fn($e) => filter_var($e, FILTER_VALIDATE_EMAIL));
+                return array_values(array_unique($arr));
+            }
+            function pushIfEmail(&$arr, $email): void
+            {
+                if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) $arr[] = trim($email);
+            }
+
         if ($sbx[0]->sandbox == 0) {
 
              // --- 1) Traer customer (por username) y cliente (por client_id) ---
@@ -1768,6 +1782,8 @@ class ServiceSatelital extends Controller
        /*  $cliente = DB::table('users')
             ->where('cliente_id', '=', $carga->client_id)
             ->first(); */
+
+            
         if ($sbx[0]->sandbox == 0) {
              // --- 1) Traer customer (por username) y cliente (por client_id) ---
              $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
