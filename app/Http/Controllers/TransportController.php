@@ -896,7 +896,6 @@ class TransportController extends Controller
                 $status->user_status = $asignMail->user;
                 $status->save();
 
-                return 'ok';
             } else {
                 return 'ok';
             }
