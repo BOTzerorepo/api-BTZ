@@ -692,6 +692,7 @@ class TransportController extends Controller
     //El usuario Traffic confirma una unidad del tranporte
     public function confirmarUnidad(Request $request, $cntrId)
     {
+
         DB::beginTransaction();
         try {
             // Validación de datos
