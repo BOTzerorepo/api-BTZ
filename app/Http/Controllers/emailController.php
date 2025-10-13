@@ -294,7 +294,7 @@ class emailController extends Controller
                 $cc = array_values(array_unique($cc));
 
                 // --- 4) Armar BCC (acepta string o array) ---
-                $bcc = array_values(array_unique(parseEmailList($inboxEmail ?? '')));
+                $bcc = array_values(array_unique($this->parseEmailList($inboxEmail ?? '')));
 
                 // --- 5) Envío ---
                 Mail::to($to)
