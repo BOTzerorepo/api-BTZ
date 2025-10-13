@@ -333,8 +333,7 @@ class TransportController extends Controller
         ], 200);
     }
 
-    public function parseEmailList($value): array
-    {
+    private function parseEmailList($value): array {
         if (!$value) return [];
         if (is_array($value)) $value = implode(',', $value);
         $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
@@ -342,8 +341,8 @@ class TransportController extends Controller
         $arr = array_filter($arr, fn($e) => filter_var($e, FILTER_VALIDATE_EMAIL));
         return array_values(array_unique($arr));
     }
-    public function pushIfEmail(&$arr, $email): void
-    {
+    
+    private function pushIfEmail(array &$arr, ?string $email): void {
         if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) $arr[] = trim($email);
     }
     public function transporteAsignado(Request $request, $cntrId)
@@ -409,7 +408,7 @@ class TransportController extends Controller
             $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
             $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
             $carga = Carga::whereNull('deleted_at')->where('booking', '=', $asign->booking)->first();
-
+            
 
             if ($sbx[0]->sandbox == 0) {
 
@@ -419,9 +418,9 @@ class TransportController extends Controller
 
                 // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
                 $to = [];
-                pushIfEmail($to, $customerUser->email ?? null);
-                pushIfEmail($to, $clienteUser->email  ?? null);
-                $to = array_merge($to, parseEmailList($toEmails ?? ''));
+                $this->pushIfEmail($to, $customerUser->email ?? null);
+                $this->pushIfEmail($to, $clienteUser->email  ?? null);
+                $to = array_merge($to, $this->parseEmailList($toEmails ?? ''));
                 $to = array_values(array_unique($to));
 
                 if (empty($to)) {
@@ -431,14 +430,14 @@ class TransportController extends Controller
 
                 // --- 3) Armar CC (cc_emails de ambos + $ccEmails extra si lo venías usando) ---
                 $cc = array_merge(
-                    parseEmailList($customerUser->cc_emails ?? ''),
-                    parseEmailList($clienteUser->cc_emails  ?? ''),
-                    parseEmailList($ccEmails ?? '')
+                    $this->parseEmailList($customerUser->cc_emails ?? ''),
+                    $this->parseEmailList($clienteUser->cc_emails  ?? ''),
+                    $this->parseEmailList($ccEmails ?? '')
                 );
                 $cc = array_values(array_unique($cc));
 
                 // --- 4) Armar BCC (acepta string o array) ---
-                $bcc = array_values(array_unique(parseEmailList($inboxEmail ?? '')));
+                $bcc = array_values(array_unique($this->parseEmailList($inboxEmail ?? '')));
 
                 // --- 5) Envío ---
                 Mail::to($to)
@@ -620,9 +619,9 @@ class TransportController extends Controller
 
                 // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
                 $to = [];
-                pushIfEmail($to, $customerUser->email ?? null);
-                pushIfEmail($to, $clienteUser->email  ?? null);
-                $to = array_merge($to, parseEmailList($toEmails ?? ''));
+                $this->pushIfEmail($to, $customerUser->email ?? null);
+                $this-> pushIfEmail($to, $clienteUser->email  ?? null);
+                $to = array_merge($to, $this->parseEmailList($toEmails ?? ''));
                 $to = array_values(array_unique($to));
 
                 if (empty($to)) {
@@ -632,9 +631,9 @@ class TransportController extends Controller
 
                 // --- 3) Armar CC (cc_emails de ambos + $ccEmails extra si lo venías usando) ---
                 $cc = array_merge(
-                    parseEmailList($customerUser->cc_emails ?? ''),
-                    parseEmailList($clienteUser->cc_emails  ?? ''),
-                    parseEmailList($ccEmails ?? '')
+                    $this->parseEmailList($customerUser->cc_emails ?? ''),
+                    $this->parseEmailList($clienteUser->cc_emails  ?? ''),
+                    $this->parseEmailList($ccEmails ?? '')
                 );
                 $cc = array_values(array_unique($cc));
 
@@ -848,9 +847,9 @@ class TransportController extends Controller
 
                 // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
                 $to = [];
-                pushIfEmail($to, $customerUser->email ?? null);
-                pushIfEmail($to, $clienteUser->email  ?? null);
-                $to = array_merge($to, parseEmailList($toEmails ?? ''));
+                $this->pushIfEmail($to, $customerUser->email ?? null);
+                $this->pushIfEmail($to, $clienteUser->email  ?? null);
+                $to = array_merge($to, $this->parseEmailList($toEmails ?? ''));
                 $to = array_values(array_unique($to));
 
                 if (empty($to)) {
@@ -860,14 +859,14 @@ class TransportController extends Controller
 
                 // --- 3) Armar CC (cc_emails de ambos + $ccEmails extra si lo venías usando) ---
                 $cc = array_merge(
-                    parseEmailList($customerUser->cc_emails ?? ''),
-                    parseEmailList($clienteUser->cc_emails  ?? ''),
-                    parseEmailList($ccEmails ?? '')
+                    $this->parseEmailList($customerUser->cc_emails ?? ''),
+                    $this->parseEmailList($clienteUser->cc_emails  ?? ''),
+                    $this->parseEmailList($ccEmails ?? '')
                 );
                 $cc = array_values(array_unique($cc));
 
                 // --- 4) Armar BCC (acepta string o array) ---
-                $bcc = array_values(array_unique(parseEmailList($inboxEmail ?? '')));
+                $bcc = array_values(array_unique($this->parseEmailList($inboxEmail ?? '')));
 
                 // --- 5) Envío ---
                 Mail::to($to)
