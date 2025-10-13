@@ -454,8 +454,7 @@ class TransportController extends Controller
                     . ' | BCC:' . implode(', ', $bcc);
                 $logapi->save();
 
-                return 'ok';
-
+                
                 //Enviar mail
                 if ($transporteMail) {
                     Mail::to($transporteMail->email)
@@ -463,7 +462,8 @@ class TransportController extends Controller
                         ->send(new transporteAsignado($datos, $date));
                 }
             } else {
-                return 'ok';
+                //Sandbox
+              
             }
 
             DB::commit();
