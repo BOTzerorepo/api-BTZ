@@ -212,7 +212,6 @@ class emailController extends Controller
         $carga = Carga::whereNull('deleted_at')->where('booking', '=', $booking)->first();
 
 
-
         if ($tipo == 'problema') {
 
             $qd = DB::table('status')
@@ -271,7 +270,7 @@ class emailController extends Controller
 
                 // --- 1) Traer customer (por username) y cliente (por client_id) ---
                 $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
-                $clienteUser  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
+                $clienteUser  = DB::table('users')->where('cliente_id', '=', $carga->cliente_id)->first();
 
                 // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
                 $to = [];
@@ -301,11 +300,7 @@ class emailController extends Controller
                     ->when(!empty($cc),  fn($m) => $m->cc($cc))
                     ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                     ->send(new CargaConProblemas($datos, $statusArchivoPath));
-
-                // --- 6) Logs y status (tu lógica original) ---
-
-                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new CargaConProblemas($datos, $statusArchivoPath));
-
+                    
                 // --- 6) Logs y status (tu lógica original) ---
                 $logapi = new logapi();
                 $logapi->user    = $customerUser->username;
