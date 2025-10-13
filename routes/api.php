@@ -13,6 +13,9 @@ use App\Http\Controllers\ProfitController;
 use App\Http\Controllers\UserController;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\ParticularSoftConfigurationController;
+use App\Http\Controllers\CustomerCcController;
+use App\Http\Controllers\UserCcController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
@@ -583,3 +586,20 @@ Route::get('truckAker', 'App\Http\Controllers\AkerTruckController@index');
 //Route::get('cmaCgm','App\Http\Controllers\CmaCgmController@index');
 Route::get('cmaCgm/getForTO/{cma_to}/{cntr_number}', [cargaController::class,'getForTO']);
 Route::get('cmaCgm/issetTo/{cntr_number}', [cargaController::class,'issetTo']);
+
+
+// routes/api.php
+
+Route::get('psc/current', [ParticularSoftConfigurationController::class, 'current']);
+Route::apiResource('psc', ParticularSoftConfigurationController::class);
+
+Route::get('user-cct', [UserCcController::class, 'index']);
+Route::post('user-cct/{userId}', [UserCcController::class, 'updateCc'])->name('user.cct.update');
+
+
+
+
+
+
+
+

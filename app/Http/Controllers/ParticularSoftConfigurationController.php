@@ -1,85 +1,84 @@
 <?php
-
+// app/Http/Controllers/ParticularSoftConfigurationController.php
 namespace App\Http\Controllers;
 
-use App\Models\particularSoftConfiguration;
+use App\Models\ParticularSoftConfiguration;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ParticularSoftConfigurationController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+    // Listado general
     public function index()
     {
-        //
+        return ParticularSoftConfiguration::orderBy('id', 'desc')->get();
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
+    // Configuración actual (la última o única)
+    public function current()
     {
-        //
+        return ParticularSoftConfiguration::latest('id')->first();
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
+    // Mostrar una configuración específica
+    public function show($id)
+    {
+        return ParticularSoftConfiguration::findOrFail($id);
+    }
+
+    // Crear nueva configuración
     public function store(Request $request)
     {
-        //
+        $data = $request->all();
+
+        if ($request->hasFile('logo')) {
+            $data['logo'] = $request->file('logo')->store('psc', 'public');
+        }
+
+        if ($request->hasFile('imgLogin')) {
+            $data['imgLogin'] = $request->file('imgLogin')->store('psc', 'public');
+        }
+
+        $psc = ParticularSoftConfiguration::create($data);
+
+        return response()->json($psc, 201);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\particularSoftConfiguration  $particularSoftConfiguration
-     * @return \Illuminate\Http\Response
-     */
-    public function show(particularSoftConfiguration $particularSoftConfiguration)
+    // Actualizar configuración existente
+    public function update(Request $request, $id)
     {
-        //
+        $psc = ParticularSoftConfiguration::findOrFail($id);
+        $data = $request->all();
+
+        if ($request->hasFile('logo')) {
+            if ($psc->logo) {
+                Storage::disk('public')->delete($psc->logo);
+            }
+            $data['logo'] = $request->file('logo')->store('psc', 'public');
+        }
+
+        if ($request->hasFile('imgLogin')) {
+            if ($psc->imgLogin) {
+                Storage::disk('public')->delete($psc->imgLogin);
+            }
+            $data['imgLogin'] = $request->file('imgLogin')->store('psc', 'public');
+        }
+
+        $psc->update($data);
+
+        return response()->json($psc);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\particularSoftConfiguration  $particularSoftConfiguration
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(particularSoftConfiguration $particularSoftConfiguration)
+    // Eliminar configuración
+    public function destroy($id)
     {
-        //
-    }
+        $psc = ParticularSoftConfiguration::findOrFail($id);
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\particularSoftConfiguration  $particularSoftConfiguration
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, particularSoftConfiguration $particularSoftConfiguration)
-    {
-        //
-    }
+        if ($psc->logo) Storage::disk('public')->delete($psc->logo);
+        if ($psc->imgLogin) Storage::disk('public')->delete($psc->imgLogin);
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\particularSoftConfiguration  $particularSoftConfiguration
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(particularSoftConfiguration $particularSoftConfiguration)
-    {
-        //
+        $psc->delete();
+
+        return response()->noContent();
     }
 }
