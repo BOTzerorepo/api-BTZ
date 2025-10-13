@@ -60,11 +60,15 @@
              <td class="center p-16" style="background:#e0e0e0;">
               <div class="tag">Asignación de unidad</div>
               <h2 class="h2" style="margin-top:6px;">
-                @if( $datos['confirmacion'] != 0) 
-                  <strong>Carga {{ $datos['cntr_number'] - $datos['cntr_seal']}} para el {{ $datos['booking'] }}</strong>
-                @else
-                  <strong>Carga CNTR SIN CONFIRMAR para el {{ $datos['booking'] }}</strong>
-                @endif
+                @if(!empty($datos['confirmacion']))
+                <strong>
+                  Carga {{ $datos['cntr_number'] }} - {{ $datos['cntr_seal'] ?? 'SIN PRECINTO' }} para el {{ $datos['booking'] }}
+                </strong>
+              @else
+                <strong>
+                  Carga CNTR SIN CONFIRMAR para el {{ $datos['booking'] }}
+                </strong>
+              @endif
               </h2>
             </td>
           </tr>
