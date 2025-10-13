@@ -26,7 +26,19 @@ use Illuminate\Support\Facades\Mail;
 
 class emailController extends Controller
 {
-
+    function parseEmailList($value): array
+    {
+        if (!$value) return [];
+        if (is_array($value)) $value = implode(',', $value);
+        $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
+        $arr = array_map('trim', explode(',', $normalized));
+        $arr = array_filter($arr, fn($e) => filter_var($e, FILTER_VALIDATE_EMAIL));
+        return array_values(array_unique($arr));
+    }
+    function pushIfEmail(&$arr, $email): void
+    {
+        if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) $arr[] = trim($email);
+    }
     public function cargaAsignada($id) // FALTA ACOMODAR TODO
     {
 
@@ -99,21 +111,55 @@ class emailController extends Controller
 
         if ($sbx[0]->sandbox == 0) {
 
-            $customer = DB::table('users')
-                ->where('username', '=', $carga->user)
-                ->value('email');
-            $toEmails = array_merge([$customer], (array) $toEmails);
+            // --- 1) Traer customer (por username) y cliente (por client_id) ---
+            $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
+            $clienteUser  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
 
-            Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaAsignada($data, $date));
+            // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
+            $to = [];
+            pushIfEmail($to, $customerUser->email ?? null);
+            pushIfEmail($to, $clienteUser->email  ?? null);
+            $to = array_merge($to, parseEmailList($toEmails ?? ''));
+            $to = array_values(array_unique($to));
 
+            if (empty($to)) {
+                Log::warning("Sin destinatarios TO en 'cargaAsignada' para carga ID {$carga->id} (booking {$carga->booking}). Uso fallback.");
+                $to[] = 'soporte@rail.ar';
+            }
+
+            // --- 3) Armar CC (cc_emails de ambos + $ccEmails extra si lo venías usando) ---
+            $cc = array_merge(
+                parseEmailList($customerUser->cc_emails ?? ''),
+                parseEmailList($clienteUser->cc_emails  ?? ''),
+                parseEmailList($ccEmails ?? '')
+            );
+            $cc = array_values(array_unique($cc));
+
+            // --- 4) Armar BCC (acepta string o array) ---
+            $bcc = array_values(array_unique(parseEmailList($inboxEmail ?? '')));
+
+            // --- 5) Envío ---
+            Mail::to($to)
+                ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
+                ->send(new cargaAsignada($data, $date));
+
+            // --- 6) Logs y status (tu lógica original) ---
             $logapi = new logapi();
-            $logapi->user = $dAsign->user;
-            $logapi->detalle = 'AsignaUnidadCarga-User:' . $dAsign->user . '|Transporte:' . $dAsign->transport . '|Chofer:' . $dAsign->driver . '|Tractor:' . $dAsign->truck . '|Semi:' . $dAsign->truck_semi;
+            $logapi->user    = $dAsign->user;
+            $logapi->detalle = 'AsignaUnidadCarga-User:' . $dAsign->user
+                . '|Transporte:' . $dAsign->transport
+                . '|Chofer:' . $dAsign->driver
+                . '|Tractor:' . $dAsign->truck
+                . '|Semi:' . $dAsign->truck_semi
+                . ' | TO:' . implode(', ', $to)
+                . ' | CC:' . implode(', ', $cc)
+                . ' | BCC:' . implode(', ', $bcc);
             $logapi->save();
 
             $status = new statu();
-            $status->status = 'Asignado Chofer:' . $dAsign->driver . '|Tractor:' . $dAsign->truck . '|Semi:' . $dAsign->truck_semi;
-            $status->avisado = 1;
+            $status->status      = 'Asignado Chofer:' . $dAsign->driver . '|Tractor:' . $dAsign->truck . '|Semi:' . $dAsign->truck_semi;
+            $status->avisado     = 1;
             $status->main_status = 'ASIGNADA';
             $status->cntr_number = $dAsign->cntr_number;
             $status->user_status = $dAsign->user;
@@ -163,16 +209,31 @@ class emailController extends Controller
         $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
         $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
         $carga = Carga::whereNull('deleted_at')->where('booking', '=', $booking)->first();
-        $cliente = DB::table('users')
-            ->where('cliente_id', '=', $carga->client_id)
-            ->first();
+
+
+
         if ($tipo == 'problema') {
 
             $qd = DB::table('status')
-                ->select('status.id', 'status.status', 'cntr.cntr_type', 'carga.trader', 'carga.type', 'carga.load_place',
-                'carga.unload_place',
-                'carga.custom_place',
-                'carga.custom_place_impo','carga.ref_customer', 'cntr.confirmacion', 'asign.transport', 'asign.transport_agent', 'asign.truck', 'asign.truck_semi', 'asign.driver', 'drivers.documento')
+                ->select(
+                    'status.id',
+                    'status.status',
+                    'cntr.cntr_type',
+                    'carga.trader',
+                    'carga.type',
+                    'carga.load_place',
+                    'carga.unload_place',
+                    'carga.custom_place',
+                    'carga.custom_place_impo',
+                    'carga.ref_customer',
+                    'cntr.confirmacion',
+                    'asign.transport',
+                    'asign.transport_agent',
+                    'asign.truck',
+                    'asign.truck_semi',
+                    'asign.driver',
+                    'drivers.documento'
+                )
                 ->join('cntr', 'cntr.cntr_number', '=', 'status.cntr_number')
                 ->join('carga', 'carga.booking', '=', 'cntr.booking')
                 ->leftJoin('asign', 'asign.cntr_number', '=', 'status.cntr_number')
@@ -205,51 +266,86 @@ class emailController extends Controller
             ];
 
             if ($sbx[0]->sandbox == 0) {
-                if (!$cliente) {
-                    // Logueás un warning para debug
-                    Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
 
-                    // Podés definir un mail fallback para no perder la notificación
-                    $clienteEmail = 'soporte@botzero.com.ar';
-                } else {
-                    $clienteEmail = $cliente->email;
+                // --- 1) Traer customer (por username) y cliente (por client_id) ---
+                $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
+                $clienteUser  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
+
+                // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
+                $to = [];
+                pushIfEmail($to, $customerUser->email ?? null);
+                pushIfEmail($to, $clienteUser->email  ?? null);
+                $to = array_merge($to, parseEmailList($toEmails ?? ''));
+                $to = array_values(array_unique($to));
+
+                if (empty($to)) {
+                    Log::warning("Sin destinatarios TO en 'cargaAsignada' para carga ID {$carga->id} (booking {$carga->booking}). Uso fallback.");
+                    $to[] = 'soporte@rail.ar';
                 }
-                $customer = DB::table('users')
-                    ->where('username', '=', $carga->user)
-                    ->value('email');
-                $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
+
+                // --- 3) Armar CC (cc_emails de ambos + $ccEmails extra si lo venías usando) ---
+                $cc = array_merge(
+                    parseEmailList($customerUser->cc_emails ?? ''),
+                    parseEmailList($clienteUser->cc_emails  ?? ''),
+                    parseEmailList($ccEmails ?? '')
+                );
+                $cc = array_values(array_unique($cc));
+
+                // --- 4) Armar BCC (acepta string o array) ---
+                $bcc = array_values(array_unique(parseEmailList($inboxEmail ?? '')));
+
+                // --- 5) Envío ---
+                Mail::to($to)
+                    ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                    ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
+                    ->send(new CargaConProblemas($datos, $statusArchivoPath));
+
+                // --- 6) Logs y status (tu lógica original) ---
 
                 Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new CargaConProblemas($datos, $statusArchivoPath));
+
+                // --- 6) Logs y status (tu lógica original) ---
+                $logapi = new logapi();
+                $logapi->user    = $customerUser->username;
+                $logapi->detalle = 'Carga con problemas:' . $cntr
+                    . '|Transporte:' . $datos['transport']
+                    . '|Chofer:' . $datos['driver']
+                    . '|Tractor:' . $datos['truck']
+                    . '|Semi:' . $datos['truck_semi']
+                    . ' | TO:' . implode(', ', $to)
+                    . ' | CC:' . implode(', ', $cc)
+                    . ' | BCC:' . implode(', ', $bcc);
+                $logapi->save();
+                
                 return 'ok';
             } else {
 
-                if (!$cliente) {
-                    // Logueás un warning para debug
-                    Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-
-                    // Podés definir un mail fallback para no perder la notificación
-                    $clienteEmail = 'soporte@botzero.com.ar';
-                } else {
-                    $clienteEmail = $cliente->email;
-                }
-                $customer = DB::table('users')
-                    ->where('username', '=', $carga->user)
-                    ->value('email');
-                $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
-
-                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new CargaConProblemas($datos, $statusArchivoPath));
+               
                 return 'ok';
             }
         } elseif ($tipo == 'stacking') {
 
             $qd = DB::table('status')
-                ->select('status.main_status', 'status.id', 'status.status', 'cntr.cntr_type', 
-                'carga.trader', 'carga.type', 'carga.ref_customer', 
-                'carga.load_place',
+                ->select(
+                    'status.main_status',
+                    'status.id',
+                    'status.status',
+                    'cntr.cntr_type',
+                    'carga.trader',
+                    'carga.type',
+                    'carga.ref_customer',
+                    'carga.load_place',
                     'carga.unload_place',
                     'carga.custom_place',
                     'carga.custom_place_impo',
-                'cntr.confirmacion', 'asign.transport', 'asign.transport_agent', 'asign.truck', 'asign.truck_semi', 'asign.driver', 'drivers.documento')
+                    'cntr.confirmacion',
+                    'asign.transport',
+                    'asign.transport_agent',
+                    'asign.truck',
+                    'asign.truck_semi',
+                    'asign.driver',
+                    'drivers.documento'
+                )
                 ->join('cntr', 'cntr.cntr_number', '=', 'status.cntr_number')
                 ->join('carga', 'carga.booking', '=', 'cntr.booking')
                 ->leftJoin('asign', 'asign.cntr_number', '=', 'status.cntr_number')
@@ -283,49 +379,80 @@ class emailController extends Controller
             ];
 
             if ($sbx[0]->sandbox == 0) {
-                if (!$cliente) {
-                    // Logueás un warning para debug
-                    Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+                // --- 1) Traer customer (por username) y cliente (por client_id) ---
+                $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
+                $clienteUser  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
 
-                    // Podés definir un mail fallback para no perder la notificación
-                    $clienteEmail = 'soporte@botzero.com.ar';
-                } else {
-                    $clienteEmail = $cliente->email;
+                // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
+                $to = [];
+                pushIfEmail($to, $customerUser->email ?? null);
+                pushIfEmail($to, $clienteUser->email  ?? null);
+                $to = array_merge($to, parseEmailList($toEmails ?? ''));
+                $to = array_values(array_unique($to));
+
+                if (empty($to)) {
+                    Log::warning("Sin destinatarios TO en 'cargaAsignada' para carga ID {$carga->id} (booking {$carga->booking}). Uso fallback.");
+                    $to[] = 'soporte@rail.ar';
                 }
-                $customer = DB::table('users')
-                    ->where('username', '=', $carga->user)
-                    ->value('email');
-                $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
-                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)
+
+                // --- 3) Armar CC (cc_emails de ambos + $ccEmails extra si lo venías usando) ---
+                $cc = array_merge(
+                    parseEmailList($customerUser->cc_emails ?? ''),
+                    parseEmailList($clienteUser->cc_emails  ?? ''),
+                    parseEmailList($ccEmails ?? '')
+                );
+                $cc = array_values(array_unique($cc));
+
+                // --- 4) Armar BCC (acepta string o array) ---
+                $bcc = array_values(array_unique(parseEmailList($inboxEmail ?? '')));
+
+                // --- 5) Envío ---
+                Mail::to($to)
+                    ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                    ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                     ->send(new IngresadoStacking($datos, $statusArchivoPath));
+
+                // --- 6) Logs y status (tu lógica original) ---
+                $logapi = new logapi();
+                $logapi->user    = $customerUser->username;
+                $logapi->detalle = 'Carga ingresada Stackign:' . $cntr
+                    . '|Transporte:' . $datos['transport']
+                    . '|Chofer:' . $datos['driver']
+                    . '|Tractor:' . $datos['truck']
+                    . '|Semi:' . $datos['truck_semi']
+                    . ' | TO:' . implode(', ', $to)
+                    . ' | CC:' . implode(', ', $cc)
+                    . ' | BCC:' . implode(', ', $bcc);
+                $logapi->save();
+                
                 return 'ok';
+                
             } else {
-                if (!$cliente) {
-                    // Logueás un warning para debug
-                    Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-
-                    // Podés definir un mail fallback para no perder la notificación
-                    $clienteEmail = 'soporte@botzero.com.ar';
-                } else {
-                    $clienteEmail = $cliente->email;
-                }
-                $customer = DB::table('users')
-                    ->where('username', '=', $carga->user)
-                    ->value('email');
-                $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
-                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)
-                    ->send(new IngresadoStacking($datos, $statusArchivoPath));
+                
                 return 'ok';
             }
         } elseif ($tipo == 'terminada') {
 
             $qd = DB::table('status')
-                ->select('status.id', 'status.status', 'cntr.cntr_type', 
-                'carga.trader', 'carga.type', 'carga.ref_customer', 
-                'carga.load_place',
+                ->select(
+                    'status.id',
+                    'status.status',
+                    'cntr.cntr_type',
+                    'carga.trader',
+                    'carga.type',
+                    'carga.ref_customer',
+                    'carga.load_place',
                     'carga.unload_place',
                     'carga.custom_place',
-                    'carga.custom_place_impo','cntr.confirmacion', 'asign.transport', 'asign.transport_agent', 'asign.truck', 'asign.truck_semi', 'asign.driver', 'drivers.documento')
+                    'carga.custom_place_impo',
+                    'cntr.confirmacion',
+                    'asign.transport',
+                    'asign.transport_agent',
+                    'asign.truck',
+                    'asign.truck_semi',
+                    'asign.driver',
+                    'drivers.documento'
+                )
                 ->join('cntr', 'cntr.cntr_number', '=', 'status.cntr_number')
                 ->join('carga', 'carga.booking', '=', 'cntr.booking')
                 ->leftJoin('asign', 'asign.cntr_number', '=', 'status.cntr_number')
@@ -358,38 +485,56 @@ class emailController extends Controller
             ];
 
             if ($sbx[0]->sandbox == 0) {
-                if (!$cliente) {
-                    // Logueás un warning para debug
-                    Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+                // --- 1) Traer customer (por username) y cliente (por client_id) ---
+                $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
+                $clienteUser  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
 
-                    // Podés definir un mail fallback para no perder la notificación
-                    $clienteEmail = 'soporte@botzero.com.ar';
-                } else {
-                    $clienteEmail = $cliente->email;
+                // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
+                $to = [];
+                pushIfEmail($to, $customerUser->email ?? null);
+                pushIfEmail($to, $clienteUser->email  ?? null);
+                $to = array_merge($to, parseEmailList($toEmails ?? ''));
+                $to = array_values(array_unique($to));
+
+                if (empty($to)) {
+                    Log::warning("Sin destinatarios TO en 'cargaAsignada' para carga ID {$carga->id} (booking {$carga->booking}). Uso fallback.");
+                    $to[] = 'soporte@rail.ar';
                 }
-                $customer = DB::table('users')
-                    ->where('username', '=', $carga->user)
-                    ->value('email');
-                $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
-                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)
+
+                // --- 3) Armar CC (cc_emails de ambos + $ccEmails extra si lo venías usando) ---
+                $cc = array_merge(
+                    parseEmailList($customerUser->cc_emails ?? ''),
+                    parseEmailList($clienteUser->cc_emails  ?? ''),
+                    parseEmailList($ccEmails ?? '')
+                );
+                $cc = array_values(array_unique($cc));
+
+                // --- 4) Armar BCC (acepta string o array) ---
+                $bcc = array_values(array_unique(parseEmailList($inboxEmail ?? '')));
+
+                // --- 5) Envío ---
+                Mail::to($to)
+                    ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                    ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                     ->send(new cargaTerminada($datos, $statusArchivoPath));
+
+                // --- 6) Logs y status (tu lógica original) ---
+                $logapi = new logapi();
+                $logapi->user    = $customerUser->username;
+                $logapi->detalle = 'Carga con Terminada:' . $cntr
+                    . '|Transporte:' . $datos['transport']
+                    . '|Chofer:' . $datos['driver']
+                    . '|Tractor:' . $datos['truck']
+                    . '|Semi:' . $datos['truck_semi']
+                    . ' | TO:' . implode(', ', $to)
+                    . ' | CC:' . implode(', ', $cc)
+                    . ' | BCC:' . implode(', ', $bcc);
+                $logapi->save();
+                
                 return 'ok';
+                
             } else {
-                if (!$cliente) {
-                    // Logueás un warning para debug
-                    Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-
-                    // Podés definir un mail fallback para no perder la notificación
-                    $clienteEmail = 'soporte@botzero.com.ar';
-                } else {
-                    $clienteEmail = $cliente->email;
-                }
-                $customer = DB::table('users')
-                    ->where('username', '=', $carga->user)
-                    ->value('email');
-                $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
-                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)
-                    ->send(new cargaTerminada($datos, $statusArchivoPath));
+               
                 return 'ok';
             }
         } else {
@@ -467,51 +612,56 @@ class emailController extends Controller
             ];
 
             if ($sbx[0]->sandbox == 0) {
-                if (!$cliente) {
-                    // Logueás un warning para debug
-                    Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
+               // --- 1) Traer customer (por username) y cliente (por client_id) ---
+               $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
+               $clienteUser  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
 
-                    // Podés definir un mail fallback para no perder la notificación
-                    $clienteEmail = 'soporte@botzero.com.ar';
-                } else {
-                    $clienteEmail = $cliente->email;
-                }
+               // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
+               $to = [];
+               pushIfEmail($to, $customerUser->email ?? null);
+               pushIfEmail($to, $clienteUser->email  ?? null);
+               $to = array_merge($to, parseEmailList($toEmails ?? ''));
+               $to = array_values(array_unique($to));
 
-                $customer = DB::table('users')
-                    ->where('username', '=', $carga->user)
-                    ->value('email');
+               if (empty($to)) {
+                   Log::warning("Sin destinatarios TO en 'cargaAsignada' para carga ID {$carga->id} (booking {$carga->booking}). Uso fallback.");
+                   $to[] = 'soporte@rail.ar';
+               }
 
-                $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
+               // --- 3) Armar CC (cc_emails de ambos + $ccEmails extra si lo venías usando) ---
+               $cc = array_merge(
+                   parseEmailList($customerUser->cc_emails ?? ''),
+                   parseEmailList($clienteUser->cc_emails  ?? ''),
+                   parseEmailList($ccEmails ?? '')
+               );
+               $cc = array_values(array_unique($cc));
 
-                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new CamnioStatus($datos, $statusArchivoPath));
+               // --- 4) Armar BCC (acepta string o array) ---
+               $bcc = array_values(array_unique(parseEmailList($inboxEmail ?? '')));
 
-                $logApi = new logapi();
-                $logApi->user = $user;
-                $logApi->detalle = "envio email camnioStatus to:" . implode(', ', $toEmails);
-                $logApi->save();
-                return 'ok';
+               // --- 5) Envío ---
+               Mail::to($to)
+                   ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                   ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
+                   ->send(new CamnioStatus($datos, $statusArchivoPath));
+                   
+               // --- 6) Logs y status (tu lógica original) ---
+               $logapi = new logapi();
+               $logapi->user    = $customerUser->username;
+               $logapi->detalle = 'Carga Cambio Status:' . $datos['status']
+                   . '|Transporte:' . $datos['transport']
+                   . '|Chofer:' . $datos['driver']
+                   . '|Tractor:' . $datos['truck']
+                   . '|Semi:' . $datos['truck_semi']
+                   . ' | TO:' . implode(', ', $to)
+                   . ' | CC:' . implode(', ', $cc)
+                   . ' | BCC:' . implode(', ', $bcc);
+               $logapi->save();
+               
+               return 'ok';
+                
             } else {
-                if (!$cliente) {
-                    // Logueás un warning para debug
-                    Log::warning("Cliente no encontrado para carga ID {$carga->id} (booking {$carga->booking})");
-
-                    // Podés definir un mail fallback para no perder la notificación
-                    $clienteEmail = 'satelitales@btz.ar';
-                } else {
-                    $clienteEmail = $cliente->email;
-                }
-
-                $customer = DB::table('users')
-                    ->where('username', '=', $carga->user)
-                    ->value('email');
-
-                $toEmails = array_merge([$customer, $clienteEmail], (array) $toEmails);
-
-                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new CamnioStatus($datos, $statusArchivoPath));
-                $logApi = new logapi();
-                $logApi->user = $user;
-                $logApi->detalle = "+ Sandbox + envio email camnioStatus to: ['equipoDemo1@botzero.com.ar', 'equipodemo2@botzero.com.ar', 'equipodemo2@botzero.com.ar']";
-                $logApi->save();
+                
                 return 'ok';
             }
         }

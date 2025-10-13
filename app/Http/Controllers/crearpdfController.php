@@ -637,6 +637,17 @@ public function carga($cntr_number)
             return 'no hay asignacion para ese camion';
         }
     }
+    function parseEmailList($value): array {
+        if (!$value) return [];
+        // normalizo separadores a coma
+        $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
+        // split, trim, filtro vacíos y no válidos
+        $arr = array_filter(array_map('trim', explode(',', $normalized)), function ($e) {
+            return filter_var($e, FILTER_VALIDATE_EMAIL);
+        });
+        // dedupe y reindex
+        return array_values(array_unique($arr));
+    }
 
 
     public function vacio($id_cntr)

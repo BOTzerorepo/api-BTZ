@@ -49,7 +49,7 @@ class TransportController extends Controller
     {
         try {
             $company = $request->input('company');
-            $transportes = Transport::whereNull('deleted_at')->where('empresa','=', $company)->orderBy('razon_social', 'asc')->get();
+            $transportes = Transport::whereNull('deleted_at')->where('empresa', '=', $company)->orderBy('razon_social', 'asc')->get();
             return response()->json([
                 'data' => $transportes,
                 'success' => true
@@ -62,7 +62,7 @@ class TransportController extends Controller
             ], 500);
         }
     }
-    
+
     public function indexTransporteCustomer($id_customer)
     {
         $transportes = Transport::whereNull('deleted_at')->where('customer_id', '=', $id_customer)->orderBy('razon_social', 'asc')->get();
@@ -168,6 +168,18 @@ class TransportController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+    function parseEmailList($value): array
+    {
+        if (!$value) return [];
+        // normalizo separadores a coma
+        $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
+        // split, trim, filtro vacíos y no válidos
+        $arr = array_filter(array_map('trim', explode(',', $normalized)), function ($e) {
+            return filter_var($e, FILTER_VALIDATE_EMAIL);
+        });
+        // dedupe y reindex
+        return array_values(array_unique($arr));
     }
 
     /**
@@ -398,30 +410,58 @@ class TransportController extends Controller
 
             if ($sbx[0]->sandbox == 0) {
 
-                $customer = DB::table('users')
-                    ->where('username', '=', $carga->user)
-                    ->value('email');
-                $toEmails = array_merge([$customer], (array) $toEmails);
-               $mailCustomer =  Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new transporteAsignado($datos, $date));
-               Log::info('Mail enviado a: ' . implode(', ', $toEmails) . ' | CC: ' . implode(', ', $ccEmails) . ' | BCC: ' . $inboxEmail);
-                // Enviar solo al correo del transporte
+                // --- 1) Traer customer (por username) y cliente (por client_id) ---
+                $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
+                $clienteUser  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first(); 
+
+                // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
+                $to = [];
+                pushIfEmail($to, $customerUser->email ?? null);
+                pushIfEmail($to, $clienteUser->email  ?? null);
+                $to = array_merge($to, parseEmailList($toEmails ?? ''));
+                $to = array_values(array_unique($to));
+
+                if (empty($to)) {
+                    Log::warning("Sin destinatarios TO en 'carga Asignada' para carga ID {$carga->id} (booking {$carga->booking}). Uso fallback.");
+                    $to[] = 'soporte@rail.ar';
+                }
+
+                // --- 3) Armar CC (cc_emails de ambos + $ccEmails extra si lo venías usando) ---
+                $cc = array_merge(
+                    parseEmailList($customerUser->cc_emails ?? ''),
+                    parseEmailList($clienteUser->cc_emails  ?? ''),
+                    parseEmailList($ccEmails ?? '')
+                );
+                $cc = array_values(array_unique($cc));
+
+                // --- 4) Armar BCC (acepta string o array) ---
+                $bcc = array_values(array_unique(parseEmailList($inboxEmail ?? '')));
+
+                // --- 5) Envío ---
+                Mail::to($to)
+                    ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                    ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
+                    ->send(new transporteAsignado($datos, $date));
+
+                // --- 6) Logs y status (tu lógica original) ---
+                $logapi = new logapi();
+                $logapi->user    = $customerUser->username;
+                $logapi->detalle = 'Tranporte asiganado a la carga  ID:' . $cntrId
+                    . ' | TO:' . implode(', ', $to)
+                    . ' | CC:' . implode(', ', $cc)
+                    . ' | BCC:' . implode(', ', $bcc);
+                $logapi->save();
+
+                return 'ok';
+
+                //Enviar mail
                 if ($transporteMail) {
                     Mail::to($transporteMail->email)
                         ->bcc($inboxEmail)
                         ->send(new transporteAsignado($datos, $date));
                 }
             } else {
-                $customer = DB::table('users')
-                ->where('username', '=', $carga->user)
-                ->value('email');
-            $toEmails = array_merge([$customer], (array) $toEmails);
-            Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new transporteAsignado($datos, $date));
-            // Enviar solo al correo del transporte
-            if ($transporteMail) {
-                Mail::to($transporteMail->email)
-                    ->bcc($inboxEmail)
-                    ->send(new transporteAsignado($datos, $date));
-            }
+                return 'ok';
             }
 
             DB::commit();
@@ -556,17 +596,52 @@ class TransportController extends Controller
             $carga = Carga::whereNull('deleted_at')->where('booking', '=', $asign->booking)->first();
 
             if ($sbx[0]->sandbox == 0) {
-                $customer = DB::table('users')
-                    ->where('username', '=', $carga->user)
-                    ->value('email');
-                $toEmails = array_merge([$customer], (array) $toEmails);
-                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new asignarUnidadTransporte($datos, $date));
+
+                // --- 1) Traer customer (por username) y cliente (por client_id) ---
+                $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
+                /* $clienteUser  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first(); */
+
+                // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
+                $to = [];
+                pushIfEmail($to, $customerUser->email ?? null);
+                pushIfEmail($to, $clienteUser->email  ?? null);
+                $to = array_merge($to, parseEmailList($toEmails ?? ''));
+                $to = array_values(array_unique($to));
+
+                if (empty($to)) {
+                    Log::warning("Sin destinatarios TO en 'asignarUnidadTrasnporte' para carga ID {$carga->id} (booking {$carga->booking}). Uso fallback.");
+                    $to[] = 'soporte@rail.ar';
+                }
+
+                // --- 3) Armar CC (cc_emails de ambos + $ccEmails extra si lo venías usando) ---
+                $cc = array_merge(
+                    parseEmailList($customerUser->cc_emails ?? ''),
+                    parseEmailList($clienteUser->cc_emails  ?? ''),
+                    parseEmailList($ccEmails ?? '')
+                );
+                $cc = array_values(array_unique($cc));
+
+                // --- 4) Armar BCC (acepta string o array) ---
+                $bcc = array_values(array_unique(parseEmailList($inboxEmail ?? '')));
+
+                // --- 5) Envío ---
+                Mail::to($to)
+                    ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                    ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
+                    ->send(new asignarUnidadTransporte($datos, $date));
+
+                // --- 6) Logs y status (tu lógica original) ---
+                $logapi = new logapi();
+                $logapi->user    = $customerUser->username;
+                $logapi->detalle = 'Tranporte asiganado a la carga  ID:' . $cntrId
+                    . ' | TO:' . implode(', ', $to)
+                    . ' | CC:' . implode(', ', $cc)
+                    . ' | BCC:' . implode(', ', $bcc);
+                $logapi->save();
+
+                return 'ok';
             } else {
-                $customer = DB::table('users')
-                    ->where('username', '=', $carga->user)
-                    ->value('email');
-                $toEmails = array_merge([$customer], (array) $toEmails);
-                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new asignarUnidadTransporte($datos, $date));
+                return 'ok';
             }
 
             DB::commit();
@@ -740,7 +815,7 @@ class TransportController extends Controller
                 'cntr_seal' => $asignMail->cntr_seal,
 
             ];
-            
+
             //Enviar mail
             $sbx = DB::table('variables')->select('sandbox')->get();
             $inboxEmail = env('INBOX_EMAIL');
@@ -750,16 +825,51 @@ class TransportController extends Controller
             $carga = Carga::whereNull('deleted_at')->where('booking', '=', $asign->booking)->first();
 
             if ($sbx[0]->sandbox == 0) {
-                $customer = DB::table('users')
-                ->where('username', '=', $carga->user)
-                ->value('email');
-                $toEmails = array_merge([$customer], (array) $toEmails);
+                // --- 1) Traer customer (por username) y cliente (por client_id) ---
+                $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
+                $clienteUser  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
 
-                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaAsignada($datos, $date));
-                
+                // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
+                $to = [];
+                pushIfEmail($to, $customerUser->email ?? null);
+                pushIfEmail($to, $clienteUser->email  ?? null);
+                $to = array_merge($to, parseEmailList($toEmails ?? ''));
+                $to = array_values(array_unique($to));
+
+                if (empty($to)) {
+                    Log::warning("Sin destinatarios TO en 'Confitmación Unidad' para carga ID {$carga->id} (booking {$carga->booking}). Uso fallback.");
+                    $to[] = 'soporte@rail.ar';
+                }
+
+                // --- 3) Armar CC (cc_emails de ambos + $ccEmails extra si lo venías usando) ---
+                $cc = array_merge(
+                    parseEmailList($customerUser->cc_emails ?? ''),
+                    parseEmailList($clienteUser->cc_emails  ?? ''),
+                    parseEmailList($ccEmails ?? '')
+                );
+                $cc = array_values(array_unique($cc));
+
+                // --- 4) Armar BCC (acepta string o array) ---
+                $bcc = array_values(array_unique(parseEmailList($inboxEmail ?? '')));
+
+                // --- 5) Envío ---
+                Mail::to($to)
+                    ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                    ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
+                    ->send(new cargaAsignada($datos, $date));
+
+                // --- 6) Logs y status (tu lógica original) ---
                 $logapi = new logapi();
-                $logapi->user = $asignMail->user;
-                $logapi->detalle = 'AsignaUnidadCarga-User:' . $asignMail->user . '|Transporte:' . $asignMail->transport . '|Chofer:' . $asignMail->driver . '|Tractor:' . $asignMail->truck . '|Semi:' . $asignMail->truck_semi;
+                $logapi->user    = $customerUser->username;
+                $logapi->detalle = 'Se confirmó la unidad Asignada:' . $cntrId
+                    . ' | AsignaUnidadCarga-User:' . $asignMail->user
+                    . ' | Transporte:' . $asignMail->transport
+                    . ' | Chofer:' . $asignMail->driver
+                    . ' | Tractor:' . $asignMail->truck
+                    . ' | Semi:' . $asignMail->truck_semi
+                    . ' | TO:' . implode(', ', $to)
+                    . ' | CC:' . implode(', ', $cc)
+                    . ' | BCC:' . implode(', ', $bcc);
                 $logapi->save();
 
                 $status = new statu();
@@ -769,26 +879,11 @@ class TransportController extends Controller
                 $status->cntr_number = $asignMail->cntr_number;
                 $status->user_status = $asignMail->user;
                 $status->save();
+
+                return 'ok';
+
             } else {
-                $customer = DB::table('users')
-                ->where('username', '=', $carga->user)
-                ->value('email');
-                $toEmails = array_merge([$customer], (array) $toEmails);
-
-                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new cargaAsignada($datos, $date));
-
-                $logapi = new logapi();
-                $logapi->user = $asignMail->user;
-                $logapi->detalle = '+ Sandbox + to: ' . implode(',', $toEmails) . ' AsignaUnidadCarga-User:' . $asignMail->user . ' |Transporte:' . $asignMail->transport . '|Chofer:' . $asignMail->driver . '|Tractor:' . $asignMail->truck . '|Semi:' . $asignMail->truck_semi;
-                $logapi->save();
-
-                $status = new statu();
-                $status->status = 'Asignado Chofer:' . $asignMail->driver . '|Tractor:' . $asignMail->truck . '|Semi:' . $asignMail->truck_semi;
-                $status->avisado = 1;
-                $status->main_status = 'ASIGNADA';
-                $status->cntr_number = $asignMail->cntr_number;
-                $status->user_status = $asignMail->user;
-                $status->save();
+                return 'ok';
             }
 
             // ESTADO DEL DRIVE EN OCUPADO

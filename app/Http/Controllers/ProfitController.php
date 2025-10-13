@@ -120,7 +120,7 @@ class ProfitController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             $profit = profit::find($id);
-            $cntr = cntr::where('cntr_number', $$profit->cntr_number)->first();
+            $cntr = cntr::where('cntr_number', $profit->cntr_number)->first();
             return response()->json([
                 'success' => false,
                 'message' => 'Error al eliminar el profit',

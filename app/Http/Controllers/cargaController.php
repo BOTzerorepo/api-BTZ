@@ -582,16 +582,7 @@ class cargaController extends Controller
         return $trader->count();
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
+
 
     /**
      * Update the specified resource in storage.
@@ -602,6 +593,7 @@ class cargaController extends Controller
      */
     public function update(Request $request, $id)
     {
+
         try {
             // Validar los datos entrantes
             $validatedData = $request->validate([
@@ -682,7 +674,7 @@ class cargaController extends Controller
 
             $changes = $carga->getChanges(); // Obtener los datos que fueron modificados
 
-            
+
             // Buscar el CNTR relacionado y actualizarlo
             $cntr = cntr::where('booking', $carga->booking)->firstOrFail();
             $cntrOriginal = $cntr->getOriginal();
@@ -716,20 +708,79 @@ class cargaController extends Controller
             $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
             $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
 
+            function parseEmailList($value): array
+            {
+                if (!$value) return [];
+                // normalizo separadores a coma
+                $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
+                // split, trim, filtro vacíos y no válidos
+                $arr = array_filter(array_map('trim', explode(',', $normalized)), function ($e) {
+                    return filter_var($e, FILTER_VALIDATE_EMAIL);
+                });
+                // dedupe y reindex
+                return array_values(array_unique($arr));
+            }
+
             if ($sbx[0]->sandbox == 0) {
-                $customer = DB::table('users')
+                $user = DB::table('users')
+                    ->select('email', 'cc_emails')
                     ->where('username', '=', $carga->user)
-                    ->value('email');
-                $toEmails = array_merge([$customer], (array) $toEmails);
-                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new UpdateCarga($modificacionesCntr, $modificacionesCarga, $carga));
+                    ->first();
+
+                $to = array_values(array_unique(array_filter(array_map('trim', array_merge(
+                    $user && !empty($user->email) ? [$user->email] : [],
+                    is_array($toEmails ?? null) ? $toEmails : (isset($toEmails) ? [$toEmails] : [])
+                )), function ($e) {
+                    return filter_var($e, FILTER_VALIDATE_EMAIL);
+                })));
+
+                $ccFromUser = parseEmailList($user->cc_emails ?? '');
+                $ccFromCode = parseEmailList($ccEmails ?? '');
+                $cc = array_values(array_unique(array_merge($ccFromUser, $ccFromCode)));
+
+                // 4) BCC (puede ser uno o varios; soporta string o array)
+                $bcc = array_merge(
+                    parseEmailList($inboxEmail ?? ''),
+                    is_array($inboxEmail ?? null) ? parseEmailList(implode(',', $inboxEmail)) : []
+                );
+
+                // 5) Envío
+                Mail::to($to)
+                    ->when(!empty($cc),   fn($m) => $m->cc($cc))
+                    ->when(!empty($bcc),  fn($m) => $m->bcc($bcc))
+                    ->send(new UpdateCarga($modificacionesCntr, $modificacionesCarga, $carga));
             } elseif ($sbx[0]->sandbox == 2) {
+
                 Mail::to(['customer@qa.botzero.com.ar', 'abel.mazzitelli@gmail.com'])->cc(['copiaequipodemo5@botzero.com.ar', 'copiaequipodemo6@botzero.com.ar'])->bcc($inboxEmail)->send(new UpdateCarga($modificacionesCntr, $modificacionesCarga, $carga));
             } else {
-                $customer = DB::table('users')
+
+                $user = DB::table('users')
+                    ->select('email', 'cc_emails')
                     ->where('username', '=', $carga->user)
-                    ->value('email');
-                $toEmails = array_merge([$customer], (array) $toEmails);
-                Mail::to($toEmails)->cc($ccEmails)->bcc($inboxEmail)->send(new UpdateCarga($modificacionesCntr, $modificacionesCarga, $carga));
+                    ->first();
+
+                $to = array_values(array_unique(array_filter(array_map('trim', array_merge(
+                    $user && !empty($user->email) ? [$user->email] : [],
+                    is_array($toEmails ?? null) ? $toEmails : (isset($toEmails) ? [$toEmails] : [])
+                )), function ($e) {
+                    return filter_var($e, FILTER_VALIDATE_EMAIL);
+                })));
+
+                $ccFromUser = parseEmailList($user->cc_emails ?? '');
+                $ccFromCode = parseEmailList($ccEmails ?? '');
+                $cc = array_values(array_unique(array_merge($ccFromUser, $ccFromCode)));
+
+                // 4) BCC (puede ser uno o varios; soporta string o array)
+                $bcc = array_merge(
+                    parseEmailList($inboxEmail ?? ''),
+                    is_array($inboxEmail ?? null) ? parseEmailList(implode(',', $inboxEmail)) : []
+                );
+
+                // 5) Envío
+                Mail::to($to)
+                    ->when(!empty($cc),   fn($m) => $m->cc($cc))
+                    ->when(!empty($bcc),  fn($m) => $m->bcc($bcc))
+                    ->send(new UpdateCarga($modificacionesCntr, $modificacionesCarga, $carga));
             }
             return response()->json(['message' => 'Carga actualizada exitosamente.'], 200);
         } catch (ValidationException $e) {
@@ -752,6 +803,7 @@ class cargaController extends Controller
             return response()->json(['error' => $errorMessage, 'message_type' => 'danger'], 500);
         }
     }
+
 
     /**
      * Remove the specified resource from storage.

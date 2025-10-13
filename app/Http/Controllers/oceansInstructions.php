@@ -133,4 +133,15 @@ class oceansInstructions extends Controller
 
         return 'ok';
     }
+    function parseEmailList($value): array {
+        if (!$value) return [];
+        // normalizo separadores a coma
+        $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
+        // split, trim, filtro vacíos y no válidos
+        $arr = array_filter(array_map('trim', explode(',', $normalized)), function ($e) {
+            return filter_var($e, FILTER_VALIDATE_EMAIL);
+        });
+        // dedupe y reindex
+        return array_values(array_unique($arr));
+    }
 }
