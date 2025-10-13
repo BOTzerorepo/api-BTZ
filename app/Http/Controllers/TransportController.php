@@ -172,14 +172,15 @@ class TransportController extends Controller
     function parseEmailList($value): array
     {
         if (!$value) return [];
-        // normalizo separadores a coma
+        if (is_array($value)) $value = implode(',', $value);
         $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
-        // split, trim, filtro vacíos y no válidos
-        $arr = array_filter(array_map('trim', explode(',', $normalized)), function ($e) {
-            return filter_var($e, FILTER_VALIDATE_EMAIL);
-        });
-        // dedupe y reindex
+        $arr = array_map('trim', explode(',', $normalized));
+        $arr = array_filter($arr, fn($e) => filter_var($e, FILTER_VALIDATE_EMAIL));
         return array_values(array_unique($arr));
+    }
+    function pushIfEmail(&$arr, $email): void
+    {
+        if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) $arr[] = trim($email);
     }
 
     /**
