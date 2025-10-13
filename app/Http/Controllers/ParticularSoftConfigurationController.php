@@ -2,7 +2,7 @@
 // app/Http/Controllers/ParticularSoftConfigurationController.php
 namespace App\Http\Controllers;
 
-use App\Models\ParticularSoftConfiguration;
+use App\Models\particularSoftConfiguration;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
