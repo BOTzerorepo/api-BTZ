@@ -414,7 +414,7 @@ class TransportController extends Controller
 
                 // --- 1) Traer customer (por username) y cliente (por client_id) ---
                 $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
-                $clienteUser  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
+                $clienteUser  = DB::table('users')->where('id', '=', $carga->client_id)->first();
 
                 // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
                 $to = [];
@@ -615,7 +615,7 @@ class TransportController extends Controller
 
                 // --- 1) Traer customer (por username) y cliente (por client_id) ---
                 $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
-                /* $clienteUser  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first(); */
+                /* $clienteUser  = DB::table('users')->where('id', '=', $carga->client_id)->first(); */
 
                 // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
                 $to = [];
@@ -844,7 +844,7 @@ class TransportController extends Controller
             if ($sbx[0]->sandbox == 0) {
                 // --- 1) Traer customer (por username) y cliente (por client_id) ---
                 $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
-                $clienteUser  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
+                $clienteUser  = DB::table('users')->where('id', '=', $carga->client_id)->first();
 
                 // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
                 $to = [];

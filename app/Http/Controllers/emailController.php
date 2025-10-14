@@ -114,7 +114,7 @@ class emailController extends Controller
 
             // --- 1) Traer customer (por username) y cliente (por client_id) ---
             $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
-            $clienteUser  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
+            $clienteUser  = DB::table('users')->where('id', '=', $carga->client_id)->first();
 
             // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
             $to = [];
@@ -196,7 +196,6 @@ class emailController extends Controller
 
     public function cambiaStatus($cntr, $empresa, $booking, $user, $tipo, $statusArchivoPath) //TRABAJANDO
     {
-
         $logapi = new logapi();
         $logapi->user = $user;
         $logapi->detalle = 'Envio Mail_' . $tipo;
@@ -210,8 +209,6 @@ class emailController extends Controller
         $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
         $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
         $carga = Carga::whereNull('deleted_at')->where('booking', '=', $booking)->first();
-
-
         if ($tipo == 'problema') {
 
             $qd = DB::table('status')
@@ -270,7 +267,7 @@ class emailController extends Controller
 
                 // --- 1) Traer customer (por username) y cliente (por client_id) ---
                 $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
-                $clienteUser  = DB::table('users')->where('cliente_id', '=', $carga->cliente_id)->first();
+                $clienteUser  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
 
                 // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
                 $to = [];
@@ -375,12 +372,10 @@ class emailController extends Controller
                 'documento' => $qd->documento,
             ];
             
-
             if ($sbx[0]->sandbox == 0) {
                 // --- 1) Traer customer (por username) y cliente (por client_id) ---
                 $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
-                $clienteUser  = DB::table('users')->where('cliente_id', '=', $carga->cliente_id)->first();
-
+                $clienteUser  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
                 // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
                 $to = [];
                 $this->pushIfEmail($to, $customerUser->email ?? null);
@@ -486,7 +481,7 @@ class emailController extends Controller
             if ($sbx[0]->sandbox == 0) {
                 // --- 1) Traer customer (por username) y cliente (por client_id) ---
                 $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
-                $clienteUser  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
+                $clienteUser  = DB::table('users')->where('id', '=', $carga->client_id)->first();
 
                 // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
                 $to = [];
@@ -614,7 +609,7 @@ class emailController extends Controller
             if ($sbx[0]->sandbox == 0) {
                // --- 1) Traer customer (por username) y cliente (por client_id) ---
                $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
-               $clienteUser  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
+               $clienteUser  = DB::table('users')->where('id', '=', $carga->client_id)->first();
 
                // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
                $to = [];

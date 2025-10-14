@@ -446,7 +446,6 @@ class statusController extends Controller
                 }
             } elseif ($statusGral == "STACKING") {
                 // si la carga está en Staking, Actualizamos el Status en la tabla Status
-
                 $tipo = 'stacking';
             
                 // ENVIAMOS MAIL
@@ -454,7 +453,7 @@ class statusController extends Controller
                 $emailController = new emailController();
                 // Llamar directamente a la función mailStatus
                 $response = $emailController->cambiaStatus($cntr, $empresa, $booking, $user, $tipo, $savedPath);
-
+                
                 if ($response == 'ok') {
 
                     // si todo esta ok, Acualizamos el estado del CNTR
