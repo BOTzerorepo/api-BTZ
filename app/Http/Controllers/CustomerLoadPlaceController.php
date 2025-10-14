@@ -155,7 +155,7 @@ class CustomerLoadPlaceController extends Controller
             if (($sbx[0]->sandbox ?? 0) == 0) {
 
                 // --- 1) Traer usuarios involucrados
-                $cliente  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
+                $cliente  = DB::table('users')->where('id', '=', $carga->clienet_id)->first();
                 $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
 
                 // --- 2) TO: cliente + customer + lo que venga en $toEmails
@@ -312,7 +312,7 @@ class CustomerLoadPlaceController extends Controller
             if (($sbx[0]->sandbox ?? 0) == 0) {
 
                 // --- 1) Traer usuarios involucrados
-                $cliente  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
+                $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
                 $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
 
                 // --- 2) TO: cliente + customer + lo que venga en $toEmails
@@ -375,7 +375,7 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->save();
                 } else {
                     // --- 1) Traer usuarios involucrados
-                $cliente  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
+                $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
                 $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
 
                 // --- 2) TO: cliente + customer + lo que venga en $toEmails
@@ -603,7 +603,7 @@ class CustomerLoadPlaceController extends Controller
             if (($sbx[0]->sandbox ?? 0) == 0) {
 
                 // --- 1) Traer usuarios involucrados
-                $cliente  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
+                $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
                 $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
 
                 // --- 2) TO: cliente + customer + lo que venga en $toEmails
@@ -665,7 +665,7 @@ class CustomerLoadPlaceController extends Controller
                 $logApi->save();
             } else {
                  // --- 1) Traer usuarios involucrados
-                 $cliente  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
+                 $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
                  $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
  
                  // --- 2) TO: cliente + customer + lo que venga en $toEmails
@@ -805,7 +805,7 @@ class CustomerLoadPlaceController extends Controller
             if (($sbx[0]->sandbox ?? 0) == 0) {
 
                 // --- 1) Traer usuarios involucrados
-                $cliente  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
+                $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
                 $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
 
                 // --- 2) TO: cliente + customer + lo que venga en $toEmails
@@ -867,7 +867,7 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->save();
                 } else {
                      // --- 1) Traer usuarios involucrados
-                $cliente  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
+                $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
                 $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
 
                 // --- 2) TO: cliente + customer + lo que venga en $toEmails
@@ -1035,7 +1035,7 @@ class CustomerLoadPlaceController extends Controller
             if (($sbx[0]->sandbox ?? 0) == 0) {
 
                 // --- 1) Traer usuarios involucrados
-                $cliente  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
+                $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
                 $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
 
                 // --- 2) TO: cliente + customer + lo que venga en $toEmails
@@ -1097,7 +1097,7 @@ class CustomerLoadPlaceController extends Controller
                 $logApi->save();
             } else {
                 // --- 1) Traer usuarios involucrados
-                $cliente  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
+                $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
                 $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
 
                 // --- 2) TO: cliente + customer + lo que venga en $toEmails
@@ -1239,7 +1239,7 @@ class CustomerLoadPlaceController extends Controller
             if (($sbx[0]->sandbox ?? 0) == 0) {
 
                 // --- 1) Traer usuarios involucrados
-                $cliente  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
+                $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
                 $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
 
                 // --- 2) TO: cliente + customer + lo que venga en $toEmails
@@ -1300,7 +1300,7 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->save();
                 } else {
                     // --- 1) Traer usuarios involucrados
-                $cliente  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
+                $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
                 $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
 
                 // --- 2) TO: cliente + customer + lo que venga en $toEmails
@@ -1522,7 +1522,7 @@ class CustomerLoadPlaceController extends Controller
             if (($sbx[0]->sandbox ?? 0) == 0) {
 
                 // --- 1) Traer usuarios involucrados
-                $cliente  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
+                $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
                 $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
 
                 // --- 2) TO: cliente + customer + lo que venga en $toEmails
@@ -1586,7 +1586,7 @@ class CustomerLoadPlaceController extends Controller
             } else {
 
                 // --- 1) Traer usuarios involucrados
-                $cliente  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
+                $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
                 $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
 
                 // --- 2) TO: cliente + customer + lo que venga en $toEmails
@@ -1714,7 +1714,7 @@ class CustomerLoadPlaceController extends Controller
             if (($sbx[0]->sandbox ?? 0) == 0) {
 
                 // --- 1) Traer usuarios involucrados
-                $cliente  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
+                $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
                 $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
 
                 // --- 2) TO: cliente + customer + lo que venga en $toEmails
@@ -1777,7 +1777,7 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->save();
                 } else {
                     // --- 1) Traer usuarios involucrados
-                $cliente  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
+                $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
                 $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
 
                 // --- 2) TO: cliente + customer + lo que venga en $toEmails
@@ -1972,7 +1972,7 @@ class CustomerLoadPlaceController extends Controller
             if (($sbx[0]->sandbox ?? 0) == 0) {
 
                 // --- 1) Traer usuarios involucrados
-                $cliente  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
+                $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
                 $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
 
                 // --- 2) TO: cliente + customer + lo que venga en $toEmails
@@ -2034,7 +2034,7 @@ class CustomerLoadPlaceController extends Controller
                 $logApi->save();
             } else {
                 // --- 1) Traer usuarios involucrados
-                $cliente  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
+                $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
                 $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
 
                 // --- 2) TO: cliente + customer + lo que venga en $toEmails
@@ -2176,7 +2176,7 @@ class CustomerLoadPlaceController extends Controller
             if (($sbx[0]->sandbox ?? 0) == 0) {
 
                 // --- 1) Traer usuarios involucrados
-                $cliente  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
+                $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
                 $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
 
                 // --- 2) TO: cliente + customer + lo que venga en $toEmails
@@ -2238,7 +2238,7 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->save();
                 } else {
                     // --- 1) Traer usuarios involucrados
-                $cliente  = DB::table('users')->where('cliente_id', '=', $carga->client_id)->first();
+                $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
                 $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
 
                 // --- 2) TO: cliente + customer + lo que venga en $toEmails

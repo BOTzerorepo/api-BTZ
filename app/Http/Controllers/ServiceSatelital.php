@@ -1638,16 +1638,16 @@ class ServiceSatelital extends Controller
         $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
         $carga = Carga::whereNull('deleted_at')->where('booking', '=', $contenedor->booking)->first();
         /* $cliente = DB::table('users')
-            ->where('cliente_id', '=', $carga->client_id)
+            ->where('cliente_id', '=', $carga->cliente_id)
             ->first(); */
 
            
 
         if ($sbx[0]->sandbox == 0) {
 
-             // --- 1) Traer customer (por username) y cliente (por client_id) ---
+             // --- 1) Traer customer (por username) y cliente (por cliente_id) ---
              $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
-             $clienteUser  = DB::table('users')->where('id', '=', $carga->client_id)->first();
+             $clienteUser  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
 
              // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
              $to = [];
@@ -1768,14 +1768,14 @@ class ServiceSatelital extends Controller
         $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
         $carga = Carga::whereNull('deleted_at')->where('booking', '=', $contenedor->booking)->first();
        /*  $cliente = DB::table('users')
-            ->where('cliente_id', '=', $carga->client_id)
+            ->where('cliente_id', '=', $carga->cliente_id)
             ->first(); */
 
             
         if ($sbx[0]->sandbox == 0) {
-             // --- 1) Traer customer (por username) y cliente (por client_id) ---
+             // --- 1) Traer customer (por username) y cliente (por cliente_id) ---
              $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
-             $clienteUser  = DB::table('users')->where('id', '=', $carga->client_id)->first();
+             $clienteUser  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
 
              // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
              $to = [];
