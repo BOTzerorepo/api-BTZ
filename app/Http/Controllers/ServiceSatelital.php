@@ -898,6 +898,7 @@ class ServiceSatelital extends Controller
     }
     public function flotaCliente($id)
     {
+        set_time_limit(120); // 120 segundos (2 minutos)
 
         $curl = curl_init();
 
@@ -1024,7 +1025,7 @@ class ServiceSatelital extends Controller
                         'ref_customer' => $camion->ref_customer,
                         'agent_port' => $camion->agent_port,
                         'id_carga' => $camion->cargaId,
-                        'url_carga' => env('FRONT_URL') . '/includes/view_carga_user.php?id=' . $camion->cargaId,
+                        'url_carga' => env('FRONT_URL') . '/includes/view_carga.php?id=' . $camion->cargaId,
 
                     );
 
