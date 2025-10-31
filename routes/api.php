@@ -15,7 +15,9 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ParticularSoftConfigurationController;
 use App\Http\Controllers\CustomerCcController;
+use App\Http\Controllers\CustomerLoadPlaceController;
 use App\Http\Controllers\UserCcController;
+use App\Http\Controllers\v2SatelitalController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
@@ -598,8 +600,24 @@ Route::post('user-cct/{userId}', [UserCcController::class, 'updateCc'])->name('u
 
 
 
+Route::prefix('geo')->group(function () {
+  Route::get('/actions', [\App\Http\Controllers\GeoController::class, 'listActions']);   // historial
+  Route::get('/active',  [\App\Http\Controllers\GeoController::class, 'activeState']);   // estado actual por POI
+});
+
+Route::get('v2-satelital', [\App\Http\Controllers\v2SatelitalController::class, 'serviceSatelital']);
+Route::get('v2-checkPoint', [\App\Http\Controllers\v2SatelitalController::class, 'checkPoint']);
+Route::get('run-geofencing', [v2SatelitalController::class, 'runGeofencing']);
 
 
+// === Lugar de CARGA ===
+Route::post('/accionLugarDeCARGA/{id}', [CustomerLoadPlaceController::class, 'accionLugarDeCarga']);
+Route::post('/accionFueraLugarDeCARGA/{id}', [CustomerLoadPlaceController::class, 'accionFueraLugarDeCarga']);
 
+// === Lugar de ADUANA ===
+Route::post('/accionLugarDeADUANA/{id}', [CustomerLoadPlaceController::class, 'accionLugarAduana']);
+Route::post('/accionFueraLugarDeADUANA/{id}', [CustomerLoadPlaceController::class, 'accionFueraLugarAduana']);
 
-
+// === Lugar de DESCARGA ===
+Route::post('/accionLugarDeDESCARGA/{id}', [CustomerLoadPlaceController::class, 'accionLugarDescarga']);
+Route::post('/accionFueraLugarDeDESCARGA/{id}', [CustomerLoadPlaceController::class, 'accionFueraLugarDescarga']);
