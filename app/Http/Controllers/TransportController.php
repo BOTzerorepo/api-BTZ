@@ -518,15 +518,18 @@ class TransportController extends Controller
             ]);
             //Obtener el cntr
             $cntr = cntr::whereNull('deleted_at')->where('id_cntr', '=', $cntrId)->first();
-
+            
             //Obtener el asign
             $asign = asign::whereNull('deleted_at')->where('cntr_number', '=', $cntr->cntr_number)->first();
-
             //Actualizar el asign
             $asign->driver = $request->input('driver');
+
             $asign->truck = $request->input('truck');
+
             $asign->truck_semi = $request->input('truck_semi');
+
             $asign->crt = $request->input('crt');
+
             $asign->fletero_razon_social = $request->input('fletero_razon_social');
             $asign->fletero_cuit = $request->input('fletero_cuit');
             $asign->fletero_domicilio = $request->input('fletero_domicilio');
@@ -610,6 +613,7 @@ class TransportController extends Controller
             {
                 if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) $arr[] = trim($email);
             }
+            DB::commit();
 
             if ($sbx[0]->sandbox == 0) {
 
@@ -660,7 +664,6 @@ class TransportController extends Controller
                 return 'ok';
             }
 
-            DB::commit();
             return response()->json([
                 'message' => 'Unidad asignada correctamente al contenedor: ' .  $cntr->cntr_number,
                 'message_type' => 'success',
@@ -1001,12 +1004,11 @@ class TransportController extends Controller
             $request->validate([
                 'transporte_id' => 'required',
             ]);
+
             //Obtener el cntr
             $cntr = cntr::whereNull('deleted_at')->where('id_cntr', '=', $cntrId)->first();
-
             //Obtener el asign
             $asign = asign::whereNull('deleted_at')->where('cntr_number', '=', $cntr->cntr_number)->first();
-
             // Buscar todos los transportes que coinciden con los IDs
             $transport = Transport::whereNull('deleted_at')->where('id', '=', $request->input('transporte_id'))->first();
             //Actualizar el asign
