@@ -39,4 +39,5 @@ Route::resource('actions', ActionController::class);
 
 Route::view('/geo/panel','geo.panel');
 
+Route::get('/admin/geofencing-monitor', [\App\Http\Controllers\GeofencingMonitorController::class, 'index']);
 

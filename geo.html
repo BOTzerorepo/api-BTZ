@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dashboard Geofencing — BOTzero</title>
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    body{ background:#0b1016; color:#e9eef5; }
+    .navbar{ background:#101826; }
+    .card{ background:#121a28; border:1px solid #1d2b44; }
+    .form-control, .form-select{ background:#0e1522; color:#e9eef5; border-color:#1d2b44; }
+    .form-control:focus, .form-select:focus{ background:#0e1522; color:#fff; border-color:#2f6bff; box-shadow:0 0 0 .25rem rgba(47,107,255,.15); }
+    .badge{ font-weight:600; }
+    .table{ color:#cfe0ff; }
+    .table thead th{ color:#93a7c6; border-bottom-color:#1d2b44; }
+    .table tbody tr{ border-color:#1d2b44; }
+    .pill{ display:inline-flex; align-items:center; gap:.35rem; padding:.15rem .5rem; border-radius:999px; border:1px solid #1d2b44; background:#0e1522; color:#9ec5ff; font-size:.8rem; }
+    .kpi{ font-variant-numeric:tabular-nums; }
+    .cursor-pointer{ cursor:pointer; }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark px-3">
+    <a class="navbar-brand fw-bold" href="#">BOTzero · Geofencing</a>
+    <div class="ms-auto d-flex gap-2">
+      <button id="btnRefresh" class="btn btn-outline-light btn-sm">Refrescar</button>
+      <button id="btnExport" class="btn btn-primary btn-sm">Exportar CSV</button>
+      <button id="btnPrint" class="btn btn-outline-info btn-sm">Imprimir</button>
+    </div>
+  </nav>
+
+  <main class="container-fluid py-3">
+    <!-- Filtros -->
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="row g-3 align-items-end">
+          <div class="col-12 col-md-2">
+            <label class="form-label">Desde</label>
+            <input id="fStart" type="datetime-local" class="form-control" />
+          </div>
+          <div class="col-12 col-md-2">
+            <label class="form-label">Hasta</label>
+            <input id="fEnd" type="datetime-local" class="form-control" />
+          </div>
+          <div class="col-12 col-md-2">
+            <label class="form-label">Zona</label>
+            <select id="fZone" class="form-select">
+              <option value="">(Todas)</option>
+              <option>CARGA</option>
+              <option>ADUANA</option>
+              <option>DESCARGA</option>
+            </select>
+          </div>
+          <div class="col-12 col-md-2">
+            <label class="form-label">CNTR</label>
+            <input id="fCntr" class="form-control" placeholder="MSCU1234567" />
+          </div>
+          <div class="col-12 col-md-2">
+            <label class="form-label">Dominio</label>
+            <input id="fPlate" class="form-control" placeholder="AA123BB" />
+          </div>
+          <div class="col-12 col-md-2 d-grid">
+            <button id="btnApply" class="btn btn-primary">Aplicar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="row g-3 mb-3">
+      <div class="col-6 col-lg-3">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="text-secondary small">Eventos</div>
+                <div id="kpiEvents" class="h3 kpi">0</div>
+              </div>
+              <span class="pill">Total</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="text-secondary small">Unidades</div>
+                <div id="kpiTrucks" class="h3 kpi">0</div>
+              </div>
+              <span class="pill">Dominios</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="text-secondary small">Contenedores</div>
+                <div id="kpiCntrs" class="h3 kpi">0</div>
+              </div>
+              <span class="pill">CNTR únicos</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="card h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="text-secondary small">Prom. Permanencia</div>
+                <div id="kpiAvg" class="h3 kpi">0 min</div>
+              </div>
+              <span class="pill">ENTER→EXIT</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row g-3 mb-3">
+      <div class="col-12 col-lg-4">
+        <div class="card h-100">
+          <div class="card-header">Eventos por zona</div>
+          <div class="card-body"><canvas id="chartByZone" height="220"></canvas></div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-4">
+        <div class="card h-100">
+          <div class="card-header">Promedio permanencia (min) por zona</div>
+          <div class="card-body"><canvas id="chartAvgByZone" height="220"></canvas></div>
+        </div>
+      </div>
+      <div class="col-12 col-lg-4">
+        <div class="card h-100">
+          <div class="card-header">Eventos en el tiempo</div>
+          <div class="card-body"><canvas id="chartOverTime" height="220"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla -->
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Historial de eventos</span>
+        <div class="small text-secondary" id="tableInfo">0 registros</div>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-sm align-middle mb-0">
+            <thead>
+              <tr>
+                <th class="cursor-pointer" data-sort="entered_at">Fecha (entrada)</th>
+                <th data-sort="cntr_number" class="cursor-pointer">CNTR</th>
+                <th data-sort="truck_plate" class="cursor-pointer">Dominio</th>
+                <th data-sort="zone_type" class="cursor-pointer">Zona</th>
+                <th>Entrada</th>
+                <th>Salida</th>
+                <th data-sort="duration_minutes" class="cursor-pointer">Permanencia</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card-footer d-flex justify-content-between align-items-center">
+        <div class="text-secondary small">Orden: <span id="sortLabel">entered_at ↓</span></div>
+        <div class="d-flex align-items-center gap-2">
+          <select id="pageSize" class="form-select form-select-sm" style="width:auto;">
+            <option>10</option>
+            <option selected>25</option>
+            <option>50</option>
+            <option>100</option>
+          </select>
+          <div class="btn-group">
+            <button class="btn btn-outline-light btn-sm" id="prevPage">«</button>
+            <span class="btn btn-outline-secondary btn-sm disabled" id="pageInfo">1 / 1</span>
+            <button class="btn btn-outline-light btn-sm" id="nextPage">»</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+  // ==========================
+  // CONFIG
+  // ==========================
+  const API_URL = "http://127.0.0.1:8000/api/geofencing-events"; // Ajustá si tu ruta es distinta.
+  // Estructura esperada por registro:
+  // { id, cntr_number, truck_plate, zone_type: 'CARGA'|'ADUANA'|'DESCARGA', event_type: 'ENTER'|'EXIT', entered_at, exited_at, duration_minutes, lat, lon }
+
+  // ==========================
+  // Utils
+  // ==========================
+  const $ = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+  const fmt = (d) => d ? new Date(d).toLocaleString() : '—';
+  const zpad = (n) => (n<10?`0${n}`:n);
+  const toISO = (d) => d instanceof Date ? `${d.getFullYear()}-${zpad(d.getMonth()+1)}-${zpad(d.getDate())}T${zpad(d.getHours())}:${zpad(d.getMinutes())}` : '';
+  const download = (filename, text) => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], {type:'text/csv;charset=utf-8;'})); a.download = filename; a.click(); };
+
+  // ==========================
+  // Estado
+  // ==========================
+  let RAW = [];      // datos crudos desde API
+  let VIEW = [];     // datos filtrados/ordenados
+  let PAGE = 1;      // página actual
+  let PAGE_SIZE = 25;
+  let SORT = { key: 'entered_at', dir: 'desc' };
+
+  // ==========================
+  // Mock (fallback si la API falla)
+  // ==========================
+  const MOCK_DATA = [
+    {id:1, cntr_number:'MSCU1234567', truck_plate:'AA123BB', zone_type:'CARGA', event_type:'ENTER', entered_at:new Date(Date.now()-7*3600e3).toISOString(), exited_at:new Date(Date.now()-6*3600e3).toISOString(), duration_minutes:60, lat:-32.9, lon:-68.85},
+    {id:2, cntr_number:'MSCU1234567', truck_plate:'AA123BB', zone_type:'ADUANA', event_type:'ENTER', entered_at:new Date(Date.now()-5*3600e3).toISOString(), exited_at:new Date(Date.now()-4.2*3600e3).toISOString(), duration_minutes:48, lat:-32.89, lon:-68.83},
+    {id:3, cntr_number:'MSCU7654321', truck_plate:'AC987CD', zone_type:'DESCARGA', event_type:'ENTER', entered_at:new Date(Date.now()-2*3600e3).toISOString(), exited_at:new Date(Date.now()-1.5*3600e3).toISOString(), duration_minutes:30, lat:-32.88, lon:-68.84},
+  ];
+
+  // ==========================
+  // Carga de datos
+  // ==========================
+  async function fetchData(){
+    const qs = buildQuery();
+    try{
+      const res = await fetch(`${API_URL}${qs}`);
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      const data = await res.json();
+      RAW = Array.isArray(data) ? data : (data.items || []);
+    }catch(err){
+      console.warn('Falla API, usando MOCK', err);
+      RAW = MOCK_DATA;
+    }
+    applyFilters();
+    renderKPIs();
+    renderTable();
+    renderCharts();
+  }
+
+  function buildQuery(){
+    const p = new URLSearchParams();
+    const start = $('#fStart').value; if(start) p.set('start', start+':00');
+    const end   = $('#fEnd').value;   if(end)   p.set('end',   end+':59');
+    const zone  = $('#fZone').value;  if(zone)  p.set('zone',  zone);
+    const cntr  = $('#fCntr').value.trim(); if(cntr) p.set('cntr', cntr);
+    const plate = $('#fPlate').value.trim(); if(plate) p.set('plate', plate);
+    return p.toString() ? ('?'+p.toString()) : '';
+  }
+
+  // ==========================
+  // Filtros, orden y paginado (client side)
+  // ==========================
+  function applyFilters(){
+    const zone = $('#fZone').value.trim().toUpperCase();
+    const cntr = $('#fCntr').value.trim().toUpperCase();
+    const plate= $('#fPlate').value.trim().toUpperCase();
+    const start= $('#fStart').value ? new Date($('#fStart').value) : null;
+    const end  = $('#fEnd').value ? new Date($('#fEnd').value)   : null;
+
+    VIEW = RAW.filter(r=>{
+      if(zone && r.zone_type !== zone) return false;
+      if(cntr && !String(r.cntr_number||'').toUpperCase().includes(cntr)) return false;
+      if(plate && !String(r.truck_plate||'').toUpperCase().includes(plate)) return false;
+      const t = r.entered_at ? new Date(r.entered_at) : null;
+      if(start && t && t < start) return false;
+      if(end && t && t > end) return false;
+      return true;
+    });
+
+    VIEW.sort((a,b)=>{
+      const va = (a[SORT.key] ?? ''), vb = (b[SORT.key] ?? '');
+      const na = (typeof va === 'number') ? va : (isFinite(Date.parse(va))?Date.parse(va):String(va));
+      const nb = (typeof vb === 'number') ? vb : (isFinite(Date.parse(vb))?Date.parse(vb):String(vb));
+      const cmp = (na<nb ? -1 : na>nb ? 1 : 0);
+      return SORT.dir === 'asc' ? cmp : -cmp;
+    });
+
+    PAGE = 1;
+  }
+
+  // ==========================
+  // KPIs
+  // ==========================
+  function renderKPIs(){
+    const events = VIEW.length;
+    const trucks = new Set(VIEW.map(r=>r.truck_plate)).size;
+    const cntrs  = new Set(VIEW.map(r=>r.cntr_number)).size;
+    const duras  = VIEW.map(r=>r.duration_minutes).filter(x=>typeof x==='number');
+    const avg    = duras.length ? Math.round(duras.reduce((a,b)=>a+b,0)/duras.length) : 0;
+    $('#kpiEvents').textContent = events;
+    $('#kpiTrucks').textContent = trucks;
+    $('#kpiCntrs').textContent  = cntrs;
+    $('#kpiAvg').textContent    = `${avg} min`;
+  }
+
+  // ==========================
+  // Tabla
+  // ==========================
+  function renderTable(){
+    const size = PAGE_SIZE;
+    const start = (PAGE-1)*size;
+    const rows = VIEW.slice(start, start+size);
+    const tbody = $('#tbody');
+    tbody.innerHTML = rows.map(r=>`
+      <tr>
+        <td>${fmt(r.entered_at)}</td>
+        <td><span class="badge text-bg-secondary">${r.cntr_number||'—'}</span></td>
+        <td><span class="badge text-bg-dark">${r.truck_plate||'—'}</span></td>
+        <td><span class="badge ${badgeByZone(r.zone_type)}">${r.zone_type||'—'}</span></td>
+        <td>${fmt(r.entered_at)}</td>
+        <td>${fmt(r.exited_at)}</td>
+        <td>${(r.duration_minutes??'—')} min</td>
+      </tr>
+    `).join('');
+
+    const totalPages = Math.max(1, Math.ceil(VIEW.length/size));
+    $('#pageInfo').textContent = `${PAGE} / ${totalPages}`;
+    $('#tableInfo').textContent = `${VIEW.length} registros`;
+  }
+
+  function badgeByZone(z){
+    switch(z){
+      case 'CARGA': return 'text-bg-info';
+      case 'ADUANA': return 'text-bg-warning';
+      case 'DESCARGA': return 'text-bg-success';
+      default: return 'text-bg-secondary';
+    }
+  }
+
+  // ==========================
+  // Charts
+  // ==========================
+  let chartByZone, chartAvgByZone, chartOverTime;
+
+  function renderCharts(){
+    const zones = ['CARGA','ADUANA','DESCARGA'];
+    const groupBy = (arr, key) => arr.reduce((m,o)=>((m[o[key]]=(m[o[key]]||[]).concat(o)),m),{});
+
+    // Por zona (cantidad)
+    const gZone = groupBy(VIEW,'zone_type');
+    const counts = zones.map(z => (gZone[z]||[]).length);
+
+    // Promedio por zona (min)
+    const avgBy = zones.map(z => {
+      const d = (gZone[z]||[]).map(r=>r.duration_minutes).filter(x=>typeof x==='number');
+      return d.length ? Math.round(d.reduce((a,b)=>a+b,0)/d.length) : 0;
+    });
+
+    // Serie temporal (por día)
+    const gDay = {};
+    for(const r of VIEW){
+      const d = r.entered_at ? new Date(r.entered_at) : null;
+      if(!d) continue;
+      const key = `${d.getFullYear()}-${zpad(d.getMonth()+1)}-${zpad(d.getDate())}`;
+      gDay[key] = (gDay[key]||0)+1;
+    }
+    const days = Object.keys(gDay).sort();
+    const dayVals = days.map(k=>gDay[k]);
+
+    const asBar = (ctx, labels, data, title) => new Chart(ctx, { type:'bar', data:{ labels, datasets:[{ label:title, data }] }, options:{ responsive:true, maintainAspectRatio:false } });
+    const asLine= (ctx, labels, data, title) => new Chart(ctx, { type:'line', data:{ labels, datasets:[{ label:title, data }] }, options:{ responsive:true, maintainAspectRatio:false } });
+
+    chartByZone && chartByZone.destroy();
+    chartAvgByZone && chartAvgByZone.destroy();
+    chartOverTime && chartOverTime.destroy();
+
+    chartByZone = asBar($('#chartByZone'), zones, counts, 'Eventos');
+    chartAvgByZone = asBar($('#chartAvgByZone'), zones, avgBy, 'Prom. min');
+    chartOverTime = asLine($('#chartOverTime'), days, dayVals, 'Eventos por día');
+  }
+
+  // ==========================
+  // Export CSV
+  // ==========================
+  function exportCSV(){
+    const head = ['id','cntr_number','truck_plate','zone_type','event_type','entered_at','exited_at','duration_minutes','lat','lon'];
+    const lines = [head.join(',')].concat(VIEW.map(r => head.map(k => JSON.stringify(r[k]??'')).join(',')));
+    download(`geofencing_${Date.now()}.csv`, lines.join('\n'));
+  }
+
+  // ==========================
+  // Eventos UI
+  // ==========================
+  function initUI(){
+    // Rango por defecto: hoy 00:00 → ahora
+    const now = new Date();
+    const start = new Date(now); start.setHours(0,0,0,0);
+    $('#fStart').value = toISO(start);
+    $('#fEnd').value = toISO(now);
+
+    $('#btnApply').addEventListener('click', async ()=>{ await fetchData(); });
+    $('#btnRefresh').addEventListener('click', async ()=>{ await fetchData(); });
+    $('#btnExport').addEventListener('click', exportCSV);
+    $('#btnPrint').addEventListener('click', ()=>window.print());
+
+    $('#pageSize').addEventListener('change', e=>{ PAGE_SIZE = +e.target.value; renderTable(); });
+    $('#prevPage').addEventListener('click', ()=>{ if(PAGE>1){ PAGE--; renderTable(); }});
+    $('#nextPage').addEventListener('click', ()=>{ const totalPages = Math.max(1, Math.ceil(VIEW.length/PAGE_SIZE)); if(PAGE<totalPages){ PAGE++; renderTable(); }});
+
+    // Sorting
+    $$('th[data-sort]').forEach(th=>{
+      th.addEventListener('click', ()=>{
+        const key = th.getAttribute('data-sort');
+        if(SORT.key===key){ SORT.dir = (SORT.dir==='asc'?'desc':'asc'); } else { SORT.key=key; SORT.dir='asc'; }
+        $('#sortLabel').textContent = `${key} ${SORT.dir==='asc'?'↑':'↓'}`;
+        applyFilters();
+        renderTable();
+      });
+    });
+  }
+
+  // ==========================
+  // Inicio
+  // ==========================
+  (async function(){
+    initUI();
+    await fetchData();
+  })();
+  </script>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>

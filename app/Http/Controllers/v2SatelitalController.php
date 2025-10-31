@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Jobs\ProcessGeofencingJob;
 use App\Models\GeoActionLog;
+use App\Models\GeofencingEvent;
 use App\Models\position;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
@@ -123,7 +124,20 @@ private function checkPoint($v,$tipo,$dist,$TH_IN,$TH_OUT,$lat,$lng,$status)
     $entering = ($dist <= $TH_IN) && (!$last || $last->action_type !== 'ENTER');
     $exiting  = ($dist >  $TH_OUT) && ($last && $last->action_type === 'ENTER');
 
+    // === ENTER ===
     if ($entering) {
+
+        // GUARDAR EVENTO ENTER
+        GeofencingEvent::create([
+            'cntr_number' => $v->cntr_number,
+            'truck_plate' => $v->domain,
+            'lat' => $lat,
+            'lon' => $lng,
+            'zone_type' => $tipo, // CARGA / ADUANA / DESCARGA
+            'event_type' => 'ENTER',
+            'entered_at' => now(),
+        ]);
+
         Log::info("ENTER {$tipo} - {$v->cntr_number}");
         $this->logGeoAction([
             'trip_id'=>$v->trip_id,'cntr_number'=>$v->cntr_number,'domain'=>$v->domain,
@@ -133,14 +147,31 @@ private function checkPoint($v,$tipo,$dist,$TH_IN,$TH_OUT,$lat,$lng,$status)
             'position_lat'=>$lat,'position_lng'=>$lng,
             'status_at_moment'=>$status
         ]);
+
         if($tipo === 'DESCARGA') {
             $this->fireEndpoint(new Client(), env('APP_URL')."/api/accionLugarDescarga/{$v->trip_id}", "accionLugarDescarga", $v->trip_id);
             return;
         }
-        //$this->fireEndpoint(new Client(), env('APP_URL')."/api/accionLugarDe{$tipo}/{$v->trip_id}", "accionLugarDe{$tipo}", $v->trip_id);
     }
 
+    // === EXIT ===
     if ($exiting) {
+
+        // Buscar último ENTER pendiente
+        $ultimo = GeofencingEvent::whereNull('exited_at')
+            ->where('cntr_number',$v->cntr_number)
+            ->where('zone_type',$tipo)
+            ->latest()
+            ->first();
+
+        if ($ultimo) {
+            $ultimo->update([
+                'exited_at' => now(),
+                'duration_minutes' => $ultimo->entered_at?->diffInMinutes(now()),
+                'event_type' => 'EXIT'
+            ]);
+        }
+
         Log::info("EXIT {$tipo} - {$v->cntr_number}");
         $this->logGeoAction([
             'trip_id'=>$v->trip_id,'cntr_number'=>$v->cntr_number,'domain'=>$v->domain,
@@ -150,6 +181,7 @@ private function checkPoint($v,$tipo,$dist,$TH_IN,$TH_OUT,$lat,$lng,$status)
             'position_lat'=>$lat,'position_lng'=>$lng,
             'status_at_moment'=>$status
         ]);
+
         $this->fireEndpoint(new Client(), env('APP_URL')."/api/accionFueraLugarDe{$tipo}/{$v->trip_id}", "accionFueraLugarDe{$tipo}", $v->trip_id);
     }
 }
