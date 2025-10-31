@@ -1067,6 +1067,11 @@ class CustomerLoadPlaceController extends Controller
 
                 // Dedup final TO
                 $to = array_values(array_unique($to));
+
+                $datos['ref_customer'] = $contenedor->ref_customer ?? '-';
+$datos['type']         = $contenedor->type ?? '-';
+$datos['trader']       = $contenedor->trader ?? '-';
+$datos['cntr_type']    = $contenedor->cntr_type ?? '-';
                 // --- 5) Envío
                 Mail::to($to)
                     ->when(!empty($cc),  fn($m) => $m->cc($cc))
