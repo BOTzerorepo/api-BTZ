@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class AkerService
 {
@@ -18,7 +19,7 @@ class AkerService
                 "apiCode"  => env('AKER_API_CODE'),
                 "phone"    => env('AKER_PHONE'),
             ];
-
+            Log::info("Consultando AKER para dominio $domain", $payload);
             $res = Http::acceptJson()->post(env('AKER_API_URL'), $payload);
             if (!$res->successful()) return null;
 
