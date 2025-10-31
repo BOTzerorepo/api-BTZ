@@ -37,4 +37,6 @@ Route::post('/itinerarios', 'App\Http\Controllers\ItinerarioController@guardarFo
 
 Route::resource('actions', ActionController::class);
 
+Route::view('/geo/panel','geo.panel');
+
 

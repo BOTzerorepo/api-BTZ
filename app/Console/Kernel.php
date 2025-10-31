@@ -22,6 +22,20 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')->hourly();
         $schedule->command('revisar:coordenadas')->everyTenMinutes();
+
+        $schedule->call(function () {
+            $tripIds = \Illuminate\Support\Facades\DB::table('cntr')
+                ->join('asign','cntr.cntr_number','=','asign.cntr_number')
+                ->where('cntr.main_status','!=','TERMINADA')
+                ->whereNotNull('asign.truck')
+                ->pluck('cntr.id_cntr')
+                ->unique();
+    
+            foreach ($tripIds as $tid) {
+                dispatch(new \App\Jobs\ProcessTripGeofencing((int)$tid))
+                    ->onQueue('geofencing');
+            }
+        })->everyMinute();
     }
 
     /**
