@@ -30,5 +30,11 @@ return [
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
+    'aker' => [
+    'url'   => env('AKER_API_URL', ''),
+    'code'  => env('AKER_API_CODE', ''),
+    'phone' => env('AKER_PHONE', ''),
+],
+
 
 ];

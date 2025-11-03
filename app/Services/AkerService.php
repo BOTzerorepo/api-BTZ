@@ -16,8 +16,8 @@ class AkerService
                 "patentes" => [$domain],
                 "cercania" => true,
                 "domicilio" => false,
-                "apiCode"  => env('AKER_API_CODE'),
-                "phone"    => env('AKER_PHONE'),
+                "apiCode"  => config('services.aker.code'),
+                "phone"    => config('services.aker.phone'),
             ];
             Log::info("Consultando AKER para dominio $domain", $payload);
             $res = Http::acceptJson()->post(env('AKER_API_URL'), $payload);
