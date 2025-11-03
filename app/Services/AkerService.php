@@ -16,11 +16,11 @@ class AkerService
                 "patentes" => [$domain],
                 "cercania" => true,
                 "domicilio" => false,
-                "apiCode"  => config('services.aker.code'),
-                "phone"    => config('services.aker.phone'),
+                "apiCode"  => 'E6HW19',
+                "phone"    => '2612128105',
             ];
             Log::info("Consultando AKER para dominio $domain", $payload);
-            $res = Http::acceptJson()->post(env('AKER_API_URL'), $payload);
+            $res = Http::acceptJson()->post('https://app.akercontrol.com/ws/v2/servicios', $payload);
             if (!$res->successful()) return null;
 
             $data = $res->json("data.$domain");
