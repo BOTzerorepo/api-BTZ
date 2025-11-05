@@ -1137,7 +1137,7 @@ class ServiceSatelital extends Controller
                 'trucks.vto_poliza',
                 'transports.razon_social',
                 'transports.logo',
-                'trucks.vto_permiso'
+                'trucks.vto_poliza'
             )
             ->where('trucks.domain', '=', $dato->patente)
             ->where('carga.cliente_id', '=', $id)
