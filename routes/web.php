@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\ActionController;
-
+use App\Http\Controllers\TrackingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,4 +40,12 @@ Route::resource('actions', ActionController::class);
 Route::view('/geo/panel','geo.panel');
 
 Route::get('/admin/geofencing-monitor', [\App\Http\Controllers\GeofencingMonitorController::class, 'index']);
+
+Route::get('/dashboard/cma', [\App\Http\Controllers\DashboardCmaController::class, 'index']);
+
+
+Route::get('/viajes', [TrackingController::class, 'index']);
+Route::get('/viajes/{equipment_reference}', [TrackingController::class, 'show']);
+
+
 

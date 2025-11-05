@@ -17,6 +17,7 @@ use App\Http\Controllers\ParticularSoftConfigurationController;
 use App\Http\Controllers\CustomerCcController;
 use App\Http\Controllers\CustomerLoadPlaceController;
 use App\Http\Controllers\GeofencingEventController;
+use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\UserCcController;
 use App\Http\Controllers\v2SatelitalController;
 
@@ -623,3 +624,6 @@ Route::post('/accionFueraLugarDeADUANA/{id}', [CustomerLoadPlaceController::clas
 Route::post('/accionLugarDeDESCARGA/{id}', [CustomerLoadPlaceController::class, 'accionLugarDescarga']);
 Route::post('/accionFueraLugarDeDESCARGA/{id}', [CustomerLoadPlaceController::class, 'accionFueraLugarDescarga']);
 Route::get('/geofencing-events', [GeofencingEventController::class, 'index']);
+
+Route::get('/viajes', [TrackingController::class, 'indexapi']);
+Route::get('/viajes/{equipment_reference}', [TrackingController::class, 'showapi']);
