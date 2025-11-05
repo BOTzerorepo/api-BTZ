@@ -254,6 +254,8 @@ Route::get('/flota', 'App\Http\Controllers\ServiceSatelital@flota');
 Route::get('/flotaId/{id}', 'App\Http\Controllers\ServiceSatelital@flotaID');
 Route::get('/flotaTransport/{transport}', 'App\Http\Controllers\ServiceSatelital@flotaTransport');
 Route::get('/flotaCliente/{cliente}', 'App\Http\Controllers\ServiceSatelital@flotaCliente');
+Route::get('/flotaClienteNew/{cliente}', 'App\Http\Controllers\ServiceSatelital@flotaClienteNew');
+
 
 Route::get('/ejecutarAccionSalida/{id_poi}/{id_cntr}', 'App\Http\Controllers\ServiceSatelital@ejecutarAccionSalida');
 
