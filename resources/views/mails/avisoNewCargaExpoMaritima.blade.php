@@ -4,7 +4,6 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Nueva Expo Marítima</title>
-  <meta name="x-preheader" content="Nueva Expo Marítima para {{ $datos['trader'] ?? 'cliente' }} — detalles y estado."/>
 
   <style>
     body{margin:0;padding:0;background:#F5F5F5;-webkit-text-size-adjust:none;text-size-adjust:none}

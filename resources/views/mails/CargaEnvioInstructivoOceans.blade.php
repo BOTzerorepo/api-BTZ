@@ -4,7 +4,6 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Instructivo de carga</title>
-  <meta name="x-preheader" content="Nuevo instructivo de carga y detalles de la asignación"/>
   <style>
     body { margin:0; padding:0; background:#F5F5F5; }
     table { border-collapse:collapse; }

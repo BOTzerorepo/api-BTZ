@@ -6,7 +6,6 @@
   <title>Asignación de transporte</title>
 
   <!-- Preheader (oculto) -->
-  <meta name="x-preheader" content="Asignación de transporte — Booking {{ $datos['booking'] }}."/>
 
   <style>
     body{margin:0;padding:0;background:#F5F5F5;-webkit-text-size-adjust:none;text-size-adjust:none}

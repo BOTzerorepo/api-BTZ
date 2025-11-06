@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Asignación de unidad provisoria</title>
+  <title></title>
   <meta name="x-preheader" content="Asignación de unidad provisoria — Detalles para {{ $datos['booking'] }}"/>
 
   <style>

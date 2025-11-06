@@ -1067,6 +1067,8 @@ class ServiceSatelital extends Controller
         }
         return $camiones;
     }
+   
+    
 
     public function flotaId($domain)
     {

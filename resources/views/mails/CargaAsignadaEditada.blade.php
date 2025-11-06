@@ -4,7 +4,6 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Editada la asignación de unidad</title>
-  <meta name="x-preheader" content="Editamos la asignación para {{ $datos['booking'] }}"/>
 
   <style>
     body{margin:0;padding:0;background:#F5F5F5;-webkit-text-size-adjust:none;text-size-adjust:none}
