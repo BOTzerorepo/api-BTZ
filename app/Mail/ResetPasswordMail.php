@@ -23,7 +23,9 @@ class ResetPasswordMail extends Mailable
 
     public function build()
     {
-        $url = env('FRONT_URL') . '/reset-pass.php?token=' . $this->token;
+
+        $frontendUrl = env('FRONT_URL', 'https://api-v2.botzero.ar'); // valor por defecto
+        $url = "{$frontendUrl}/reset-pass.php?token={$this->token}";
         return $this->subject('Recuperar contraseña')
             ->view('mails.reset-password')
             ->with(['url' => $url]);
