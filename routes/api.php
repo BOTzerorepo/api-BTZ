@@ -629,3 +629,6 @@ Route::get('/geofencing-events', [GeofencingEventController::class, 'index']);
 
 Route::get('/viajes', [TrackingController::class, 'indexapi']);
 Route::get('/viajes/{equipment_reference}', [TrackingController::class, 'showapi']);
+
+Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword']);
+Route::post('/auth/reset-password', [AuthController::class, 'resetPassword']);
