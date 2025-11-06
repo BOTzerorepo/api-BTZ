@@ -136,6 +136,7 @@ class AuthController extends Controller
     public function forgotPassword(Request $request)
     {
         $request->validate(['email' => 'required|email']);
+        $ruta = env('FRONT_URL');
 
         $user = User::where('email', $request->email)->first();
         if (!$user) {
@@ -149,7 +150,7 @@ class AuthController extends Controller
         );
 
         // Envía mail
-        Mail::to($user->email)->send(new ResetPasswordMail($token));
+        Mail::to($user->email)->send(new ResetPasswordMail($token, $ruta));
 
         return response()->json(['message' => 'Correo enviado']);
     }
