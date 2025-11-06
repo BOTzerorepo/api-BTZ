@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Instructivo de carga</title>
   <!-- Preheader para Gmail/Apple Mail -->
-  <meta name="x-preheader" content="Nuevo instructivo de carga y detalles de la asignación"/>
 
   <style>
     /* Estilos mínimos y seguros */
