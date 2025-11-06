@@ -76,7 +76,7 @@
             <td class="p-24">
               <p>Hola,</p>
               <p>Recibimos una solicitud para restablecer tu contraseña. Haz clic en el siguiente enlace:</p>
-              <p><a href="{{ $url }}">Restablecer contraseña</a></p>
+              <p><a style="color: green;font-weight:600;" href="{{ $url }}">Restablecer contraseña</a></p>
               <p>Si no solicitaste esto, ignora este mensaje.</p>
             </td>
           </tr>
