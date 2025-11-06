@@ -27,7 +27,7 @@ class ResetPasswordMail extends Mailable
     public function build()
     {
 
-        $frontendUrl = env('FRONT_URL',$this->ruta ); // valor por defecto
+        $frontendUrl = env('FRONT_URL','https://totaltradegroup.btz.ar' ); // valor por defecto
         $url = "{$frontendUrl}/reset-pass.php?token={$this->token}";
         return $this->subject('Recuperar contraseña')
             ->view('mails.reset-password')
