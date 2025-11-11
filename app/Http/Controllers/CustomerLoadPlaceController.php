@@ -456,7 +456,7 @@ class CustomerLoadPlaceController extends Controller
     {
         Log::info("CMA: Cambiando flag a {$flag} para contenedor {$cntrNumber}");
 
-        $base = rtrim(env('API_CMA_BOTZERO'), '/');
+        $base ='https://cma-cgm.botzero.ar/api';
         if (!$base) {
             Log::error('CMA: API_CMA_BOTZERO no configurado');
             return ['ok' => false, 'http' => 500, 'error' => 'API_CMA_BOTZERO no configurado'];
@@ -952,7 +952,7 @@ class CustomerLoadPlaceController extends Controller
 
         if ($contenedor->cma_t_o != null) {
 
-            $base    = rtrim(env('API_CMA_BOTZERO'), '/');
+            $base    = 'https://cma-cgm.botzero.ar/api';
             $client = new Client();
             $headers = ['Content-Type' => 'application/json'];
             $request = new Psr7Request('GET', "{$base}/cma/actArrAtCusLoc/{$contenedor->cntr_number}/{$contenedor->cma_t_o}", $headers);
@@ -1402,7 +1402,7 @@ class CustomerLoadPlaceController extends Controller
             $lat     = $place->latitud;
             $lon     = $place->longitud;
 
-            $base    = rtrim(env('API_CMA_BOTZERO'), '/');
+            $base    = 'https://cma-cgm.botzero.ar/api';
             $headers = ['Content-Type' => 'application/json'];
 
             $client = new Client([
@@ -1881,7 +1881,7 @@ class CustomerLoadPlaceController extends Controller
                     ->first();
             }
 
-            $base    = rtrim(env('API_CMA_BOTZERO'), '/');
+            $base    = 'https://cma-cgm.botzero.ar/api';
             $client = new Client();
             $headers = ['Content-Type' => 'application/json'];
             $request = new Psr7Request('GET', "{$base}/cma/estArrAtCusLoc/{$cntr->cma_t_o}/{$cntr->cntr_number}/{$place->lat}/{$place->lon}", $headers);

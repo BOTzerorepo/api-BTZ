@@ -1603,7 +1603,7 @@ class ServiceSatelital extends Controller
         $punto = DB::table('interest_points')->where('id', $puntoActivoId)->first();
         if ($contenedor->cma_t_o != null) {
 
-            $base    = rtrim(env('API_CMA_BOTZERO'), '/');
+            $base    = 'https://cma-cgm.botzero.ar/api';
             $client = new Client();
             $headers = ['Content-Type' => 'application/json'];
             $request = new Psr7Request('GET', "{$base}/cma/estArrAtCusLoc/{$contenedor->cma_t_o}/{$contenedor->cntr_number}/{$punto->latitude}/{$punto->longitude}", $headers);
@@ -1732,7 +1732,7 @@ class ServiceSatelital extends Controller
 
         if ($contenedor->cma_t_o != null) {
 
-            $base    = rtrim(env('API_CMA_BOTZERO'), '/');
+            $base    = 'https://cma-cgm.botzero.ar/api';
             $client = new Client();
             $headers = ['Content-Type' => 'application/json'];
             $request = new Psr7Request('GET', "{$base}/cma/estArrAtCusLoc/{$contenedor->cma_t_o}/{$contenedor->cntr_number}/{$punto->latitude}/{$punto->longitude}", $headers);
