@@ -33,11 +33,7 @@
   </style>
 </head>
 <body style="background:#F5F5F5;margin:0;">
-  <!-- Texto previo oculto para inbox previews -->
-  <span style="display:none !important;visibility:hidden;opacity:0;color:transparent;height:0;width:0;overflow:hidden;">
-    {{ 'Asignación de transporte — Booking ' . $datos['booking'] . '.' }}
-  </span>
-
+ 
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
     <tr><td style="height:24px;"></td></tr>
 
