@@ -41,7 +41,22 @@ class SendGeoEventNotifications implements ShouldQueue
 
             // (usa tu misma lógica de TO/CC/BCC si querés; aquí envío simple)
             $to = config('mail.to_default', 'soporte@rail.ar');
+            \Log::info('POI mail: sending', [
+              'to' => $to,
+              'action' => $this->action ?? null,
+              'cntr' => $cntr->cntr_number ?? null,
+              'poi_id' => $poi->id ?? null,
+            ]);
+            
             Mail::to($to)->send($mailable);
+            
+            \Log::info('POI mail: sent', [
+              'to' => $to,
+              'action' => $this->action ?? null,
+              'cntr' => $cntr->cntr_number ?? null,
+              'poi_id' => $poi->id ?? null,
+            ]);
+
         } catch (\Throwable $e) {
             Log::error('SendGeoEventNotifications mail error: '.$e->getMessage());
         }
