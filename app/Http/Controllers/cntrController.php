@@ -536,4 +536,80 @@ class cntrController extends Controller
             ], 500);
         }
     }
+
+    public function destroyPhysical($id, $user)
+    {
+        $user = User::where('username', '=', $user)->first();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Usuario inválido.'
+            ], 401);
+        }
+
+        //Permisos: SOLO estos pueden borrar CNTR
+        $allowed = ['Traffic', 'Master', 'Customer'];
+        if (!in_array($user->permiso, $allowed, true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No autorizado.'
+            ], 403);
+        }
+
+        //Traigo el CNTR
+        $cntr = DB::table('cntr')
+            ->select('cntr.*')
+            ->where('cntr.id_cntr', '=', $id)
+            ->whereNull('cntr.deleted_at')
+            ->first();
+
+        if (!$cntr) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Contenedor no encontrado.'
+            ], 404);
+        }
+
+        //Validación: no borrar si está confirmado
+        if ((int)($cntr->confirmacion ?? 0) === 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se puede eliminar: el contenedor está confirmado.'
+            ], 409);
+        }
+
+        DB::beginTransaction();
+        try {
+            // 1) Borrado físico de asignación/es (por cntr_number)
+            DB::table('asign')
+                ->where('cntr_number', '=', $cntr->cntr_number)
+                ->delete();
+
+            // 2) Borrado físico del contenedor
+            DB::table('cntr')
+                ->where('id_cntr', '=', $id)
+                ->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Contenedor y asignación eliminados correctamente.',
+                'data' => [
+                    'id_cntr' => (int)$id,
+                    'cntr_number' => $cntr->cntr_number,
+                    'booking' => $cntr->booking,
+                ]
+            ], 200);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error eliminando contenedor/asignación.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

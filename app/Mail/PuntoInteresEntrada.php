@@ -9,17 +9,23 @@ use Illuminate\Queue\SerializesModels;
 class PuntoInteresEntrada extends Mailable
 {
     use Queueable, SerializesModels;
+
+    public $subject;
     public $contenedor;
     public $puntoDeInteres;
-    /**
-     * Create a new message instance.
-     *
-     * @return void
-     */
-    public function __construct($contenedor, $puntoDeInteres )
+
+    public function __construct($contenedor, $puntoDeInteres)
     {
         $this->contenedor = $contenedor;
         $this->puntoDeInteres = $puntoDeInteres;
+
+        $ref    = $contenedor->ref_customer ?? 'SIN REF';
+        $type   = $contenedor->type ?? 'SIN TYPE';
+        $trader = $contenedor->trader ?? 'SIN TRADER';
+        $ct     = $contenedor->cntr_type ?? 'SIN CNTR';
+        $bkg    = $contenedor->booking ?? 'SIN BKG';
+
+        $this->subject = "PI ENTRADA // {$ref} - {$type} - {$trader} - 1 * {$ct} // BKG: {$bkg}.";
     }
 
     public function build()

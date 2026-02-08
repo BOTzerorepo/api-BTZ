@@ -1067,8 +1067,8 @@ class ServiceSatelital extends Controller
         }
         return $camiones;
     }
-   
-    
+
+
 
     public function flotaId($domain)
     {
@@ -1644,58 +1644,57 @@ class ServiceSatelital extends Controller
             ->where('cliente_id', '=', $carga->cliente_id)
             ->first(); */
 
-           
+
 
         if ($sbx[0]->sandbox == 0) {
 
-             // --- 1) Traer customer (por username) y cliente (por cliente_id) ---
-             $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
-             $clienteUser  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+            // --- 1) Traer customer (por username) y cliente (por cliente_id) ---
+            $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
+            $clienteUser  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
 
-             // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
-             $to = [];
-             $this->pushIfEmail($to, $customerUser->email ?? null);
-             $this->pushIfEmail($to, $clienteUser->email  ?? null);
-             $to = array_merge($to, $this->parseEmailList($toEmails ?? ''));
-             $to = array_values(array_unique($to));
+            // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
+            $to = [];
+            $this->pushIfEmail($to, $customerUser->email ?? null);
+            $this->pushIfEmail($to, $clienteUser->email  ?? null);
+            $to = array_merge($to, $this->parseEmailList($toEmails ?? ''));
+            $to = array_values(array_unique($to));
 
-             if (empty($to)) {
-                 Log::warning("Sin destinatarios TO en 'cargaAsignada' para carga ID {$carga->id} (booking {$carga->booking}). Uso fallback.");
-                 $to[] = 'soporte@rail.ar';
-             }
+            if (empty($to)) {
+                Log::warning("Sin destinatarios TO en 'cargaAsignada' para carga ID {$carga->id} (booking {$carga->booking}). Uso fallback.");
+                $to[] = 'soporte@rail.ar';
+            }
 
-             // --- 3) Armar CC (cc_emails de ambos + $ccEmails extra si lo venías usando) ---
-             $cc = array_merge(
+            // --- 3) Armar CC (cc_emails de ambos + $ccEmails extra si lo venías usando) ---
+            $cc = array_merge(
                 $this->parseEmailList($customerUser->cc_emails ?? ''),
                 $this->parseEmailList($clienteUser->cc_emails  ?? ''),
                 $this->parseEmailList($ccEmails ?? '')
-             );
-             $cc = array_values(array_unique($cc));
+            );
+            $cc = array_values(array_unique($cc));
 
-             // --- 4) Armar BCC (acepta string o array) ---
-             $bcc = array_values(array_unique($this->parseEmailList($inboxEmail ?? '')));
+            // --- 4) Armar BCC (acepta string o array) ---
+            $bcc = array_values(array_unique($this->parseEmailList($inboxEmail ?? '')));
 
-             // --- 5) Envío ---
-             Mail::to($to)
-                 ->when(!empty($cc),  fn($m) => $m->cc($cc))
-                 ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
-                 ->send(new PuntoInteresEntrada($contenedor, $punto));
-                 
-             // --- 6) Logs y status (tu lógica original) ---
-             $logapi = new logapi();
-             $logapi->user    = $customerUser->username;
-             $logapi->detalle = 'Carga Entro a punto de interés id:' . $punto->id;
-             $logapi->save();
-             
-             return 'ok';
+            // --- 5) Envío ---
+            Mail::to($to)
+                ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
+                ->send(new PuntoInteresEntrada($contenedor, $punto));
 
+            // --- 6) Logs y status (tu lógica original) ---
+            $logapi = new logapi();
+            $logapi->user    = $customerUser->username;
+            $logapi->detalle = 'Carga Entro a punto de interés id:' . $punto->id;
+            $logapi->save();
+
+            return 'ok';
         } else {
 
             return 'sandbox';
         }
         //ENTRADA
         if ($punto->accion_correo_customer_entrada) {
-/* 
+            /* 
             if ($sbx[0]->sandbox == 0) {
 
                 $customer = DB::table('users')->where('username', $contenedor->user)->first();
@@ -1770,56 +1769,55 @@ class ServiceSatelital extends Controller
         $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
         $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
         $carga = Carga::whereNull('deleted_at')->where('booking', '=', $contenedor->booking)->first();
-       /*  $cliente = DB::table('users')
+        /*  $cliente = DB::table('users')
             ->where('cliente_id', '=', $carga->cliente_id)
             ->first(); */
 
-            
+
         if ($sbx[0]->sandbox == 0) {
-             // --- 1) Traer customer (por username) y cliente (por cliente_id) ---
-             $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
-             $clienteUser  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+            // --- 1) Traer customer (por username) y cliente (por cliente_id) ---
+            $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
+            $clienteUser  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
 
-             // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
-             $to = [];
-             $this->pushIfEmail($to, $customerUser->email ?? null);
-             $this->pushIfEmail($to, $clienteUser->email  ?? null);
-             $to = array_merge($to, $this->parseEmailList($toEmails ?? ''));
-             $to = array_values(array_unique($to));
+            // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
+            $to = [];
+            $this->pushIfEmail($to, $customerUser->email ?? null);
+            $this->pushIfEmail($to, $clienteUser->email  ?? null);
+            $to = array_merge($to, $this->parseEmailList($toEmails ?? ''));
+            $to = array_values(array_unique($to));
 
-             if (empty($to)) {
-                 Log::warning("Sin destinatarios TO en 'cargaAsignada' para carga ID {$carga->id} (booking {$carga->booking}). Uso fallback.");
-                 $to[] = 'soporte@rail.ar';
-             }
+            if (empty($to)) {
+                Log::warning("Sin destinatarios TO en 'cargaAsignada' para carga ID {$carga->id} (booking {$carga->booking}). Uso fallback.");
+                $to[] = 'soporte@rail.ar';
+            }
 
-             // --- 3) Armar CC (cc_emails de ambos + $ccEmails extra si lo venías usando) ---
-             $cc = array_merge(
+            // --- 3) Armar CC (cc_emails de ambos + $ccEmails extra si lo venías usando) ---
+            $cc = array_merge(
                 $this->parseEmailList($customerUser->cc_emails ?? ''),
                 $this->parseEmailList($clienteUser->cc_emails  ?? ''),
                 $this->parseEmailList($ccEmails ?? '')
-             );
-             $cc = array_values(array_unique($cc));
+            );
+            $cc = array_values(array_unique($cc));
 
-             // --- 4) Armar BCC (acepta string o array) ---
-             $bcc = array_values(array_unique($this->parseEmailList($inboxEmail ?? '')));
+            // --- 4) Armar BCC (acepta string o array) ---
+            $bcc = array_values(array_unique($this->parseEmailList($inboxEmail ?? '')));
 
-             // --- 5) Envío ---
-             Mail::to($to)
-                 ->when(!empty($cc),  fn($m) => $m->cc($cc))
-                 ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
-                 ->send(new PuntoInteresSalida($contenedor, $punto));
-                 
-             // --- 6) Logs y status (tu lógica original) ---
-             $logapi = new logapi();
-             $logapi->user    = $customerUser->username;
-             $logapi->detalle = 'Carga Salio del punoto de interés ID:' . $puntoActivoId
-                 . ' | TO:' . implode(', ', $to)
-                 . ' | CC:' . implode(', ', $cc)
-                 . ' | BCC:' . implode(', ', $bcc);
-             $logapi->save();
-             
-             return 'ok';
-            
+            // --- 5) Envío ---
+            Mail::to($to)
+                ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
+                ->send(new PuntoInteresSalida($contenedor, $punto));
+
+            // --- 6) Logs y status (tu lógica original) ---
+            $logapi = new logapi();
+            $logapi->user    = $customerUser->username;
+            $logapi->detalle = 'Carga Salio del punoto de interés ID:' . $puntoActivoId
+                . ' | TO:' . implode(', ', $to)
+                . ' | CC:' . implode(', ', $cc)
+                . ' | BCC:' . implode(', ', $bcc);
+            $logapi->save();
+
+            return 'ok';
         } else {
             return 'sandbox';
         }
