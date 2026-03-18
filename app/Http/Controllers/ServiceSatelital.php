@@ -494,8 +494,7 @@ class ServiceSatelital extends Controller
                 }
 
 
-
-
+                
                 // ======== DESCARGA ========
                 if ($isInsideDescarga && (($lastDescarga->action_type ?? null) !== 'ENTER') && $canTrigger($description, 'DESCARGA')) {
                     Log::info('Está entrando al lugar de descarga');
