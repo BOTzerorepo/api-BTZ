@@ -98,8 +98,10 @@ class AuthController extends Controller
                 'username'     => $user->username,
                 'email'        => $user->email,
                 'company'      => $user->empresa,
+                'role'         => $role,
                 'permiso'      => $role,
                 'transport_id' => $user->transport_id,
+                'cliente_id'   => $user->cliente_id,
             ], 201);
         } else {
             return response()->json([
