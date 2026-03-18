@@ -10,13 +10,13 @@ class GeoActionService
 {
     public function logEnter(array $ctx): GeoActionLog
     {
-        Log::info('Geo ENTER', $ctx);
+        Log::debug('Geo ENTER', $ctx);
         return GeoActionLog::create($this->pack($ctx, 'ENTER'));
     }
 
     public function logExit(array $ctx): GeoActionLog
     {
-        Log::info('Geo EXIT', $ctx);
+        Log::debug('Geo EXIT', $ctx);
         return GeoActionLog::create($this->pack($ctx, 'EXIT'));
     }
 
@@ -31,22 +31,22 @@ class GeoActionService
     private function pack(array $ctx, string $action): array
     {
         return [
-            'trip_id'          => $ctx['trip_id'],
-            'cntr_number'      => $ctx['cntr_number'],
-            'domain'           => $ctx['domain'],
-            'action_type'      => $action,
-            'point_type'       => $ctx['point_type'] ?? 'POI',
-            'distance_m'       => $ctx['distance_m'] ?? null,
-            'threshold_m'      => $ctx['threshold_m'] ?? null,
-            'event_lat'        => $ctx['event_lat'] ?? null,
-            'event_lng'        => $ctx['event_lng'] ?? null,
-            'position_lat'     => $ctx['position_lat'] ?? null,
-            'position_lng'     => $ctx['position_lng'] ?? null,
+            'trip_id' => $ctx['trip_id'],
+            'cntr_number' => $ctx['cntr_number'],
+            'domain' => $ctx['domain'],
+            'action_type' => $action,
+            'point_type' => $ctx['point_type'] ?? 'POI',
+            'distance_m' => $ctx['distance_m'] ?? null,
+            'threshold_m' => $ctx['threshold_m'] ?? null,
+            'event_lat' => $ctx['event_lat'] ?? null,
+            'event_lng' => $ctx['event_lng'] ?? null,
+            'position_lat' => $ctx['position_lat'] ?? null,
+            'position_lng' => $ctx['position_lng'] ?? null,
             'status_at_moment' => $ctx['status_at_moment'] ?? null,
-            'aker_time'        => $ctx['aker_time'] ?? null,
-            'meta'             => $ctx['meta'] ?? null,
-            'created_at'       => now(),
-            'updated_at'       => now(),
+            'aker_time' => $ctx['aker_time'] ?? null,
+            'meta' => $ctx['meta'] ?? null,
+            'created_at' => now(),
+            'updated_at' => now(),
         ];
     }
 }
