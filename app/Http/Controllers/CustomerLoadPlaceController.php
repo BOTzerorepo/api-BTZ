@@ -441,6 +441,9 @@ class CustomerLoadPlaceController extends Controller
     {
         if (!$value)
             return [];
+        if (is_array($value))
+            $value = implode(',', $value);
+
         // normalizo separadores a coma
         $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
         // split, trim, filtro vacíos y no válidos
