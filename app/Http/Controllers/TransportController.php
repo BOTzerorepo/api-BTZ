@@ -333,17 +333,27 @@ class TransportController extends Controller
         ], 200);
     }
 
-    private function parseEmailList($value): array {
-        if (!$value) return [];
-        if (is_array($value)) $value = implode(',', $value);
+    private function parseEmailList($value): array
+    {
+        if (!$value)
+            return [];
+        if (is_array($value)) {
+            $value = implode(',', $value);
+        }
+        // normalizo separadores a coma
         $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
-        $arr = array_map('trim', explode(',', $normalized));
-        $arr = array_filter($arr, fn($e) => filter_var($e, FILTER_VALIDATE_EMAIL));
+        // split, trim, filtro vacíos y no válidos
+        $arr = array_filter(array_map('trim', explode(',', $normalized)), function ($e) {
+            return filter_var($e, FILTER_VALIDATE_EMAIL);
+        });
+        // dedupe y reindex
         return array_values(array_unique($arr));
     }
-    
-    private function pushIfEmail(array &$arr, ?string $email): void {
-        if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) $arr[] = trim($email);
+
+    private function pushIfEmail(array &$arr, ?string $email): void
+    {
+        if ($email && filter_var($email, FILTER_VALIDATE_EMAIL))
+            $arr[] = trim($email);
     }
     public function transporteAsignado(Request $request, $cntrId)
     {
@@ -408,18 +418,18 @@ class TransportController extends Controller
             $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
             $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
             $carga = Carga::whereNull('deleted_at')->where('booking', '=', $asign->booking)->first();
-            
+
 
             if ($sbx[0]->sandbox == 0) {
 
                 // --- 1) Traer customer (por username) y cliente (por cliente_id) ---
                 $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
-                $clienteUser  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+                $clienteUser = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
 
                 // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
                 $to = [];
                 $this->pushIfEmail($to, $customerUser->email ?? null);
-                $this->pushIfEmail($to, $clienteUser->email  ?? null);
+                $this->pushIfEmail($to, $clienteUser->email ?? null);
                 $to = array_merge($to, $this->parseEmailList($toEmails ?? ''));
                 $to = array_values(array_unique($to));
 
@@ -431,7 +441,7 @@ class TransportController extends Controller
                 // --- 3) Armar CC (cc_emails de ambos + $ccEmails extra si lo venías usando) ---
                 $cc = array_merge(
                     $this->parseEmailList($customerUser->cc_emails ?? ''),
-                    $this->parseEmailList($clienteUser->cc_emails  ?? ''),
+                    $this->parseEmailList($clienteUser->cc_emails ?? ''),
                     $this->parseEmailList($ccEmails ?? '')
                 );
                 $cc = array_values(array_unique($cc));
@@ -441,20 +451,20 @@ class TransportController extends Controller
 
                 // --- 5) Envío ---
                 Mail::to($to)
-                    ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                    ->when(!empty($cc), fn($m) => $m->cc($cc))
                     ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                     ->send(new transporteAsignado($datos, $date));
 
                 // --- 6) Logs y status (tu lógica original) ---
                 $logapi = new logapi();
-                $logapi->user    = $customerUser->username;
+                $logapi->user = $customerUser->username;
                 $logapi->detalle = 'Tranporte asiganado a la carga  ID:' . $cntrId
                     . ' | TO:' . implode(', ', $to)
                     . ' | CC:' . implode(', ', $cc)
                     . ' | BCC:' . implode(', ', $bcc);
                 $logapi->save();
 
-                
+
                 //Enviar mail
                 if ($transporteMail) {
                     Mail::to($transporteMail->email)
@@ -463,12 +473,12 @@ class TransportController extends Controller
                 }
             } else {
                 //Sandbox
-              
+
             }
 
             DB::commit();
             return response()->json([
-                'message' => 'Transporte asignado correctamente al contenedor: ' .  $cntr->cntr_number,
+                'message' => 'Transporte asignado correctamente al contenedor: ' . $cntr->cntr_number,
                 'message_type' => 'success',
                 'cargaId' => $carga->id
             ], 200);
@@ -518,7 +528,7 @@ class TransportController extends Controller
             ]);
             //Obtener el cntr
             $cntr = cntr::whereNull('deleted_at')->where('id_cntr', '=', $cntrId)->first();
-            
+
             //Obtener el asign
             $asign = asign::whereNull('deleted_at')->where('cntr_number', '=', $cntr->cntr_number)->first();
             //Actualizar el asign
@@ -602,16 +612,24 @@ class TransportController extends Controller
 
             function parseEmailList($value): array
             {
-                if (!$value) return [];
-                if (is_array($value)) $value = implode(',', $value);
+                if (!$value)
+                    return [];
+                if (is_array($value)) {
+                    $value = implode(',', $value);
+                }
+                // normalizo separadores a coma
                 $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
-                $arr = array_map('trim', explode(',', $normalized));
-                $arr = array_filter($arr, fn($e) => filter_var($e, FILTER_VALIDATE_EMAIL));
+                // split, trim, filtro vacíos y no válidos
+                $arr = array_filter(array_map('trim', explode(',', $normalized)), function ($e) {
+                    return filter_var($e, FILTER_VALIDATE_EMAIL);
+                });
+                // dedupe y reindex
                 return array_values(array_unique($arr));
             }
             function pushIfEmail(&$arr, $email): void
             {
-                if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) $arr[] = trim($email);
+                if ($email && filter_var($email, FILTER_VALIDATE_EMAIL))
+                    $arr[] = trim($email);
             }
             DB::commit();
 
@@ -624,7 +642,7 @@ class TransportController extends Controller
                 // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
                 $to = [];
                 $this->pushIfEmail($to, $customerUser->email ?? null);
-                $this-> pushIfEmail($to, $clienteUser->email  ?? null);
+                $this->pushIfEmail($to, $clienteUser->email ?? null);
                 $to = array_merge($to, $this->parseEmailList($toEmails ?? ''));
                 $to = array_values(array_unique($to));
 
@@ -636,7 +654,7 @@ class TransportController extends Controller
                 // --- 3) Armar CC (cc_emails de ambos + $ccEmails extra si lo venías usando) ---
                 $cc = array_merge(
                     $this->parseEmailList($customerUser->cc_emails ?? ''),
-                    $this->parseEmailList($clienteUser->cc_emails  ?? ''),
+                    $this->parseEmailList($clienteUser->cc_emails ?? ''),
                     $this->parseEmailList($ccEmails ?? '')
                 );
                 $cc = array_values(array_unique($cc));
@@ -646,13 +664,13 @@ class TransportController extends Controller
 
                 // --- 5) Envío ---
                 Mail::to($to)
-                    ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                    ->when(!empty($cc), fn($m) => $m->cc($cc))
                     ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                     ->send(new asignarUnidadTransporte($datos, $date));
 
                 // --- 6) Logs y status (tu lógica original) ---
                 $logapi = new logapi();
-                $logapi->user    = $customerUser->username;
+                $logapi->user = $customerUser->username;
                 $logapi->detalle = 'Tranporte asiganado a la carga  ID:' . $cntrId
                     . ' | TO:' . implode(', ', $to)
                     . ' | CC:' . implode(', ', $cc)
@@ -665,7 +683,7 @@ class TransportController extends Controller
             }
 
             return response()->json([
-                'message' => 'Unidad asignada correctamente al contenedor: ' .  $cntr->cntr_number,
+                'message' => 'Unidad asignada correctamente al contenedor: ' . $cntr->cntr_number,
                 'message_type' => 'success',
                 'cargaId' => $carga->id
             ], 200);
@@ -847,12 +865,12 @@ class TransportController extends Controller
             if ($sbx[0]->sandbox == 0) {
                 // --- 1) Traer customer (por username) y cliente (por cliente_id) ---
                 $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
-                $clienteUser  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+                $clienteUser = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
 
                 // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
                 $to = [];
                 $this->pushIfEmail($to, $customerUser->email ?? null);
-                $this->pushIfEmail($to, $clienteUser->email  ?? null);
+                $this->pushIfEmail($to, $clienteUser->email ?? null);
                 $to = array_merge($to, $this->parseEmailList($toEmails ?? ''));
                 $to = array_values(array_unique($to));
 
@@ -864,7 +882,7 @@ class TransportController extends Controller
                 // --- 3) Armar CC (cc_emails de ambos + $ccEmails extra si lo venías usando) ---
                 $cc = array_merge(
                     $this->parseEmailList($customerUser->cc_emails ?? ''),
-                    $this->parseEmailList($clienteUser->cc_emails  ?? ''),
+                    $this->parseEmailList($clienteUser->cc_emails ?? ''),
                     $this->parseEmailList($ccEmails ?? '')
                 );
                 $cc = array_values(array_unique($cc));
@@ -874,13 +892,13 @@ class TransportController extends Controller
 
                 // --- 5) Envío ---
                 Mail::to($to)
-                    ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                    ->when(!empty($cc), fn($m) => $m->cc($cc))
                     ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                     ->send(new cargaAsignada($datos, $date));
 
                 // --- 6) Logs y status (tu lógica original) ---
                 $logapi = new logapi();
-                $logapi->user    = $customerUser->username;
+                $logapi->user = $customerUser->username;
                 $logapi->detalle = 'Se confirmó la unidad Asignada:' . $cntrId
                     . ' | AsignaUnidadCarga-User:' . $asignMail->user
                     . ' | Transporte:' . $asignMail->transport
@@ -947,7 +965,7 @@ class TransportController extends Controller
 
             DB::commit();
             return response()->json([
-                'message' => 'Unidad asignada correctamente al contenedor: ' .  $cntr->cntr_number,
+                'message' => 'Unidad asignada correctamente al contenedor: ' . $cntr->cntr_number,
                 'message_type' => 'success',
                 'cargaId' => $carga->id
             ], 200);
@@ -1019,7 +1037,7 @@ class TransportController extends Controller
 
             DB::commit();
             return response()->json([
-                'message' => 'Transporte modificado correctamente al contenedor: ' .  $cntr->cntr_number,
+                'message' => 'Transporte modificado correctamente al contenedor: ' . $cntr->cntr_number,
                 'message_type' => 'success',
             ], 200);
         } catch (ValidationException $e) {
