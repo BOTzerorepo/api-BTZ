@@ -10,7 +10,6 @@ use App\Models\cntr;
 use App\Models\itinerario;
 use App\Models\logapi;
 use App\Models\position;
-use App\Models\pruebasModel;
 use App\Models\statu;
 use App\Models\Transport;
 use App\Models\truck;
@@ -163,24 +162,24 @@ class ServiceSatelital extends Controller
     public function serviceSatelital()
     {
         set_time_limit(120);
-        Log::info('Comenzo Satelital');
+        Log::debug('Comenzo Satelital');
 
         // === Configurables ===
-        $AKerApiUrl     = 'https://app.akercontrol.com/ws/v2/servicios';
-        $AKerApiCode    = 'E6HW19';
-        $AKerPhone      = '2612128105';
+        $AKerApiUrl = 'https://app.akercontrol.com/ws/v2/servicios';
+        $AKerApiCode = 'E6HW19';
+        $AKerPhone = '2612128105';
 
         // Umbrales en metros
-        $THRESHOLD_CARGA_IN     = 200;
-        $THRESHOLD_ADUANA_IN    = 200;
-        $THRESHOLD_DESCARGA_IN  = 200;
+        $THRESHOLD_CARGA_IN = 200;
+        $THRESHOLD_ADUANA_IN = 200;
+        $THRESHOLD_DESCARGA_IN = 200;
 
-        $THRESHOLD_CARGA_OUT    = 400; // fuera de rango carga
-        $THRESHOLD_ADUANA_OUT   = 200; // fuera de rango aduana
+        $THRESHOLD_CARGA_OUT = 400; // fuera de rango carga
+        $THRESHOLD_ADUANA_OUT = 200; // fuera de rango aduana
 
         $STATUS_FOR_POINT = [
-            'CARGA'    => ['YENDO A CARGAR', 'CARGANDO', 'ASIGNADA'],
-            'ADUANA'   => ['YENDO A DESCARGAR', 'EN ADUANA', 'SALIENDO CARGAR'],
+            'CARGA' => ['YENDO A CARGAR', 'CARGANDO', 'ASIGNADA'],
+            'ADUANA' => ['YENDO A DESCARGAR', 'EN ADUANA', 'SALIENDO CARGAR'],
             'DESCARGA' => ['EN ADUANA', 'STACKING'],
         ];
 
@@ -204,7 +203,7 @@ class ServiceSatelital extends Controller
             ->join('carga', 'carga.booking', '=', 'cntr.booking')
             // Aduana: puede venir de custom_place_impo o de custom_place
             ->leftJoin('aduanas as a_impo', 'a_impo.description', '=', 'carga.custom_place_impo')
-            ->leftJoin('aduanas as a_exp',  'a_exp.description',  '=', 'carga.custom_place')
+            ->leftJoin('aduanas as a_exp', 'a_exp.description', '=', 'carga.custom_place')
             ->join('customer_load_places', 'customer_load_places.description', '=', 'carga.load_place')
             ->join('customer_unload_places', 'customer_unload_places.description', '=', 'carga.unload_place')
             ->whereNull('carga.deleted_at')
@@ -235,21 +234,21 @@ class ServiceSatelital extends Controller
 
 
         if ($camiones->isEmpty()) {
-            Log::info('serviceSatelital: No hay camiones activos con alta_aker != 0.');
+            Log::debug('serviceSatelital: No hay camiones activos con alta_aker != 0.');
             return;
         }
 
         foreach ($camiones as $camion) {
 
-            Log::info('ingresó a la llamada de aker: ' . $camion->domain . ' con ID de viaje: ' . $camion->IdTrip);
+            Log::debug('ingresó a la llamada de aker: ' . $camion->domain . ' con ID de viaje: ' . $camion->IdTrip);
 
             // === 2) Llamada a AKER ===
             $payload = [
                 'patentes' => [$camion->domain],
                 'cercania' => true,
                 'domicilio' => false,
-                'apiCode'  => $AKerApiCode,
-                'phone'    => $AKerPhone,
+                'apiCode' => $AKerApiCode,
+                'phone' => $AKerPhone,
             ];
 
 
@@ -262,7 +261,7 @@ class ServiceSatelital extends Controller
                     continue;
                 }
 
-                $r = json_decode((string)$res->getBody(), true);
+                $r = json_decode((string) $res->getBody(), true);
                 if (!is_array($r) || !array_key_exists('data', $r) || !array_key_exists($camion->domain, $r['data'])) {
                     Log::warning("serviceSatelital: respuesta inválida para {$camion->domain}");
                     continue;
@@ -287,8 +286,8 @@ class ServiceSatelital extends Controller
 
                     $positionDB = new Position();
                     $positionDB->dominio = $camion->domain;
-                    $positionDB->lat     = $posicionLat;
-                    $positionDB->lng     = $posicionLon;
+                    $positionDB->lat = $posicionLat;
+                    $positionDB->lng = $posicionLon;
                     $positionDB->asigned = 1;
                     $positionDB->save();
                 } catch (\Throwable $e) {
@@ -298,15 +297,15 @@ class ServiceSatelital extends Controller
                 $IdTrip = $camion->IdTrip;
 
                 // === 4) Calcular distancias ===
-                $distCarga    = $this->distIfCoords($posicionLat, $posicionLon, $this->toFloat($camion->CargaLat),    $this->toFloat($camion->CargaLng));
-                Log::info('Está a : ' . $distCarga . 'del Lugar de Carga');
-                $distAduana   = $this->distIfCoords($posicionLat, $posicionLon, $this->toFloat($camion->aduanaLat),   $this->toFloat($camion->aduanaLon));
-                Log::info('Está a : ' . $distAduana . 'del Lugar de Aduana');
+                $distCarga = $this->distIfCoords($posicionLat, $posicionLon, $this->toFloat($camion->CargaLat), $this->toFloat($camion->CargaLng));
+                Log::debug('Está a : ' . $distCarga . 'del Lugar de Carga');
+                $distAduana = $this->distIfCoords($posicionLat, $posicionLon, $this->toFloat($camion->aduanaLat), $this->toFloat($camion->aduanaLon));
+                Log::debug('Está a : ' . $distAduana . 'del Lugar de Aduana');
                 $distDescarga = $this->distIfCoords($posicionLat, $posicionLon, $this->toFloat($camion->descargaLat), $this->toFloat($camion->descargaLon));
-                Log::info('Está a : ' . $distDescarga . 'del Lugar de Descarga');
+                Log::debug('Está a : ' . $distDescarga . 'del Lugar de Descarga');
 
                 // === 4.1) Flags de existencia de POIs ===
-                $hasAduana   = $this->toFloat($camion->aduanaLat)   !== null && $this->toFloat($camion->aduanaLon)   !== null;
+                $hasAduana = $this->toFloat($camion->aduanaLat) !== null && $this->toFloat($camion->aduanaLon) !== null;
                 $hasDescarga = $this->toFloat($camion->descargaLat) !== null && $this->toFloat($camion->descargaLon) !== null;
 
                 // === 5) Obtener cntr y último status (ANTES de usar $cntr/$description) ===
@@ -321,38 +320,38 @@ class ServiceSatelital extends Controller
                     continue;
                 }
 
-                $lastStatus  = DB::table('status')
+                $lastStatus = DB::table('status')
                     ->where('cntr_number', $cntr->cntr_number)
                     ->orderByDesc('id')
                     ->first();
 
-                Log::info('Ultimo estado del contenedor: ' . ($lastStatus->main_status ?? 'N/A'));
+                Log::debug('Ultimo estado del contenedor: ' . ($lastStatus->main_status ?? 'N/A'));
 
                 $description = $lastStatus->main_status ?? null;
 
 
                 // === 6) Acciones ENTER (dentro de rango) ===
-                Log::info('Empezó a probar las distacias con los lugares');
+                Log::debug('Empezó a probar las distacias con los lugares');
                 // helpers de estado por punto
-                $isInsideCarga    = ($distCarga    !== null && $distCarga <= $THRESHOLD_CARGA_IN);
-                Log::info('Está dentro del umbral de carga? ' . ($isInsideCarga ? 'SI' : 'NO'));
-                $isInsideAduana   = ($distAduana   !== null && $distAduana <= $THRESHOLD_ADUANA_IN);
-                Log::info('Está dentro del umbral de carga? ' . ($isInsideAduana ? 'SI' : 'NO'));
+                $isInsideCarga = ($distCarga !== null && $distCarga <= $THRESHOLD_CARGA_IN);
+                Log::debug('Está dentro del umbral de carga? ' . ($isInsideCarga ? 'SI' : 'NO'));
+                $isInsideAduana = ($distAduana !== null && $distAduana <= $THRESHOLD_ADUANA_IN);
+                Log::debug('Está dentro del umbral de carga? ' . ($isInsideAduana ? 'SI' : 'NO'));
                 $isInsideDescarga = ($distDescarga !== null && $distDescarga <= $THRESHOLD_DESCARGA_IN);
-                Log::info('Está dentro del umbral de carga? ' . ($isInsideDescarga ? 'SI' : 'NO'));
+                Log::debug('Está dentro del umbral de carga? ' . ($isInsideDescarga ? 'SI' : 'NO'));
 
                 // último log por punto
-                $lastCarga    = GeoActionLog::where('trip_id', $IdTrip)->where('point_type', 'CARGA')->orderByDesc('id')->first();
-                Log::info('Último log de carga: ' . ($lastCarga->action_type ?? 'N/A'));
-                $lastAduana   = GeoActionLog::where('trip_id', $IdTrip)->where('point_type', 'ADUANA')->orderByDesc('id')->first();
-                Log::info('Último log de aduana: ' . ($lastAduana->action_type ?? 'N/A'));
+                $lastCarga = GeoActionLog::where('trip_id', $IdTrip)->where('point_type', 'CARGA')->orderByDesc('id')->first();
+                Log::debug('Último log de carga: ' . ($lastCarga->action_type ?? 'N/A'));
+                $lastAduana = GeoActionLog::where('trip_id', $IdTrip)->where('point_type', 'ADUANA')->orderByDesc('id')->first();
+                Log::debug('Último log de aduana: ' . ($lastAduana->action_type ?? 'N/A'));
                 $lastDescarga = GeoActionLog::where('trip_id', $IdTrip)->where('point_type', 'DESCARGA')->orderByDesc('id')->first();
-                Log::info('Último log de descarga: ' . ($lastDescarga->action_type ?? 'N/A'));
+                Log::debug('Último log de descarga: ' . ($lastDescarga->action_type ?? 'N/A'));
 
                 // ======== CARGA ========
                 if ($isInsideCarga && (($lastCarga->action_type ?? null) !== 'ENTER') && in_array($description, ['YENDO A CARGAR', 'CARGANDO', 'ASIGNADA'], true)) {
                     // ENTER CARGA (solo al cruzar el umbral hacia adentro)
-                    Log::info('Está entrando al lugar de carga');
+                    Log::debug('Está entrando al lugar de carga');
                     $this->logGeoAction([
                         'trip_id' => $IdTrip,
                         'cntr_number' => $cntr->cntr_number,
@@ -370,11 +369,11 @@ class ServiceSatelital extends Controller
                     ]);
                     $this->fireEndpoint($http, "{$appUrl}/api/accionLugarDeCarga/{$IdTrip}", "accionLugarDeCarga", $IdTrip);
                 } else {
-                    Log::info('No está entrando al lugar de carga');
+                    Log::debug('No está entrando al lugar de carga');
                 }
                 // EXIT CARGA: solo si veníamos de ENTER y ahora estamos fuera (usar umbral OUT para histéresis)
                 if ((!$isInsideCarga && ($distCarga !== null && $distCarga > $THRESHOLD_CARGA_OUT)) && (($lastCarga->action_type ?? null) === 'ENTER') && in_array($description, ['YENDO A CARGAR', 'CARGANDO', 'ASIGNADA'], true)) {
-                    Log::info('Está saliendo del lugar de carga');
+                    Log::debug('Está saliendo del lugar de carga');
 
                     $this->logGeoAction([
                         'trip_id' => $IdTrip,
@@ -431,27 +430,27 @@ class ServiceSatelital extends Controller
                         if ($shouldUpdate) {
                             // Inserta un NUEVO status (no sobreescribas el histórico)
                             DB::table('status')->insert([
-                                'cntr_number'   => $cntr->cntr_number,
-                                'main_status'   => $nextStatus,
-                                'description'   => 'Cambio automático por salida de CARGA (GPS)',
-                                'created_at'    => now(),
-                                'updated_at'    => now(),
+                                'cntr_number' => $cntr->cntr_number,
+                                'main_status' => $nextStatus,
+                                'description' => 'Cambio automático por salida de CARGA (GPS)',
+                                'created_at' => now(),
+                                'updated_at' => now(),
                             ]);
 
-                            Log::info("Auto-estado: {$cntr->cntr_number} pasó de {$currentStatus} a {$nextStatus} (EXIT CARGA).");
+                            Log::debug("Auto-estado: {$cntr->cntr_number} pasó de {$currentStatus} a {$nextStatus} (EXIT CARGA).");
                         } else {
-                            Log::info("Auto-estado: no se actualiza (cooldown/duplicado/no permitido). current={$currentStatus}, next={$nextStatus}");
+                            Log::debug("Auto-estado: no se actualiza (cooldown/duplicado/no permitido). current={$currentStatus}, next={$nextStatus}");
                         }
                     } catch (\Throwable $e) {
                         Log::error("Auto-estado: error al transicionar tras EXIT CARGA para {$cntr->cntr_number}: " . $e->getMessage());
                     }
                 } else {
-                    Log::info('No está saliendo del lugar de carga');
+                    Log::debug('No está saliendo del lugar de carga');
                 }
 
                 // ======== ADUANA ========
                 if ($isInsideAduana && (($lastAduana->action_type ?? null) !== 'ENTER') && $canTrigger($description, 'ADUANA')) {
-                    Log::info('Está entrando al lugar de aduana');
+                    Log::debug('Está entrando al lugar de aduana');
                     $this->logGeoAction([
                         'trip_id' => $IdTrip,
                         'cntr_number' => $cntr->cntr_number,
@@ -469,12 +468,13 @@ class ServiceSatelital extends Controller
                     ]);
                     $this->fireEndpoint($http, "{$appUrl}/api/accionLugarAduana/{$IdTrip}", "accionLugarAduana", $IdTrip);
                 }
-                if ((!$isInsideAduana && ($distAduana !== null && $distAduana > $THRESHOLD_ADUANA_OUT))
+                if (
+                    (!$isInsideAduana && ($distAduana !== null && $distAduana > $THRESHOLD_ADUANA_OUT))
                     && (($lastAduana->action_type ?? null) === 'ENTER')
                     && $description === 'EN ADUANA'
                 ) {
 
-                    Log::info('Está saliendo del lugar de aduana');
+                    Log::debug('Está saliendo del lugar de aduana');
                     $this->logGeoAction([
                         'trip_id' => $IdTrip,
                         'cntr_number' => $cntr->cntr_number,
@@ -494,10 +494,10 @@ class ServiceSatelital extends Controller
                 }
 
 
-                
+
                 // ======== DESCARGA ========
                 if ($isInsideDescarga && (($lastDescarga->action_type ?? null) !== 'ENTER') && $canTrigger($description, 'DESCARGA')) {
-                    Log::info('Está entrando al lugar de descarga');
+                    Log::debug('Está entrando al lugar de descarga');
                     $this->logGeoAction([
                         'trip_id' => $IdTrip,
                         'cntr_number' => $cntr->cntr_number,
@@ -516,10 +516,11 @@ class ServiceSatelital extends Controller
 
                     $this->fireEndpoint($http, "{$appUrl}/api/accionLugarDescarga/{$IdTrip}", "accionLugarDescarga", $IdTrip);
                 }
-                if ((!$isInsideDescarga && ($distDescarga !== null && $distDescarga > $THRESHOLD_DESCARGA_IN))
+                if (
+                    (!$isInsideDescarga && ($distDescarga !== null && $distDescarga > $THRESHOLD_DESCARGA_IN))
                     && (($lastDescarga->action_type ?? null) === 'ENTER')
                 ) {
-                    Log::info('Está saliendo del lugar de descarga');
+                    Log::debug('Está saliendo del lugar de descarga');
                     // si querés manejar EXIT Descarga, agregalo similar a los otros
                 }
             } catch (GuzzleException $e) {
@@ -535,11 +536,12 @@ class ServiceSatelital extends Controller
     }
     private function toFloat($value): ?float
     {
-        if ($value === null || $value === '') return null;
+        if ($value === null || $value === '')
+            return null;
         if (is_string($value)) {
             $value = str_replace([' ', ','], ['', '.'], $value);
         }
-        return is_numeric($value) ? (float)$value : null;
+        return is_numeric($value) ? (float) $value : null;
     }
 
     /**
@@ -547,7 +549,8 @@ class ServiceSatelital extends Controller
      */
     private function distIfCoords(?float $lat1, ?float $lon1, ?float $lat2, ?float $lon2): ?float
     {
-        if ($lat1 === null || $lon1 === null || $lat2 === null || $lon2 === null) return null;
+        if ($lat1 === null || $lon1 === null || $lat2 === null || $lon2 === null)
+            return null;
         return $this->calcularDistancia($lat1, $lon1, $lat2, $lon2);
     }
 
@@ -1234,11 +1237,11 @@ class ServiceSatelital extends Controller
     public function revisarCoordenadas()
     {
         set_time_limit(120);
-        Log::info('revisarCoordenadas: start-----------------------');
+        Log::debug('revisarCoordenadas: start-----------------------');
 
-        $AKerApiUrl  = 'https://app.akercontrol.com/ws/v2/servicios';
+        $AKerApiUrl = 'https://app.akercontrol.com/ws/v2/servicios';
         $AKerApiCode = 'E6HW19';
-        $AKerPhone   = '2612128105';
+        $AKerPhone = '2612128105';
 
         // Histéresis: si el POI no define OUT en DB, usar factor para salida (p. ej., 1.5x o +50 m)
         $POI_EXIT_FACTOR = 1.5;
@@ -1264,26 +1267,26 @@ class ServiceSatelital extends Controller
             ->get();
 
         if ($items->isEmpty()) {
-            Log::info('revisarCoordenadas: no hay items activos con POIs');
+            Log::debug('revisarCoordenadas: no hay items activos con POIs');
             return $detalleComparaciones;
         }
 
         foreach ($items as $item) {
 
-            Log::info('Domain: ' . json_encode($item->domain) . ' - ' . json_encode($item->cntr_number));
+            Log::debug('Domain: ' . json_encode($item->domain) . ' - ' . json_encode($item->cntr_number));
 
-            $domain     = $item->domain;
-            $cntrId     = $item->cntr_id;
+            $domain = $item->domain;
+            $cntrId = $item->cntr_id;
             $cntrNumber = $item->cntr_number;
-            $statusNow  = $item->main_status;
+            $statusNow = $item->main_status;
 
             // 2) Posición Aker
             $payload = [
                 'patentes' => [$domain],
                 'cercania' => true,
                 'domicilio' => false,
-                'apiCode'  => $AKerApiCode,
-                'phone'    => $AKerPhone,
+                'apiCode' => $AKerApiCode,
+                'phone' => $AKerPhone,
             ];
 
             try {
@@ -1293,7 +1296,7 @@ class ServiceSatelital extends Controller
                     continue;
                 }
 
-                $body = json_decode((string)$res->getBody(), true);
+                $body = json_decode((string) $res->getBody(), true);
                 if (!is_array($body) || !isset($body['data'][$domain])) {
                     Log::warning("revisarCoordenadas: respuesta inválida Aker para {$domain}");
                     continue;
@@ -1324,64 +1327,65 @@ class ServiceSatelital extends Controller
                         'ip.status_transition as ip_status',
                     ]);
 
-                if ($pois->isEmpty()) continue;
+                if ($pois->isEmpty())
+                    continue;
 
                 // Activo = último con activo != 0
-                $activePoi = $pois->filter(fn($p) => (int)$p->activo !== 0)
+                $activePoi = $pois->filter(fn($p) => (int) $p->activo !== 0)
                     ->sortByDesc('order')
                     ->first();
 
-                Log::info('Active POI: ' . json_encode($activePoi));
+                Log::debug('Active POI: ' . json_encode($activePoi));
 
                 $dist = function ($aLat, $aLng, $bLat, $bLng) {
                     return $this->distIfCoords($aLat, $aLng, $this->toFloat($bLat), $this->toFloat($bLng));
                 };
-                Log::info('Dist: ' . json_encode($dist));
+                // Calculador de distancia listo (eliminado log de closure)
 
 
                 // 4) EXIT del activo (histéresis OUT calculado) si status coincide
                 if ($activePoi) {
-                    Log::info('Active POI inside: ' . json_encode($activePoi));
+                    Log::debug('Active POI inside: ' . json_encode($activePoi));
 
-                    $dActive   = $dist($lat, $lng, $activePoi->ip_lat, $activePoi->ip_lng);
-                    $radiusIn  = max(0.0, (float)$activePoi->ip_radius_in);
+                    $dActive = $dist($lat, $lng, $activePoi->ip_lat, $activePoi->ip_lng);
+                    $radiusIn = max(0.0, (float) $activePoi->ip_radius_in);
                     $radiusOut = $this->resolveRadiusOut($radiusIn, null, $POI_EXIT_FACTOR); // no hay radius_out en DB
 
                     if ($dActive !== null && $dActive > $radiusOut && $statusNow === $activePoi->ip_status) {
-                        Log::info('Active POI outside: ' . json_encode($activePoi));
-                        if ((int)$activePoi->activo === 1) {
-                            if (strtolower((string)$activePoi->ip_type) !== 'proceso') {
+                        Log::debug('Active POI outside: ' . json_encode($activePoi));
+                        if ((int) $activePoi->activo === 1) {
+                            if (strtolower((string) $activePoi->ip_type) !== 'proceso') {
                                 $this->ejecutarAccionSalida($activePoi->ip_id, $cntrId);
                             }
                             DB::table('cntr_interest_point')->where('id', $activePoi->cip_id)->update(['activo' => 2]);
 
                             $this->logGeoAction([
-                                'trip_id'          => (int)$cntrId,
-                                'cntr_number'      => $cntrNumber,
-                                'domain'           => $domain,
-                                'action_type'      => 'EXIT',
-                                'point_type'       => 'POI',
-                                'distance_m'       => $dActive,
-                                'threshold_m'      => (int)$radiusOut,
-                                'event_lat'        => $this->toFloat($activePoi->ip_lat),
-                                'event_lng'        => $this->toFloat($activePoi->ip_lng),
-                                'position_lat'     => $lat,
-                                'position_lng'     => $lng,
+                                'trip_id' => (int) $cntrId,
+                                'cntr_number' => $cntrNumber,
+                                'domain' => $domain,
+                                'action_type' => 'EXIT',
+                                'point_type' => 'POI',
+                                'distance_m' => $dActive,
+                                'threshold_m' => (int) $radiusOut,
+                                'event_lat' => $this->toFloat($activePoi->ip_lat),
+                                'event_lng' => $this->toFloat($activePoi->ip_lng),
+                                'position_lat' => $lat,
+                                'position_lng' => $lng,
                                 'status_at_moment' => $statusNow,
                                 'meta' => [
-                                    'poi_id'   => (int)$activePoi->ip_id,
+                                    'poi_id' => (int) $activePoi->ip_id,
                                     'poi_desc' => $activePoi->ip_desc,
-                                    'order'    => (int)$activePoi->order,
-                                    'kind'     => $activePoi->ip_type,
+                                    'order' => (int) $activePoi->order,
+                                    'kind' => $activePoi->ip_type,
                                 ],
                             ]);
 
                             $detalleComparaciones[] = [
-                                'cntr_id'          => $cntrId,
-                                'truck_domain'     => $domain,
+                                'cntr_id' => $cntrId,
+                                'truck_domain' => $domain,
                                 'punto_de_interes' => $activePoi->ip_desc,
-                                'distancia'        => $dActive,
-                                'accion'           => 'salida',
+                                'distancia' => $dActive,
+                                'accion' => 'salida',
                             ];
 
                             $activePoi = null; // dejó de estar activo
@@ -1391,44 +1395,44 @@ class ServiceSatelital extends Controller
 
                 // 5) ENTER inicial (order=1) si no hay activo
                 if (!$activePoi) {
-                    Log::info('No active POI, checking first POI for ENTER: ' . json_encode($activePoi));
+                    Log::debug('No active POI, checking first POI for ENTER: ' . json_encode($activePoi));
                     $firstPoi = $pois->firstWhere('order', 1);
                     if ($firstPoi) {
-                        $dFirst   = $dist($lat, $lng, $firstPoi->ip_lat, $firstPoi->ip_lng);
-                        $radiusIn = max(0.0, (float)$firstPoi->ip_radius_in);
+                        $dFirst = $dist($lat, $lng, $firstPoi->ip_lat, $firstPoi->ip_lng);
+                        $radiusIn = max(0.0, (float) $firstPoi->ip_radius_in);
 
                         if ($dFirst !== null && $dFirst <= $radiusIn && $statusNow === $firstPoi->ip_status) {
-                            if ((int)$firstPoi->activo === 0) {
+                            if ((int) $firstPoi->activo === 0) {
                                 $this->ejecutarAccionEntrada($firstPoi->ip_id, $cntrId);
                                 DB::table('cntr_interest_point')->where('id', $firstPoi->cip_id)->update(['activo' => 1]);
 
                                 $this->logGeoAction([
-                                    'trip_id'          => (int)$cntrId,
-                                    'cntr_number'      => $cntrNumber,
-                                    'domain'           => $domain,
-                                    'action_type'      => 'ENTER',
-                                    'point_type'       => 'POI',
-                                    'distance_m'       => $dFirst,
-                                    'threshold_m'      => (int)$radiusIn,
-                                    'event_lat'        => $this->toFloat($firstPoi->ip_lat),
-                                    'event_lng'        => $this->toFloat($firstPoi->ip_lng),
-                                    'position_lat'     => $lat,
-                                    'position_lng'     => $lng,
+                                    'trip_id' => (int) $cntrId,
+                                    'cntr_number' => $cntrNumber,
+                                    'domain' => $domain,
+                                    'action_type' => 'ENTER',
+                                    'point_type' => 'POI',
+                                    'distance_m' => $dFirst,
+                                    'threshold_m' => (int) $radiusIn,
+                                    'event_lat' => $this->toFloat($firstPoi->ip_lat),
+                                    'event_lng' => $this->toFloat($firstPoi->ip_lng),
+                                    'position_lat' => $lat,
+                                    'position_lng' => $lng,
                                     'status_at_moment' => $statusNow,
                                     'meta' => [
-                                        'poi_id'   => (int)$firstPoi->ip_id,
+                                        'poi_id' => (int) $firstPoi->ip_id,
                                         'poi_desc' => $firstPoi->ip_desc,
-                                        'order'    => (int)$firstPoi->order,
-                                        'kind'     => $firstPoi->ip_type,
+                                        'order' => (int) $firstPoi->order,
+                                        'kind' => $firstPoi->ip_type,
                                     ],
                                 ]);
 
                                 $detalleComparaciones[] = [
-                                    'cntr_id'          => $cntrId,
-                                    'truck_domain'     => $domain,
+                                    'cntr_id' => $cntrId,
+                                    'truck_domain' => $domain,
                                     'punto_de_interes' => $firstPoi->ip_desc,
-                                    'distancia'        => $dFirst,
-                                    'accion'           => 'entrada',
+                                    'distancia' => $dFirst,
+                                    'accion' => 'entrada',
                                 ];
 
                                 $activePoi = $firstPoi;
@@ -1439,84 +1443,84 @@ class ServiceSatelital extends Controller
 
                 // 6) Transición activo → siguiente
                 if ($activePoi) {
-                    Log::info('Active POI for transition to next: ' . json_encode($activePoi));
-                    $idx = $pois->search(fn($p) => (int)$p->cip_id === (int)$activePoi->cip_id);
+                    Log::debug('Active POI for transition to next: ' . json_encode($activePoi));
+                    $idx = $pois->search(fn($p) => (int) $p->cip_id === (int) $activePoi->cip_id);
                     $nextPoi = $pois->get($idx + 1);
                     if ($nextPoi) {
-                        $dNext    = $dist($lat, $lng, $nextPoi->ip_lat, $nextPoi->ip_lng);
-                        $radiusIn = max(0.0, (float)$nextPoi->ip_radius_in);
+                        $dNext = $dist($lat, $lng, $nextPoi->ip_lat, $nextPoi->ip_lng);
+                        $radiusIn = max(0.0, (float) $nextPoi->ip_radius_in);
 
                         if ($dNext !== null && $dNext <= $radiusIn && $statusNow === $nextPoi->ip_status) {
                             DB::transaction(function () use ($activePoi, $nextPoi, $cntrId, $cntrNumber, $domain, $lat, $lng, $dNext, $radiusIn, $statusNow, &$detalleComparaciones) {
                                 // EXIT del activo si aún no está en 2
-                                if ((int)$activePoi->activo !== 2) {
-                                    if (strtolower((string)$activePoi->ip_type) !== 'proceso') {
+                                if ((int) $activePoi->activo !== 2) {
+                                    if (strtolower((string) $activePoi->ip_type) !== 'proceso') {
                                         $this->ejecutarAccionSalida($activePoi->ip_id, $cntrId);
                                     }
                                     DB::table('cntr_interest_point')->where('id', $activePoi->cip_id)->update(['activo' => 2]);
 
                                     $this->logGeoAction([
-                                        'trip_id'          => (int)$cntrId,
-                                        'cntr_number'      => $cntrNumber,
-                                        'domain'           => $domain,
-                                        'action_type'      => 'EXIT',
-                                        'point_type'       => 'POI',
-                                        'distance_m'       => null,
-                                        'threshold_m'      => null,
-                                        'event_lat'        => $this->toFloat($activePoi->ip_lat),
-                                        'event_lng'        => $this->toFloat($activePoi->ip_lng),
-                                        'position_lat'     => $lat,
-                                        'position_lng'     => $lng,
+                                        'trip_id' => (int) $cntrId,
+                                        'cntr_number' => $cntrNumber,
+                                        'domain' => $domain,
+                                        'action_type' => 'EXIT',
+                                        'point_type' => 'POI',
+                                        'distance_m' => null,
+                                        'threshold_m' => null,
+                                        'event_lat' => $this->toFloat($activePoi->ip_lat),
+                                        'event_lng' => $this->toFloat($activePoi->ip_lng),
+                                        'position_lat' => $lat,
+                                        'position_lng' => $lng,
                                         'status_at_moment' => $statusNow,
                                         'meta' => [
-                                            'poi_id'   => (int)$activePoi->ip_id,
+                                            'poi_id' => (int) $activePoi->ip_id,
                                             'poi_desc' => $activePoi->ip_desc,
-                                            'order'    => (int)$activePoi->order,
-                                            'kind'     => $activePoi->ip_type,
+                                            'order' => (int) $activePoi->order,
+                                            'kind' => $activePoi->ip_type,
                                         ],
                                     ]);
 
                                     $detalleComparaciones[] = [
-                                        'cntr_id'          => $cntrId,
-                                        'truck_domain'     => $domain,
+                                        'cntr_id' => $cntrId,
+                                        'truck_domain' => $domain,
                                         'punto_de_interes' => $activePoi->ip_desc,
-                                        'distancia'        => null,
-                                        'accion'           => 'salida',
+                                        'distancia' => null,
+                                        'accion' => 'salida',
                                     ];
                                 }
 
                                 // ENTER del siguiente si estaba en 0
-                                if ((int)$nextPoi->activo === 0) {
+                                if ((int) $nextPoi->activo === 0) {
                                     $this->ejecutarAccionEntrada($nextPoi->ip_id, $cntrId);
                                     DB::table('cntr_interest_point')->where('id', $nextPoi->cip_id)->update(['activo' => 1]);
 
                                     $this->logGeoAction([
-                                        'trip_id'          => (int)$cntrId,
-                                        'cntr_number'      => $cntrNumber,
-                                        'domain'           => $domain,
-                                        'action_type'      => 'ENTER',
-                                        'point_type'       => 'POI',
-                                        'distance_m'       => $dNext,
-                                        'threshold_m'      => (int)$radiusIn,
-                                        'event_lat'        => $this->toFloat($nextPoi->ip_lat),
-                                        'event_lng'        => $this->toFloat($nextPoi->ip_lng),
-                                        'position_lat'     => $lat,
-                                        'position_lng'     => $lng,
+                                        'trip_id' => (int) $cntrId,
+                                        'cntr_number' => $cntrNumber,
+                                        'domain' => $domain,
+                                        'action_type' => 'ENTER',
+                                        'point_type' => 'POI',
+                                        'distance_m' => $dNext,
+                                        'threshold_m' => (int) $radiusIn,
+                                        'event_lat' => $this->toFloat($nextPoi->ip_lat),
+                                        'event_lng' => $this->toFloat($nextPoi->ip_lng),
+                                        'position_lat' => $lat,
+                                        'position_lng' => $lng,
                                         'status_at_moment' => $statusNow,
                                         'meta' => [
-                                            'poi_id'   => (int)$nextPoi->ip_id,
+                                            'poi_id' => (int) $nextPoi->ip_id,
                                             'poi_desc' => $nextPoi->ip_desc,
-                                            'order'    => (int)$nextPoi->order,
-                                            'kind'     => $nextPoi->ip_type,
+                                            'order' => (int) $nextPoi->order,
+                                            'kind' => $nextPoi->ip_type,
                                         ],
                                     ]);
 
                                     $detalleComparaciones[] = [
-                                        'cntr_id'          => $cntrId,
-                                        'truck_domain'     => $domain,
+                                        'cntr_id' => $cntrId,
+                                        'truck_domain' => $domain,
                                         'punto_de_interes' => $nextPoi->ip_desc,
-                                        'distancia'        => $dNext,
-                                        'accion'           => 'entrada',
+                                        'distancia' => $dNext,
+                                        'accion' => 'entrada',
                                     ];
                                 }
                             });
@@ -1531,20 +1535,22 @@ class ServiceSatelital extends Controller
                 continue;
             }
         }
-        Log::info('Detalle comparación: ' . json_encode($detalleComparaciones));
+        Log::debug('Detalle comparación: ' . json_encode($detalleComparaciones));
 
         return $detalleComparaciones;
     }
     private function resolveRadiusOut(float $radiusIn, ?float $radiusOut, float $factor = 1.5): float
     {
-        $radiusIn  = max(0.0, $radiusIn);
-        $radiusOut = $radiusOut !== null ? (float)$radiusOut : 0.0;
+        $radiusIn = max(0.0, $radiusIn);
+        $radiusOut = $radiusOut !== null ? (float) $radiusOut : 0.0;
         return $radiusOut > 0.0 ? $radiusOut : max($radiusIn * $factor, $radiusIn + 50.0);
     }
     private function parseEmailList($value): array
     {
-        if (!$value) return [];
-        if (is_array($value)) $value = implode(',', $value);
+        if (!$value)
+            return [];
+        if (is_array($value))
+            $value = implode(',', $value);
         $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
         $arr = array_map('trim', explode(',', $normalized));
         $arr = array_filter($arr, fn($e) => filter_var($e, FILTER_VALIDATE_EMAIL));
@@ -1552,16 +1558,19 @@ class ServiceSatelital extends Controller
     }
     private function pushIfEmail(&$arr, $email): void
     {
-        if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) $arr[] = trim($email);
+        if ($email && filter_var($email, FILTER_VALIDATE_EMAIL))
+            $arr[] = trim($email);
     }
 
     public function calcularDistancia($latitud1, $longitud1, $latitud2, $longitud2)
     {
         // Normaliza: acepta strings con coma/punto, espacios, etc.
         [$lat1, $lon1, $lat2, $lon2] = array_map(function ($v) {
-            if ($v === null || $v === '') return NAN;
-            if (is_string($v)) $v = str_replace([' ', ','], ['', '.'], $v);
-            return is_numeric($v) ? (float)$v : NAN;
+            if ($v === null || $v === '')
+                return NAN;
+            if (is_string($v))
+                $v = str_replace([' ', ','], ['', '.'], $v);
+            return is_numeric($v) ? (float) $v : NAN;
         }, [$latitud1, $longitud1, $latitud2, $longitud2]);
 
         // Si algo es inválido, mantenemos compatibilidad devolviendo 0.0 m
@@ -1602,32 +1611,32 @@ class ServiceSatelital extends Controller
         $punto = DB::table('interest_points')->where('id', $puntoActivoId)->first();
         if ($contenedor->cma_t_o != null) {
 
-            $base    = 'https://cma-cgm.botzero.ar/api';
+            $base = 'https://cma-cgm.botzero.ar/api';
             $client = new Client();
             $headers = ['Content-Type' => 'application/json'];
             $request = new Psr7Request('GET', "{$base}/cma/estArrAtCusLoc/{$contenedor->cma_t_o}/{$contenedor->cntr_number}/{$punto->latitude}/{$punto->longitude}", $headers);
             $res = $client->sendAsync($request)->wait();
             $respuesta = $res->getBody();
             $r = json_decode($respuesta, true);
-            Log::info('Respuesta CMA - Est Arr At Cus Loc: ' . $respuesta);
+            Log::debug('Respuesta CMA - Est Arr At Cus Loc: ' . $respuesta);
 
             // ---------- POST a n8n ----------
             try {
                 $payload = [
-                    'function'   => __FUNCTION__, // te manda el nombre de la función actual
+                    'function' => __FUNCTION__, // te manda el nombre de la función actual
                     'contenedor' => $contenedor->cntr_number,
-                    'cma_t_o'    => $contenedor->cma_t_o,
-                    'lat'        => $punto->latitude,
-                    'lon'        => $punto->longitude,
-                    'respuesta'  => $r, // lo que devolvió CMA
+                    'cma_t_o' => $contenedor->cma_t_o,
+                    'lat' => $punto->latitude,
+                    'lon' => $punto->longitude,
+                    'respuesta' => $r, // lo que devolvió CMA
                 ];
 
                 $postRes = $client->post('https://n8n.rail.ar/webhook/reporte-cma', [
                     'headers' => $headers,
-                    'json'    => $payload,
+                    'json' => $payload,
                 ]);
 
-                Log::info('Posteado a n8n: ' . $postRes->getBody());
+                Log::debug('Posteado a n8n: ' . $postRes->getBody());
             } catch (\Exception $e) {
                 Log::error('Error enviando a n8n: ' . $e->getMessage());
             }
@@ -1649,12 +1658,12 @@ class ServiceSatelital extends Controller
 
             // --- 1) Traer customer (por username) y cliente (por cliente_id) ---
             $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
-            $clienteUser  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+            $clienteUser = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
 
             // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
             $to = [];
             $this->pushIfEmail($to, $customerUser->email ?? null);
-            $this->pushIfEmail($to, $clienteUser->email  ?? null);
+            $this->pushIfEmail($to, $clienteUser->email ?? null);
             $to = array_merge($to, $this->parseEmailList($toEmails ?? ''));
             $to = array_values(array_unique($to));
 
@@ -1666,7 +1675,7 @@ class ServiceSatelital extends Controller
             // --- 3) Armar CC (cc_emails de ambos + $ccEmails extra si lo venías usando) ---
             $cc = array_merge(
                 $this->parseEmailList($customerUser->cc_emails ?? ''),
-                $this->parseEmailList($clienteUser->cc_emails  ?? ''),
+                $this->parseEmailList($clienteUser->cc_emails ?? ''),
                 $this->parseEmailList($ccEmails ?? '')
             );
             $cc = array_values(array_unique($cc));
@@ -1676,13 +1685,13 @@ class ServiceSatelital extends Controller
 
             // --- 5) Envío ---
             Mail::to($to)
-                ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                ->when(!empty($cc), fn($m) => $m->cc($cc))
                 ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                 ->send(new PuntoInteresEntrada($contenedor, $punto));
 
             // --- 6) Logs y status (tu lógica original) ---
             $logapi = new logapi();
-            $logapi->user    = $customerUser->username;
+            $logapi->user = $customerUser->username;
             $logapi->detalle = 'Carga Entro a punto de interés id:' . $punto->id;
             $logapi->save();
 
@@ -1730,33 +1739,33 @@ class ServiceSatelital extends Controller
 
         if ($contenedor->cma_t_o != null) {
 
-            $base    = 'https://cma-cgm.botzero.ar/api';
+            $base = 'https://cma-cgm.botzero.ar/api';
             $client = new Client();
             $headers = ['Content-Type' => 'application/json'];
             $request = new Psr7Request('GET', "{$base}/cma/estArrAtCusLoc/{$contenedor->cma_t_o}/{$contenedor->cntr_number}/{$punto->latitude}/{$punto->longitude}", $headers);
             $res = $client->sendAsync($request)->wait();
             $respuesta = $res->getBody();
             $r = json_decode($respuesta, true);
-            //Log::info('Respuesta CMA - Est Arr At Cus Loc: ' . $r);
+            //Log::debug('Respuesta CMA - Est Arr At Cus Loc: ' . $r);
 
 
             // ---------- POST a n8n ----------
             try {
                 $payload = [
-                    'function'   => __FUNCTION__, // te manda el nombre de la función actual
+                    'function' => __FUNCTION__, // te manda el nombre de la función actual
                     'contenedor' => $contenedor->cntr_number,
-                    'cma_t_o'    => $contenedor->cma_t_o,
-                    'lat'        => $punto->latitude,
-                    'lon'        => $punto->longitude,
-                    'respuesta'  => $r, // lo que devolvió CMA
+                    'cma_t_o' => $contenedor->cma_t_o,
+                    'lat' => $punto->latitude,
+                    'lon' => $punto->longitude,
+                    'respuesta' => $r, // lo que devolvió CMA
                 ];
 
                 $postRes = $client->post('https://n8n.rail.ar/webhook/reporte-cma', [
                     'headers' => $headers,
-                    'json'    => $payload,
+                    'json' => $payload,
                 ]);
 
-                Log::info('Posteado a n8n: ' . $postRes->getBody());
+                Log::debug('Posteado a n8n: ' . $postRes->getBody());
             } catch (\Exception $e) {
                 Log::error('Error enviando a n8n: ' . $e->getMessage());
             }
@@ -1776,12 +1785,12 @@ class ServiceSatelital extends Controller
         if ($sbx[0]->sandbox == 0) {
             // --- 1) Traer customer (por username) y cliente (por cliente_id) ---
             $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
-            $clienteUser  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+            $clienteUser = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
 
             // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
             $to = [];
             $this->pushIfEmail($to, $customerUser->email ?? null);
-            $this->pushIfEmail($to, $clienteUser->email  ?? null);
+            $this->pushIfEmail($to, $clienteUser->email ?? null);
             $to = array_merge($to, $this->parseEmailList($toEmails ?? ''));
             $to = array_values(array_unique($to));
 
@@ -1793,7 +1802,7 @@ class ServiceSatelital extends Controller
             // --- 3) Armar CC (cc_emails de ambos + $ccEmails extra si lo venías usando) ---
             $cc = array_merge(
                 $this->parseEmailList($customerUser->cc_emails ?? ''),
-                $this->parseEmailList($clienteUser->cc_emails  ?? ''),
+                $this->parseEmailList($clienteUser->cc_emails ?? ''),
                 $this->parseEmailList($ccEmails ?? '')
             );
             $cc = array_values(array_unique($cc));
@@ -1803,13 +1812,13 @@ class ServiceSatelital extends Controller
 
             // --- 5) Envío ---
             Mail::to($to)
-                ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                ->when(!empty($cc), fn($m) => $m->cc($cc))
                 ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                 ->send(new PuntoInteresSalida($contenedor, $punto));
 
             // --- 6) Logs y status (tu lógica original) ---
             $logapi = new logapi();
-            $logapi->user    = $customerUser->username;
+            $logapi->user = $customerUser->username;
             $logapi->detalle = 'Carga Salio del punoto de interés ID:' . $puntoActivoId
                 . ' | TO:' . implode(', ', $to)
                 . ' | CC:' . implode(', ', $cc)
@@ -1856,20 +1865,20 @@ class ServiceSatelital extends Controller
         log::info('logGeoAction: ' . json_encode($args));
         try {
             GeoActionLog::create([
-                'trip_id'          => $args['trip_id'],
-                'cntr_number'      => $args['cntr_number'],
-                'domain'           => $args['domain'],
-                'action_type'      => $args['action_type'],
-                'point_type'       => $args['point_type'],
-                'distance_m'       => $args['distance_m'] ?? null,
-                'threshold_m'      => $args['threshold_m'] ?? null,
-                'event_lat'        => $args['event_lat'] ?? null,
-                'event_lng'        => $args['event_lng'] ?? null,
-                'position_lat'     => $args['position_lat'] ?? null,
-                'position_lng'     => $args['position_lng'] ?? null,
+                'trip_id' => $args['trip_id'],
+                'cntr_number' => $args['cntr_number'],
+                'domain' => $args['domain'],
+                'action_type' => $args['action_type'],
+                'point_type' => $args['point_type'],
+                'distance_m' => $args['distance_m'] ?? null,
+                'threshold_m' => $args['threshold_m'] ?? null,
+                'event_lat' => $args['event_lat'] ?? null,
+                'event_lng' => $args['event_lng'] ?? null,
+                'position_lat' => $args['position_lat'] ?? null,
+                'position_lng' => $args['position_lng'] ?? null,
                 'status_at_moment' => $args['status_at_moment'] ?? null,
-                'aker_time'        => $args['aker_time'] ?? null,
-                'meta'             => $args['meta'] ?? null,
+                'aker_time' => $args['aker_time'] ?? null,
+                'meta' => $args['meta'] ?? null,
             ]);
         } catch (\Throwable $e) {
             Log::error('logGeoAction error: ' . $e->getMessage(), ['args' => $args]);
@@ -1884,7 +1893,7 @@ class ServiceSatelital extends Controller
             if ($code < 200 || $code >= 300) {
                 Log::warning("{$tag}: HTTP {$code} para IdTrip={$IdTrip} url={$url}");
             } else {
-                Log::info("{$tag}: OK para IdTrip={$IdTrip}");
+                Log::debug("{$tag}: OK para IdTrip={$IdTrip}");
             }
         } catch (\Throwable $e) {
             Log::error("{$tag}: error para IdTrip={$IdTrip}: " . $e->getMessage());

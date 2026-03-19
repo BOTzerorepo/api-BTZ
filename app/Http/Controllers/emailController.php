@@ -28,8 +28,11 @@ class emailController extends Controller
 {
     private function parseEmailList($value): array
     {
-        if (!$value) return [];
-        if (is_array($value)) $value = implode(',', $value);
+        if (!$value)
+            return [];
+        if (is_array($value)) {
+            $value = implode(',', $value);
+        }
         $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
         $arr = array_map('trim', explode(',', $normalized));
         $arr = array_filter($arr, fn($e) => filter_var($e, FILTER_VALIDATE_EMAIL));
@@ -37,7 +40,8 @@ class emailController extends Controller
     }
     private function pushIfEmail(&$arr, $email): void
     {
-        if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) $arr[] = trim($email);
+        if ($email && filter_var($email, FILTER_VALIDATE_EMAIL))
+            $arr[] = trim($email);
     }
     public function cargaAsignada($id) // FALTA ACOMODAR TODO
     {
@@ -108,18 +112,18 @@ class emailController extends Controller
         $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
         $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
         $carga = Carga::whereNull('deleted_at')->where('booking', '=', $dAsign->booking)->first();
-       
+
 
         if ($sbx[0]->sandbox == 0) {
 
             // --- 1) Traer customer (por username) y cliente (por cliente_id) ---
             $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
-            $clienteUser  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+            $clienteUser = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
 
             // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
             $to = [];
             $this->pushIfEmail($to, $customerUser->email ?? null);
-            $this->pushIfEmail($to, $clienteUser->email  ?? null);
+            $this->pushIfEmail($to, $clienteUser->email ?? null);
             $to = array_merge($to, $this->parseEmailList($toEmails ?? ''));
             $to = array_values(array_unique($to));
 
@@ -131,7 +135,7 @@ class emailController extends Controller
             // --- 3) Armar CC (cc_emails de ambos + $ccEmails extra si lo venías usando) ---
             $cc = array_merge(
                 $this->parseEmailList($customerUser->cc_emails ?? ''),
-                $this->parseEmailList($clienteUser->cc_emails  ?? ''),
+                $this->parseEmailList($clienteUser->cc_emails ?? ''),
                 $this->parseEmailList($ccEmails ?? '')
             );
             $cc = array_values(array_unique($cc));
@@ -141,13 +145,13 @@ class emailController extends Controller
 
             // --- 5) Envío ---
             Mail::to($to)
-                ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                ->when(!empty($cc), fn($m) => $m->cc($cc))
                 ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                 ->send(new cargaAsignada($data, $date));
 
             // --- 6) Logs y status (tu lógica original) ---
             $logapi = new logapi();
-            $logapi->user    = $dAsign->user;
+            $logapi->user = $dAsign->user;
             $logapi->detalle = 'AsignaUnidadCarga-User:' . $dAsign->user
                 . '|Transporte:' . $dAsign->transport
                 . '|Chofer:' . $dAsign->driver
@@ -159,8 +163,8 @@ class emailController extends Controller
             $logapi->save();
 
             $status = new statu();
-            $status->status      = 'Asignado Chofer:' . $dAsign->driver . '|Tractor:' . $dAsign->truck . '|Semi:' . $dAsign->truck_semi;
-            $status->avisado     = 1;
+            $status->status = 'Asignado Chofer:' . $dAsign->driver . '|Tractor:' . $dAsign->truck . '|Semi:' . $dAsign->truck_semi;
+            $status->avisado = 1;
             $status->main_status = 'ASIGNADA';
             $status->cntr_number = $dAsign->cntr_number;
             $status->user_status = $dAsign->user;
@@ -239,7 +243,7 @@ class emailController extends Controller
             $description = $qd->status;
             $datos = [
                 'cntr' => $cntr,
-                'description' =>  $description,
+                'description' => $description,
                 'confirmacion' => $qd->confirmacion,
                 'user' => $user,
                 'empresa' => $empresa,
@@ -247,9 +251,9 @@ class emailController extends Controller
                 'date' => $date,
                 'status' => 'con Problema',
                 'cntr_type' => $qd->cntr_type,
-                'load_place'        => $qd->load_place,
-                'unload_place'      => $qd->unload_place,
-                'custom_place'      => $qd->custom_place,
+                'load_place' => $qd->load_place,
+                'unload_place' => $qd->unload_place,
+                'custom_place' => $qd->custom_place,
                 'custom_place_impo' => $qd->custom_place_impo,
                 'trader' => $qd->trader,
                 'type' => $qd->type,
@@ -261,18 +265,18 @@ class emailController extends Controller
                 'truck_semi' => $qd->truck_semi,
                 'documento' => $qd->documento,
             ];
-            
+
 
             if ($sbx[0]->sandbox == 0) {
 
                 // --- 1) Traer customer (por username) y cliente (por cliente_id) ---
                 $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
-                $clienteUser  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+                $clienteUser = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
 
                 // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
                 $to = [];
                 $this->pushIfEmail($to, $customerUser->email ?? null);
-                $this->pushIfEmail($to, $clienteUser->email  ?? null);
+                $this->pushIfEmail($to, $clienteUser->email ?? null);
                 $to = array_merge($to, $this->parseEmailList($toEmails ?? ''));
                 $to = array_values(array_unique($to));
 
@@ -284,7 +288,7 @@ class emailController extends Controller
                 // --- 3) Armar CC (cc_emails de ambos + $ccEmails extra si lo venías usando) ---
                 $cc = array_merge(
                     $this->parseEmailList($customerUser->cc_emails ?? ''),
-                    $this->parseEmailList($clienteUser->cc_emails  ?? ''),
+                    $this->parseEmailList($clienteUser->cc_emails ?? ''),
                     $this->parseEmailList($ccEmails ?? '')
                 );
                 $cc = array_values(array_unique($cc));
@@ -294,13 +298,13 @@ class emailController extends Controller
 
                 // --- 5) Envío ---
                 Mail::to($to)
-                    ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                    ->when(!empty($cc), fn($m) => $m->cc($cc))
                     ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                     ->send(new CargaConProblemas($datos, $statusArchivoPath));
 
                 // --- 6) Logs y status (tu lógica original) ---
                 $logapi = new logapi();
-                $logapi->user    = $customerUser->username;
+                $logapi->user = $customerUser->username;
                 $logapi->detalle = 'Carga con problemas:' . $cntr
                     . '|Transporte:' . $datos['transport']
                     . '|Chofer:' . $datos['driver']
@@ -310,11 +314,11 @@ class emailController extends Controller
                     . ' | CC:' . implode(', ', $cc)
                     . ' | BCC:' . implode(', ', $bcc);
                 $logapi->save();
-                
+
                 return 'ok';
             } else {
 
-               
+
                 return 'ok';
             }
         } elseif ($tipo == 'stacking') {
@@ -350,14 +354,14 @@ class emailController extends Controller
 
             $datos = [
                 'cntr' => $cntr,
-                'description' =>  $description,
+                'description' => $description,
                 'confirmacion' => $qd->confirmacion,
                 'user' => $user,
                 'empresa' => $empresa,
                 'booking' => $booking,
-                'load_place'        => $qd->load_place,
-                'unload_place'      => $qd->unload_place,
-                'custom_place'      => $qd->custom_place,
+                'load_place' => $qd->load_place,
+                'unload_place' => $qd->unload_place,
+                'custom_place' => $qd->custom_place,
                 'custom_place_impo' => $qd->custom_place_impo,
                 'date' => $date,
                 'cntr_type' => $qd->cntr_type,
@@ -371,15 +375,15 @@ class emailController extends Controller
                 'truck_semi' => $qd->truck_semi,
                 'documento' => $qd->documento,
             ];
-            
+
             if ($sbx[0]->sandbox == 0) {
                 // --- 1) Traer customer (por username) y cliente (por cliente_id) ---
                 $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
-                $clienteUser  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+                $clienteUser = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
                 // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
                 $to = [];
                 $this->pushIfEmail($to, $customerUser->email ?? null);
-                $this->pushIfEmail($to, $clienteUser->email  ?? null);
+                $this->pushIfEmail($to, $clienteUser->email ?? null);
                 $to = array_merge($to, $this->parseEmailList($toEmails ?? ''));
                 $to = array_values(array_unique($to));
 
@@ -391,7 +395,7 @@ class emailController extends Controller
                 // --- 3) Armar CC (cc_emails de ambos + $ccEmails extra si lo venías usando) ---
                 $cc = array_merge(
                     $this->parseEmailList($customerUser->cc_emails ?? ''),
-                    $this->parseEmailList($clienteUser->cc_emails  ?? ''),
+                    $this->parseEmailList($clienteUser->cc_emails ?? ''),
                     $this->parseEmailList($ccEmails ?? '')
                 );
                 $cc = array_values(array_unique($cc));
@@ -401,13 +405,13 @@ class emailController extends Controller
 
                 // --- 5) Envío ---
                 Mail::to($to)
-                    ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                    ->when(!empty($cc), fn($m) => $m->cc($cc))
                     ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                     ->send(new IngresadoStacking($datos, $statusArchivoPath));
 
                 // --- 6) Logs y status (tu lógica original) ---
                 $logapi = new logapi();
-                $logapi->user    = $customerUser->username;
+                $logapi->user = $customerUser->username;
                 $logapi->detalle = 'Carga ingresada Stackign:' . $cntr
                     . '|Transporte:' . $datos['transport']
                     . '|Chofer:' . $datos['driver']
@@ -417,11 +421,11 @@ class emailController extends Controller
                     . ' | CC:' . implode(', ', $cc)
                     . ' | BCC:' . implode(', ', $bcc);
                 $logapi->save();
-                
+
                 return 'ok';
-                
+
             } else {
-                
+
                 return 'ok';
             }
         } elseif ($tipo == 'terminada') {
@@ -454,7 +458,7 @@ class emailController extends Controller
             $description = $qd->status;
             $datos = [
                 'cntr' => $cntr,
-                'description' =>  $description,
+                'description' => $description,
                 'user' => $user,
                 'empresa' => $empresa,
                 'booking' => $booking,
@@ -471,22 +475,22 @@ class emailController extends Controller
                 'truck' => $qd->truck,
                 'truck_semi' => $qd->truck_semi,
                 'documento' => $qd->documento,
-                'load_place'        => $qd->load_place,
-                'unload_place'      => $qd->unload_place,
-                'custom_place'      => $qd->custom_place,
+                'load_place' => $qd->load_place,
+                'unload_place' => $qd->unload_place,
+                'custom_place' => $qd->custom_place,
                 'custom_place_impo' => $qd->custom_place_impo,
             ];
-            
+
 
             if ($sbx[0]->sandbox == 0) {
                 // --- 1) Traer customer (por username) y cliente (por cliente_id) ---
                 $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
-                $clienteUser  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+                $clienteUser = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
 
                 // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
                 $to = [];
                 $this->pushIfEmail($to, $customerUser->email ?? null);
-                $this->pushIfEmail($to, $clienteUser->email  ?? null);
+                $this->pushIfEmail($to, $clienteUser->email ?? null);
                 $to = array_merge($to, $this->parseEmailList($toEmails ?? ''));
                 $to = array_values(array_unique($to));
 
@@ -498,7 +502,7 @@ class emailController extends Controller
                 // --- 3) Armar CC (cc_emails de ambos + $ccEmails extra si lo venías usando) ---
                 $cc = array_merge(
                     $this->parseEmailList($customerUser->cc_emails ?? ''),
-                    $this->parseEmailList($clienteUser->cc_emails  ?? ''),
+                    $this->parseEmailList($clienteUser->cc_emails ?? ''),
                     $this->parseEmailList($ccEmails ?? '')
                 );
                 $cc = array_values(array_unique($cc));
@@ -508,13 +512,13 @@ class emailController extends Controller
 
                 // --- 5) Envío ---
                 Mail::to($to)
-                    ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                    ->when(!empty($cc), fn($m) => $m->cc($cc))
                     ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                     ->send(new cargaTerminada($datos, $statusArchivoPath));
 
                 // --- 6) Logs y status (tu lógica original) ---
                 $logapi = new logapi();
-                $logapi->user    = $customerUser->username;
+                $logapi->user = $customerUser->username;
                 $logapi->detalle = 'Carga con Terminada:' . $cntr
                     . '|Transporte:' . $datos['transport']
                     . '|Chofer:' . $datos['driver']
@@ -524,11 +528,11 @@ class emailController extends Controller
                     . ' | CC:' . implode(', ', $cc)
                     . ' | BCC:' . implode(', ', $bcc);
                 $logapi->save();
-                
+
                 return 'ok';
-                
+
             } else {
-               
+
                 return 'ok';
             }
         } else {
@@ -574,89 +578,89 @@ class emailController extends Controller
             }
 
             $description = $qd->status;
-            $status      = $qd->main_status;
+            $status = $qd->main_status;
 
             $datos = [
-                'cntr'              => $cntr,
-                'description'       => $description,
-                'confirmacion'      => $qd->confirmacion,
-                'user'              => $user,
-                'empresa'           => $empresa,
-                'booking'           => $booking,
-                'date'              => $date,
-                'status'            => $status,
-                'load_place'        => $qd->load_place,
-                'unload_place'      => $qd->unload_place,
-                'custom_place'      => $qd->custom_place,
+                'cntr' => $cntr,
+                'description' => $description,
+                'confirmacion' => $qd->confirmacion,
+                'user' => $user,
+                'empresa' => $empresa,
+                'booking' => $booking,
+                'date' => $date,
+                'status' => $status,
+                'load_place' => $qd->load_place,
+                'unload_place' => $qd->unload_place,
+                'custom_place' => $qd->custom_place,
                 'custom_place_impo' => $qd->custom_place_impo,
-                'cntr_type'         => $qd->cntr_type,
-                'trader'            => $qd->trader,
-                'type'              => $qd->type,
-                'ref_customer'      => $qd->ref_customer,
-                'transport'         => $qd->transport,
-                'transport_agent'   => $qd->transport_agent,
-                'driver'            => $qd->driver,
-                'truck'             => $qd->truck,
-                'truck_semi'        => $qd->truck_semi,
-                'documento'         => $qd->documento,
-                'load_place'        => $qd->load_place,
-                'unload_place'      => $qd->unload_place,
-                'custom_place'      => $qd->custom_place,
+                'cntr_type' => $qd->cntr_type,
+                'trader' => $qd->trader,
+                'type' => $qd->type,
+                'ref_customer' => $qd->ref_customer,
+                'transport' => $qd->transport,
+                'transport_agent' => $qd->transport_agent,
+                'driver' => $qd->driver,
+                'truck' => $qd->truck,
+                'truck_semi' => $qd->truck_semi,
+                'documento' => $qd->documento,
+                'load_place' => $qd->load_place,
+                'unload_place' => $qd->unload_place,
+                'custom_place' => $qd->custom_place,
                 'custom_place_impo' => $qd->custom_place_impo,
             ];
-            
+
 
             if ($sbx[0]->sandbox == 0) {
-               // --- 1) Traer customer (por username) y cliente (por cliente_id) ---
-               $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
-               $clienteUser  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+                // --- 1) Traer customer (por username) y cliente (por cliente_id) ---
+                $customerUser = DB::table('users')->where('username', '=', $carga->user)->first();
+                $clienteUser = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
 
-               // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
-               $to = [];
-               $this->pushIfEmail($to, $customerUser->email ?? null);
-               $this->pushIfEmail($to, $clienteUser->email  ?? null);
-               $to = array_merge($to, $this->parseEmailList($toEmails ?? ''));
-               $to = array_values(array_unique($to));
+                // --- 2) Armar TO (customer + cliente + lo que ya tengas en $toEmails) ---
+                $to = [];
+                $this->pushIfEmail($to, $customerUser->email ?? null);
+                $this->pushIfEmail($to, $clienteUser->email ?? null);
+                $to = array_merge($to, $this->parseEmailList($toEmails ?? ''));
+                $to = array_values(array_unique($to));
 
-               if (empty($to)) {
-                   Log::warning("Sin destinatarios TO en 'cargaAsignada' para carga ID {$carga->id} (booking {$carga->booking}). Uso fallback.");
-                   $to[] = 'soporte@rail.ar';
-               }
+                if (empty($to)) {
+                    Log::warning("Sin destinatarios TO en 'cargaAsignada' para carga ID {$carga->id} (booking {$carga->booking}). Uso fallback.");
+                    $to[] = 'soporte@rail.ar';
+                }
 
-               // --- 3) Armar CC (cc_emails de ambos + $ccEmails extra si lo venías usando) ---
-               $cc = array_merge(
-                $this->parseEmailList($customerUser->cc_emails ?? ''),
-                $this->parseEmailList($clienteUser->cc_emails  ?? ''),
-                $this->parseEmailList($ccEmails ?? '')
-               );
-               $cc = array_values(array_unique($cc));
+                // --- 3) Armar CC (cc_emails de ambos + $ccEmails extra si lo venías usando) ---
+                $cc = array_merge(
+                    $this->parseEmailList($customerUser->cc_emails ?? ''),
+                    $this->parseEmailList($clienteUser->cc_emails ?? ''),
+                    $this->parseEmailList($ccEmails ?? '')
+                );
+                $cc = array_values(array_unique($cc));
 
-               // --- 4) Armar BCC (acepta string o array) ---
-               $bcc = array_values(array_unique($this->parseEmailList($inboxEmail ?? '')));
+                // --- 4) Armar BCC (acepta string o array) ---
+                $bcc = array_values(array_unique($this->parseEmailList($inboxEmail ?? '')));
 
-               // --- 5) Envío ---
-               Mail::to($to)
-                   ->when(!empty($cc),  fn($m) => $m->cc($cc))
-                   ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
-                   ->send(new CamnioStatus($datos, $statusArchivoPath));
-                   
-               // --- 6) Logs y status (tu lógica original) ---
-               $logapi = new logapi();
-               $logapi->user    = $customerUser->username;
-               $logapi->detalle = 'Carga Cambio Status:' . $datos['status']
-                   . '|Transporte:' . $datos['transport']
-                   . '|Chofer:' . $datos['driver']
-                   . '|Tractor:' . $datos['truck']
-                   . '|Semi:' . $datos['truck_semi']
-                   . ' | TO:' . implode(', ', $to)
-                   . ' | CC:' . implode(', ', $cc)
-                   . ' | BCC:' . implode(', ', $bcc);
-               $logapi->save();
-               
-               return 'ok';
-                
+                // --- 5) Envío ---
+                Mail::to($to)
+                    ->when(!empty($cc), fn($m) => $m->cc($cc))
+                    ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
+                    ->send(new CamnioStatus($datos, $statusArchivoPath));
+
+                // --- 6) Logs y status (tu lógica original) ---
+                $logapi = new logapi();
+                $logapi->user = $customerUser->username;
+                $logapi->detalle = 'Carga Cambio Status:' . $datos['status']
+                    . '|Transporte:' . $datos['transport']
+                    . '|Chofer:' . $datos['driver']
+                    . '|Tractor:' . $datos['truck']
+                    . '|Semi:' . $datos['truck_semi']
+                    . ' | TO:' . implode(', ', $to)
+                    . ' | CC:' . implode(', ', $cc)
+                    . ' | BCC:' . implode(', ', $bcc);
+                $logapi->save();
+
+                return 'ok';
+
             } else {
-                
+
                 return 'ok';
             }
         }
@@ -752,7 +756,7 @@ class emailController extends Controller
         $mailsTrafico = DB::table('particular_soft_configurations')->first();
         $toEmails = array_filter(array_map('trim', preg_split('/[;,]+/', $mailsTrafico->to_mail_trafico_Team)));
         $ccEmails = array_filter(array_map('trim', preg_split('/[;,]+/', $mailsTrafico->cc_mail_trafico_Team)));
-        
+
 
         if ($sbx[0]->sandbox == 0) {
 
