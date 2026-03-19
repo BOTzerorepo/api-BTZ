@@ -38,10 +38,7 @@
   </style>
 </head>
 <body>
-  <!-- Preheader oculto -->
-  <span style="display:none !important;visibility:hidden;opacity:0;color:transparent;height:0;width:0;overflow:hidden;">
-    {{ 'Carga terminada — Booking ' . ($datos['booking'] ?? '-') . '.' }}
-  </span>
+  
 
   <table class="wrapper" role="presentation" width="100%" cellpadding="0" cellspacing="0">
     <tr><td style="height:24px;"></td></tr>

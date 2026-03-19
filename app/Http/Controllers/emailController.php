@@ -750,8 +750,9 @@ class emailController extends Controller
         $inboxEmail = env('INBOX_EMAIL');
 
         $mailsTrafico = DB::table('particular_soft_configurations')->first();
-        $toEmails = explode(',', $mailsTrafico->to_mail_trafico_Team);
-        $ccEmails = explode(',', $mailsTrafico->cc_mail_trafico_Team);
+        $toEmails = array_filter(array_map('trim', preg_split('/[;,]+/', $mailsTrafico->to_mail_trafico_Team)));
+        $ccEmails = array_filter(array_map('trim', preg_split('/[;,]+/', $mailsTrafico->cc_mail_trafico_Team)));
+        
 
         if ($sbx[0]->sandbox == 0) {
 

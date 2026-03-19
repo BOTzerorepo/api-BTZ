@@ -10,7 +10,6 @@ use App\Mail\ubicacion;
 use App\Mail\cargaFueraAduana;
 use App\Mail\cargaFueraCargando;
 use App\Models\logapi;
-use App\Models\pruebasModel;
 use App\Models\statu;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -28,10 +27,6 @@ class CustomerLoadPlaceController extends Controller
 
     public function coordenadas($patente)
     {
-
-        $chek = new pruebasModel();
-        $chek->contenido = 'Entro a la funcion coordenadas de /lugarDeCarga/{patente} con el Parametro:' . $patente;
-        $chek->save();
         $coordenadas = DB::table('carga')
             ->select(
                 'carga.id as idLoad',
@@ -54,10 +49,6 @@ class CustomerLoadPlaceController extends Controller
             ->where('asign.truck', '=', $patente)
             ->get();
 
-        $chek = new pruebasModel();
-        $chek->contenido = 'La api devolvio:' . $coordenadas;
-        $chek->save();
-
         return $coordenadas;
 
         // SELECT * FROM `carga` INNER JOIN `cntr` INNER JOIN `asign` ON carga.booking = cntr.booking AND cntr.cntr_number = asign.cntr_number WHERE asign.truck = 'AE792WJ';
@@ -71,13 +62,13 @@ class CustomerLoadPlaceController extends Controller
             ->where('id_cntr', '=', $idTrip)->get();
         $cntr = $qc[0];
         // cual es el ultimo status.
-        $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
+        $qd = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
         $description = $qd->status;
 
-        Log::info('El ultimo status del contenedor ' . $cntr->cntr_number . ' es: ' . $qd->main_status);
+        Log::debug('El ultimo status del contenedor ' . $cntr->cntr_number . ' es: ' . $qd->main_status);
 
         if ($qd->main_status != 'CARGANDO') {
-            Log::info('El status es distinto a CARGANDO, se procede a cambiarlo y enviar mail.');
+            Log::debug('El status es distinto a CARGANDO, se procede a cambiarlo y enviar mail.');
             DB::table('status')->insert([
                 'status' => 'Camión se encuentra en un radio de 50 mts del Lugar de Carga.',
                 'main_status' => 'CARGANDO',
@@ -106,7 +97,7 @@ class CustomerLoadPlaceController extends Controller
                 Carga::where('booking', $cntr->booking)->update(['status' => $primerCntrStatus]);
             }
 
-            $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
+            $qd = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
             $description = $qd->status;
 
             $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $cntr->booking)->get();
@@ -115,7 +106,7 @@ class CustomerLoadPlaceController extends Controller
             $datos = [
                 'cntr' => $cntr->cntr_number,
                 'confirmacion' => $cntr->confirmacion,
-                'description' =>  $description,
+                'description' => $description,
                 'user' => $qd->user_status,
                 'empresa' => $empresa,
                 'booking' => $cntr->booking,
@@ -137,8 +128,10 @@ class CustomerLoadPlaceController extends Controller
 
             function parseEmailList($value): array
             {
-                if (!$value) return [];
-                if (is_array($value)) $value = implode(',', $value);
+                if (!$value)
+                    return [];
+                if (is_array($value))
+                    $value = implode(',', $value);
 
                 $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
                 $arr = array_map('trim', explode(',', $normalized));
@@ -149,14 +142,15 @@ class CustomerLoadPlaceController extends Controller
             /** Helper: agrega si es válido */
             function pushIfEmail(&$arr, $email)
             {
-                if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) $arr[] = trim($email);
+                if ($email && filter_var($email, FILTER_VALIDATE_EMAIL))
+                    $arr[] = trim($email);
             }
 
             if (($sbx[0]->sandbox ?? 0) == 0) {
 
                 // --- 1) Traer usuarios involucrados
-                $cliente  = DB::table('users')->where('id', '=', $carga->clienet_id)->first();
-                $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
+                $cliente = DB::table('users')->where('id', '=', $carga->clienet_id)->first();
+                $customer = DB::table('users')->where('username', '=', $carga->user)->first();
 
                 // --- 2) TO: cliente + customer + lo que venga en $toEmails
                 $to = [];
@@ -174,7 +168,7 @@ class CustomerLoadPlaceController extends Controller
                 }
                 // --- 3) CC: cc_emails de ambos + lo que venga en $ccEmails
                 $cc = array_merge(
-                    parseEmailList($cliente->cc_emails  ?? ''),
+                    parseEmailList($cliente->cc_emails ?? ''),
                     parseEmailList($customer->cc_emails ?? ''),
                     parseEmailList($ccEmails ?? '')
                 );
@@ -189,21 +183,21 @@ class CustomerLoadPlaceController extends Controller
                 $to = array_values(array_unique($to));
                 // --- 5) Envío
                 Mail::to($to)
-                    ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                    ->when(!empty($cc), fn($m) => $m->cc($cc))
                     ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                     ->send(new cargaCargando($datos));
 
                 // --- 6) Logueo de lo enviado
-                Log::info('Email cargaCargando enviado', [
+                Log::debug('Email cargaCargando enviado', [
                     'carga_id' => $carga->id,
-                    'booking'  => $carga->booking,
-                    'to'       => $to,
-                    'cc'       => $cc,
-                    'bcc'      => $bcc,
+                    'booking' => $carga->booking,
+                    'to' => $to,
+                    'cc' => $cc,
+                    'bcc' => $bcc,
                 ]);
 
                 $logApi = new logapi();
-                $logApi->user    = 'No Informa';
+                $logApi->user = 'No Informa';
                 $logApi->detalle = "envio email cargaCargando TO: " . implode(', ', $to)
                     . " | CC: " . implode(', ', $cc)
                     . " | BCC: " . implode(', ', $bcc);
@@ -229,7 +223,7 @@ class CustomerLoadPlaceController extends Controller
             $actualizarAvisado->avisado = $avisadoMas;
             $actualizarAvisado->save();
 
-            return 'Se cambió Status - Envió mail.'  . $qd->avisado;
+            return 'Se cambió Status - Envió mail.' . $qd->avisado;
         } else {
 
             if ($qd->avisado == 0) {
@@ -261,7 +255,7 @@ class CustomerLoadPlaceController extends Controller
                     Carga::where('booking', $cntr->booking)->update(['status' => $primerCntrStatus]);
                 }
 
-                $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
+                $qd = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
                 $description = $qd->status;
 
                 $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $cntr->booking)->get();
@@ -269,7 +263,7 @@ class CustomerLoadPlaceController extends Controller
 
                 $datos = [
                     'cntr' => $cntr->cntr_number,
-                    'description' =>  $description,
+                    'description' => $description,
                     'confirmacion' => $cntr->confirmacion,
                     'user' => $qd->user_status,
                     'empresa' => $empresa,
@@ -292,8 +286,10 @@ class CustomerLoadPlaceController extends Controller
                 $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
                 function parseEmailList($value): array
                 {
-                    if (!$value) return [];
-                    if (is_array($value)) $value = implode(',', $value);
+                    if (!$value)
+                        return [];
+                    if (is_array($value))
+                        $value = implode(',', $value);
 
                     $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
                     $arr = array_map('trim', explode(',', $normalized));
@@ -304,14 +300,15 @@ class CustomerLoadPlaceController extends Controller
                 /** Helper: agrega si es válido */
                 function pushIfEmail(&$arr, $email)
                 {
-                    if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) $arr[] = trim($email);
+                    if ($email && filter_var($email, FILTER_VALIDATE_EMAIL))
+                        $arr[] = trim($email);
                 }
 
                 if (($sbx[0]->sandbox ?? 0) == 0) {
 
                     // --- 1) Traer usuarios involucrados
-                    $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
-                    $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
+                    $cliente = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+                    $customer = DB::table('users')->where('username', '=', $carga->user)->first();
 
                     // --- 2) TO: cliente + customer + lo que venga en $toEmails
                     $to = [];
@@ -329,7 +326,7 @@ class CustomerLoadPlaceController extends Controller
                     }
                     // --- 3) CC: cc_emails de ambos + lo que venga en $ccEmails
                     $cc = array_merge(
-                        parseEmailList($cliente->cc_emails  ?? ''),
+                        parseEmailList($cliente->cc_emails ?? ''),
                         parseEmailList($customer->cc_emails ?? ''),
                         parseEmailList($ccEmails ?? '')
                     );
@@ -344,21 +341,21 @@ class CustomerLoadPlaceController extends Controller
                     $to = array_values(array_unique($to));
                     // --- 5) Envío
                     Mail::to($to)
-                        ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                        ->when(!empty($cc), fn($m) => $m->cc($cc))
                         ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                         ->send(new cargaCargando($datos));
 
                     // --- 6) Logueo de lo enviado
-                    Log::info('Email cargaCargando enviado', [
+                    Log::debug('Email cargaCargando enviado', [
                         'carga_id' => $carga->id,
-                        'booking'  => $carga->booking,
-                        'to'       => $to,
-                        'cc'       => $cc,
-                        'bcc'      => $bcc,
+                        'booking' => $carga->booking,
+                        'to' => $to,
+                        'cc' => $cc,
+                        'bcc' => $bcc,
                     ]);
 
                     $logApi = new logapi();
-                    $logApi->user    = 'No Informa';
+                    $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaCargando TO: " . implode(', ', $to)
                         . " | CC: " . implode(', ', $cc)
                         . " | BCC: " . implode(', ', $bcc);
@@ -373,8 +370,8 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->save();
                 } else {
                     // --- 1) Traer usuarios involucrados
-                    $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
-                    $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
+                    $cliente = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+                    $customer = DB::table('users')->where('username', '=', $carga->user)->first();
 
                     // --- 2) TO: cliente + customer + lo que venga en $toEmails
                     $to = [];
@@ -392,7 +389,7 @@ class CustomerLoadPlaceController extends Controller
                     }
                     // --- 3) CC: cc_emails de ambos + lo que venga en $ccEmails
                     $cc = array_merge(
-                        parseEmailList($cliente->cc_emails  ?? ''),
+                        parseEmailList($cliente->cc_emails ?? ''),
                         parseEmailList($customer->cc_emails ?? ''),
                         parseEmailList($ccEmails ?? '')
                     );
@@ -407,21 +404,21 @@ class CustomerLoadPlaceController extends Controller
                     $to = array_values(array_unique($to));
                     // --- 5) Envío
                     Mail::to($to)
-                        ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                        ->when(!empty($cc), fn($m) => $m->cc($cc))
                         ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                         ->send(new cargaCargando($datos));
 
                     // --- 6) Logueo de lo enviado
-                    Log::info('Email cargaCargando enviado', [
+                    Log::debug('Email cargaCargando enviado', [
                         'carga_id' => $carga->id,
-                        'booking'  => $carga->booking,
-                        'to'       => $to,
-                        'cc'       => $cc,
-                        'bcc'      => $bcc,
+                        'booking' => $carga->booking,
+                        'to' => $to,
+                        'cc' => $cc,
+                        'bcc' => $bcc,
                     ]);
 
                     $logApi = new logapi();
-                    $logApi->user    = 'No Informa';
+                    $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaCargando TO: " . implode(', ', $to)
                         . " | CC: " . implode(', ', $cc)
                         . " | BCC: " . implode(', ', $bcc);
@@ -442,7 +439,8 @@ class CustomerLoadPlaceController extends Controller
     }
     function parseEmailList($value): array
     {
-        if (!$value) return [];
+        if (!$value)
+            return [];
         // normalizo separadores a coma
         $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
         // split, trim, filtro vacíos y no válidos
@@ -454,26 +452,26 @@ class CustomerLoadPlaceController extends Controller
     }
     private function cmaChangeFlag(string $cntrNumber, int $flag = 1, int $timeout = 30): array
     {
-        Log::info("CMA: Cambiando flag a {$flag} para contenedor {$cntrNumber}");
+        Log::debug("CMA: Cambiando flag a {$flag} para contenedor {$cntrNumber}");
 
-        $base = rtrim(env('API_CMA_BOTZERO'), '/');
+        $base = 'https://cma-cgm.botzero.ar/api';
         if (!$base) {
             Log::error('CMA: API_CMA_BOTZERO no configurado');
             return ['ok' => false, 'http' => 500, 'error' => 'API_CMA_BOTZERO no configurado'];
         }
 
 
-        $url     = "{$base}/cma/changeFlag/{$flag}/{$cntrNumber}";
+        $url = "{$base}/cma/changeFlag/{$flag}/{$cntrNumber}";
         $headers = ['Content-Type' => 'application/json'];
 
         try {
-            $client  = new Client(['http_errors' => false, 'timeout' => $timeout]);
+            $client = new Client(['http_errors' => false, 'timeout' => $timeout]);
             $request = new Psr7Request('GET', $url, $headers);
 
-            $res   = $client->send($request);
-            $code  = $res->getStatusCode();
-            $body  = (string) $res->getBody();
-            $data  = json_decode($body, true);
+            $res = $client->send($request);
+            $code = $res->getStatusCode();
+            $body = (string) $res->getBody();
+            $data = json_decode($body, true);
             $return = $data;
             if (!is_array($data) || (($data['ok'] ?? false) !== true)) {
                 $status = $data['http'] ?? $code;
@@ -481,7 +479,7 @@ class CustomerLoadPlaceController extends Controller
                 return ['ok' => false, 'http' => $status, 'data' => $data ?? $body];
             }
 
-            Log::info("CMA OK changeFlag({$flag}) {$cntrNumber}");
+            Log::debug("CMA OK changeFlag({$flag}) {$cntrNumber}");
             return ['ok' => true, 'http' => $data['http'] ?? $code, 'data' => $data];
         } catch (\Throwable $e) {
             Log::error("CMA Exception changeFlag({$flag}) {$cntrNumber}: {$e->getMessage()}");
@@ -490,20 +488,20 @@ class CustomerLoadPlaceController extends Controller
         // ---------- POST a n8n ----------
         try {
             $payload = [
-                'function'   => __FUNCTION__, // te manda el nombre de la función actual
+                'function' => __FUNCTION__, // te manda el nombre de la función actual
                 'contenedor' => $contenedor->cntr_number,
-                'cma_t_o'    => $contenedor->cma_t_o,
-                'lat'        => $punto->latitude,
-                'lon'        => $punto->longitude,
-                'respuesta'  => $r, // lo que devolvió CMA
+                'cma_t_o' => $contenedor->cma_t_o,
+                'lat' => $punto->latitude,
+                'lon' => $punto->longitude,
+                'respuesta' => $r, // lo que devolvió CMA
             ];
 
             $postRes = $client->post('https://n8n.rail.ar/webhook/reporte-cma', [
                 'headers' => $headers,
-                'json'    => $payload,
+                'json' => $payload,
             ]);
 
-            Log::info('Posteado a n8n: ' . $postRes->getBody());
+            Log::debug('Posteado a n8n: ' . $postRes->getBody());
         } catch (\Exception $e) {
             Log::error('Error enviando a n8n: ' . $e->getMessage());
         }
@@ -517,7 +515,7 @@ class CustomerLoadPlaceController extends Controller
             ->where('id_cntr', '=', $idTrip)->get();
         $cntr = $qc[0];
         // cual es el ultimo status.
-        $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
+        $qd = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
         $description = $qd->status;
 
         if ($cntr->cma_t_o != null) {
@@ -552,7 +550,7 @@ class CustomerLoadPlaceController extends Controller
             if ($equal) {
                 Carga::where('booking', $cntr->booking)->update(['status' => $primerCntrStatus]);
             }
-            $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
+            $qd = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
             $description = $qd->status;
 
             $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $cntr->booking)->get();
@@ -560,7 +558,7 @@ class CustomerLoadPlaceController extends Controller
 
             $datos = [
                 'cntr' => $cntr->cntr_number,
-                'description' =>  $description,
+                'description' => $description,
                 'confirmacion' => $cntr->confirmacion,
                 'user' => $qd->user_status,
                 'empresa' => $empresa,
@@ -583,8 +581,10 @@ class CustomerLoadPlaceController extends Controller
             $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
             function parseEmailList($value): array
             {
-                if (!$value) return [];
-                if (is_array($value)) $value = implode(',', $value);
+                if (!$value)
+                    return [];
+                if (is_array($value))
+                    $value = implode(',', $value);
 
                 $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
                 $arr = array_map('trim', explode(',', $normalized));
@@ -595,14 +595,15 @@ class CustomerLoadPlaceController extends Controller
             /** Helper: agrega si es válido */
             function pushIfEmail(&$arr, $email)
             {
-                if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) $arr[] = trim($email);
+                if ($email && filter_var($email, FILTER_VALIDATE_EMAIL))
+                    $arr[] = trim($email);
             }
 
             if (($sbx[0]->sandbox ?? 0) == 0) {
 
                 // --- 1) Traer usuarios involucrados
-                $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
-                $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
+                $cliente = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+                $customer = DB::table('users')->where('username', '=', $carga->user)->first();
 
                 // --- 2) TO: cliente + customer + lo que venga en $toEmails
                 $to = [];
@@ -620,7 +621,7 @@ class CustomerLoadPlaceController extends Controller
                 }
                 // --- 3) CC: cc_emails de ambos + lo que venga en $ccEmails
                 $cc = array_merge(
-                    parseEmailList($cliente->cc_emails  ?? ''),
+                    parseEmailList($cliente->cc_emails ?? ''),
                     parseEmailList($customer->cc_emails ?? ''),
                     parseEmailList($ccEmails ?? '')
                 );
@@ -635,21 +636,21 @@ class CustomerLoadPlaceController extends Controller
                 $to = array_values(array_unique($to));
                 // --- 5) Envío
                 Mail::to($to)
-                    ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                    ->when(!empty($cc), fn($m) => $m->cc($cc))
                     ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                     ->send(new cargaAduana($datos));
 
                 // --- 6) Logueo de lo enviado
-                Log::info('Email cargaCargando enviado', [
+                Log::debug('Email cargaCargando enviado', [
                     'carga_id' => $carga->id,
-                    'booking'  => $carga->booking,
-                    'to'       => $to,
-                    'cc'       => $cc,
-                    'bcc'      => $bcc,
+                    'booking' => $carga->booking,
+                    'to' => $to,
+                    'cc' => $cc,
+                    'bcc' => $bcc,
                 ]);
 
                 $logApi = new logapi();
-                $logApi->user    = 'No Informa';
+                $logApi->user = 'No Informa';
                 $logApi->detalle = "envio email cargaCargando TO: " . implode(', ', $to)
                     . " | CC: " . implode(', ', $cc)
                     . " | BCC: " . implode(', ', $bcc);
@@ -663,8 +664,8 @@ class CustomerLoadPlaceController extends Controller
                 $logApi->save();
             } else {
                 // --- 1) Traer usuarios involucrados
-                $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
-                $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
+                $cliente = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+                $customer = DB::table('users')->where('username', '=', $carga->user)->first();
 
                 // --- 2) TO: cliente + customer + lo que venga en $toEmails
                 $to = [];
@@ -682,7 +683,7 @@ class CustomerLoadPlaceController extends Controller
                 }
                 // --- 3) CC: cc_emails de ambos + lo que venga en $ccEmails
                 $cc = array_merge(
-                    parseEmailList($cliente->cc_emails  ?? ''),
+                    parseEmailList($cliente->cc_emails ?? ''),
                     parseEmailList($customer->cc_emails ?? ''),
                     parseEmailList($ccEmails ?? '')
                 );
@@ -697,21 +698,21 @@ class CustomerLoadPlaceController extends Controller
                 $to = array_values(array_unique($to));
                 // --- 5) Envío
                 Mail::to($to)
-                    ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                    ->when(!empty($cc), fn($m) => $m->cc($cc))
                     ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                     ->send(new cargaAduana($datos));
 
                 // --- 6) Logueo de lo enviado
-                Log::info('Email cargaCargando enviado', [
+                Log::debug('Email cargaCargando enviado', [
                     'carga_id' => $carga->id,
-                    'booking'  => $carga->booking,
-                    'to'       => $to,
-                    'cc'       => $cc,
-                    'bcc'      => $bcc,
+                    'booking' => $carga->booking,
+                    'to' => $to,
+                    'cc' => $cc,
+                    'bcc' => $bcc,
                 ]);
 
                 $logApi = new logapi();
-                $logApi->user    = 'No Informa';
+                $logApi->user = 'No Informa';
                 $logApi->detalle = "envio email cargaCargando TO: " . implode(', ', $to)
                     . " | CC: " . implode(', ', $cc)
                     . " | BCC: " . implode(', ', $bcc);
@@ -723,7 +724,7 @@ class CustomerLoadPlaceController extends Controller
             $actualizarAvisado->avisado = $avisadoMas;
             $actualizarAvisado->save();
 
-            return 'Se cambió Status - Envió mail.'  . $qd->avisado;
+            return 'Se cambió Status - Envió mail.' . $qd->avisado;
         } else {
 
             if ($qd->avisado == 0) {
@@ -754,7 +755,7 @@ class CustomerLoadPlaceController extends Controller
                 if ($equal) {
                     Carga::where('booking', $cntr->booking)->update(['status' => $primerCntrStatus]);
                 }
-                $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
+                $qd = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
                 $description = $qd->status;
 
                 $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $cntr->booking)->get();
@@ -762,7 +763,7 @@ class CustomerLoadPlaceController extends Controller
 
                 $datos = [
                     'cntr' => $cntr->cntr_number,
-                    'description' =>  $description,
+                    'description' => $description,
                     'confirmacion' => $cntr->confirmacion,
                     'user' => $qd->user_status,
                     'empresa' => $empresa,
@@ -785,8 +786,10 @@ class CustomerLoadPlaceController extends Controller
                 $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
                 function parseEmailList($value): array
                 {
-                    if (!$value) return [];
-                    if (is_array($value)) $value = implode(',', $value);
+                    if (!$value)
+                        return [];
+                    if (is_array($value))
+                        $value = implode(',', $value);
 
                     $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
                     $arr = array_map('trim', explode(',', $normalized));
@@ -797,14 +800,15 @@ class CustomerLoadPlaceController extends Controller
                 /** Helper: agrega si es válido */
                 function pushIfEmail(&$arr, $email)
                 {
-                    if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) $arr[] = trim($email);
+                    if ($email && filter_var($email, FILTER_VALIDATE_EMAIL))
+                        $arr[] = trim($email);
                 }
 
                 if (($sbx[0]->sandbox ?? 0) == 0) {
 
                     // --- 1) Traer usuarios involucrados
-                    $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
-                    $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
+                    $cliente = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+                    $customer = DB::table('users')->where('username', '=', $carga->user)->first();
 
                     // --- 2) TO: cliente + customer + lo que venga en $toEmails
                     $to = [];
@@ -822,7 +826,7 @@ class CustomerLoadPlaceController extends Controller
                     }
                     // --- 3) CC: cc_emails de ambos + lo que venga en $ccEmails
                     $cc = array_merge(
-                        parseEmailList($cliente->cc_emails  ?? ''),
+                        parseEmailList($cliente->cc_emails ?? ''),
                         parseEmailList($customer->cc_emails ?? ''),
                         parseEmailList($ccEmails ?? '')
                     );
@@ -837,21 +841,21 @@ class CustomerLoadPlaceController extends Controller
                     $to = array_values(array_unique($to));
                     // --- 5) Envío
                     Mail::to($to)
-                        ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                        ->when(!empty($cc), fn($m) => $m->cc($cc))
                         ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                         ->send(new cargaCargando($datos));
 
                     // --- 6) Logueo de lo enviado
-                    Log::info('Email cargaCargando enviado', [
+                    Log::debug('Email cargaCargando enviado', [
                         'carga_id' => $carga->id,
-                        'booking'  => $carga->booking,
-                        'to'       => $to,
-                        'cc'       => $cc,
-                        'bcc'      => $bcc,
+                        'booking' => $carga->booking,
+                        'to' => $to,
+                        'cc' => $cc,
+                        'bcc' => $bcc,
                     ]);
 
                     $logApi = new logapi();
-                    $logApi->user    = 'No Informa';
+                    $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaCargando TO: " . implode(', ', $to)
                         . " | CC: " . implode(', ', $cc)
                         . " | BCC: " . implode(', ', $bcc);
@@ -865,8 +869,8 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->save();
                 } else {
                     // --- 1) Traer usuarios involucrados
-                    $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
-                    $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
+                    $cliente = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+                    $customer = DB::table('users')->where('username', '=', $carga->user)->first();
 
                     // --- 2) TO: cliente + customer + lo que venga en $toEmails
                     $to = [];
@@ -884,7 +888,7 @@ class CustomerLoadPlaceController extends Controller
                     }
                     // --- 3) CC: cc_emails de ambos + lo que venga en $ccEmails
                     $cc = array_merge(
-                        parseEmailList($cliente->cc_emails  ?? ''),
+                        parseEmailList($cliente->cc_emails ?? ''),
                         parseEmailList($customer->cc_emails ?? ''),
                         parseEmailList($ccEmails ?? '')
                     );
@@ -899,21 +903,21 @@ class CustomerLoadPlaceController extends Controller
                     $to = array_values(array_unique($to));
                     // --- 5) Envío
                     Mail::to($to)
-                        ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                        ->when(!empty($cc), fn($m) => $m->cc($cc))
                         ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                         ->send(new cargaCargando($datos));
 
                     // --- 6) Logueo de lo enviado
-                    Log::info('Email cargaCargando enviado', [
+                    Log::debug('Email cargaCargando enviado', [
                         'carga_id' => $carga->id,
-                        'booking'  => $carga->booking,
-                        'to'       => $to,
-                        'cc'       => $cc,
-                        'bcc'      => $bcc,
+                        'booking' => $carga->booking,
+                        'to' => $to,
+                        'cc' => $cc,
+                        'bcc' => $bcc,
                     ]);
 
                     $logApi = new logapi();
-                    $logApi->user    = 'No Informa';
+                    $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaCargando TO: " . implode(', ', $to)
                         . " | CC: " . implode(', ', $cc)
                         . " | BCC: " . implode(', ', $bcc);
@@ -946,20 +950,20 @@ class CustomerLoadPlaceController extends Controller
             ->first();
 
         // cual es el ultimo status.
-        $qd  = DB::table('status')->where('cntr_number', '=', $contenedor->cntr_number)->latest('id')->first();
+        $qd = DB::table('status')->where('cntr_number', '=', $contenedor->cntr_number)->latest('id')->first();
         $description = $qd->status;
 
 
         if ($contenedor->cma_t_o != null) {
 
-            $base    = rtrim(env('API_CMA_BOTZERO'), '/');
+            $base = 'https://cma-cgm.botzero.ar/api';
             $client = new Client();
             $headers = ['Content-Type' => 'application/json'];
             $request = new Psr7Request('GET', "{$base}/cma/actArrAtCusLoc/{$contenedor->cntr_number}/{$contenedor->cma_t_o}", $headers);
             $res = $client->sendAsync($request)->wait();
             $respuesta = $res->getBody();
             $r = json_decode($respuesta, true);
-            Log::info('Respuesta CMA - Act Arr At Cus Loc: ' . $respuesta);
+            Log::debug('Respuesta CMA - Act Arr At Cus Loc: ' . $respuesta);
         }
         if ($qd->main_status != 'STACKING') {
 
@@ -989,7 +993,7 @@ class CustomerLoadPlaceController extends Controller
             if ($equal) {
                 Carga::where('booking', $cntr->booking)->update(['status' => $primerCntrStatus]);
             }
-            $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
+            $qd = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
             $description = $qd->status;
 
             $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $cntr->booking)->get();
@@ -997,7 +1001,7 @@ class CustomerLoadPlaceController extends Controller
 
             $datos = [
                 'cntr' => $cntr->cntr_number,
-                'description' =>  $description,
+                'description' => $description,
                 'confirmacion' => $cntr->confirmacion,
                 'user' => $qd->user_status,
                 'empresa' => $empresa,
@@ -1006,9 +1010,9 @@ class CustomerLoadPlaceController extends Controller
                 'unload_place' => $contenedor->unload_place,
             ];
             $datos['ref_customer'] = $contenedor->ref_customer ?? '-';
-            $datos['type']         = $contenedor->type ?? '-';
-            $datos['trader']       = $contenedor->trader ?? '-';
-            $datos['cntr_type']    = $contenedor->cntr_type ?? '-';
+            $datos['type'] = $contenedor->type ?? '-';
+            $datos['trader'] = $contenedor->trader ?? '-';
+            $datos['cntr_type'] = $contenedor->cntr_type ?? '-';
 
             //Enviar mail
             $sbx = DB::table('variables')->select('sandbox')->get();
@@ -1019,8 +1023,10 @@ class CustomerLoadPlaceController extends Controller
             $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
             function parseEmailList($value): array
             {
-                if (!$value) return [];
-                if (is_array($value)) $value = implode(',', $value);
+                if (!$value)
+                    return [];
+                if (is_array($value))
+                    $value = implode(',', $value);
 
                 $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
                 $arr = array_map('trim', explode(',', $normalized));
@@ -1031,14 +1037,15 @@ class CustomerLoadPlaceController extends Controller
             /** Helper: agrega si es válido */
             function pushIfEmail(&$arr, $email)
             {
-                if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) $arr[] = trim($email);
+                if ($email && filter_var($email, FILTER_VALIDATE_EMAIL))
+                    $arr[] = trim($email);
             }
 
             if (($sbx[0]->sandbox ?? 0) == 0) {
 
                 // --- 1) Traer usuarios involucrados
-                $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
-                $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
+                $cliente = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+                $customer = DB::table('users')->where('username', '=', $carga->user)->first();
 
                 // --- 2) TO: cliente + customer + lo que venga en $toEmails
                 $to = [];
@@ -1056,7 +1063,7 @@ class CustomerLoadPlaceController extends Controller
                 }
                 // --- 3) CC: cc_emails de ambos + lo que venga en $ccEmails
                 $cc = array_merge(
-                    parseEmailList($cliente->cc_emails  ?? ''),
+                    parseEmailList($cliente->cc_emails ?? ''),
                     parseEmailList($customer->cc_emails ?? ''),
                     parseEmailList($ccEmails ?? '')
                 );
@@ -1073,21 +1080,21 @@ class CustomerLoadPlaceController extends Controller
 
                 // --- 5) Envío
                 Mail::to($to)
-                    ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                    ->when(!empty($cc), fn($m) => $m->cc($cc))
                     ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                     ->send(new cargaDescarga($datos));
 
                 // --- 6) Logueo de lo enviado
-                Log::info('Email cargaCargando enviado', [
+                Log::debug('Email cargaCargando enviado', [
                     'carga_id' => $carga->id,
-                    'booking'  => $carga->booking,
-                    'to'       => $to,
-                    'cc'       => $cc,
-                    'bcc'      => $bcc,
+                    'booking' => $carga->booking,
+                    'to' => $to,
+                    'cc' => $cc,
+                    'bcc' => $bcc,
                 ]);
 
                 $logApi = new logapi();
-                $logApi->user    = 'No Informa';
+                $logApi->user = 'No Informa';
                 $logApi->detalle = "envio email cargaCargando TO: " . implode(', ', $to)
                     . " | CC: " . implode(', ', $cc)
                     . " | BCC: " . implode(', ', $bcc);
@@ -1101,8 +1108,8 @@ class CustomerLoadPlaceController extends Controller
                 $logApi->save();
             } else {
                 // --- 1) Traer usuarios involucrados
-                $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
-                $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
+                $cliente = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+                $customer = DB::table('users')->where('username', '=', $carga->user)->first();
 
                 // --- 2) TO: cliente + customer + lo que venga en $toEmails
                 $to = [];
@@ -1120,7 +1127,7 @@ class CustomerLoadPlaceController extends Controller
                 }
                 // --- 3) CC: cc_emails de ambos + lo que venga en $ccEmails
                 $cc = array_merge(
-                    parseEmailList($cliente->cc_emails  ?? ''),
+                    parseEmailList($cliente->cc_emails ?? ''),
                     parseEmailList($customer->cc_emails ?? ''),
                     parseEmailList($ccEmails ?? '')
                 );
@@ -1135,21 +1142,21 @@ class CustomerLoadPlaceController extends Controller
                 $to = array_values(array_unique($to));
                 // --- 5) Envío
                 Mail::to($to)
-                    ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                    ->when(!empty($cc), fn($m) => $m->cc($cc))
                     ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                     ->send(new cargaDescarga($datos));
 
                 // --- 6) Logueo de lo enviado
-                Log::info('Email cargaCargando enviado', [
+                Log::debug('Email cargaCargando enviado', [
                     'carga_id' => $carga->id,
-                    'booking'  => $carga->booking,
-                    'to'       => $to,
-                    'cc'       => $cc,
-                    'bcc'      => $bcc,
+                    'booking' => $carga->booking,
+                    'to' => $to,
+                    'cc' => $cc,
+                    'bcc' => $bcc,
                 ]);
 
                 $logApi = new logapi();
-                $logApi->user    = 'No Informa';
+                $logApi->user = 'No Informa';
                 $logApi->detalle = "envio email cargaCargando TO: " . implode(', ', $to)
                     . " | CC: " . implode(', ', $cc)
                     . " | BCC: " . implode(', ', $bcc);
@@ -1160,7 +1167,7 @@ class CustomerLoadPlaceController extends Controller
             $actualizarAvisado->avisado = $avisadoMas;
             $actualizarAvisado->save();
 
-            return 'Se cambió Status - Envió mail.'  . $qd->avisado;
+            return 'Se cambió Status - Envió mail.' . $qd->avisado;
         } else {
 
             if ($qd->avisado == 0) {
@@ -1191,7 +1198,7 @@ class CustomerLoadPlaceController extends Controller
                 if ($equal) {
                     Carga::where('booking', $cntr->booking)->update(['status' => $primerCntrStatus]);
                 }
-                $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
+                $qd = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
                 $description = $qd->status;
 
                 $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $cntr->booking)->get();
@@ -1200,7 +1207,7 @@ class CustomerLoadPlaceController extends Controller
                 $datos = [
                     'cntr' => $cntr->cntr_number,
                     'confirmacion' => $cntr->confirmacion,
-                    'description' =>  $description,
+                    'description' => $description,
                     'user' => $qd->user_status,
                     'empresa' => $empresa,
                     'booking' => $cntr->booking,
@@ -1225,8 +1232,10 @@ class CustomerLoadPlaceController extends Controller
                 $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
                 function parseEmailList($value): array
                 {
-                    if (!$value) return [];
-                    if (is_array($value)) $value = implode(',', $value);
+                    if (!$value)
+                        return [];
+                    if (is_array($value))
+                        $value = implode(',', $value);
 
                     $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
                     $arr = array_map('trim', explode(',', $normalized));
@@ -1237,14 +1246,15 @@ class CustomerLoadPlaceController extends Controller
                 /** Helper: agrega si es válido */
                 function pushIfEmail(&$arr, $email)
                 {
-                    if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) $arr[] = trim($email);
+                    if ($email && filter_var($email, FILTER_VALIDATE_EMAIL))
+                        $arr[] = trim($email);
                 }
 
                 if (($sbx[0]->sandbox ?? 0) == 0) {
 
                     // --- 1) Traer usuarios involucrados
-                    $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
-                    $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
+                    $cliente = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+                    $customer = DB::table('users')->where('username', '=', $carga->user)->first();
 
                     // --- 2) TO: cliente + customer + lo que venga en $toEmails
                     $to = [];
@@ -1262,7 +1272,7 @@ class CustomerLoadPlaceController extends Controller
                     }
                     // --- 3) CC: cc_emails de ambos + lo que venga en $ccEmails
                     $cc = array_merge(
-                        parseEmailList($cliente->cc_emails  ?? ''),
+                        parseEmailList($cliente->cc_emails ?? ''),
                         parseEmailList($customer->cc_emails ?? ''),
                         parseEmailList($ccEmails ?? '')
                     );
@@ -1277,21 +1287,21 @@ class CustomerLoadPlaceController extends Controller
                     $to = array_values(array_unique($to));
                     // --- 5) Envío
                     Mail::to($to)
-                        ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                        ->when(!empty($cc), fn($m) => $m->cc($cc))
                         ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                         ->send(new cargaDescarga($datos));
 
                     // --- 6) Logueo de lo enviado
-                    Log::info('Email cargaCargando enviado', [
+                    Log::debug('Email cargaCargando enviado', [
                         'carga_id' => $carga->id,
-                        'booking'  => $carga->booking,
-                        'to'       => $to,
-                        'cc'       => $cc,
-                        'bcc'      => $bcc,
+                        'booking' => $carga->booking,
+                        'to' => $to,
+                        'cc' => $cc,
+                        'bcc' => $bcc,
                     ]);
 
                     $logApi = new logapi();
-                    $logApi->user    = 'No Informa';
+                    $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaCargando TO: " . implode(', ', $to)
                         . " | CC: " . implode(', ', $cc)
                         . " | BCC: " . implode(', ', $bcc);
@@ -1304,8 +1314,8 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->save();
                 } else {
                     // --- 1) Traer usuarios involucrados
-                    $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
-                    $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
+                    $cliente = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+                    $customer = DB::table('users')->where('username', '=', $carga->user)->first();
 
                     // --- 2) TO: cliente + customer + lo que venga en $toEmails
                     $to = [];
@@ -1323,7 +1333,7 @@ class CustomerLoadPlaceController extends Controller
                     }
                     // --- 3) CC: cc_emails de ambos + lo que venga en $ccEmails
                     $cc = array_merge(
-                        parseEmailList($cliente->cc_emails  ?? ''),
+                        parseEmailList($cliente->cc_emails ?? ''),
                         parseEmailList($customer->cc_emails ?? ''),
                         parseEmailList($ccEmails ?? '')
                     );
@@ -1338,21 +1348,21 @@ class CustomerLoadPlaceController extends Controller
                     $to = array_values(array_unique($to));
                     // --- 5) Envío
                     Mail::to($to)
-                        ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                        ->when(!empty($cc), fn($m) => $m->cc($cc))
                         ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                         ->send(new cargaDescarga($datos));
 
                     // --- 6) Logueo de lo enviado
-                    Log::info('Email cargaCargando enviado', [
+                    Log::debug('Email cargaCargando enviado', [
                         'carga_id' => $carga->id,
-                        'booking'  => $carga->booking,
-                        'to'       => $to,
-                        'cc'       => $cc,
-                        'bcc'      => $bcc,
+                        'booking' => $carga->booking,
+                        'to' => $to,
+                        'cc' => $cc,
+                        'bcc' => $bcc,
                     ]);
 
                     $logApi = new logapi();
-                    $logApi->user    = 'No Informa';
+                    $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaCargando TO: " . implode(', ', $to)
                         . " | CC: " . implode(', ', $cc)
                         . " | BCC: " . implode(', ', $bcc);
@@ -1379,7 +1389,7 @@ class CustomerLoadPlaceController extends Controller
             ->get();
         $cntr = $qc[0];
         // cual es el ultimo status.
-        $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
+        $qd = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
         $description = $qd->status;
 
         /* ++++++++++++++++++++++++++ ACCION CMA (no corta el flujo) +++++++++++++++++++++++++++ */
@@ -1396,28 +1406,28 @@ class CustomerLoadPlaceController extends Controller
             Log::warning('CMA: sin cma_t_o para booking ' . ($cntr->booking ?? 'N/D'));
         } else {
 
-            Log::info('-----| CARGA CMA | ------');
+            Log::debug('-----| CARGA CMA | ------');
 
             $cma_t_o = $place->cma_t_o;
-            $lat     = $place->latitud;
-            $lon     = $place->longitud;
+            $lat = $place->latitud;
+            $lon = $place->longitud;
 
-            $base    = rtrim(env('API_CMA_BOTZERO'), '/');
+            $base = 'https://cma-cgm.botzero.ar/api';
             $headers = ['Content-Type' => 'application/json'];
 
             $client = new Client([
                 'http_errors' => false, // no lance excepción en 4xx/5xx
-                'timeout'     => 30,
+                'timeout' => 30,
             ]);
 
             // Helper para enviar y loguear sin cortar
             $send = function (string $label, string $url) use ($client, $headers, &$cmaResults) {
                 log::info('Usamos:' . $label);
                 try {
-                    $req   = new Psr7Request('GET', $url, $headers);
-                    $res   = $client->send($req);
-                    $body  = (string) $res->getBody();
-                    $data  = json_decode($body, true);
+                    $req = new Psr7Request('GET', $url, $headers);
+                    $res = $client->send($req);
+                    $body = (string) $res->getBody();
+                    $data = json_decode($body, true);
                     return $data;
 
                     if (!is_array($data) || (($data['ok'] ?? false) !== true)) {
@@ -1426,7 +1436,7 @@ class CustomerLoadPlaceController extends Controller
                         $cmaResults['errors'][] = ['step' => $label, 'status' => $status, 'body' => $body];
                     } else {
                         $cmaResults['steps'][$label] = $data;
-                        Log::info('-----| CARGA CMA | Status: ok ------' . $cmaResults['steps'][$label] = $data);
+                        Log::debug('-----| CARGA CMA | Status: ok ------' . $cmaResults['steps'][$label] = $data);
                     }
                 } catch (\Throwable $e) {
                     Log::error("CMA Exception {$label}: " . $e->getMessage());
@@ -1456,7 +1466,7 @@ class CustomerLoadPlaceController extends Controller
             if (!empty($cmaResults['errors'])) {
                 Log::warning('CMA finalizado con errores', $cmaResults['errors']);
             } else {
-                Log::info('CMA finalizado OK', array_keys($cmaResults['steps']));
+                Log::debug('CMA finalizado OK', array_keys($cmaResults['steps']));
             }
         }
 
@@ -1478,7 +1488,7 @@ class CustomerLoadPlaceController extends Controller
                     'status_cntr' => 'El camión ha salido del área de carga y se encuentra a más de 200 metros del lugar.'
                 ]);
 
-            $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
+            $qd = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
             $description = $qd->status;
 
             $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $cntr->booking)->get();
@@ -1487,7 +1497,7 @@ class CustomerLoadPlaceController extends Controller
             $datos = [
                 'cntr' => $cntr->cntr_number,
                 'confirmacion' => $cntr->confirmacion,
-                'description' =>  $description,
+                'description' => $description,
                 'user' => $qd->user_status,
                 'empresa' => $empresa,
                 'booking' => $cntr->booking,
@@ -1508,8 +1518,10 @@ class CustomerLoadPlaceController extends Controller
             $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
             function parseEmailList($value): array
             {
-                if (!$value) return [];
-                if (is_array($value)) $value = implode(',', $value);
+                if (!$value)
+                    return [];
+                if (is_array($value))
+                    $value = implode(',', $value);
 
                 $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
                 $arr = array_map('trim', explode(',', $normalized));
@@ -1520,14 +1532,15 @@ class CustomerLoadPlaceController extends Controller
             /** Helper: agrega si es válido */
             function pushIfEmail(&$arr, $email)
             {
-                if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) $arr[] = trim($email);
+                if ($email && filter_var($email, FILTER_VALIDATE_EMAIL))
+                    $arr[] = trim($email);
             }
 
             if (($sbx[0]->sandbox ?? 0) == 0) {
 
                 // --- 1) Traer usuarios involucrados
-                $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
-                $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
+                $cliente = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+                $customer = DB::table('users')->where('username', '=', $carga->user)->first();
 
                 // --- 2) TO: cliente + customer + lo que venga en $toEmails
                 $to = [];
@@ -1545,7 +1558,7 @@ class CustomerLoadPlaceController extends Controller
                 }
                 // --- 3) CC: cc_emails de ambos + lo que venga en $ccEmails
                 $cc = array_merge(
-                    parseEmailList($cliente->cc_emails  ?? ''),
+                    parseEmailList($cliente->cc_emails ?? ''),
                     parseEmailList($customer->cc_emails ?? ''),
                     parseEmailList($ccEmails ?? '')
                 );
@@ -1560,21 +1573,21 @@ class CustomerLoadPlaceController extends Controller
                 $to = array_values(array_unique($to));
                 // --- 5) Envío
                 Mail::to($to)
-                    ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                    ->when(!empty($cc), fn($m) => $m->cc($cc))
                     ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                     ->send(new cargaFueraCargando($datos));
 
                 // --- 6) Logueo de lo enviado
-                Log::info('Email cargaCargando enviado', [
+                Log::debug('Email cargaCargando enviado', [
                     'carga_id' => $carga->id,
-                    'booking'  => $carga->booking,
-                    'to'       => $to,
-                    'cc'       => $cc,
-                    'bcc'      => $bcc,
+                    'booking' => $carga->booking,
+                    'to' => $to,
+                    'cc' => $cc,
+                    'bcc' => $bcc,
                 ]);
 
                 $logApi = new logapi();
-                $logApi->user    = 'No Informa';
+                $logApi->user = 'No Informa';
                 $logApi->detalle = "envio email cargaCargando TO: " . implode(', ', $to)
                     . " | CC: " . implode(', ', $cc)
                     . " | BCC: " . implode(', ', $bcc);
@@ -1590,8 +1603,8 @@ class CustomerLoadPlaceController extends Controller
             } else {
 
                 // --- 1) Traer usuarios involucrados
-                $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
-                $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
+                $cliente = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+                $customer = DB::table('users')->where('username', '=', $carga->user)->first();
 
                 // --- 2) TO: cliente + customer + lo que venga en $toEmails
                 $to = [];
@@ -1609,7 +1622,7 @@ class CustomerLoadPlaceController extends Controller
                 }
                 // --- 3) CC: cc_emails de ambos + lo que venga en $ccEmails
                 $cc = array_merge(
-                    parseEmailList($cliente->cc_emails  ?? ''),
+                    parseEmailList($cliente->cc_emails ?? ''),
                     parseEmailList($customer->cc_emails ?? ''),
                     parseEmailList($ccEmails ?? '')
                 );
@@ -1624,21 +1637,21 @@ class CustomerLoadPlaceController extends Controller
                 $to = array_values(array_unique($to));
                 // --- 5) Envío
                 Mail::to($to)
-                    ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                    ->when(!empty($cc), fn($m) => $m->cc($cc))
                     ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                     ->send(new cargaFueraCargando($datos));
 
                 // --- 6) Logueo de lo enviado
-                Log::info('Email cargaCargando enviado', [
+                Log::debug('Email cargaCargando enviado', [
                     'carga_id' => $carga->id,
-                    'booking'  => $carga->booking,
-                    'to'       => $to,
-                    'cc'       => $cc,
-                    'bcc'      => $bcc,
+                    'booking' => $carga->booking,
+                    'to' => $to,
+                    'cc' => $cc,
+                    'bcc' => $bcc,
                 ]);
 
                 $logApi = new logapi();
-                $logApi->user    = 'No Informa';
+                $logApi->user = 'No Informa';
                 $logApi->detalle = "envio email cargaCargando TO: " . implode(', ', $to)
                     . " | CC: " . implode(', ', $cc)
                     . " | BCC: " . implode(', ', $bcc);
@@ -1651,7 +1664,7 @@ class CustomerLoadPlaceController extends Controller
             $actualizarAvisado->avisado = $avisadoMas;
             $actualizarAvisado->save();
 
-            return 'Se cambió Status - Envió mail.'  . $qd->avisado;
+            return 'Se cambió Status - Envió mail.' . $qd->avisado;
         } else {
 
             if ($qd->avisado == 0) {
@@ -1670,7 +1683,7 @@ class CustomerLoadPlaceController extends Controller
                         'status_cntr' => 'El camión ha salido del área de carga y se encuentra a más de 200 metros del lugar.'
                     ]);
 
-                $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
+                $qd = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
                 $description = $qd->status;
 
                 $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $cntr->booking)->get();
@@ -1678,7 +1691,7 @@ class CustomerLoadPlaceController extends Controller
 
                 $datos = [
                     'cntr' => $cntr->cntr_number,
-                    'description' =>  $description,
+                    'description' => $description,
                     'confirmacion' => $cntr->confirmacion,
                     'user' => $qd->user_status,
                     'empresa' => $empresa,
@@ -1700,8 +1713,10 @@ class CustomerLoadPlaceController extends Controller
                 $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
                 function parseEmailList($value): array
                 {
-                    if (!$value) return [];
-                    if (is_array($value)) $value = implode(',', $value);
+                    if (!$value)
+                        return [];
+                    if (is_array($value))
+                        $value = implode(',', $value);
 
                     $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
                     $arr = array_map('trim', explode(',', $normalized));
@@ -1712,14 +1727,15 @@ class CustomerLoadPlaceController extends Controller
                 /** Helper: agrega si es válido */
                 function pushIfEmail(&$arr, $email)
                 {
-                    if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) $arr[] = trim($email);
+                    if ($email && filter_var($email, FILTER_VALIDATE_EMAIL))
+                        $arr[] = trim($email);
                 }
 
                 if (($sbx[0]->sandbox ?? 0) == 0) {
 
                     // --- 1) Traer usuarios involucrados
-                    $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
-                    $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
+                    $cliente = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+                    $customer = DB::table('users')->where('username', '=', $carga->user)->first();
 
                     // --- 2) TO: cliente + customer + lo que venga en $toEmails
                     $to = [];
@@ -1737,7 +1753,7 @@ class CustomerLoadPlaceController extends Controller
                     }
                     // --- 3) CC: cc_emails de ambos + lo que venga en $ccEmails
                     $cc = array_merge(
-                        parseEmailList($cliente->cc_emails  ?? ''),
+                        parseEmailList($cliente->cc_emails ?? ''),
                         parseEmailList($customer->cc_emails ?? ''),
                         parseEmailList($ccEmails ?? '')
                     );
@@ -1752,21 +1768,21 @@ class CustomerLoadPlaceController extends Controller
                     $to = array_values(array_unique($to));
                     // --- 5) Envío
                     Mail::to($to)
-                        ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                        ->when(!empty($cc), fn($m) => $m->cc($cc))
                         ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                         ->send(new cargaFueraCargando($datos));
 
                     // --- 6) Logueo de lo enviado
-                    Log::info('Email cargaCargando enviado', [
+                    Log::debug('Email cargaCargando enviado', [
                         'carga_id' => $carga->id,
-                        'booking'  => $carga->booking,
-                        'to'       => $to,
-                        'cc'       => $cc,
-                        'bcc'      => $bcc,
+                        'booking' => $carga->booking,
+                        'to' => $to,
+                        'cc' => $cc,
+                        'bcc' => $bcc,
                     ]);
 
                     $logApi = new logapi();
-                    $logApi->user    = 'No Informa';
+                    $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaCargando TO: " . implode(', ', $to)
                         . " | CC: " . implode(', ', $cc)
                         . " | BCC: " . implode(', ', $bcc);
@@ -1781,8 +1797,8 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->save();
                 } else {
                     // --- 1) Traer usuarios involucrados
-                    $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
-                    $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
+                    $cliente = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+                    $customer = DB::table('users')->where('username', '=', $carga->user)->first();
 
                     // --- 2) TO: cliente + customer + lo que venga en $toEmails
                     $to = [];
@@ -1800,7 +1816,7 @@ class CustomerLoadPlaceController extends Controller
                     }
                     // --- 3) CC: cc_emails de ambos + lo que venga en $ccEmails
                     $cc = array_merge(
-                        parseEmailList($cliente->cc_emails  ?? ''),
+                        parseEmailList($cliente->cc_emails ?? ''),
                         parseEmailList($customer->cc_emails ?? ''),
                         parseEmailList($ccEmails ?? '')
                     );
@@ -1815,21 +1831,21 @@ class CustomerLoadPlaceController extends Controller
                     $to = array_values(array_unique($to));
                     // --- 5) Envío
                     Mail::to($to)
-                        ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                        ->when(!empty($cc), fn($m) => $m->cc($cc))
                         ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                         ->send(new cargaFueraCargando($datos));
 
                     // --- 6) Logueo de lo enviado
-                    Log::info('Email cargaCargando enviado', [
+                    Log::debug('Email cargaCargando enviado', [
                         'carga_id' => $carga->id,
-                        'booking'  => $carga->booking,
-                        'to'       => $to,
-                        'cc'       => $cc,
-                        'bcc'      => $bcc,
+                        'booking' => $carga->booking,
+                        'to' => $to,
+                        'cc' => $cc,
+                        'bcc' => $bcc,
                     ]);
 
                     $logApi = new logapi();
-                    $logApi->user    = 'No Informa';
+                    $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaCargando TO: " . implode(', ', $to)
                         . " | CC: " . implode(', ', $cc)
                         . " | BCC: " . implode(', ', $bcc);
@@ -1862,7 +1878,7 @@ class CustomerLoadPlaceController extends Controller
 
 
         // cual es el ultimo status.
-        $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
+        $qd = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
         $description = $qd->status;
 
         if ($cntr->cma_t_o != null) {
@@ -1881,7 +1897,7 @@ class CustomerLoadPlaceController extends Controller
                     ->first();
             }
 
-            $base    = rtrim(env('API_CMA_BOTZERO'), '/');
+            $base = 'https://cma-cgm.botzero.ar/api';
             $client = new Client();
             $headers = ['Content-Type' => 'application/json'];
             $request = new Psr7Request('GET', "{$base}/cma/estArrAtCusLoc/{$cntr->cma_t_o}/{$cntr->cntr_number}/{$place->lat}/{$place->lon}", $headers);
@@ -1889,10 +1905,10 @@ class CustomerLoadPlaceController extends Controller
             $respuesta = $res->getBody();
             $r = json_decode($respuesta, true);
 
-            Log::info('CMA - Est Arr At Cus Loc: ' . $respuesta);
+            Log::debug('CMA - Est Arr At Cus Loc: ' . $respuesta);
             // ++++++++++++++ ACCION CMA +++++++++++++++ */
             $result = $this->cmaChangeFlag($cntr->cntr_number, 3);
-            Log::info('CMA - Change Flag 3: ' . json_encode($result));
+            Log::debug('CMA - Change Flag 3: ' . json_encode($result));
             /* ++++++++++++++ FIN ACCION CMA +++++++++++ */
         }
 
@@ -1927,7 +1943,7 @@ class CustomerLoadPlaceController extends Controller
             if ($equal) {
                 Carga::where('booking', $cntr->booking)->update(['status' => $primerCntrStatus]);
             }
-            $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
+            $qd = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
             $description = $qd->status;
 
             $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $cntr->booking)->get();
@@ -1935,7 +1951,7 @@ class CustomerLoadPlaceController extends Controller
 
             $datos = [
                 'cntr' => $cntr->cntr_number,
-                'description' =>  $description,
+                'description' => $description,
                 'confirmacion' => $cntr->confirmacion,
                 'user' => $qd->user_status,
                 'empresa' => $empresa,
@@ -1958,8 +1974,10 @@ class CustomerLoadPlaceController extends Controller
             $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
             function parseEmailList($value): array
             {
-                if (!$value) return [];
-                if (is_array($value)) $value = implode(',', $value);
+                if (!$value)
+                    return [];
+                if (is_array($value))
+                    $value = implode(',', $value);
 
                 $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
                 $arr = array_map('trim', explode(',', $normalized));
@@ -1970,14 +1988,15 @@ class CustomerLoadPlaceController extends Controller
             /** Helper: agrega si es válido */
             function pushIfEmail(&$arr, $email)
             {
-                if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) $arr[] = trim($email);
+                if ($email && filter_var($email, FILTER_VALIDATE_EMAIL))
+                    $arr[] = trim($email);
             }
 
             if (($sbx[0]->sandbox ?? 0) == 0) {
 
                 // --- 1) Traer usuarios involucrados
-                $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
-                $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
+                $cliente = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+                $customer = DB::table('users')->where('username', '=', $carga->user)->first();
 
                 // --- 2) TO: cliente + customer + lo que venga en $toEmails
                 $to = [];
@@ -1995,7 +2014,7 @@ class CustomerLoadPlaceController extends Controller
                 }
                 // --- 3) CC: cc_emails de ambos + lo que venga en $ccEmails
                 $cc = array_merge(
-                    parseEmailList($cliente->cc_emails  ?? ''),
+                    parseEmailList($cliente->cc_emails ?? ''),
                     parseEmailList($customer->cc_emails ?? ''),
                     parseEmailList($ccEmails ?? '')
                 );
@@ -2010,21 +2029,21 @@ class CustomerLoadPlaceController extends Controller
                 $to = array_values(array_unique($to));
                 // --- 5) Envío
                 Mail::to($to)
-                    ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                    ->when(!empty($cc), fn($m) => $m->cc($cc))
                     ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                     ->send(new cargaFueraAduana($datos));
 
                 // --- 6) Logueo de lo enviado
-                Log::info('Email cargaCargando enviado', [
+                Log::debug('Email cargaCargando enviado', [
                     'carga_id' => $carga->id,
-                    'booking'  => $carga->booking,
-                    'to'       => $to,
-                    'cc'       => $cc,
-                    'bcc'      => $bcc,
+                    'booking' => $carga->booking,
+                    'to' => $to,
+                    'cc' => $cc,
+                    'bcc' => $bcc,
                 ]);
 
                 $logApi = new logapi();
-                $logApi->user    = 'No Informa';
+                $logApi->user = 'No Informa';
                 $logApi->detalle = "envio email cargaCargando TO: " . implode(', ', $to)
                     . " | CC: " . implode(', ', $cc)
                     . " | BCC: " . implode(', ', $bcc);
@@ -2038,8 +2057,8 @@ class CustomerLoadPlaceController extends Controller
                 $logApi->save();
             } else {
                 // --- 1) Traer usuarios involucrados
-                $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
-                $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
+                $cliente = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+                $customer = DB::table('users')->where('username', '=', $carga->user)->first();
 
                 // --- 2) TO: cliente + customer + lo que venga en $toEmails
                 $to = [];
@@ -2057,7 +2076,7 @@ class CustomerLoadPlaceController extends Controller
                 }
                 // --- 3) CC: cc_emails de ambos + lo que venga en $ccEmails
                 $cc = array_merge(
-                    parseEmailList($cliente->cc_emails  ?? ''),
+                    parseEmailList($cliente->cc_emails ?? ''),
                     parseEmailList($customer->cc_emails ?? ''),
                     parseEmailList($ccEmails ?? '')
                 );
@@ -2072,21 +2091,21 @@ class CustomerLoadPlaceController extends Controller
                 $to = array_values(array_unique($to));
                 // --- 5) Envío
                 Mail::to($to)
-                    ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                    ->when(!empty($cc), fn($m) => $m->cc($cc))
                     ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                     ->send(new cargaFueraAduana($datos));
 
                 // --- 6) Logueo de lo enviado
-                Log::info('Email cargaCargando enviado', [
+                Log::debug('Email cargaCargando enviado', [
                     'carga_id' => $carga->id,
-                    'booking'  => $carga->booking,
-                    'to'       => $to,
-                    'cc'       => $cc,
-                    'bcc'      => $bcc,
+                    'booking' => $carga->booking,
+                    'to' => $to,
+                    'cc' => $cc,
+                    'bcc' => $bcc,
                 ]);
 
                 $logApi = new logapi();
-                $logApi->user    = 'No Informa';
+                $logApi->user = 'No Informa';
                 $logApi->detalle = "envio email cargaCargando TO: " . implode(', ', $to)
                     . " | CC: " . implode(', ', $cc)
                     . " | BCC: " . implode(', ', $bcc);
@@ -2098,7 +2117,7 @@ class CustomerLoadPlaceController extends Controller
             $actualizarAvisado->avisado = $avisadoMas;
             $actualizarAvisado->save();
 
-            return 'Se cambió Status - Envió mail.'  . $qd->avisado;
+            return 'Se cambió Status - Envió mail.' . $qd->avisado;
         } else {
 
             if ($qd->avisado == 0) {
@@ -2129,7 +2148,7 @@ class CustomerLoadPlaceController extends Controller
                 if ($equal) {
                     Carga::where('booking', $cntr->booking)->update(['status' => $primerCntrStatus]);
                 }
-                $qd  = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
+                $qd = DB::table('status')->where('cntr_number', '=', $cntr->cntr_number)->latest('id')->first();
                 $description = $qd->status;
 
                 $qempresa = DB::table('carga')->select('empresa')->where('booking', '=', $cntr->booking)->get();
@@ -2137,7 +2156,7 @@ class CustomerLoadPlaceController extends Controller
 
                 $datos = [
                     'cntr' => $cntr->cntr_number,
-                    'description' =>  $description,
+                    'description' => $description,
                     'confirmacion' => $cntr->confirmacion,
                     'user' => $qd->user_status,
                     'empresa' => $empresa,
@@ -2162,8 +2181,10 @@ class CustomerLoadPlaceController extends Controller
                 $carga = Carga::whereNull('deleted_at')->where('booking', '=', $cntr->booking)->first();
                 function parseEmailList($value): array
                 {
-                    if (!$value) return [];
-                    if (is_array($value)) $value = implode(',', $value);
+                    if (!$value)
+                        return [];
+                    if (is_array($value))
+                        $value = implode(',', $value);
 
                     $normalized = str_replace([';', "\n", "\r", "\t"], ',', $value);
                     $arr = array_map('trim', explode(',', $normalized));
@@ -2174,14 +2195,15 @@ class CustomerLoadPlaceController extends Controller
                 /** Helper: agrega si es válido */
                 function pushIfEmail(&$arr, $email)
                 {
-                    if ($email && filter_var($email, FILTER_VALIDATE_EMAIL)) $arr[] = trim($email);
+                    if ($email && filter_var($email, FILTER_VALIDATE_EMAIL))
+                        $arr[] = trim($email);
                 }
 
                 if (($sbx[0]->sandbox ?? 0) == 0) {
 
                     // --- 1) Traer usuarios involucrados
-                    $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
-                    $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
+                    $cliente = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+                    $customer = DB::table('users')->where('username', '=', $carga->user)->first();
 
                     // --- 2) TO: cliente + customer + lo que venga en $toEmails
                     $to = [];
@@ -2199,7 +2221,7 @@ class CustomerLoadPlaceController extends Controller
                     }
                     // --- 3) CC: cc_emails de ambos + lo que venga en $ccEmails
                     $cc = array_merge(
-                        parseEmailList($cliente->cc_emails  ?? ''),
+                        parseEmailList($cliente->cc_emails ?? ''),
                         parseEmailList($customer->cc_emails ?? ''),
                         parseEmailList($ccEmails ?? '')
                     );
@@ -2214,21 +2236,21 @@ class CustomerLoadPlaceController extends Controller
                     $to = array_values(array_unique($to));
                     // --- 5) Envío
                     Mail::to($to)
-                        ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                        ->when(!empty($cc), fn($m) => $m->cc($cc))
                         ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                         ->send(new cargaFueraAduana($datos));
 
                     // --- 6) Logueo de lo enviado
-                    Log::info('Email cargaCargando enviado', [
+                    Log::debug('Email cargaCargando enviado', [
                         'carga_id' => $carga->id,
-                        'booking'  => $carga->booking,
-                        'to'       => $to,
-                        'cc'       => $cc,
-                        'bcc'      => $bcc,
+                        'booking' => $carga->booking,
+                        'to' => $to,
+                        'cc' => $cc,
+                        'bcc' => $bcc,
                     ]);
 
                     $logApi = new logapi();
-                    $logApi->user    = 'No Informa';
+                    $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaCargando TO: " . implode(', ', $to)
                         . " | CC: " . implode(', ', $cc)
                         . " | BCC: " . implode(', ', $bcc);
@@ -2242,8 +2264,8 @@ class CustomerLoadPlaceController extends Controller
                     $logApi->save();
                 } else {
                     // --- 1) Traer usuarios involucrados
-                    $cliente  = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
-                    $customer = DB::table('users')->where('username',  '=', $carga->user)->first();
+                    $cliente = DB::table('users')->where('id', '=', $carga->cliente_id)->first();
+                    $customer = DB::table('users')->where('username', '=', $carga->user)->first();
 
                     // --- 2) TO: cliente + customer + lo que venga en $toEmails
                     $to = [];
@@ -2261,7 +2283,7 @@ class CustomerLoadPlaceController extends Controller
                     }
                     // --- 3) CC: cc_emails de ambos + lo que venga en $ccEmails
                     $cc = array_merge(
-                        parseEmailList($cliente->cc_emails  ?? ''),
+                        parseEmailList($cliente->cc_emails ?? ''),
                         parseEmailList($customer->cc_emails ?? ''),
                         parseEmailList($ccEmails ?? '')
                     );
@@ -2276,21 +2298,21 @@ class CustomerLoadPlaceController extends Controller
                     $to = array_values(array_unique($to));
                     // --- 5) Envío
                     Mail::to($to)
-                        ->when(!empty($cc),  fn($m) => $m->cc($cc))
+                        ->when(!empty($cc), fn($m) => $m->cc($cc))
                         ->when(!empty($bcc), fn($m) => $m->bcc($bcc))
                         ->send(new cargaFueraAduana($datos));
 
                     // --- 6) Logueo de lo enviado
-                    Log::info('Email cargaCargando enviado', [
+                    Log::debug('Email cargaCargando enviado', [
                         'carga_id' => $carga->id,
-                        'booking'  => $carga->booking,
-                        'to'       => $to,
-                        'cc'       => $cc,
-                        'bcc'      => $bcc,
+                        'booking' => $carga->booking,
+                        'to' => $to,
+                        'cc' => $cc,
+                        'bcc' => $bcc,
                     ]);
 
                     $logApi = new logapi();
-                    $logApi->user    = 'No Informa';
+                    $logApi->user = 'No Informa';
                     $logApi->detalle = "envio email cargaCargando TO: " . implode(', ', $to)
                         . " | CC: " . implode(', ', $cc)
                         . " | BCC: " . implode(', ', $bcc);
@@ -2391,7 +2413,7 @@ class CustomerLoadPlaceController extends Controller
     {
         //
     }
-    public function update(Request $request,  $id)
+    public function update(Request $request, $id)
     {
         try {
             $validated = $request->validate([
@@ -2444,42 +2466,42 @@ class CustomerLoadPlaceController extends Controller
         }
     }
     public function accionFueraLugarDescarga($idTrip)
-{
-    $date = \Carbon\Carbon::now('-03:00');
+    {
+        $date = \Carbon\Carbon::now('-03:00');
 
-    // Obtener el contenedor
-    $contenedor = DB::table('cntr')
-        ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
-        ->join('carga', 'cntr.booking', '=', 'carga.booking')
-        ->where('cntr.id_cntr', $idTrip)
-        ->select('cntr.*', 'asign.*', 'carga.*')
-        ->first();
+        // Obtener el contenedor
+        $contenedor = DB::table('cntr')
+            ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+            ->join('carga', 'cntr.booking', '=', 'carga.booking')
+            ->where('cntr.id_cntr', $idTrip)
+            ->select('cntr.*', 'asign.*', 'carga.*')
+            ->first();
 
-    if (!$contenedor) {
-        Log::warning("accionFueraLugarDescarga: contenedor no encontrado para idTrip {$idTrip}");
-        return response()->json(['error' => 'No encontrado'], 404);
-    }
+        if (!$contenedor) {
+            Log::warning("accionFueraLugarDescarga: contenedor no encontrado para idTrip {$idTrip}");
+            return response()->json(['error' => 'No encontrado'], 404);
+        }
 
-    // Actualizar estados
-    DB::table('cntr')
-        ->where('cntr_number', $contenedor->cntr_number)
-        ->update([
+        // Actualizar estados
+        DB::table('cntr')
+            ->where('cntr_number', $contenedor->cntr_number)
+            ->update([
+                'main_status' => 'TERMINADA',
+                'status_cntr' => 'La unidad está saliendo del punto de descarga.',
+            ]);
+
+        DB::table('status')->insert([
+            'status' => 'La unidad está saliendo del punto de descarga.',
             'main_status' => 'TERMINADA',
-            'status_cntr' => 'La unidad está saliendo del punto de descarga.',
+            'cntr_number' => $contenedor->cntr_number,
+            'user_status' => 'AUTOMATICO',
+            'created_at' => $date,
         ]);
 
-    DB::table('status')->insert([
-        'status'      => 'La unidad está saliendo del punto de descarga.',
-        'main_status' => 'TERMINADA',
-        'cntr_number' => $contenedor->cntr_number,
-        'user_status' => 'AUTOMATICO',
-        'created_at'  => $date,
-    ]);
+        // Log
+        Log::debug("🚛 EXIT DESCARGA → {$contenedor->cntr_number} (trip {$idTrip})");
 
-    // Log
-    Log::info("🚛 EXIT DESCARGA → {$contenedor->cntr_number} (trip {$idTrip})");
-
-    return response()->json(['ok' => true, 'msg' => 'EXIT DESCARGA procesado.']);
-}
+        return response()->json(['ok' => true, 'msg' => 'EXIT DESCARGA procesado.']);
+    }
 
 }

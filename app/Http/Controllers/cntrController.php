@@ -19,9 +19,14 @@ use Illuminate\Support\Facades\Log;
 use GuzzleHttp\Psr7\Request as Psr7Request;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Services\CntrService;
 
 class cntrController extends Controller
 {
+    public function __construct(private CntrService $cntrService)
+    {
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -51,48 +56,8 @@ class cntrController extends Controller
     public function store(Request $request)
     {
         try {
-            $booking = $request->input('booking');
-            $cntr_seal = $request->input('cntr_seal');
-            // Si viene cntr_type lo uso, si no lo dejo como null
-            $cntr_type = $request->has('cntr_type') ? $request['cntr_type'] : null;
-            // Igual con retiro_place
-            $retiro_place = $request->has('retiro_place') ? $request['retiro_place'] : null;
-            $confirmacion = $request->input('confirmacion') ?? 0;
-            $user_cntr = $request->input('user_cntr');
-            $company = $request->input('company');
-
-            // Buscar contenedores con ese booking para generar número nuevo si hace falta
-            $existingCntrs = DB::table('cntr')->where('booking', $booking)->get();
-            $numero = $existingCntrs->count() + 1;
-
-            $cntr_number = $request->input('cntr_number') ?: $booking . $numero;
-
-            // Crear el contenedor
-            $cntr = new cntr();
-            $cntr->booking = $booking;
-            $cntr->cntr_number = $cntr_number;
-            $cntr->cntr_seal = $cntr_seal;
-            $cntr->cntr_type = $cntr_type;
-            $cntr->retiro_place = $retiro_place;
-            $cntr->confirmacion = $confirmacion;
-            $cntr->user_cntr = $user_cntr;
-            $cntr->company = $company;
-            $cntr->save();
-
-            // Insertar en asign
-            $asign = new asign();
-            $asign->cntr_number = $cntr_number;
-            $asign->booking = $booking;
-            $asign->save();
-
-            // Obtener ID de carga
-            $idCarga = DB::table('carga')->where('booking', $booking)->value('id');
-
-            return response()->json([
-                'success' => true,
-                'detail' => $cntr,
-                'idCarga' => $idCarga
-            ], 200);
+            $result = $this->cntrService->store($request->all());
+            return response()->json($result, 200);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -124,52 +89,52 @@ class cntrController extends Controller
     public function update(Request $request, $id)
     {
         $this->validate($request, [
-            'cntr_number'   => 'required|string|max:255',
-            'cntr_seal'     => 'nullable|string|max:255',
-            'confirmacion'  => 'required|boolean',
+            'cntr_number' => 'required|string|max:255',
+            'cntr_seal' => 'nullable|string|max:255',
+            'confirmacion' => 'required|boolean',
         ]);
 
         // Tomo estos valores temprano para no depender luego
         $newCntrNumber = $request->input('cntr_number');
-        $newSeal       = $request->input('cntr_seal');
-        $newConfirm    = (bool) $request->input('confirmacion');
+        $newSeal = $request->input('cntr_seal');
+        $newConfirm = (bool) $request->input('confirmacion');
 
         try {
 
             $cntr = cntr::findOrFail($id);
             $cntrOld = $cntr->cntr_number;
 
-            $asign = DB::table('asign')->where('cntr_number',  $newCntrNumber)->first();
+            $asign = DB::table('asign')->where('cntr_number', $newCntrNumber)->first();
 
             $idCarga = DB::table('carga')->where('booking', $cntr->booking)->value('id');
 
             $cntr->cntr_number = $newCntrNumber;
-            $cntr->cntr_seal =  $newSeal;
+            $cntr->cntr_seal = $newSeal;
             $cntr->confirmacion = $newConfirm;
             $cntr->save();
 
             $changeAsign = asign::where('cntr_number', $cntrOld)->update(['cntr_number' => $newCntrNumber]);
-            Log::info("Asign actualizada de $cntrOld a $newCntrNumber");
-            Log::info("Esto es asign $changeAsign");
+            Log::debug("Asign actualizada de $cntrOld a $newCntrNumber");
+            Log::debug("Esto es asign $changeAsign");
 
             statu::where('cntr_number', $cntrOld)->update(['cntr_number' => $newCntrNumber]);
 
             //Eliminar el archivo intructivo y generar uno nuevo 
             if ($changeAsign) {
                 /* $dirPath = base_path('public/storage/instructivos/' . $asign->booking . '/' . $cntrOld);
-                Log::info("Eliminando directorio de instructivo: $dirPath");
+                Log::debug("Eliminando directorio de instructivo: $dirPath");
 
                 $this->deleteDirectory($dirPath); */
 
                 DB::table('asign')->where('cntr_number', $request['cntr_number'])->update(['file_instruction' => null]);
-                Log::info("Instructivo eliminado en base de datos para CNTR: " . $request['cntr_number']);
+                Log::debug("Instructivo eliminado en base de datos para CNTR: " . $request['cntr_number']);
                 // Llamar a la función carga() del controlador crearpdfController
                 DB::commit();
                 try {
                     $crearpdfController = app(crearpdfController::class);
                     $crearpdfController->carga($request['cntr_number']);
 
-                    Log::info("Instructivo regenerado para CNTR: " . $request['cntr_number']);
+                    Log::debug("Instructivo regenerado para CNTR: " . $request['cntr_number']);
                 } catch (\Exception $e) {
                     DB::rollBack();
                     Log::error('Error al ejecutar el método carga en crearpdfController: ' . $e->getMessage());
@@ -196,24 +161,14 @@ class cntrController extends Controller
     public function destroy($cntrId)
     {
         try {
-            $cntr = cntr::findOrFail($cntrId);
-            $asign = asign::where('cntr_number', $cntr->cntr_number)->first();
-
-            $carga = Carga::where('booking', $cntr->booking)->first();
-            // Eliminar el CNTR
-            $cntr->delete();
-            $asign->delete();
-
+            $result = $this->cntrService->destroy((int) $cntrId);
             return response()->json([
                 'message' => 'CNTR eliminado con éxito.',
-                'id' => $carga->id,
+                'id' => $result['id'],
             ], 200);
         } catch (\Exception $e) {
-            $cntr = cntr::findOrFail($cntrId);
-            $carga = Carga::where('booking', $cntr->booking)->first();
             return response()->json([
                 'message' => 'Error al eliminar el CNTR.',
-                'id' => $carga->id,
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -315,29 +270,29 @@ class cntrController extends Controller
                 ->firstOrFail();
 
             return response()->json([
-                'cntr'        => $cntr,
-                'asign'       => $asign,
-                'transport'   => $transport,        // null si no hay asignado o no matchea
-                'truck'       => $truck,            // null si no hay asignado
-                'carga'       => $carga,
+                'cntr' => $cntr,
+                'asign' => $asign,
+                'transport' => $transport,        // null si no hay asignado o no matchea
+                'truck' => $truck,            // null si no hay asignado
+                'carga' => $carga,
                 // flags para el front
                 'meta' => [
                     'transport_assigned' => $transportAssigned,
-                    'truck_assigned'     => $truckAssigned,
-                    'transport_found'    => (bool) $transport,
-                    'truck_found'        => (bool) $truck,
+                    'truck_assigned' => $truckAssigned,
+                    'transport_found' => (bool) $transport,
+                    'truck_found' => (bool) $truck,
                 ],
             ], 200);
         } catch (ModelNotFoundException $e) {
             return response()->json([
-                'error'   => 'No se encontraron datos requeridos',
+                'error' => 'No se encontraron datos requeridos',
                 'detalle' => $e->getMessage(),
             ], 404);
         } catch (\Throwable $e) {
             Log::error('datosConfirmar error', ['e' => $e]);
             return response()->json([
                 'error' => 'Error al obtener los datos',
-                'msg'   => $e->getMessage(),
+                'msg' => $e->getMessage(),
             ], 500);
         }
     }
@@ -532,6 +487,82 @@ class cntrController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error al guardar las calificaciones.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function destroyPhysical($id, $user)
+    {
+        $user = User::where('username', '=', $user)->first();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Usuario inválido.'
+            ], 401);
+        }
+
+        //Permisos: SOLO estos pueden borrar CNTR
+        $allowed = ['Traffic', 'Master', 'Customer'];
+        if (!in_array($user->permiso, $allowed, true)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No autorizado.'
+            ], 403);
+        }
+
+        //Traigo el CNTR
+        $cntr = DB::table('cntr')
+            ->select('cntr.*')
+            ->where('cntr.id_cntr', '=', $id)
+            ->whereNull('cntr.deleted_at')
+            ->first();
+
+        if (!$cntr) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Contenedor no encontrado.'
+            ], 404);
+        }
+
+        //Validación: no borrar si está confirmado
+        if ((int) ($cntr->confirmacion ?? 0) === 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se puede eliminar: el contenedor está confirmado.'
+            ], 409);
+        }
+
+        DB::beginTransaction();
+        try {
+            // 1) Borrado físico de asignación/es (por cntr_number)
+            DB::table('asign')
+                ->where('cntr_number', '=', $cntr->cntr_number)
+                ->delete();
+
+            // 2) Borrado físico del contenedor
+            DB::table('cntr')
+                ->where('id_cntr', '=', $id)
+                ->delete();
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Contenedor y asignación eliminados correctamente.',
+                'data' => [
+                    'id_cntr' => (int) $id,
+                    'cntr_number' => $cntr->cntr_number,
+                    'booking' => $cntr->booking,
+                ]
+            ], 200);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error eliminando contenedor/asignación.',
                 'error' => $e->getMessage()
             ], 500);
         }

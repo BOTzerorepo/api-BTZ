@@ -328,6 +328,7 @@ Route::get('/datosConfirmar/{cntrId}', [cntrController::class, 'datosConfirmar']
 Route::get('/datosCntrNumber/{cntrNumber}', [cntrController::class, 'datosCntrNumber']);
 Route::delete('/cntr/{cntrId}', [cntrController::class, 'destroy']);
 Route::post('/storeCalifications', [cntrController::class, 'storeCalifications']);
+Route::delete('/cntrdelete/{id}/{user}', [CntrController::class, 'destroyPhysical']);
 
 // FLETERO CONTROLLER 
 

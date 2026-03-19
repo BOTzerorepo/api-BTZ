@@ -522,7 +522,7 @@ class statusController extends Controller
     
                             $request = new Psr7Request(
                                 'GET',
-                                env('API_CMA_BOTZERO') . '/cma/estDepCustLoc/' . $cntr . '/' . $valor,
+                                'https://cma-cgm.botzero.ar/api/cma/estDepCustLoc/' . $cntr . '/' . $valor,
                                 $headers
                             );
                             $res = $client->sendAsync($request)->wait();

@@ -87,25 +87,29 @@ class AuthController extends Controller
             $user = User::where('username', $credentials['username'])->first();
         }
 
-        if ($user && Hash::check($credentials['pass'], $user->pass)
-        ) {
-            // Generar el token
-            $token = JWTAuth::fromUser($user);
-            $role = $user->getRoleNames()->first();
-            $permissions = Role::findByName($role)->permissions;
-            // Devolver el token y la información del usuario
+        if ($user && Hash::check($credentials['pass'], $user->pass)) {
+            $token       = JWTAuth::fromUser($user);
+            $role        = $user->getRoleNames()->first();
+            $permissions = Role::findByName($role)->permissions->pluck('name')->toArray();
+
             return response()->json([
-                'token' => $token,
-                'user_id' => $user->id,
-                'username' => $user->username,
-                'email' => $user->email,
-                'company' => $user->empresa,
-                'role' => $role,
-                'permiso' => $permissions->pluck('name'),
+                'success'      => true,
+                'token'        => $token,
+                'id'           => $user->id,
+                'username'     => $user->username,
+                'email'        => $user->email,
+                'company'      => $user->empresa,
+                'role'         => $role,
+                'permiso'      => $permissions,
                 'transport_id' => $user->transport_id,
+                'cliente_id'   => $user->cliente_id,
             ], 201);
         } else {
-            return response()->json(['error' => 'Usuario o contraseña incorrecto.'], 400);
+            return response()->json([
+                'success' => false,
+                'code'    => 'INVALID_CREDENTIALS',
+                'message' => 'Usuario o contraseña incorrecto.',
+            ], 401);
         }
     }
 
