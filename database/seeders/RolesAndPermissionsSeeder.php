@@ -40,6 +40,10 @@ class RolesAndPermissionsSeeder extends Seeder
         $transport = Role::create(['name' => 'Transport']);
         $transport->givePermissionTo('ver carga');
 
+        Permission::create(['name' => 'soporte']);
+        $rail = Role::create(['name' => 'Rail']);
+        $rail->givePermissionTo(Permission::all());
+
         // Asignar rol a un usuario específico (ejemplo)
         $usuario = User::find(77); // Cambia el ID por el usuario adecuado
         $usuario->assignRole('Master');

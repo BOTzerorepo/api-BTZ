@@ -11,6 +11,7 @@ use App\Http\Controllers\AsignController;
 use App\Http\Controllers\instructivosController;
 use App\Http\Controllers\ProfitController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\SupportController;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\ParticularSoftConfigurationController;
@@ -633,3 +634,25 @@ Route::get('/viajes/{equipment_reference}', [TrackingController::class, 'showapi
 
 Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/auth/reset-password', [AuthController::class, 'resetPassword']);
+
+
+// ═══════════════════════════════════════════════════════════════════
+// === SOPORTE RAIL (solo rol Rail) ===================================
+// ═══════════════════════════════════════════════════════════════════
+Route::middleware(['jwt.verify', 'role.rail'])->prefix('support')->group(function () {
+
+    // Usuarios
+    Route::get('/users',                 [SupportController::class, 'users']);
+    Route::put('/users/{id}',            [SupportController::class, 'updateUser']);
+    Route::post('/users/{id}/restore',   [SupportController::class, 'restoreUser']);
+    Route::delete('/users/{id}/force',   [SupportController::class, 'forceDeleteUser']);
+    Route::get('/users/{id}/logs',       [SupportController::class, 'userLogs']);
+
+    // Impersonación
+    Route::post('/impersonate/{id}',     [SupportController::class, 'impersonate']);
+
+    // Otras entidades: carga | cntr | transport | driver | fletero | asign | razon_social | interest_point
+    Route::get('/{entity}/trashed',      [SupportController::class, 'trashed']);
+    Route::post('/{entity}/{id}/restore',[SupportController::class, 'restore']);
+    Route::delete('/{entity}/{id}/force',[SupportController::class, 'forceDelete']);
+});
