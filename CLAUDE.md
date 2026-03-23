@@ -121,3 +121,21 @@ php artisan migrate --env=testing
 - `UserFactory` usa `bcrypt()` sobre el campo `pass`
 - Las deprecation warnings son de PHP 8.2 vs Laravel 9 (vendor code) — no afectan el funcionamiento
 - No commitear `.env` — contiene credenciales de producción
+
+---
+
+## Fixes de seguridad pendientes
+
+Ver el plan completo en `../CLAUDE.md`. Los fixes de este sub-proyecto son:
+
+| Fix | Archivo principal | Estado |
+|---|---|---|
+| FIX-01 CORS | `config/cors.php` + eliminar `app/Http/Middleware/Cors.php` | Pendiente |
+| FIX-02 APP_DEBUG | `.env` + `app/Http/Controllers/UserController.php` | Pendiente |
+| FIX-03 Rutas FCM | `routes/api.php` líneas ~74-82 | Pendiente |
+| FIX-05 Rate limiting | `routes/api.php` líneas ~25-26 | Pendiente |
+| FIX-07 File uploads | `app/Http/Requests/StoredocumetRequest.php` + `DocumentController.php` | Pendiente |
+| FIX-09 Password reset | `app/Http/Controllers/AuthController.php` método `resetPassword` | Pendiente |
+| FIX-10 JWT TTL | `config/jwt.php` línea 104 | Pendiente |
+| FIX-11 Contraseñas | `app/Http/Controllers/AuthController.php` | Pendiente |
+| FIX-12 Laravel EOL | `composer.json` — actualizar a Laravel 11 | Pendiente |
