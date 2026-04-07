@@ -87,20 +87,23 @@ class AuthController extends Controller
             $user = User::where('username', $credentials['username'])->first();
         }
 
-        if ($user && Hash::check($credentials['pass'], $user->pass)) {
+
+        if ($user && \Hash::check($credentials['pass'], $user->pass)) {
             $token       = JWTAuth::fromUser($user);
             $role        = $user->getRoleNames()->first();
-            $permissions = Role::findByName($role, 'web')->permissions->pluck('name')->toArray();
+            $permissions = $role ? Role::findByName($role, 'web')->permissions->pluck('name')->toArray() : [];
 
             return response()->json([
                 'success'      => true,
                 'token'        => $token,
                 'id'           => $user->id,
+                'user_id'      => $user->id,
                 'username'     => $user->username,
                 'email'        => $user->email,
                 'company'      => $user->empresa,
                 'role'         => $role,
                 'permiso'      => $permissions,
+                'permissions'  => $permissions,
                 'transport_id' => $user->transport_id,
                 'cliente_id'   => $user->cliente_id,
             ], 201);

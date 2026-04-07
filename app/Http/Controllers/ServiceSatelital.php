@@ -162,6 +162,7 @@ class ServiceSatelital extends Controller
     public function serviceSatelital()
     {
         set_time_limit(120);
+        
         Log::debug('Comenzo Satelital');
 
         // === Configurables ===
@@ -561,12 +562,13 @@ class ServiceSatelital extends Controller
     public function flota()
     {
 
-        $curl = curl_init();
+        set_time_limit(120);
+                $curl = curl_init();
 
         // TEST: E6HW19 - PRODUCCION: C2QC20
         if (env('APP_ENV') === 'production') {
             curl_setopt_array($curl, array(
-                CURLOPT_URL => 'https://app.akercontrol.com/ws/flota/2612128105/E6HW19',
+                CURLOPT_URL => 'https://app.akercontrol.com/ws/flota/2612128105/C2QC20',
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => '',
                 CURLOPT_MAXREDIRS => 10,
@@ -590,7 +592,7 @@ class ServiceSatelital extends Controller
 
         $response = curl_exec($curl);
         $json = json_decode($response);
-        $datos = $json->data;
+        $datos = ($json && isset($json->data)) ? $json->data : [];
 
         $camiones = [];
 
@@ -736,7 +738,7 @@ class ServiceSatelital extends Controller
         // TEST: E6HW19 - PRODUCCION: C2QC20
         if (env('APP_ENV') === 'production') {
             curl_setopt_array($curl, array(
-                CURLOPT_URL => 'https://app.akercontrol.com/ws/flota/2612128105/E6HW19',
+                CURLOPT_URL => 'https://app.akercontrol.com/ws/flota/2612128105/C2QC20',
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => '',
                 CURLOPT_MAXREDIRS => 10,
@@ -760,6 +762,11 @@ class ServiceSatelital extends Controller
 
         $response = curl_exec($curl);
         $json = json_decode($response);
+        
+        if (!$json || !isset($json->data)) {
+            return response()->json(['success' => false, 'message' => 'Error al obtener datos de la flota'], 200);
+        }
+        
         $datos = $json->data;
 
         $camiones = [];
@@ -900,14 +907,15 @@ class ServiceSatelital extends Controller
     }
     public function flotaCliente($id)
     {
-        set_time_limit(120); // 120 segundos (2 minutos)
+        set_time_limit(120);
+         // 120 segundos (2 minutos)
 
         $curl = curl_init();
 
         // TEST: E6HW19 - PRODUCCION: C2QC20
         if (env('APP_ENV') === 'production') {
             curl_setopt_array($curl, array(
-                CURLOPT_URL => 'https://app.akercontrol.com/ws/flota/2612128105/E6HW19',
+                CURLOPT_URL => 'https://app.akercontrol.com/ws/flota/2612128105/C2QC20',
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING => '',
                 CURLOPT_MAXREDIRS => 10,
@@ -931,6 +939,11 @@ class ServiceSatelital extends Controller
 
         $response = curl_exec($curl);
         $json = json_decode($response);
+        
+        if (!$json || !isset($json->data)) {
+            return response()->json(['success' => false, 'message' => 'Error al obtener datos de la flota'], 200);
+        }
+        
         $datos = $json->data;
 
         $camiones = [];
@@ -986,7 +999,11 @@ class ServiceSatelital extends Controller
                         'transports.*'
                     )
                     ->where('trucks.domain', '=', $dato->patente)
-                    ->where('carga.cliente_id', '=', $id)
+                    ->where(function($q) use ($id) {
+                        $q->where('carga.cliente_id', $id)
+                          ->orWhere('carga.trader', 'like', '%' . $id . '%')
+                          ->orWhere('carga.importador', 'like', '%' . $id . '%');
+                    })
                     ->whereNotIn('cntr.main_status', ['TERMINADA', 'NO ASIGNED'])
                     ->get();
 
@@ -1237,6 +1254,7 @@ class ServiceSatelital extends Controller
     public function revisarCoordenadas()
     {
         set_time_limit(120);
+        
         Log::debug('revisarCoordenadas: start-----------------------');
 
         $AKerApiUrl = 'https://app.akercontrol.com/ws/v2/servicios';

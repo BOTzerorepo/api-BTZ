@@ -161,15 +161,6 @@ class cargaController extends Controller
         return $todasLasCargasDeEstaSemana;
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
     public function show($id, $user)
     {
 
@@ -275,23 +266,6 @@ class cargaController extends Controller
         return $cargaPorId;
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function issetBooking(Request $request)
     {
         $booking = $request->input('booking');
@@ -306,15 +280,6 @@ class cargaController extends Controller
         return $trader->count();
     }
 
-
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function update(Request $request, $id)
     {
 
@@ -531,14 +496,6 @@ class cargaController extends Controller
             return response()->json(['error' => $errorMessage, 'message_type' => 'danger'], 500);
         }
     }
-
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function destroy($id)
     {
         DB::beginTransaction();
@@ -1256,6 +1213,29 @@ class cargaController extends Controller
                 ->whereNull('asign.deleted_at')
                 ->where('cntr.main_status', '!=', 'TERMINADA')
                 ->where('carga.empresa', '=', $user->empresa)
+                ->orderBy('carga.load_date', 'ASC')
+                ->get();
+        } elseif ($user->permiso == 'ClienteEmpresa') {
+            $todasLasCargasDeEstaSemana = Carga::whereNull('carga.deleted_at')
+                ->join('cntr', 'cntr.booking', '=', 'carga.booking')
+                ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+                ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
+                ->whereNull('cntr.deleted_at')
+                ->whereNull('asign.deleted_at')
+                ->where('cntr.main_status', '!=', 'TERMINADA')
+                ->where(function ($q) use ($user) {
+                    $q->where('carga.cliente_id', $user->id)
+                        ->orWhere(function ($sub) use ($user) {
+                            $sub->whereNull('carga.cliente_id');
+                            if (!empty($user->cliente_id)) {
+                                $sub->where(function ($inner) use ($user) {
+                                    $inner->where('carga.trader', $user->cliente_id)
+                                        ->orWhere('carga.shipper', $user->cliente_id)
+                                        ->orWhere('carga.importador', $user->cliente_id);
+                                });
+                            }
+                        });
+                })
                 ->orderBy('carga.load_date', 'ASC')
                 ->get();
         } elseif ($user->permiso == 'Transport') {
