@@ -69,5 +69,6 @@ class Kernel extends HttpKernel
         'cors' => \App\Http\Middleware\Cors::class,
         'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
         'jwt.verify' => \App\Http\Middleware\JwtMiddleware::class,
+        'role.rail'  => \App\Http\Middleware\RailMiddleware::class,
     ];
 }
