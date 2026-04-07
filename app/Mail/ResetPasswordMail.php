@@ -18,10 +18,10 @@ class ResetPasswordMail extends Mailable
     public $ruta;
 
 
-    public function __construct($token)
+    public function __construct($token, $ruta = null)
     {
         $this->token = $token;
-
+        $this->ruta = $ruta;
     }
 
     public function build()
