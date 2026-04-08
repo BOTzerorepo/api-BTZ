@@ -1243,8 +1243,9 @@ class ServiceSatelital extends Controller
                     'carnet' => $camion->vto_carnet,
                     'whatsapp' => $camion->WhatsApp,
                 );
+
+                array_push($camiones, $truck);
             }
-            array_push($camiones, $truck);
         }
 
         return $camiones;
