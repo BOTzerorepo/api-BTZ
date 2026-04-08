@@ -143,7 +143,7 @@ class AuthController extends Controller
     public function forgotPassword(Request $request)
     {
         $request->validate(['email' => 'required|email']);
-        $ruta = env('FRONT_URL');
+        $ruta = config('app.front_url');
 
         $user = User::where('email', $request->email)->first();
         if (!$user) {

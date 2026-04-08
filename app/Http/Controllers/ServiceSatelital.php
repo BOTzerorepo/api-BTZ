@@ -687,7 +687,7 @@ class ServiceSatelital extends Controller
                         'ref_customer' => $camion->ref_customer,
                         'agent_port' => $camion->agent_port,
                         'id_carga' => $camion->cargaId,
-                        'url_carga' => env('FRONT_URL') . '/includes/view_carga_user.php?id=' . $camion->cargaId,
+                        'url_carga' => config('app.front_url') . '/includes/view_carga_user.php?id=' . $camion->cargaId,
 
                     );
 
@@ -863,7 +863,7 @@ class ServiceSatelital extends Controller
                         'ref_customer' => $camion->ref_customer,
                         'agent_port' => $camion->agent_port,
                         'id_carga' => $camion->cargaId,
-                        'url_carga' => env('FRONT_URL') . '/includes/view_carga_user.php?id=' . $camion->cargaId,
+                        'url_carga' => config('app.front_url') . '/includes/view_carga_user.php?id=' . $camion->cargaId,
 
                     );
 
@@ -1044,7 +1044,7 @@ class ServiceSatelital extends Controller
                         'ref_customer' => $camion->ref_customer,
                         'agent_port' => $camion->agent_port,
                         'id_carga' => $camion->cargaId,
-                        'url_carga' => env('FRONT_URL') . '/includes/view_carga.php?id=' . $camion->cargaId,
+                        'url_carga' => config('app.front_url') . '/includes/view_carga.php?id=' . $camion->cargaId,
 
                     );
 
