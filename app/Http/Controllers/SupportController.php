@@ -138,12 +138,20 @@ class SupportController extends Controller
         }
 
         $token = JWTAuth::fromUser($target);
+        $roleName = $target->roles->first()?->name;
+
+        $permissions = [];
+        if ($roleName) {
+            $permissions = \Spatie\Permission\Models\Role::findByName($roleName, 'web')->permissions->pluck('name')->toArray();
+        }
 
         return $this->success([
             'token'    => $token,
             'type'     => 'bearer',
             'username' => $target->username,
             'role'     => $target->roles->first()?->name,
+            'company'  => $target->empresa,
+            'permiso'  => $permissions
         ], "Impersonando a {$target->username}.");
     }
 
