@@ -13,7 +13,7 @@ class InterestPointController extends Controller
 {
     public function index()
     {
-        $InterestPoint = InterestPoint::whereNull('deleted_at')->get();
+        $InterestPoint = InterestPoint::whereNull('deleted_at')->orderBy('description', 'asc')->get();
 
         return response()->json($InterestPoint);
     }
