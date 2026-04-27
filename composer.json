@@ -20,7 +20,11 @@
         "maatwebsite/excel": "^3.1",
         "owen-it/laravel-auditing": "^13.6",
         "psr/simple-cache": "^2.0",
+
         "spatie/laravel-permission": "^6.25",
+
+        "sentry/sentry-laravel": "^4.25",
+
         "tymon/jwt-auth": "^2.2"
     },
     "require-dev": {
