@@ -16,7 +16,7 @@ class CustomerShipperController extends Controller
     public function index()
     {
         try {
-            $customersShipper = CustomerShipper::all();
+            $customersShipper = CustomerShipper::orderBy('razon_social', 'asc')->get();
             return response()->json([
                 'data' => $customersShipper,
                 'success' => true

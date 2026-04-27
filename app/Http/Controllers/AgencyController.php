@@ -16,7 +16,7 @@ class AgencyController extends Controller
     public function index()
     {
         try {
-            $agencies = Agency::all();
+            $agencies = Agency::orderBy('description', 'asc')->get();
             return response()->json([
                 'data' => $agencies,
                 'success' => true

@@ -15,7 +15,7 @@ class PayModeController extends Controller
      */
     public function index()
     {
-        $payModes = DB::table('pay_modes')->get();
+        $payModes = DB::table('pay_modes')->orderBy('title', 'asc')->get();
         return $payModes;
     }
 
