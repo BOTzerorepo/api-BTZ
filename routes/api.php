@@ -648,6 +648,12 @@ Route::middleware(['jwt.verify', 'role.rail'])->prefix('support')->group(functio
     Route::delete('/users/{id}/force',   [SupportController::class, 'forceDeleteUser']);
     Route::get('/users/{id}/logs',       [SupportController::class, 'userLogs']);
 
+    // Dashboard Satelital
+    Route::get('/satelital/summary',              [SupportController::class, 'satelitalSummary']);
+    Route::get('/satelital/trip-detail/{cntr}',   [SupportController::class, 'satelitalTripDetail']);
+    Route::get('/satelital/logs',                 [SupportController::class, 'apiBTZLogs']);
+    Route::get('/logs/file',                      [SupportController::class, 'getLogFile']);
+
     // Impersonación
     Route::post('/impersonate/{id}',     [SupportController::class, 'impersonate']);
 
