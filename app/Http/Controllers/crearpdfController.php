@@ -89,7 +89,7 @@ class crearpdfController extends Controller
 
         // Si ya existe archivo, redirigís como antes
         if (!is_null($file)) {
-            return redirect(env('FRONT_URL') . '/views/view_instructivos.php');
+            return redirect(config('app.front_url') . '/views/view_instructivos.php');
         }
 
         // Traigo datos completos para armar instructivo
