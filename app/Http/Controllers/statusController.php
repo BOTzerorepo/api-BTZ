@@ -24,8 +24,6 @@ use Illuminate\Http\UploadedFile;
 use GuzzleHttp\Psr7\Request as Psr7Request;
 use GuzzleHttp\Client;
 
-use function GuzzleHttp\json_encode;
-
 class statusController extends Controller
 {
     /**
@@ -91,7 +89,6 @@ class statusController extends Controller
                 'asign.truck_semi',
                 'asign.transport',
                 'trucks.alta_aker'
-
             )
             ->get();
 
@@ -223,9 +220,9 @@ class statusController extends Controller
     {
         //
     }
+
     public function updateStatusCarga(Request $request)
     {
-
         $booking = $request['booking'];
         $carga = Carga::where('booking', $booking)->first();
         $idCarga = $carga->id;
@@ -233,7 +230,6 @@ class statusController extends Controller
         DB::beginTransaction();
 
         try {
-
             //------------GENERAL--------------------
             $request->validate([
                 'user' => 'required',
@@ -250,7 +246,6 @@ class statusController extends Controller
             $cntr = $request['cntr'];
            
             $empresa = $request['empresa'];
-            //$statusArchivo = $request->file('statusArchivo');
             
             // ACTUALIZA STATUS
             $status = new statu([
@@ -286,10 +281,8 @@ class statusController extends Controller
                         Storage::disk('public')->makeDirectory($folder);
                     }
             
-                    // Guardar usando el helper del UploadedFile (más simple)
-                    // Guarda en storage/app/public/status/{idCarga}/{nombreArchivo}
+                    // Guardar usando el helper del UploadedFile
                     $savedPath = $statusArchivo->storeAs($folder, $nombreArchivo, 'public');
-                    // $savedPath == "status/{idCarga}/{archivo.ext}"
             
                     if (!$savedPath) {
                         Log::error('No se pudo almacenar el archivo', [
@@ -299,8 +292,8 @@ class statusController extends Controller
                         return response('No se pudo guardar el archivo.', 500);
                     }
             
-                    // Guardá en DB un path consistente (relativo al disco 'public')
-                    $status->documento = $savedPath;            // <- antes ponías "$idCarga/$nombreArchivo" (faltaba "status/")
+                    // Guardá en DB un path consistente
+                    $status->documento = $savedPath;            
                     $status->extension = $ext;
             
                 } catch (\Throwable $e) {
@@ -312,28 +305,20 @@ class statusController extends Controller
                     return response('Error subiendo el archivo.', 500);
                 }
             } else {
-                $status->documento = null; // o mantené el valor anterior si corresponde
+                $status->documento = null;
                 $status->extension = null;
             }
             
             $status->save();
-
                    
-           //------------GENERAL--------------------
+            //------------GENERAL--------------------
             if ($statusGral == "TERMINADA") {
 
-
-                // ACTUALIZA STATUS
-
-                // Cambiar Bandera en cargas de CMA
-
                 $tipo = 'terminada';
-
                 $emailController = new emailController();
-                // Llamar directamente a la función mailStatus
                 $response = $emailController->cambiaStatus($cntr, $empresa, $booking, $user, $tipo, $savedPath);
+                
                 if ($response == 'ok') {
-
                     $cntrModel = cntr::where('cntr_number', $cntr)->firstOrFail();
                     $cntrModel->main_status = $statusGral;
                     $cntrModel->status_cntr = $description;
@@ -342,15 +327,14 @@ class statusController extends Controller
                     $cntrs = cntr::where('booking', $booking)->get();
                     $primerCntrStatus = $cntrs->first()->main_status;
 
-                    // Verificar si todos los registros tienen el mismo status
                     $equal = $cntrs->every(function ($cntr) use ($primerCntrStatus) {
                         return $cntr->main_status == $primerCntrStatus;
                     });
-                    // Si todos los registros tienen el mismo status, actualizar el status de la carga
+
                     if ($equal) {
                         Carga::where('booking', $booking)->update(['status' => $primerCntrStatus]);
                     }
-                    // ARMAMOS NOTIFICACION 
+
                     $cntrModel = cntr::where('cntr_number', $cntr)->first();
                     if ($cntrModel) {
                         $user_to = $cntrModel->user_cntr;
@@ -369,7 +353,6 @@ class statusController extends Controller
                     ]);
 
                     DB::commit();
-                    // Devolver una respuesta JSON con información de éxito
                     return response()->json([
                         'id' => $idCarga,
                         'errores' => 'Se modificó el satus a: ' . $statusGral . ' y avisado por Correo al Cliente',
@@ -380,42 +363,28 @@ class statusController extends Controller
                 }
                 
             } elseif ($statusGral == "CON PROBLEMA") {
-                // SI TIENE PROBLEMAS.
-                // ACTUALIZA STATUS
                 $tipo = 'problema';
             
-                // ENVIAMOS MAIL
-                // Crear una instancia del controlador
                 $emailController = new emailController();
-                // Llamar directamente a la función mailStatus
                 $response = $emailController->cambiaStatus($cntr, $empresa, $booking, $user, $tipo, $savedPath);
 
                 if ($response == 'ok') {
-
-                    // si todo esta ok, Acualizamos el estado del CNTR
                     $cntrModel = cntr::where('cntr_number', $cntr)->firstOrFail();
                     $cntrModel->main_status = $statusGral;
                     $cntrModel->status_cntr = $description;
                     $cntrModel->save();
 
-                    // Luego revisamos el status de los demás contenedores de la Carga. 
-                    // Buscar todos los registros Cntr asociados a la booking
                     $cntrs = cntr::where('booking', $booking)->get();
-
-                    // Obtener el status del primer registro
                     $primerCntrStatus = $cntrs->first()->main_status;
 
-                    // Verificar si todos los registros tienen el mismo status
                     $equal = $cntrs->every(function ($cntr) use ($primerCntrStatus) {
                         return $cntr->main_status == $primerCntrStatus;
                     });
 
-                    // Si todos los registros tienen el mismo status, actualizar el status de la carga
                     if ($equal) {
                         Carga::where('booking', $booking)->update(['status' => $primerCntrStatus]);
                     }
 
-                    // ARMAMOS NOTIFICACION 
                     $cntrModel = cntr::where('cntr_number', $cntr)->first();
                     if ($cntrModel) {
                         $user_to = $cntrModel->user_cntr;
@@ -434,7 +403,6 @@ class statusController extends Controller
                     ]);
                 
                     DB::commit();
-                    // Devolver una respuesta JSON con información de éxito
                     return response()->json([
                         'id' => $idCarga,
                         'errores' => 'Se modificó el satus a: ' . $statusGral .' y avisado por Correo al Cliente' ,
@@ -445,53 +413,37 @@ class statusController extends Controller
                     return response()->json(['errores' => 'Algo salió mal, por favor vuelta a intentar la acción.', 'id' => $idCarga], 500);
                 }
             } elseif ($statusGral == "STACKING") {
-                // si la carga está en Staking, Actualizamos el Status en la tabla Status
                 $tipo = 'stacking';
             
-                // ENVIAMOS MAIL
-                // Crear una instancia del controlador
                 $emailController = new emailController();
-                // Llamar directamente a la función mailStatus
                 $response = $emailController->cambiaStatus($cntr, $empresa, $booking, $user, $tipo, $savedPath);
                 
                 if ($response == 'ok') {
-
-                    // si todo esta ok, Acualizamos el estado del CNTR
                     $cntrModel = cntr::where('cntr_number', $cntr)->firstOrFail();
                     $cntrModel->main_status = $statusGral;
                     $cntrModel->status_cntr = $description;
                     $cntrModel->save();
 
-                    // Luego revisamos el status de los demás contenedores de la Carga. 
-                    // Buscar todos los registros Cntr asociados a la booking
                     $cntrs = cntr::where('booking', $booking)->get();
-
-                    // Obtener el status del primer registro
                     $primerCntrStatus = $cntrs->first()->main_status;
 
-                    // Verificar si todos los registros tienen el mismo status
                     $equal = $cntrs->every(function ($cntr) use ($primerCntrStatus) {
                         return $cntr->main_status == $primerCntrStatus;
                     });
 
-                    // Si todos los registros tienen el mismo status, actualizar el status de la carga
                     if ($equal) {
                         Carga::where('booking', $booking)->update(['status' => $primerCntrStatus]);
                     }
 
-                    // cambiamos el estado del Chofer
                     $port = Carga::where('booking', $booking)->value('unload_place');
             
-                    // Obtener el chofer desde la asignación
                     $chofer = Asign::where('booking', $booking)
                     ->where('cntr_number', $cntr)
                     ->value('driver');
                     
-                    // Actualizar el estado del chofer en la tabla 'drivers'
                     Driver::where('nombre', $chofer)->update(['status_chofer' => 'libre', 'place' => $port]);
                     
                     DB::commit();
-                    // Devolver una respuesta JSON con información de éxito
                     return response()->json([
                     'id' => $idCarga,
                     'errores' => 'Se modificó el satus a: ' . $statusGral .' y avisado por Correo al Cliente' ,
@@ -503,6 +455,7 @@ class statusController extends Controller
                 }
             } else {
 
+                // =========== AQUI ESTA LA MODIFICACIÓN ===========
                 if ($statusGral == "YENDO A CARGAR") {
                     
                     $tO = DB::table('cntr')
@@ -511,54 +464,61 @@ class statusController extends Controller
                         ->where('cntr.cntr_number', $cntr)
                         ->first();
 
-                        $valor = json_decode(\json_encode($tO->cma_t_o), true);
-                        
-                        if (!empty($valor)) {
-                            // Actualizar la fecha de carga en cada CNTR relacionado
-                            $client = new Client();
-                            $headers = [
-                                'Content-Type' => 'application/json'
-                            ];
-    
-                            $request = new Psr7Request(
-                                'GET',
-                                'https://cma-cgm.botzero.ar/api/cma/estDepCustLoc/' . $cntr . '/' . $valor,
-                                $headers
-                            );
-                            $res = $client->sendAsync($request)->wait();
-                            $respuesta = $res->getBody();
-                            $data = json_decode($respuesta, true);
+                    $valor = json_decode(\json_encode($tO->cma_t_o), true);
+                    
+                    if (!empty($valor)) {
+                        $client = new Client();
+                        $headers = [
+                            'Content-Type' => 'application/json',
+                            'Accept'       => 'application/json'
+                        ];
 
+                        // Obtenemos la URL del .env
+                        $cmaBaseUrl = rtrim(env('API_CMA_BOTZERO', 'http://172.17.0.1:8084'), '/');
+                        
+                        // Nos aseguramos de no duplicar el "/api" si alguien lo pone en el .env por accidente
+                        if (substr($cmaBaseUrl, -4) === '/api') {
+                            $cmaBaseUrl = substr($cmaBaseUrl, 0, -4);
                         }
-                    }     
-                // Insertamos Status en la tabla de Status         
+
+                        $urlCma = $cmaBaseUrl . '/api/cma/estDepCustLoc/' . $cntr . '/' . $valor;
+
+                        try {
+                            // Petición interna con timeout
+                            $res = $client->request('GET', $urlCma, [
+                                'headers' => $headers,
+                                'timeout' => 5 
+                            ]);
+                            
+                            $data = json_decode($res->getBody(), true);
+                            Log::info("CMA-API Success (Internal): Datos sincronizados para $cntr en $urlCma");
+
+                        } catch (\Exception $e) {
+                            // La red de seguridad: evita el rollback de tu base de datos si la API falla
+                            Log::warning("CMA-API falló o ignorado en $urlCma. Detalles: " . $e->getMessage());
+                            $data = [];
+                        }
+                    }
+                }    
+                // =================================================
+
                 $tipo = 'cambio';
-                // ENVIAMOS MAIL
-                // Crear una instancia del controlador
                 $emailController = new emailController();
-                // Llamar directamente a la función mailStatus
                 $response = $emailController->cambiaStatus($cntr, $empresa, $booking, $user, $tipo, $savedPath );
 
                 if ($response == 'ok') {
-                
-                    // si todo esta ok, Acualizamos el estado del CNTR
                     $cntrModel = cntr::where('cntr_number', $cntr)->orderByDesc('id_cntr')->firstOrFail();
                     $cntrModel->main_status = $statusGral;
                     $cntrModel->status_cntr = $description;
                     $cntrModel->save();
             
-                    // Luego revisamos el status de los demás contenedores de la Carga. 
-                    // Buscar todos los registros Cntr asociados a la booking
                     $cntrs = cntr::where('booking', $booking)->get();
-                    // Obtener el status del primer registro
                     $primerCntrStatus = $cntrs->first()->main_status;
 
-                    // Verificar si todos los registros tienen el mismo status
                     $equal = $cntrs->every(function ($cntr) use ($primerCntrStatus) {
                         return $cntr->main_status == $primerCntrStatus;
                     });
 
-                    // Si todos los registros tienen el mismo status, actualizar el status de la carga
                     if ($equal) {
                         Carga::where('booking', $booking)->update(['status' => $primerCntrStatus]);
                     }
@@ -575,18 +535,12 @@ class statusController extends Controller
             }
         } catch (ModelNotFoundException $e) {
             DB::rollBack();
-            // Manejar la excepción específica para ModelNotFoundException
-            //$errores[] = 'No se encontró el registro. Detalles: ' . $e->getMessage();
             return response()->json(['errores' => 'No se encontró el registro. Detalles: ' . $e->getMessage(), 'id' => $idCarga], 404);
         } catch (ValidationException $e) {
             DB::rollBack();
-            // Manejar la excepción específica para ValidationException
-            //$errores[] = 'Error de validación. Detalles: ' . $e->getMessage();
             return response()->json(['errores' => 'Error de validación. Detalles: ' . $e->getMessage(), 'id' => $idCarga], 422);
         } catch (Exception $e) {
             DB::rollBack();
-            // Manejar otras excepciones genéricas
-            $errores[] = 'Error general. Detalles: ' . $e->getMessage();
             return response()->json(['errores' => 'Error general. Detalles: ' . $e->getMessage(), 'id' => $idCarga], 500);
         }
     }

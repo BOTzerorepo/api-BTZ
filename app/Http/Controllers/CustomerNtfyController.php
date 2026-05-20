@@ -15,13 +15,13 @@ class CustomerNtfyController extends Controller
      */
     public function index()
     {
-        $customersNtfy = DB::table('customer_ntfies')->get();         
+        $customersNtfy = DB::table('customer_ntfies')->orderBy('razon_social', 'asc')->get();         
         return $customersNtfy;
     }
 
     public function indexCompany($company)
     {
-        $customersNtfy = DB::table('customer_ntfies')->where('company','=',$company)->get();
+        $customersNtfy = DB::table('customer_ntfies')->where('company','=',$company)->orderBy('razon_social', 'asc')->get();
         return $customersNtfy;
     }
 

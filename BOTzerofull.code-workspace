@@ -1,0 +1,19 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../api-cmacgm"
+		},
+		{
+			"path": "../flota"
+		},
+		{
+			"path": "../satelital-gateway"
+		},
+		{
+			"path": "../../../../../../Applications/XAMPP/xamppfiles/htdocs/front-web"
+		}
+	]
+}

@@ -17,7 +17,7 @@ class AtaController extends Controller
     public function index()
     {
         try {
-            $atas = ATA::all();
+            $atas = ATA::orderBy('razon_social', 'asc')->get();
             return response()->json([
                 'data' => $atas,
                 'success' => true
@@ -35,7 +35,7 @@ class AtaController extends Controller
     {
         try {
             $company = $request->input('company');
-            $atas = ATA::where('empresa','=', $company)->get();
+            $atas = ATA::where('empresa','=', $company)->orderBy('razon_social', 'asc')->get();
             return response()->json([
                 'data' => $atas,
                 'success' => true

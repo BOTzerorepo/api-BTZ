@@ -17,7 +17,7 @@ class CompanyController extends Controller
     public function index()
     {
         try {
-            $companies = Company::all();
+            $companies = Company::orderBy('razon_social', 'asc')->get();
             return response()->json([
                 'data' => $companies,
                 'success' => true

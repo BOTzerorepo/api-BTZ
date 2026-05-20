@@ -139,11 +139,23 @@ class SupportController extends Controller
 
         $token = JWTAuth::fromUser($target);
 
+        $roleName = $target->roles->first()?->name;
+
+        $permissions = [];
+        if ($roleName) {
+            $permissions = \Spatie\Permission\Models\Role::findByName($roleName, 'web')->permissions->pluck('name')->toArray();
+        }
+
+
         return $this->success([
             'token'    => $token,
             'type'     => 'bearer',
             'username' => $target->username,
             'role'     => $target->roles->first()?->name,
+
+            'company'  => $target->empresa,
+            'permiso'  => $permissions
+
         ], "Impersonando a {$target->username}.");
     }
 
@@ -205,6 +217,101 @@ class SupportController extends Controller
         return $this->success(null, 'Registro eliminado definitivamente.');
     }
 
+    /**
+     * Resumen de gestión satelital y CMA API para el dashboard.
+     */
+    public function satelitalSummary()
+    {
+        // 1. Viajes reportando (últimos 50 activos o recientes)
+        // Ordenamos por last_report desc (los más recientes arriba)
+        $reportingTrips = \Illuminate\Support\Facades\DB::table('geo_action_logs')
+            ->select('trip_id', 'cntr_number', 'domain', 
+                \Illuminate\Support\Facades\DB::raw('MIN(created_at) as first_report'), 
+                \Illuminate\Support\Facades\DB::raw('MAX(created_at) as last_report'))
+            ->groupBy('trip_id', 'cntr_number', 'domain')
+            ->orderBy('last_report', 'desc')
+            ->limit(50)
+            ->get();
+
+        // 2. Unidades con T.O. de CMA (Activos y Terminados) + Flags
+        // NUEVA DEFINICIÓN DE ACTIVO: truck asignado a una carga con aker activo (1)
+        $cmaUnits = \Illuminate\Support\Facades\DB::table('cntr')
+            ->join('carga', 'cntr.booking', '=', 'carga.booking')
+            ->leftJoin('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
+            ->leftJoin('trucks', 'asign.truck', '=', 'trucks.domain')
+            ->whereNotNull('carga.cma_t_o')
+            ->select(
+                'cntr.cntr_number', 
+                'carga.cma_t_o', 
+                'cntr.main_status', 
+                'cntr.flag_cma', 
+                'cntr.updated_at',
+                'trucks.alta_aker',
+                \Illuminate\Support\Facades\DB::raw("CASE WHEN trucks.alta_aker = 1 AND cntr.main_status != 'TERMINADA' THEN 'ACTIVO' ELSE 'INACTIVO' END as aker_status")
+            )
+            ->orderByRaw("CASE WHEN trucks.alta_aker = 1 AND cntr.main_status != 'TERMINADA' THEN 0 ELSE 1 END")
+            ->orderBy('cntr.updated_at', 'desc')
+            ->get();
+
+        // 3. Estadísticas de CMA (últimos 7 días)
+        $cmaEventsStats = \Illuminate\Support\Facades\DB::table('cma_logs_events')
+            ->select(\Illuminate\Support\Facades\DB::raw('DATE(created_at) as date'), \Illuminate\Support\Facades\DB::raw('count(*) as count'))
+            ->where('created_at', '>=', now()->subDays(7))
+            ->groupBy('date')
+            ->get();
+
+        $cmaCoordsStats = \Illuminate\Support\Facades\DB::table('cma_logs_coordinate')
+            ->select(\Illuminate\Support\Facades\DB::raw('DATE(created_at) as date'), \Illuminate\Support\Facades\DB::raw('count(*) as count'))
+            ->where('created_at', '>=', now()->subDays(7))
+            ->groupBy('date')
+            ->get();
+
+        // 4. Resumen de Acciones Geo (ENTER/EXIT)
+        $actionsSummary = \Illuminate\Support\Facades\DB::table('geo_action_logs')
+            ->select('action_type', 'point_type', \Illuminate\Support\Facades\DB::raw('count(*) as count'))
+            ->groupBy('action_type', 'point_type')
+            ->get();
+
+        // 5. Últimos eventos de CMA con detalle
+        $recentCmaEvents = \Illuminate\Support\Facades\DB::table('cma_logs_events')
+            ->orderBy('created_at', 'desc')
+            ->limit(20)
+            ->get();
+
+        return $this->success([
+            'reporting_trips' => $reportingTrips,
+            'cma_units' => $cmaUnits,
+            'cma_stats' => [
+                'events' => $cmaEventsStats,
+                'coords' => $cmaCoordsStats,
+            ],
+            'actions_summary' => $actionsSummary,
+            'recent_cma' => $recentCmaEvents,
+        ]);
+    }
+
+    /**
+     * Detalle cronológico de un viaje (coordenadas y eventos).
+     */
+    public function satelitalTripDetail($cntrNumber)
+    {
+        $events = \Illuminate\Support\Facades\DB::table('cma_logs_events')
+            ->where('equipment_reference', $cntrNumber)
+            ->select('created_at', 'event_type as type', 'status_cma as detail', \Illuminate\Support\Facades\DB::raw("'EVENT' as category"))
+            ->get();
+
+        $coords = \Illuminate\Support\Facades\DB::table('cma_logs_coordinate')
+            ->where('equipmentReference', $cntrNumber)
+            ->select('created_at', \Illuminate\Support\Facades\DB::raw("'COORD' as type"), \Illuminate\Support\Facades\DB::raw("CONCAT(lat, ', ', longitude) as detail"), \Illuminate\Support\Facades\DB::raw("'COORD' as category"))
+            ->get();
+
+        \Illuminate\Support\Facades\Log::debug("SatelitalTripDetail for $cntrNumber: Events=" . $events->count() . ", Coords=" . $coords->count());
+
+        $history = $events->concat($coords)->sortByDesc('created_at')->values();
+
+        return $this->success($history);
+    }
+
     // ─── Helper ──────────────────────────────────────────────────────────────
 
     private function resolveModel(string $entity): ?string
@@ -221,5 +328,48 @@ class SupportController extends Controller
         ];
 
         return $map[$entity] ?? null;
+    }
+
+    public function apiBTZLogs(Request $request)
+    {
+        $limit = (int) $request->query('limit', 50);
+        $type = $request->query('type', 'geo'); // 'geo' or 'system'
+
+        if ($type === 'geo') {
+            $logs = DB::table('geo_action_logs')
+                ->orderByDesc('id')
+                ->limit($limit)
+                ->get();
+        } else {
+            $logs = DB::table('logapi')
+                ->orderByDesc('id')
+                ->limit($limit)
+                ->get();
+        }
+
+        return response()->json([
+            'ok' => true,
+            'data' => $logs
+        ]);
+    }
+
+    public function getLogFile(Request $request)
+    {
+        $lines = (int) $request->query('lines', 1000);
+        $logPath = storage_path('logs/laravel.log');
+
+        if (!file_exists($logPath)) {
+            return response()->json(['ok' => false, 'message' => 'Log file not found'], 404);
+        }
+
+        // Leer las últimas líneas usando tail si estamos en linux/mac
+        $output = shell_exec("tail -n $lines " . escapeshellarg($logPath));
+        
+        return response()->json([
+            'ok' => true,
+            'filename' => 'laravel.log',
+            'size' => filesize($logPath),
+            'content' => $output
+        ]);
     }
 }

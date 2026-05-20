@@ -23,4 +23,6 @@ database/schema/
 pruebaGit.txt
 composer.lock
 
-.codegpt
+.codegpt*.sql.gz
+*.sql
+*.sql.gz

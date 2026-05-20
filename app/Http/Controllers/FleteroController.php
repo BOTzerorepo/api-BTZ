@@ -16,7 +16,7 @@ class FleteroController extends Controller
      */
     public function index()
     {
-        $fleteros = Fletero::all();
+        $fleteros = Fletero::orderBy('razon_social', 'asc')->get();
         return response()->json($fleteros, 200);
     }
 

@@ -15,7 +15,7 @@ class PayTimeController extends Controller
      */
     public function index()
     {
-        $payTimes = DB::table('pay_times')->get();       
+        $payTimes = DB::table('pay_times')->orderBy('title', 'asc')->get();     
         return $payTimes;
     }
 

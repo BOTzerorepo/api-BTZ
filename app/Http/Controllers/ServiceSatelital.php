@@ -1044,7 +1044,7 @@ class ServiceSatelital extends Controller
                         'ref_customer' => $camion->ref_customer,
                         'agent_port' => $camion->agent_port,
                         'id_carga' => $camion->cargaId,
-                        'url_carga' => config('app.front_url') . '/includes/view_carga.php?id=' . $camion->cargaId,
+                        'url_carga' => config('app.front_url') . '/includes/view_carga_user.php?id=' . $camion->cargaId,
 
                     );
 
@@ -1630,14 +1630,25 @@ class ServiceSatelital extends Controller
         $punto = DB::table('interest_points')->where('id', $puntoActivoId)->first();
         if ($contenedor->cma_t_o != null) {
 
-            $base = 'https://cma-cgm.botzero.ar/api';
+            $cmaBaseUrl = rtrim(env('API_CMA_BOTZERO', 'http://172.17.0.1:8084'), '/');
+            if (substr($cmaBaseUrl, -4) === '/api') {
+                $cmaBaseUrl = substr($cmaBaseUrl, 0, -4);
+            }
+            $base = $cmaBaseUrl . '/api';
+            
             $client = new Client();
             $headers = ['Content-Type' => 'application/json'];
-            $request = new Psr7Request('GET', "{$base}/cma/estArrAtCusLoc/{$contenedor->cma_t_o}/{$contenedor->cntr_number}/{$punto->latitude}/{$punto->longitude}", $headers);
-            $res = $client->sendAsync($request)->wait();
-            $respuesta = $res->getBody();
-            $r = json_decode($respuesta, true);
-            Log::debug('Respuesta CMA - Est Arr At Cus Loc: ' . $respuesta);
+            
+            $r = [];
+            try {
+                $request = new Psr7Request('GET', "{$base}/cma/estArrAtCusLoc/{$contenedor->cma_t_o}/{$contenedor->cntr_number}/{$punto->latitude}/{$punto->longitude}", $headers);
+                $res = $client->sendAsync($request)->wait();
+                $respuesta = $res->getBody();
+                $r = json_decode($respuesta, true);
+                Log::debug('Respuesta CMA - Est Arr At Cus Loc: ' . $respuesta);
+            } catch (\Exception $e) {
+                Log::warning("CMA-API falló en ejecutarAccionEntrada: " . $e->getMessage());
+            }
 
             // ---------- POST a n8n ----------
             try {
@@ -1758,13 +1769,24 @@ class ServiceSatelital extends Controller
 
         if ($contenedor->cma_t_o != null) {
 
-            $base = 'https://cma-cgm.botzero.ar/api';
+            $cmaBaseUrl = rtrim(env('API_CMA_BOTZERO', 'http://172.17.0.1:8084'), '/');
+            if (substr($cmaBaseUrl, -4) === '/api') {
+                $cmaBaseUrl = substr($cmaBaseUrl, 0, -4);
+            }
+            $base = $cmaBaseUrl . '/api';
+
             $client = new Client();
             $headers = ['Content-Type' => 'application/json'];
-            $request = new Psr7Request('GET', "{$base}/cma/estArrAtCusLoc/{$contenedor->cma_t_o}/{$contenedor->cntr_number}/{$punto->latitude}/{$punto->longitude}", $headers);
-            $res = $client->sendAsync($request)->wait();
-            $respuesta = $res->getBody();
-            $r = json_decode($respuesta, true);
+            
+            $r = [];
+            try {
+                $request = new Psr7Request('GET', "{$base}/cma/estArrAtCusLoc/{$contenedor->cma_t_o}/{$contenedor->cntr_number}/{$punto->latitude}/{$punto->longitude}", $headers);
+                $res = $client->sendAsync($request)->wait();
+                $respuesta = $res->getBody();
+                $r = json_decode($respuesta, true);
+            } catch (\Exception $e) {
+                Log::warning("CMA-API falló en ejecutarAccionSalida: " . $e->getMessage());
+            }
             //Log::debug('Respuesta CMA - Est Arr At Cus Loc: ' . $r);
 
 
