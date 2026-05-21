@@ -23,6 +23,7 @@ database/schema/
 pruebaGit.txt
 composer.lock
 
-.codegpt*.sql.gz
-*.sql
+.codegpt
 *.sql.gz
+*.sql
+.DS_Store
