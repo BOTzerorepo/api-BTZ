@@ -46,6 +46,12 @@ class User extends Authenticatable implements AuditableContract, JWTSubject
         'email_verified_at' => 'datetime',
         'last_login_at'     => 'datetime',
     ];
+
+    // Excluir last_login_at del tracking de OwenIt/Auditing
+    // (cada login haría un registro 'updated' innecesario en audits)
+    protected $auditExclude = [
+        'last_login_at',
+    ];
     public function getJWTIdentifier()
     {
         return $this->getKey(); // Retorna la clave primaria del modelo
