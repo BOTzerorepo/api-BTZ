@@ -540,6 +540,7 @@ function rUsuarios(u){
       <th class="sh-th" onclick="sortDt('t-rec',2,'str',this)">Rol ↕</th>
       <th>Asociación</th>
       <th class="sh-th" onclick="sortDt('t-rec',4,'date',this)">Alta ↕</th>
+      <th class="sh-th" onclick="sortDt('t-rec',5,'date',this)">Último acceso ↕</th>
     </tr></thead>
     <tbody>${data.map(r=>{
       const asoc=r.nombre_cliente
@@ -547,12 +548,16 @@ function rUsuarios(u){
         :r.nombre_transporte
           ?`<span class="b bv" style="font-size:9px">Trans: ${TR(r.nombre_transporte,22)}</span>`
           :'<span style="color:var(--slate-d);font-size:10px">—</span>';
+      const lastLogin=r.last_login_at
+        ?`<span class="mn" style="font-size:10px;white-space:nowrap" data-sort="${r.last_login_at}">${FD(r.last_login_at)}</span>`
+        :`<span style="color:var(--slate-d);font-size:10px">Sin registro</span>`;
       return `<tr class="cr" ${r.rol?`onclick="af('rol','${E(r.rol)}')"`:''}>
         <td class="mn" style="font-size:11px">${r.username}</td>
         <td style="font-size:10px;color:var(--slate)">${r.email||'—'}</td>
         <td>${rolColor(r.rol)}</td>
         <td>${asoc}</td>
         <td class="mn" style="font-size:10px;white-space:nowrap" data-sort="${r.created_at||''}">${FD(r.created_at)}</td>
+        <td>${lastLogin}</td>
       </tr>`;}).join('')}
     </tbody>`;
   }
@@ -596,9 +601,12 @@ function rUsuarios(u){
   const tInt=document.getElementById('t-int');
   const ints=u.interacciones||[];
   const maxInt = Math.max(...ints.map(u2=>u2.total_interacciones), 1);
-  tInt.innerHTML=`<thead><tr><th>#</th><th>Usuario</th><th>Rol</th><th class="tr">Ediciones perfil</th><th class="tr">Cambios estado</th><th class="tr">Total</th><th style="min-width:100px">Actividad</th></tr></thead>
+  tInt.innerHTML=`<thead><tr><th>#</th><th>Usuario</th><th>Rol</th><th class="tr">Ediciones perfil</th><th class="tr">Cambios estado</th><th class="tr">Total</th><th>Último acceso</th><th style="min-width:100px">Actividad</th></tr></thead>
   <tbody>${ints.map((u2,i)=>{
     const pct = Math.round((u2.total_interacciones/maxInt)*100);
+    const lastLogin=u2.last_login_at
+      ?`<span class="mn" style="font-size:10px;white-space:nowrap">${FD(u2.last_login_at)}</span>`
+      :`<span style="color:var(--slate-d);font-size:10px">Sin registro</span>`;
     return `<tr class="cr" ${u2.rol&&u2.rol!=='Sin rol'?`onclick="af('rol','${E(u2.rol)}')"`:''}>
       <td class="rk">${i+1}</td>
       <td class="mn" style="font-size:11px">${u2.username}</td>
@@ -606,6 +614,7 @@ function rUsuarios(u){
       <td class="tr mn">${N(u2.ediciones_perfil)}</td>
       <td class="tr mn">${N(u2.cambios_estado)}</td>
       <td class="tr"><span class="b ${u2.total_interacciones>50?'bc':u2.total_interacciones>10?'bi':'bg'}">${N(u2.total_interacciones)}</span></td>
+      <td>${lastLogin}</td>
       <td><div style="height:5px;width:${pct}%;background:var(--cyan);border-radius:2px;min-width:${u2.total_interacciones>0?2:0}px"></div></td>
     </tr>`;}).join('')}</tbody>`;
 }
