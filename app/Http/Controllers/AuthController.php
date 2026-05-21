@@ -92,22 +92,25 @@ class AuthController extends Controller
             $token       = JWTAuth::fromUser($user);
             $role        = $user->getRoleNames()->first();
 
-            $permissions = Role::findByName($role, 'web')->permissions->pluck('name')->toArray();
+            $permissions = $role ? Role::findByName($role, 'web')->permissions->pluck('name')->toArray() : [];
 
+            $user->last_login_at = now();
+            $user->save();
 
             return response()->json([
-                'success'      => true,
-                'token'        => $token,
-                'id'           => $user->id,
-                'user_id'      => $user->id,
-                'username'     => $user->username,
-                'email'        => $user->email,
-                'company'      => $user->empresa,
-                'role'         => $role,
-                'permiso'      => $permissions,
-                'permissions'  => $permissions,
-                'transport_id' => $user->transport_id,
-                'cliente_id'   => $user->cliente_id,
+                'success'       => true,
+                'token'         => $token,
+                'id'            => $user->id,
+                'user_id'       => $user->id,
+                'username'      => $user->username,
+                'email'         => $user->email,
+                'company'       => $user->empresa,
+                'role'          => $role,
+                'permiso'       => $permissions,
+                'permissions'   => $permissions,
+                'transport_id'  => $user->transport_id,
+                'cliente_id'    => $user->cliente_id,
+                'last_login_at' => $user->last_login_at,
             ], 201);
         } else {
             return response()->json([

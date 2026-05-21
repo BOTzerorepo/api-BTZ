@@ -33,27 +33,18 @@ class User extends Authenticatable implements AuditableContract, JWTSubject
         'last_name',
         'cc_emails',
         'cliente_id',
-        'transport_id'
-
+        'transport_id',
+        'last_login_at',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'pass',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'last_login_at'     => 'datetime',
     ];
     public function getJWTIdentifier()
     {
