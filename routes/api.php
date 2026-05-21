@@ -21,10 +21,12 @@ use App\Http\Controllers\GeofencingEventController;
 use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\UserCcController;
 use App\Http\Controllers\v2SatelitalController;
+use App\Http\Controllers\AnalyticsController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::get('/cntr/estado-resumen', [cntrController::class, 'statusResumenCompany']);
+Route::get('/analytics/dashboard', [AnalyticsController::class, 'dashboard']);
 
 
 
