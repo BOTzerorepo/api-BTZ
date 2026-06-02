@@ -18,9 +18,9 @@ class v2SatelitalController extends Controller
         set_time_limit(120);
         Log::debug('serviceSatelital: START');
 
-        $AKerApiUrl = config('services.aker.url', env('AKER_API_URL'));
-        $AKerApiCode = env('AKER_API_CODE', 'E6HW19');
-        $AKerPhone = env('AKER_PHONE', '2612128105');
+        $AKerApiUrl  = config('services.aker.url');
+        $AKerApiCode = config('services.aker.code');
+        $AKerPhone   = config('services.aker.phone');
 
         // Umbrales de geofencing (metros)
         $TH_IN = 200;
@@ -66,8 +66,8 @@ class v2SatelitalController extends Controller
             // 2) Obtener coordenada actual desde AKER
             $payload = [
                 'patentes' => [$v->domain],
-                'cercania' => true,
-                'domicilio' => false,
+                'cercania' => config('services.aker.cercania', true),
+                'domicilio' => config('services.aker.domicilio', false),
                 'apiCode' => $AKerApiCode,
                 'phone' => $AKerPhone
             ];
@@ -122,6 +122,8 @@ class v2SatelitalController extends Controller
         if ($dist === null)
             return;
 
+        $appUrl = rtrim(config('app.url'), '/');
+
         $last = GeoActionLog::where('trip_id', $v->trip_id)
             ->where('point_type', $tipo)
             ->orderByDesc('id')->first();
@@ -160,7 +162,7 @@ class v2SatelitalController extends Controller
             ]);
 
             if ($tipo === 'DESCARGA') {
-                $this->fireEndpoint(new Client(), env('APP_URL') . "/api/accionLugarDescarga/{$v->trip_id}", "accionLugarDescarga", $v->trip_id);
+                $this->fireEndpoint(new Client(), $appUrl . "/api/accionLugarDescarga/{$v->trip_id}", "accionLugarDescarga", $v->trip_id);
                 return;
             }
         }
@@ -199,7 +201,7 @@ class v2SatelitalController extends Controller
                 'status_at_moment' => $status
             ]);
 
-            $this->fireEndpoint(new Client(), env('APP_URL') . "/api/accionFueraLugarDe{$tipo}/{$v->trip_id}", "accionFueraLugarDe{$tipo}", $v->trip_id);
+            $this->fireEndpoint(new Client(), $appUrl . "/api/accionFueraLugarDe{$tipo}/{$v->trip_id}", "accionFueraLugarDe{$tipo}", $v->trip_id);
         }
     }
     /**

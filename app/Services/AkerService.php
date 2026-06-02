@@ -13,14 +13,14 @@ class AkerService
         // Cachea 60s para no golpear AKER en cada loop
         return Cache::remember("aker:pos:$domain", 60, function () use ($domain) {
             $payload = [
-                "patentes" => [$domain],
-                "cercania" => true,
-                "domicilio" => false,
-                "apiCode"  => 'E6HW19',
-                "phone"    => '2612128105',
+                "patentes"  => [$domain],
+                "cercania"  => config('services.aker.cercania', true),
+                "domicilio" => config('services.aker.domicilio', false),
+                "apiCode"   => config('services.aker.code'),
+                "phone"     => config('services.aker.phone'),
             ];
             Log::info("Consultando AKER para dominio $domain", $payload);
-            $res = Http::acceptJson()->post('https://app.akercontrol.com/ws/v2/servicios', $payload);
+            $res = Http::acceptJson()->post(config('services.aker.url'), $payload);
             if (!$res->successful()) return null;
 
             $data = $res->json("data.$domain");

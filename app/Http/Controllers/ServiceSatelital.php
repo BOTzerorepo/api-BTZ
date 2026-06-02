@@ -37,6 +37,34 @@ use function PHPUnit\Framework\returnSelf;
 
 class ServiceSatelital extends Controller
 {
+    /**
+     * URL completa del endpoint de FLOTA de Aker.
+     * Formato: {flota_url}/{phone}/{code}
+     * Todo sale de config/services.php => .env (AKER_FLOTA_URL, AKER_PHONE, AKER_API_CODE)
+     */
+    private function akerFlotaUrl(): string
+    {
+        $base  = rtrim(config('services.aker.flota_url'), '/');
+        $phone = config('services.aker.phone');
+        $code  = config('services.aker.code');
+
+        return "{$base}/{$phone}/{$code}";
+    }
+
+    /**
+     * Body JSON para el endpoint v2/servicios de Aker (posición puntual).
+     */
+    private function akerServiciosBody(string $domain): string
+    {
+        return json_encode([
+            'patentes'  => [$domain],
+            'cercania'  => config('services.aker.cercania', true),
+            'domicilio' => config('services.aker.domicilio', false),
+            'apiCode'   => config('services.aker.code'),
+            'phone'     => config('services.aker.phone'),
+        ]);
+    }
+
     public function reviewDomains()
     {
 
@@ -48,19 +76,10 @@ class ServiceSatelital extends Controller
                 'Content-Type' => 'application/json'
             ];
 
-            // TEST: E6HW19 - PRODUCCION: C2QC20
+            $body = $this->akerServiciosBody($truck->domain);
 
 
-            $body = '{
-                    "patentes":["' . $truck->domain . '"],
-                    "cercania":true,
-                    "domicilio":false,
-                    "apiCode":"E6HW19",
-                    "phone":"2612128105"
-                    }';
-
-
-            $request = new Psr7Request('GET', 'https://app.akercontrol.com/ws/v2/servicios', $headers, $body);
+            $request = new Psr7Request('GET', config('services.aker.url'), $headers, $body);
             $res = $client->sendAsync($request)->wait();
             $respuesta = $res->getBody();
             $data = json_decode($respuesta, true);
@@ -104,19 +123,10 @@ class ServiceSatelital extends Controller
             'Content-Type' => 'application/json'
         ];
 
-        // TEST: E6HW19 - PRODUCCION: C2QC20
+        $body = $this->akerServiciosBody($domain);
 
 
-        $body = '{
-                    "patentes":["' . $domain . '"],
-                    "cercania":true,
-                    "domicilio":false,
-                    "apiCode":"E6HW19",
-                    "phone":"2612128105"
-                    }';
-
-
-        $request = new Psr7Request('GET', 'https://app.akercontrol.com/ws/v2/servicios', $headers, $body);
+        $request = new Psr7Request('GET', config('services.aker.url'), $headers, $body);
         $res = $client->sendAsync($request)->wait();
         $respuesta = $res->getBody();
         $data = json_decode($respuesta, true);
@@ -162,13 +172,13 @@ class ServiceSatelital extends Controller
     public function serviceSatelital()
     {
         set_time_limit(120);
-        
+
         Log::debug('Comenzo Satelital');
 
-        // === Configurables ===
-        $AKerApiUrl = 'https://app.akercontrol.com/ws/v2/servicios';
-        $AKerApiCode = 'E6HW19';
-        $AKerPhone = '2612128105';
+        // === Configurables (desde .env via config/services.php) ===
+        $AKerApiUrl  = config('services.aker.url');
+        $AKerApiCode = config('services.aker.code');
+        $AKerPhone   = config('services.aker.phone');
 
         // Umbrales en metros
         $THRESHOLD_CARGA_IN = 200;
@@ -189,7 +199,7 @@ class ServiceSatelital extends Controller
             return $desc !== null && in_array($desc, $STATUS_FOR_POINT[$point] ?? [], true);
         };
 
-        $appUrl = rtrim(env('APP_URL'), '/');
+        $appUrl = rtrim(config('app.url'), '/');
 
         // === Cliente HTTP ===
         $http = new Client();
@@ -246,8 +256,8 @@ class ServiceSatelital extends Controller
             // === 2) Llamada a AKER ===
             $payload = [
                 'patentes' => [$camion->domain],
-                'cercania' => true,
-                'domicilio' => false,
+                'cercania' => config('services.aker.cercania', true),
+                'domicilio' => config('services.aker.domicilio', false),
                 'apiCode' => $AKerApiCode,
                 'phone' => $AKerPhone,
             ];
@@ -563,32 +573,18 @@ class ServiceSatelital extends Controller
     {
 
         set_time_limit(120);
-                $curl = curl_init();
+        $curl = curl_init();
 
-        // TEST: E6HW19 - PRODUCCION: C2QC20
-        if (env('APP_ENV') === 'production') {
-            curl_setopt_array($curl, array(
-                CURLOPT_URL => 'https://app.akercontrol.com/ws/flota/2612128105/C2QC20',
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => '',
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 0,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => 'GET',
-            ));
-        } else {
-            curl_setopt_array($curl, array(
-                CURLOPT_URL => 'https://app.akercontrol.com/ws/flota/2612128105/E6HW19',
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => '',
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 0,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => 'GET',
-            ));
-        }
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => $this->akerFlotaUrl(),
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+        ));
 
         $response = curl_exec($curl);
         $json = json_decode($response);
@@ -735,38 +731,24 @@ class ServiceSatelital extends Controller
         $transport = Transport::find($id);
         $curl = curl_init();
 
-        // TEST: E6HW19 - PRODUCCION: C2QC20
-        if (env('APP_ENV') === 'production') {
-            curl_setopt_array($curl, array(
-                CURLOPT_URL => 'https://app.akercontrol.com/ws/flota/2612128105/C2QC20',
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => '',
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 0,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => 'GET',
-            ));
-        } else {
-            curl_setopt_array($curl, array(
-                CURLOPT_URL => 'https://app.akercontrol.com/ws/flota/2612128105/E6HW19',
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => '',
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 0,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => 'GET',
-            ));
-        }
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => $this->akerFlotaUrl(),
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+        ));
 
         $response = curl_exec($curl);
         $json = json_decode($response);
-        
+
         if (!$json || !isset($json->data)) {
             return response()->json(['success' => false, 'message' => 'Error al obtener datos de la flota'], 200);
         }
-        
+
         $datos = $json->data;
 
         $camiones = [];
@@ -912,38 +894,24 @@ class ServiceSatelital extends Controller
 
         $curl = curl_init();
 
-        // TEST: E6HW19 - PRODUCCION: C2QC20
-        if (env('APP_ENV') === 'production') {
-            curl_setopt_array($curl, array(
-                CURLOPT_URL => 'https://app.akercontrol.com/ws/flota/2612128105/C2QC20',
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => '',
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 0,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => 'GET',
-            ));
-        } else {
-            curl_setopt_array($curl, array(
-                CURLOPT_URL => 'https://app.akercontrol.com/ws/flota/2612128105/E6HW19',
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING => '',
-                CURLOPT_MAXREDIRS => 10,
-                CURLOPT_TIMEOUT => 0,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST => 'GET',
-            ));
-        }
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => $this->akerFlotaUrl(),
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'GET',
+        ));
 
         $response = curl_exec($curl);
         $json = json_decode($response);
-        
+
         if (!$json || !isset($json->data)) {
             return response()->json(['success' => false, 'message' => 'Error al obtener datos de la flota'], 200);
         }
-        
+
         $datos = $json->data;
 
         $camiones = [];
@@ -1096,19 +1064,11 @@ class ServiceSatelital extends Controller
             'Content-Type' => 'application/json'
         ];
 
-        // TEST: E6HW19 - PRODUCCION: C2QC20
-
         $camiones = [];
-        $body = '{
-                    "patentes":["' . $domain . '"],
-                    "cercania":true,
-                    "domicilio":false,
-                    "apiCode":"E6HW19",
-                    "phone":"2612128105"
-                    }';
+        $body = $this->akerServiciosBody($domain);
 
 
-        $request = new Psr7Request('GET', 'https://app.akercontrol.com/ws/v2/servicios', $headers, $body);
+        $request = new Psr7Request('GET', config('services.aker.url'), $headers, $body);
         $res = $client->sendAsync($request)->wait();
         $respuesta = $res->getBody();
         $data = json_decode($respuesta, true);
@@ -1208,7 +1168,7 @@ class ServiceSatelital extends Controller
                     'ref_customer' => $camion->ref_customer,
                     'agent_port' => $camion->agent_port,
                     'id_carga' => $camion->cargaId,
-                    'url_carga' => env('FRONT_URL') . '/includes/view_carga_user.php?id=' . $camion->cargaId,
+                    'url_carga' => config('app.front_url') . '/includes/view_carga_user.php?id=' . $camion->cargaId,
 
                 );
 
@@ -1255,12 +1215,12 @@ class ServiceSatelital extends Controller
     public function revisarCoordenadas()
     {
         set_time_limit(120);
-        
+
         Log::debug('revisarCoordenadas: start-----------------------');
 
-        $AKerApiUrl = 'https://app.akercontrol.com/ws/v2/servicios';
-        $AKerApiCode = 'E6HW19';
-        $AKerPhone = '2612128105';
+        $AKerApiUrl  = config('services.aker.url');
+        $AKerApiCode = config('services.aker.code');
+        $AKerPhone   = config('services.aker.phone');
 
         // Histéresis: si el POI no define OUT en DB, usar factor para salida (p. ej., 1.5x o +50 m)
         $POI_EXIT_FACTOR = 1.5;
@@ -1302,8 +1262,8 @@ class ServiceSatelital extends Controller
             // 2) Posición Aker
             $payload = [
                 'patentes' => [$domain],
-                'cercania' => true,
-                'domicilio' => false,
+                'cercania' => config('services.aker.cercania', true),
+                'domicilio' => config('services.aker.domicilio', false),
                 'apiCode' => $AKerApiCode,
                 'phone' => $AKerPhone,
             ];
@@ -1635,10 +1595,10 @@ class ServiceSatelital extends Controller
                 $cmaBaseUrl = substr($cmaBaseUrl, 0, -4);
             }
             $base = $cmaBaseUrl . '/api';
-            
+
             $client = new Client();
             $headers = ['Content-Type' => 'application/json'];
-            
+
             $r = [];
             try {
                 $request = new Psr7Request('GET', "{$base}/cma/estArrAtCusLoc/{$contenedor->cma_t_o}/{$contenedor->cntr_number}/{$punto->latitude}/{$punto->longitude}", $headers);
@@ -1777,7 +1737,7 @@ class ServiceSatelital extends Controller
 
             $client = new Client();
             $headers = ['Content-Type' => 'application/json'];
-            
+
             $r = [];
             try {
                 $request = new Psr7Request('GET', "{$base}/cma/estArrAtCusLoc/{$contenedor->cma_t_o}/{$contenedor->cntr_number}/{$punto->latitude}/{$punto->longitude}", $headers);
