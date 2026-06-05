@@ -9,11 +9,7 @@ class Cors
 {
     public function handle(Request $request, Closure $next)
     {
-        $allowedOrigins = [
-            'https://sandbox-totalview.btz.ar',
-            'http://localhost:3000',
-            'http://localhost:5173'
-        ];
+        $allowedOrigins = ['*'];
 
         $origin = $request->header('Origin');
         

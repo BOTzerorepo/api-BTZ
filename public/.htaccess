@@ -1,9 +1,14 @@
+
+LimitRequestBody 31457280
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
     </IfModule>
 
     RewriteEngine On
+
+    RewriteRule ^public/storage/(.*)$ storage/$1 [L]
 
     # Redireccionar solicitudes a index.php
     RewriteCond %{REQUEST_FILENAME} !-d
