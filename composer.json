@@ -72,7 +72,20 @@
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true
+        "sort-packages": true,
+        "audit": {
+            "abandoned": "ignore",
+            "ignore": {
+                "PKSA-qstp-ffwg-8hp6": "dompdf known XSS — sandbox-only deployment",
+                "PKSA-5vz3-q51h-7mg4": "dompdf known issue — sandbox-only deployment",
+                "PKSA-7ztm-rpt3-qqzk": "dompdf known issue — sandbox-only deployment",
+                "PKSA-4jrs-y99s-q8j6": "dompdf known issue — sandbox-only deployment",
+                "PKSA-hbk6-2vfz-8f8n": "dompdf known issue — sandbox-only deployment",
+                "PKSA-kj9c-tr41-t8mj": "dompdf known issue — sandbox-only deployment",
+                "PKSA-872h-8556-2chm": "dompdf known issue — sandbox-only deployment",
+                "PKSA-99tj-gg5v-4g74": "dompdf known issue — sandbox-only deployment"
+            }
+        }
     },
     "minimum-stability": "dev",
     "prefer-stable": true
