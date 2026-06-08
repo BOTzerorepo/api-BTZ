@@ -266,9 +266,9 @@ class RolePermissionController extends Controller
             // Eliminar todos los roles actuales del usuario
             $user->roles()->detach();
 
-            // Asignar el nuevo rol (forzar guard api)
-            $role = Role::where('name', $request->role)->where('guard_name', 'api')->firstOrFail();
-            $user->assignRole($role);
+            // Buscar el rol sin filtrar por guard (los roles del sistema usan guard_name = 'web')
+            $role = Role::where('name', $request->role)->firstOrFail();
+            $user->roles()->attach($role->id);
 
             return response()->json(['message' => 'Rol asignado al usuario correctamente.']);
         } catch (ValidationException $e) {
