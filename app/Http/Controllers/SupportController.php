@@ -148,14 +148,13 @@ class SupportController extends Controller
 
 
         return $this->success([
-            'token'    => $token,
-            'type'     => 'bearer',
-            'username' => $target->username,
-            'role'     => $target->roles->first()?->name,
-
-            'company'  => $target->empresa,
-            'permiso'  => $permissions
-
+            'token'      => $token,
+            'type'       => 'bearer',
+            'username'   => $target->username,
+            'role'       => $target->roles->first()?->name,
+            'company'    => $target->empresa,
+            'permiso'    => $permissions,
+            'cliente_id' => $target->cliente_id,
         ], "Impersonando a {$target->username}.");
     }
 
