@@ -7,15 +7,15 @@ use Illuminate\Http\Request;
 
 class RazonSocialController extends Controller
 {
-    public function indexTransport($id){
-
-        $razonesSociales = razonSocial::all()->where('transport_id',$id);
+    public function indexTransport($id)
+    {
+        $ids = array_filter(array_map('trim', explode(',', $id)), fn ($v) => $v !== '');
+        $razonesSociales = razonSocial::whereIn('transport_id', $ids)->get();
 
         return response()->json([
-            'message' => 'Detalles de los fleteros asociados al transporte.',
-            'data' => $razonesSociales // Devuelve la colección de fleteros
+            'message' => 'Detalles de las razones sociales del transporte.',
+            'data'    => $razonesSociales,
         ], 200);
-        
     }
     public function index()
     {

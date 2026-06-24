@@ -38,38 +38,27 @@ class TruckController extends Controller
     }
     public function indexTransport($transport)
     {
-        // Convertir la cadena de transportes a un array
         $transportIds = explode(',', $transport);
+        $fleteroIds = DB::table('transport_fletero')->whereIn('transport_id', $transportIds)->pluck('fletero_id');
 
-        // Obtener todos los trucks asociados a los transportes pasados
-        $trucks = Truck::whereIn('transport_id', $transportIds) // Usar whereIn para manejar múltiples transportes
+        $trucks = Truck::where(function ($q) use ($transportIds, $fleteroIds) {
+                $q->whereIn('transport_id', $transportIds)
+                ->orWhereIn('fletero_id', $fleteroIds);
+            })
             ->with(['transport', 'fletero'])
             ->get();
 
-        // Mapear los resultados para devolver los datos formateados
-        $trucksWithNames = $trucks->map(function ($truck) {
+        return $trucks->map(function ($truck) {
             return [
-                'id' => $truck->id,
-                'model' => $truck->model,
-                'type' => $truck->type,
-                'alta_aker' => $truck->alta_aker,
-                'year' => $truck->year,
-                'domain' => $truck->domain,
-                'chasis' => $truck->chasis,
-                'poliza' => $truck->poliza,
-                'vto_poliza' => $truck->vto_poliza,
-                'transport_id' => $truck->transport_id,
-                'user' => $truck->user,
-                'fletero_id' => $truck->fletero_id,
-                'device_truck' => $truck->device_truck,
-                'satelital_location' => $truck->satelital_location,
-                'transport_name' => $truck->transport ? $truck->transport->razon_social : null, // Nombre del transporte asociado
-                'fletero_name' => $truck->fletero ? $truck->fletero->razon_social : null, // Nombre del fletero asociado
+                'id' => $truck->id, 'model' => $truck->model, 'type' => $truck->type,
+                'alta_aker' => $truck->alta_aker, 'year' => $truck->year, 'domain' => $truck->domain,
+                'chasis' => $truck->chasis, 'poliza' => $truck->poliza, 'vto_poliza' => $truck->vto_poliza,
+                'transport_id' => $truck->transport_id, 'user' => $truck->user, 'fletero_id' => $truck->fletero_id,
+                'device_truck' => $truck->device_truck, 'satelital_location' => $truck->satelital_location,
+                'transport_name' => $truck->transport ? $truck->transport->razon_social : null,
+                'fletero_name' => $truck->fletero ? $truck->fletero->razon_social : null,
             ];
         });
-
-        // Devolver la lista de trucks con los nombres de transporte y fletero
-        return $trucksWithNames;
     }
     /**
      * Store a newly created resource in storage.
@@ -149,9 +138,13 @@ class TruckController extends Controller
 
     public function showTransport($truck)
     {
-        /* Hay que recibir el id del Transporte */
-        $trucks = truck::where('transport_id', '=', $truck)->get();
-        return $trucks;
+        $fleteroIds = DB::table('transport_fletero')->where('transport_id', $truck)->pluck('fletero_id');
+
+        return truck::where(function ($q) use ($truck, $fleteroIds) {
+                $q->where('transport_id', $truck)
+                ->orWhereIn('fletero_id', $fleteroIds);
+            })
+            ->get();
     }
 
     /**

@@ -381,6 +381,7 @@ Route::delete('/driver/{id}', 'App\Http\Controllers\DriverController@destroy');
 
 //Transporte
 Route::get('/transporteCustomer/{id}', 'App\Http\Controllers\TransportController@indexTransporteCustomer'); //Busca todos los transportes del customerId
+Route::get('/transportesUser/{username}', [TransportController::class, 'indexByUser']);
 Route::get('/transportes', 'App\Http\Controllers\TransportController@index');
 Route::get('/transportesCompany', 'App\Http\Controllers\TransportController@indexCompany');
 Route::get('/transporte/{id}', 'App\Http\Controllers\TransportController@show');

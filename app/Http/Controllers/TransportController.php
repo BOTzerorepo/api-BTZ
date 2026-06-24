@@ -45,6 +45,17 @@ class TransportController extends Controller
             ], 500);
         }
     }
+
+
+    public function indexByUser($username)
+    {
+        $transports = Transport::whereNull('deleted_at')
+            ->where('user', $username)
+            ->orderBy('pais')
+            ->get(['id', 'razon_social', 'pais']);
+
+        return response()->json(['data' => $transports, 'success' => true], 200);
+    }
     public function indexCompany(Request $request)
     {
         try {
@@ -791,10 +802,10 @@ class TransportController extends Controller
                     'cntr.cntr_seal'
                 )
                 ->join('transports', 'asign.transport', '=', 'transports.razon_social')
-                ->join('drivers', 'drivers.nombre', '=', 'asign.driver')
-                ->join('trucks', 'trucks.domain', '=', 'asign.truck')
+                ->leftJoin('drivers',  'drivers.nombre', '=', 'asign.driver')
+                ->leftJoin('trucks',   'trucks.domain',  '=', 'asign.truck')
                 ->join('carga', 'asign.booking', '=', 'carga.booking')
-                ->join('trailers', 'trailers.domain', '=', 'asign.truck_semi')
+                ->leftJoin('trailers', 'trailers.domain','=', 'asign.truck_semi')
                 ->join('cntr', 'cntr.cntr_number', '=', 'asign.cntr_number')
                 ->where('asign.id', '=', $asign->id)
                 ->first(); // Obtenemos el primer resultado
@@ -924,9 +935,11 @@ class TransportController extends Controller
 
             // ESTADO DEL DRIVE EN OCUPADO
             $driver = Driver::whereNull('deleted_at')->where('nombre', '=', $asign->driver)->first();
-            $driver->status_chofer = 'ocupado';
-            $driver->place = $carga->unload_place;
-            $driver->save();
+            if ($driver) {
+                $driver->status_chofer = 'ocupado';
+                $driver->place = $carga->unload_place;
+                $driver->save();
+            }
 
             //ACTUALIZO STATUS CNTR
             $cntr->main_status = 'ASIGNADA';

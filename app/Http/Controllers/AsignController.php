@@ -135,6 +135,9 @@ class AsignController extends Controller
             ]);
 
             $transport = Transport::whereNull('deleted_at')->where('id', '=', $request->input('transport'))->first();
+            if ($transport) {
+                $asign->transport = $transport->razon_social;
+            }
             $asign = asign::whereNull('deleted_at')->where('cntr_number', '=', $cntrNumber)->first();
             $choferNombre = $asign->driver;
 
@@ -143,20 +146,17 @@ class AsignController extends Controller
             $asign->truck = $request->input('truck');
             $asign->truck_semi = $request->input('truck_semi');
             $asign->transport_agent = $request->input('transport_agent');
-            $asign->transport = $transport->razon_social;
             $asign->save();
 
             $carga = Carga::whereNull('deleted_at')->where('booking', '=', $request->input('booking'))->first();
             
-            $chofer = Driver::whereNull('deleted_at')->where('nombre', '=', $choferNombre)->first();
-            $chofer->status_chofer = 'libre';
-            $chofer->place = 'INDEFINIDO';
-            $chofer->save();
+            if ($choferNombre) {
+                $chofer = Driver::whereNull('deleted_at')->where('nombre', $choferNombre)->first();
+                if ($chofer) { $chofer->status_chofer = 'libre'; $chofer->place = 'INDEFINIDO'; $chofer->save(); }
+            }
 
             $driver = Driver::whereNull('deleted_at')->where('nombre', '=', $request->input('driver'))->first();
-            $driver->status_chofer = 'ocupado';
-            $driver->place = $carga->unload_place;
-            $driver->save();
+            if ($driver) { $driver->status_chofer = 'ocupado'; $driver->place = $carga->unload_place ?? null; $driver->save(); }
 
             return response()->json([
                 'carga' => $carga,

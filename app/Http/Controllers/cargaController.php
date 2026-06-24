@@ -498,33 +498,32 @@ class cargaController extends Controller
     }
     public function destroy($id)
     {
-        DB::beginTransaction();
         try {
-            // Busca la carga por su ID
-            $carga = Carga::find($id);
-            // Verifica si la carga existe
-            if (!$carga) {
-                return response()->json(['error' => 'La carga no fue encontrada.'], 404);
-            }
-            // Eliminar los registros de la tabla 'cntr' que coinciden con el 'booking'
-            Cntr::where('booking', $carga->booking)->delete();
+            return DB::transaction(function () use ($id) {
+                $carga = Carga::find($id);
+                if (!$carga) {
+                    return response()->json(['error' => 'La carga no fue encontrada.'], 404);
+                }
 
-            // Eliminar los registros de la tabla 'asign' que coinciden con el 'booking'
-            Asign::where('booking', $carga->booking)->delete();
-            // Elimina la carga
-            $carga->delete();
+                $service  = app(\App\Services\CntrService::class);
+                $cntrIds  = DB::table('cntr')->where('booking', $carga->booking)->pluck('id_cntr');
+                foreach ($cntrIds as $idCntr) {
+                    $service->purge((int) $idCntr);
+                }
 
-            DB::commit();
-            // Devuelve una respuesta de éxito
-            return response()->json([
-                'message' => 'La carga ha sido eliminada correctamente.',
-                'message_type' => 'success'
-            ], 200);
+                // Limpieza defensiva por si quedaron asign sin contenedor (datos viejos)
+                DB::table('asign')->where('booking', $carga->booking)->delete();
+
+                // La carga, física
+                DB::table('carga')->where('id', $carga->id)->delete();
+
+                return response()->json([
+                    'message'      => 'La carga y todos sus contenedores fueron eliminados correctamente.',
+                    'message_type' => 'success'
+                ], 200);
+            });
         } catch (\Exception $e) {
-            DB::rollBack();
-            $errorMessage = $e->getMessage();
-            // Manejar otras excepciones si es necesario
-            return response()->json(['error' => $errorMessage, 'message_type' => 'danger'], 500);
+            return response()->json(['error' => $e->getMessage(), 'message_type' => 'danger'], 500);
         }
     }
 

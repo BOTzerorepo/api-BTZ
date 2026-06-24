@@ -26,15 +26,19 @@ class TrailerController extends Controller
         $trailer = trailer::all();
         return $trailer;
     }
+
+
+
     public function indexTransport($transport)
     {
-        // Convertir $transport en un array si contiene varios IDs separados por comas
         $idArray = explode(',', $transport);
+        $fleteroIds = DB::table('transport_fletero')->whereIn('transport_id', $idArray)->pluck('fletero_id');
 
-        // Buscar los trailers cuyos transport_id coincidan con cualquiera de los IDs en el array
-        $trailers = Trailer::whereIn('transport_id', $idArray)->get();
-
-        return $trailers;
+        return Trailer::where(function ($q) use ($idArray, $fleteroIds) {
+                $q->whereIn('transport_id', $idArray)
+                ->orWhereIn('fletero_id', $fleteroIds);
+            })
+            ->get();
     }
 
     /**

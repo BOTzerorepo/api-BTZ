@@ -355,10 +355,6 @@
                                                                                             <td>Mercadería:</td>
                                                                                             <td>{{$contenedor->commodity}}</td>
                                                                                         </tr>
-                                                                                        <tr>
-                                                                                            <td>Observaciones:</td>
-                                                                                            <td>{{$contenedor->observation_customer}}</td>
-                                                                                        </tr>
                                                                                     </table>
                                                                                     <p
                                                                                     style="margin: 2%; font-size: 14px; text-align: center; mso-line-height-alt: 27px;">

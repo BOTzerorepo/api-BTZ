@@ -15,11 +15,13 @@ class CargaRepository
     private function baseQuery()
     {
         return Carga::whereNull('carga.deleted_at')
-            ->join('cntr', 'cntr.booking', '=', 'carga.booking')
-            ->join('asign', 'cntr.cntr_number', '=', 'asign.cntr_number')
-            ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
-            ->whereNull('cntr.deleted_at')
-            ->whereNull('asign.deleted_at');
+        ->join('cntr', 'cntr.booking', '=', 'carga.booking')
+        ->leftJoin('asign', function ($j) {
+            $j->on('asign.cntr_number', '=', 'cntr.cntr_number')
+              ->whereNull('asign.deleted_at');   // keep the deleted_at filter ON the join, not in WHERE
+        })
+        ->select('carga.*', 'cntr.*', 'asign.driver', 'asign.transport')
+        ->whereNull('cntr.deleted_at');
     }
 
     /**

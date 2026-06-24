@@ -534,36 +534,27 @@ class cntrController extends Controller
             ], 409);
         }
 
-        DB::beginTransaction();
         try {
-            // 1) Borrado físico de asignación/es (por cntr_number)
-            DB::table('asign')
-                ->where('cntr_number', '=', $cntr->cntr_number)
-                ->delete();
+            $res = $this->cntrService->purge((int) $id);
 
-            // 2) Borrado físico del contenedor
-            DB::table('cntr')
-                ->where('id_cntr', '=', $id)
-                ->delete();
-
-            DB::commit();
+            if (!$res['deleted']) {
+                return response()->json(['success' => false, 'message' => 'Contenedor no encontrado.'], 404);
+            }
 
             return response()->json([
                 'success' => true,
                 'message' => 'Contenedor y asignación eliminados correctamente.',
                 'data' => [
-                    'id_cntr' => (int) $id,
-                    'cntr_number' => $cntr->cntr_number,
-                    'booking' => $cntr->booking,
-                ]
+                    'id_cntr'     => (int) $id,
+                    'cntr_number' => $res['cntr_number'],
+                    'booking'     => $res['booking'],
+                ],
             ], 200);
         } catch (\Throwable $e) {
-            DB::rollBack();
-
             return response()->json([
                 'success' => false,
                 'message' => 'Error eliminando contenedor/asignación.',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage(),
             ], 500);
         }
     }

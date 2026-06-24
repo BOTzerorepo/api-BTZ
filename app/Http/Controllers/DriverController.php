@@ -29,13 +29,15 @@ class DriverController extends Controller
 
     public function indexTransport($idTransport)
     {
-        // Convertir $idTransport en un array si no lo es (separado por comas)
         $idArray = explode(',', $idTransport);
+        $fleteroIds = DB::table('transport_fletero')->whereIn('transport_id', $idArray)->pluck('fletero_id');
 
-        // Buscar los drivers cuyos transport_id coincidan con cualquiera de los IDs en el array
-        $drivers = Driver::whereNull('deleted_at')->whereIn('transport_id', $idArray)->get();
-
-        return $drivers;
+        return Driver::whereNull('deleted_at')
+            ->where(function ($q) use ($idArray, $fleteroIds) {
+                $q->whereIn('transport_id', $idArray)
+                ->orWhereIn('fletero_id', $fleteroIds);
+            })
+            ->get();
     }
 
 
@@ -121,13 +123,21 @@ class DriverController extends Controller
         return $driver;
     }
 
-    public function showDriver($transporte)
+    public function showDriver($transportId)
     {
-        $idTranport = DB::table('transports')->where('id', '=', $transporte)->first();
-        $id = $idTranport->razon_social;
-        /* Hay que recibir el id del Transporte */
-        $drivers = DB::table('drivers')->whereNull('deleted_at')->where('transporte', '=', $id)->where('empresa', '=', $idTranport->empresa)->get();
-        return $drivers;
+        $transport = DB::table('transports')->where('id', $transportId)->first();
+        if (!$transport) {
+            return response()->json([]); // antes: ->razon_social sobre null = 500
+        }
+        $fleteroIds = DB::table('transport_fletero')->where('transport_id', $transportId)->pluck('fletero_id');
+
+        return Driver::whereNull('deleted_at')
+            ->where(function ($q) use ($transport, $transportId, $fleteroIds) {
+                $q->where('transport_id', $transportId)
+                ->orWhere('transporte', $transport->razon_social)
+                ->orWhereIn('fletero_id', $fleteroIds);
+            })
+            ->get();
     }
 
     /**
