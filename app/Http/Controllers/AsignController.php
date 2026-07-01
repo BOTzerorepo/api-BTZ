@@ -134,14 +134,21 @@ class AsignController extends Controller
                 'truck_semi' => 'nullable|string',
             ]);
 
+            $asign = asign::whereNull('deleted_at')->where('cntr_number', '=', $cntrNumber)->first();
+            if (!$asign) {
+                return response()->json([
+                    'message' => 'No se encontró la asignación para el contenedor ' . $cntrNumber,
+                    'success' => false,
+                ], 404);
+            }
+
+            $choferNombre = $asign->driver;
+
             $transport = Transport::whereNull('deleted_at')->where('id', '=', $request->input('transport'))->first();
             if ($transport) {
                 $asign->transport = $transport->razon_social;
             }
-            $asign = asign::whereNull('deleted_at')->where('cntr_number', '=', $cntrNumber)->first();
-            $choferNombre = $asign->driver;
 
-            //Actualizar el asign
             $asign->driver = $request->input('driver');
             $asign->truck = $request->input('truck');
             $asign->truck_semi = $request->input('truck_semi');
@@ -149,7 +156,7 @@ class AsignController extends Controller
             $asign->save();
 
             $carga = Carga::whereNull('deleted_at')->where('booking', '=', $request->input('booking'))->first();
-            
+
             if ($choferNombre) {
                 $chofer = Driver::whereNull('deleted_at')->where('nombre', $choferNombre)->first();
                 if ($chofer) { $chofer->status_chofer = 'libre'; $chofer->place = 'INDEFINIDO'; $chofer->save(); }
@@ -163,7 +170,7 @@ class AsignController extends Controller
                 'asign' => $asign,
                 'success' => true
             ], 200);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return response()->json([
                 'message' => 'Error interno del servidor',
                 'success' => false,

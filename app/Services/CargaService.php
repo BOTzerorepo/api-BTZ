@@ -14,15 +14,15 @@ class CargaService
     /**
      * Adjunta los contenedores con sus puntos de interés a cada carga.
      */
-    private function attachInterestPoints($cargas, string $keyBy = 'cntr_number', string $relation = 'interestPoints'): void
+    private function attachInterestPoints($cargas, string $keyBy = 'id_cntr', string $relation = 'interestPoints'): void
     {
-        $cntrs = CntrModel::whereIn('cntr_number', $cargas->pluck('cntr_number'))
+        $cntrs = CntrModel::whereIn('id_cntr', $cargas->pluck('id_cntr'))
             ->with($relation)
             ->get()
-            ->keyBy('cntr_number');
+            ->keyBy('id_cntr');
 
         $cargas->each(function ($carga) use ($cntrs) {
-            $carga->cntrs = $cntrs->get($carga->cntr_number);
+            $carga->cntrs = $cntrs->get($carga->id_cntr);
         });
     }
 
