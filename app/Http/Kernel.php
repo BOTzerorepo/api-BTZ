@@ -68,7 +68,8 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'cors' => \App\Http\Middleware\Cors::class,
         'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
-        'jwt.verify' => \App\Http\Middleware\JwtMiddleware::class,
-        'role.rail'  => \App\Http\Middleware\RailMiddleware::class,
+        'jwt.verify'   => \App\Http\Middleware\JwtMiddleware::class,
+        'role.rail'       => \App\Http\Middleware\RailMiddleware::class,
+        'role.comercial'  => \App\Http\Middleware\ComercialMiddleware::class,
     ];
 }

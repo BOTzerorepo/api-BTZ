@@ -21,10 +21,30 @@ use App\Http\Controllers\GeofencingEventController;
 use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\UserCcController;
 use App\Http\Controllers\v2SatelitalController;
+use App\Http\Controllers\TarifarioController;
+use App\Http\Controllers\ClienteComercialController;
+use App\Http\Controllers\CotizacionController;
+use App\Http\Controllers\DiagnosticoController;
+use App\Http\Controllers\InsightController;
+use App\Http\Controllers\IntelController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
 Route::get('/cntr/estado-resumen', [cntrController::class, 'statusResumenCompany']);
+
+// Beacon de actividad para front-flota (sin auth requerida)
+Route::post('/activity-beacon', function (Request $req) {
+    \App\Services\ActivityLogger::logForApp(
+        'front-flota',
+        $req->input('action', 'view'),
+        null,
+        null,
+        $req->input('module'),
+        null,
+        $req
+    );
+    return response()->json(['ok' => true]);
+});
 
 
 
@@ -635,6 +655,81 @@ Route::get('/viajes/{equipment_reference}', [TrackingController::class, 'showapi
 Route::post('/auth/forgot-password', [AuthController::class, 'forgotPassword']);
 Route::post('/auth/reset-password', [AuthController::class, 'resetPassword']);
 
+
+// ═══════════════════════════════════════════════════════════════════
+// === MÓDULO COMERCIAL (roles: Comercial, AdminComercial) ============
+// ═══════════════════════════════════════════════════════════════════
+Route::middleware(['jwt.verify', 'role.comercial'])->group(function () {
+
+    // Tarifario — items
+    Route::get('/tarifario/combos',        [TarifarioController::class, 'indexCombos']);
+    Route::get('/tarifario/combos/{id}',   [TarifarioController::class, 'showCombo']);
+    Route::post('/tarifario/combos',       [TarifarioController::class, 'storeCombo']);
+    Route::put('/tarifario/combos/{id}',   [TarifarioController::class, 'updateCombo']);
+    Route::delete('/tarifario/combos/{id}',[TarifarioController::class, 'destroyCombo']);
+
+    Route::get('/tarifario',        [TarifarioController::class, 'index']);
+    Route::get('/tarifario/{id}',   [TarifarioController::class, 'show']);
+    Route::post('/tarifario',       [TarifarioController::class, 'store']);
+    Route::put('/tarifario/{id}',   [TarifarioController::class, 'update']);
+    Route::delete('/tarifario/{id}',[TarifarioController::class, 'destroy']);
+
+    // Clientes comerciales
+    Route::get('/clientes-comercial',                           [ClienteComercialController::class, 'index']);
+    Route::post('/cliente-comercial',                           [ClienteComercialController::class, 'store']);
+    Route::get('/cliente-comercial/{id}',                       [ClienteComercialController::class, 'show']);
+    Route::put('/cliente-comercial/{id}',                       [ClienteComercialController::class, 'update']);
+    Route::delete('/cliente-comercial/{id}',                    [ClienteComercialController::class, 'destroy']);
+
+    Route::post('/cliente-comercial/{id}/accion',               [ClienteComercialController::class, 'storeAccion']);
+    Route::delete('/accion-comercial/{id}',                     [ClienteComercialController::class, 'destroyAccion']);
+
+    Route::post('/cliente-comercial/{id}/proxima-accion',       [ClienteComercialController::class, 'storeProximaAccion']);
+    Route::put('/proxima-accion/{id}/completar',                [ClienteComercialController::class, 'completarProximaAccion']);
+    Route::delete('/proxima-accion/{id}',                       [ClienteComercialController::class, 'destroyProximaAccion']);
+
+    // Usuarios del sistema vinculados a clientes comerciales
+    Route::get('/cliente-comercial/{id}/usuarios-sistema',           [ClienteComercialController::class, 'usuariosSistema']);
+    Route::post('/cliente-comercial/{id}/usuarios-sistema',          [ClienteComercialController::class, 'vincularUsuario']);
+    Route::delete('/cliente-comercial/{clienteId}/usuarios-sistema/{userId}', [ClienteComercialController::class, 'desvinularUsuario']);
+    Route::put('/cliente-comercial/{clienteId}/preferencias/{userId}', [ClienteComercialController::class, 'actualizarPreferencias']);
+    Route::get('/cliente-comercial/{id}/buscar-usuarios',            [ClienteComercialController::class, 'buscarUsuariosSistema']);
+
+    // Cotizaciones
+    Route::get('/cotizaciones',             [CotizacionController::class, 'index']);
+    Route::post('/cotizacion',              [CotizacionController::class, 'store']);
+    Route::get('/cotizacion/{id}',          [CotizacionController::class, 'show']);
+    Route::put('/cotizacion/{id}',          [CotizacionController::class, 'update']);
+    Route::delete('/cotizacion/{id}',       [CotizacionController::class, 'destroy']);
+    Route::put('/cotizacion/{id}/estado',   [CotizacionController::class, 'cambiarEstado']);
+
+    // Customer Intelligence — Diagnósticos
+    Route::get('/diagnosticos',                                   [DiagnosticoController::class, 'index']);
+    Route::post('/diagnosticos',                                  [DiagnosticoController::class, 'store']);
+    Route::get('/diagnosticos/{id}',                               [DiagnosticoController::class, 'show']);
+    Route::put('/diagnosticos/{id}',                               [DiagnosticoController::class, 'update']);
+    Route::delete('/diagnosticos/{id}',                            [DiagnosticoController::class, 'destroy']);
+    Route::put('/diagnosticos/{id}/estado',                        [DiagnosticoController::class, 'cambiarEstado']);
+
+    Route::post('/diagnosticos/{id}/hallazgo',                     [DiagnosticoController::class, 'storeHallazgo']);
+    Route::delete('/diagnosticos/{id}/hallazgo/{hallazgoId}',      [DiagnosticoController::class, 'destroyHallazgo']);
+
+    Route::post('/diagnosticos/{id}/oportunidad',                  [DiagnosticoController::class, 'storeOportunidad']);
+    Route::delete('/diagnosticos/{id}/oportunidad/{oportunidadId}', [DiagnosticoController::class, 'destroyOportunidad']);
+
+    Route::post('/diagnosticos/{id}/accion',                       [DiagnosticoController::class, 'storeAccion']);
+    Route::put('/diagnosticos/{id}/accion/{accionId}',             [DiagnosticoController::class, 'updateAccion']);
+    Route::delete('/diagnosticos/{id}/accion/{accionId}',          [DiagnosticoController::class, 'destroyAccion']);
+
+    // Customer Intelligence — Insights
+    Route::get('/insights',        [InsightController::class, 'index']);
+    Route::post('/insights',       [InsightController::class, 'store']);
+    Route::put('/insights/{id}',   [InsightController::class, 'update']);
+    Route::delete('/insights/{id}',[InsightController::class, 'destroy']);
+
+    // Customer Intelligence — Agregados
+    Route::get('/intel/stats',     [IntelController::class, 'stats']);
+});
 
 // ═══════════════════════════════════════════════════════════════════
 // === SOPORTE RAIL (solo rol Rail) ===================================
